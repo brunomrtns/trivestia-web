@@ -23,6 +23,7 @@ const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'));
 
 // Student
 const DashboardPage = lazy(() => import('@/pages/student/DashboardPage'));
+const LessonPage = lazy(() => import('@/pages/student/LessonPage'));
 const ActivityPlayerPage = lazy(
   () => import('@/pages/student/ActivityPlayerPage')
 );
@@ -70,6 +71,7 @@ const router = createBrowserRouter([
         element: <AppLayout />,
         children: [
           { path: '/app/dashboard', element: <DashboardPage /> },
+          { path: '/app/lessons/:lessonId', element: <LessonPage /> },
           {
             path: '/app/lessons/:lessonId/activities/:activityId',
             element: <ActivityPlayerPage />

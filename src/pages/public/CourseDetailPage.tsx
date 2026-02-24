@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
@@ -6,13 +6,15 @@ import {
   BookOpen,
   FileText,
   Lock,
-  PlayCircle
+  PlayCircle,
+  ChevronLeft
 } from 'lucide-react';
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { useAuthStore } from '@/features/auth/auth.store';
 
 export default function CourseDetailPage() {
   const { courseId } = useParams<{ courseId: string }>();
+  const navigate = useNavigate();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   // GET /courses/:id — público
@@ -84,6 +86,7 @@ export default function CourseDetailPage() {
             title={mod.title}
             index={i + 1}
             isAuthenticated={isAuthenticated}
+            courseId={courseId!}
           />
         ))}
       </div>
@@ -95,12 +98,14 @@ function ModuleAccordion({
   moduleId,
   title,
   index,
-  isAuthenticated
+  isAuthenticated,
+  courseId,
 }: {
   moduleId: string;
   title: string;
   index: number;
   isAuthenticated: boolean;
+  courseId: string;
 }) {
   // GET /modules/:moduleId/lessons — público
   const { data: lessons, isLoading } = useQuery({
@@ -134,11 +139,13 @@ function ModuleAccordion({
             >
               {isAuthenticated ? (
                 <Link
-                  to={`/app/dashboard`}
+                  to={`/app/lessons/${lesson.id}`}
+                  state={{ lessonTitle: lesson.title, courseId }}
                   className="flex w-full items-center gap-3 text-muted-foreground transition-colors hover:text-foreground"
                 >
                   <FileText className="h-4 w-4 shrink-0" />
                   {lesson.title}
+                  <ChevronRight className="ml-auto h-4 w-4 opacity-50" />
                 </Link>
               ) : (
                 <span className="flex w-full items-center gap-3 text-muted-foreground">
