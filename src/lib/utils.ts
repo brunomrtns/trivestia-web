@@ -46,7 +46,9 @@ export function getActivityTypeLabel(type: string): string {
     TRUE_FALSE: 'Verdadeiro ou Falso',
     ORDERING: 'Ordenação',
     TEXT_INPUT: 'Resposta Aberta',
-    SCENARIO: 'Cenário'
+    SCENARIO: 'Cenário',
+    CHART_MARKUP: 'Marcação de Gráfico',
+    RISK_CALCULATOR: 'Calculadora de Risco'
   };
   return labels[type] ?? type;
 }

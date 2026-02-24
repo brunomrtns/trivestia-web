@@ -52,7 +52,9 @@ const activitySchema = z.object({
     'TRUE_FALSE',
     'ORDERING',
     'TEXT_INPUT',
-    'SCENARIO'
+    'SCENARIO',
+    'CHART_MARKUP',
+    'RISK_CALCULATOR'
   ] as const)
 });
 type ActivityForm = z.infer<typeof activitySchema>;
@@ -63,7 +65,9 @@ const ACTIVITY_TYPES: { value: ActivityType; label: string }[] = [
   { value: 'TRUE_FALSE', label: 'Verdadeiro/Falso' },
   { value: 'ORDERING', label: 'Ordenação' },
   { value: 'TEXT_INPUT', label: 'Resposta Aberta' },
-  { value: 'SCENARIO', label: 'Cenário' }
+  { value: 'SCENARIO', label: 'Cenário' },
+  { value: 'CHART_MARKUP', label: 'Marcação de Gráfico' },
+  { value: 'RISK_CALCULATOR', label: 'Calculadora de Risco' }
 ];
 
 const TYPE_COLORS: Record<ActivityType, string> = {
@@ -72,7 +76,9 @@ const TYPE_COLORS: Record<ActivityType, string> = {
   TRUE_FALSE: 'bg-green-500/10 text-green-600 border-green-200',
   ORDERING: 'bg-orange-500/10 text-orange-600 border-orange-200',
   TEXT_INPUT: 'bg-pink-500/10 text-pink-600 border-pink-200',
-  SCENARIO: 'bg-yellow-500/10 text-yellow-700 border-yellow-200'
+  SCENARIO: 'bg-yellow-500/10 text-yellow-700 border-yellow-200',
+  CHART_MARKUP: 'bg-teal-500/10 text-teal-600 border-teal-200',
+  RISK_CALCULATOR: 'bg-indigo-500/10 text-indigo-600 border-indigo-200'
 };
 
 // ─── ActivityRow ─────────────────────────────────────────────────────────────
@@ -362,11 +368,17 @@ function LessonSection({
                   className="w-full rounded-lg border bg-background px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-ring"
                   {...actForm.register('type')}
                 >
-                  {ACTIVITY_TYPES.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
+                  {ACTIVITY_TYPES.slice()
+                    .sort((a, b) =>
+                      a.label.localeCompare(b.label, 'pt-BR', {
+                        sensitivity: 'base'
+                      })
+                    )
+                    .map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
                 </select>
               </div>
               <div className="flex gap-2">

@@ -5,17 +5,13 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import {
-  Plus,
-  Trash2,
-  Loader2,
-  CheckCircle2,
-  XCircle,
-  ChevronLeft
-} from 'lucide-react';
+import { Plus, Trash2, Loader2, ChevronLeft } from 'lucide-react';
 import { adminEndpoints } from '@/services/endpoints/admin.endpoints';
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { getActivityTypeLabel } from '@/lib/utils';
+import { ChartMarkupQuestionForm } from '@/components/admin/ChartMarkupQuestionForm';
+import { RiskCalculatorQuestionForm } from '@/components/admin/RiskCalculatorQuestionForm';
+import { QuestionPreviewCard } from '@/components/admin/QuestionPreviewCard';
 import type { ActivityType } from '@/types/api';
 
 // Schema para criação de questão com opções dinâmicas
@@ -30,7 +26,8 @@ const questionSchema = z.object({
   explanation: z.string().optional(),
   difficulty: z.number().min(1).max(5).default(3),
   weight: z.number().min(1).default(1),
-  options: z.array(optionSchema).min(1)
+  options: z.array(optionSchema),
+  metadata: z.object({ jsonData: z.record(z.unknown()) }).optional()
 });
 
 type QuestionFormData = z.infer<typeof questionSchema>;
@@ -289,14 +286,27 @@ export default function AdminQuestionsPage() {
         </div>
       </div>
 
-      {adding && (
-        <QuestionForm
-          activityType={activityType}
-          onSave={(data) => createMut.mutateAsync(data)}
-          onCancel={() => setAdding(false)}
-          loading={createMut.isPending}
-        />
-      )}
+      {adding &&
+        (activityType === 'CHART_MARKUP' ? (
+          <ChartMarkupQuestionForm
+            onSave={(data) => createMut.mutateAsync(data as any)}
+            onCancel={() => setAdding(false)}
+            loading={createMut.isPending}
+          />
+        ) : activityType === 'RISK_CALCULATOR' ? (
+          <RiskCalculatorQuestionForm
+            onSave={(data) => createMut.mutateAsync(data as any)}
+            onCancel={() => setAdding(false)}
+            loading={createMut.isPending}
+          />
+        ) : (
+          <QuestionForm
+            activityType={activityType}
+            onSave={(data) => createMut.mutateAsync(data)}
+            onCancel={() => setAdding(false)}
+            loading={createMut.isPending}
+          />
+        ))}
 
       {isLoading ? (
         <div className="flex items-center justify-center py-16">
@@ -310,6 +320,7 @@ export default function AdminQuestionsPage() {
                   id: string;
                   statement: string;
                   options: { isCorrect: boolean; text: string }[];
+                  metadata?: { jsonData?: Record<string, unknown> };
                 }[]
               | undefined
           )?.map((q, i) => (
@@ -317,7 +328,7 @@ export default function AdminQuestionsPage() {
               key={q.id}
               className="rounded-2xl border bg-card p-5 shadow-sm"
             >
-              <div className="mb-3 flex items-start justify-between gap-4">
+              <div className="mb-1 flex items-start justify-between gap-4">
                 <p className="font-medium">
                   <span className="mr-2 text-muted-foreground">#{i + 1}</span>
                   {q.statement}
@@ -332,22 +343,8 @@ export default function AdminQuestionsPage() {
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
-              {q.options?.length > 0 && (
-                <ul className="space-y-1.5">
-                  {q.options.map(
-                    (opt: { isCorrect: boolean; text: string }, j: number) => (
-                      <li key={j} className="flex items-center gap-2 text-sm">
-                        {opt.isCorrect ? (
-                          <CheckCircle2 className="h-4 w-4 text-green-500" />
-                        ) : (
-                          <XCircle className="h-4 w-4 text-muted-foreground" />
-                        )}
-                        {opt.text}
-                      </li>
-                    )
-                  )}
-                </ul>
-              )}
+
+              <QuestionPreviewCard activityType={activityType} question={q} />
             </div>
           ))}
 

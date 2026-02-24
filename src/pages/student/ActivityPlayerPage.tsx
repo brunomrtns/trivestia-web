@@ -55,8 +55,22 @@ export default function ActivityPlayerPage() {
   }
 
   const questions = activity.questions;
-  const currentQuestion = questions[currentIndex];
   const totalQuestions = questions.length;
+
+  // Atividade sem questões
+  if (totalQuestions === 0) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
+        <p className="text-lg font-semibold">Nenhuma questão cadastrada</p>
+        <p className="text-sm text-muted-foreground">
+          Esta atividade ainda não possui questões. Peça ao administrador para
+          adicioná-las.
+        </p>
+      </div>
+    );
+  }
+
+  const currentQuestion = questions[currentIndex];
   const progress = ((currentIndex + 1) / totalQuestions) * 100;
 
   // Tela de resultado
@@ -65,29 +79,71 @@ export default function ActivityPlayerPage() {
       result.percentage ?? Math.round((result.score / result.maxScore) * 100);
     const passed = pct >= 60;
 
+    // Build a map of feedback by questionId from result
+    const feedbackMap: Record<string, Record<string, unknown>> = {};
+    if (result.results) {
+      result.results.forEach((r) => {
+        if (r.feedback) {
+          feedbackMap[r.questionId] = r.feedback;
+        }
+      });
+    }
+
     return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="flex min-h-[60vh] flex-col items-center justify-center text-center"
-      >
-        <div
-          className={`mb-6 flex h-24 w-24 items-center justify-center rounded-full ${passed ? 'bg-green-100' : 'bg-yellow-100'}`}
+      <div className="mx-auto max-w-2xl space-y-6">
+        {/* Score header */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center justify-center text-center"
         >
-          <Trophy
-            className={`h-12 w-12 ${passed ? 'text-green-500' : 'text-yellow-500'}`}
-          />
-        </div>
-        <h1 className="mb-2 text-4xl font-extrabold">
-          {formatPercentage(pct)}
-        </h1>
-        <p className="mb-1 text-lg font-semibold">
-          {passed ? 'Parabéns! Você passou.' : 'Continue praticando!'}
-        </p>
-        <p className="mb-8 text-muted-foreground">
-          {result.score} de {result.maxScore} pontos
-        </p>
-        <div className="flex gap-3">
+          <div
+            className={`mb-6 flex h-24 w-24 items-center justify-center rounded-full ${passed ? 'bg-green-100' : 'bg-yellow-100'}`}
+          >
+            <Trophy
+              className={`h-12 w-12 ${passed ? 'text-green-500' : 'text-yellow-500'}`}
+            />
+          </div>
+          <h1 className="mb-2 text-4xl font-extrabold">
+            {formatPercentage(pct)}
+          </h1>
+          <p className="mb-1 text-lg font-semibold">
+            {passed ? 'Parabéns! Você passou.' : 'Continue praticando!'}
+          </p>
+          <p className="mb-8 text-muted-foreground">
+            {result.score} de {result.maxScore} pontos
+          </p>
+        </motion.div>
+
+        {/* Per-question review (only for trade activities with feedback) */}
+        {Object.keys(feedbackMap).length > 0 && (
+          <div className="space-y-4">
+            <h2 className="text-lg font-bold">📊 Revisão das questões</h2>
+            {questions.map((q, idx) => (
+              <div
+                key={q.id}
+                className="rounded-2xl border bg-card p-6 shadow-sm"
+              >
+                <p className="mb-2 text-xs font-medium text-muted-foreground">
+                  Questão {idx + 1}
+                </p>
+                <p className="mb-4 text-base font-semibold leading-relaxed">
+                  {q.statement}
+                </p>
+                <QuestionRenderer
+                  activityType={activity.type}
+                  question={q}
+                  value={answers[q.id] ?? null}
+                  onChange={() => {}}
+                  feedback={feedbackMap[q.id] ?? null}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex justify-center gap-3 pb-8">
           <button
             onClick={() => {
               setResult(null);
@@ -106,7 +162,7 @@ export default function ActivityPlayerPage() {
             Ir ao Dashboard
           </button>
         </div>
-      </motion.div>
+      </div>
     );
   }
 

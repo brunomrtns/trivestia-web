@@ -10,7 +10,9 @@ export type ActivityType =
   | 'TRUE_FALSE'
   | 'ORDERING'
   | 'TEXT_INPUT'
-  | 'SCENARIO';
+  | 'SCENARIO'
+  | 'CHART_MARKUP'
+  | 'RISK_CALCULATOR';
 
 export type ProgressStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
 
@@ -166,11 +168,34 @@ export type MultiSelectAnswer = { selectedOptionIds: string[] };
 export type OrderingAnswer = { orderedOptionIds: string[] };
 export type TextInputAnswer = { text: string };
 
+// ─── Trade Activity Answers ───────────────────────────────────────────────────
+
+export interface BBox {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
+export interface ChartMarkupZone extends BBox {
+  type: 'SUPPORT' | 'RESISTANCE';
+}
+
+export type ChartMarkupAnswer = {
+  chartMarkup: { zones: ChartMarkupZone[] };
+};
+
+export type RiskCalculatorAnswer = {
+  riskCalc: { positionSize: number };
+};
+
 export type Answer =
   | SingleSelectAnswer
   | MultiSelectAnswer
   | OrderingAnswer
-  | TextInputAnswer;
+  | TextInputAnswer
+  | ChartMarkupAnswer
+  | RiskCalculatorAnswer;
 
 export interface QuestionAnswer {
   questionId: string;
@@ -193,7 +218,54 @@ export interface SubmissionResult {
     questionId: string;
     isCorrect: boolean;
     earnedScore: number;
+    feedback?: Record<string, unknown>;
   }[];
+}
+
+// ─── Trade Activity Feedback Types ────────────────────────────────────────────
+
+export type TradeGradeLabel = 'CORRECT' | 'PARTIAL' | 'WRONG';
+
+export interface ChartMarkupFeedback {
+  iou: number;
+  scoreRatio: number; // 0..1, proporcional ao IoU
+  label: TradeGradeLabel;
+  expected: ChartMarkupZone;
+  user: ChartMarkupZone | null;
+  message: string | null;
+}
+
+export interface RiskCalculatorFeedback {
+  label: TradeGradeLabel;
+  scoreRatio: number; // 0..1, proporcional à proximidade
+  expectedPositionSize: number;
+  userPositionSize: number | null;
+  diffPercent: number;
+  message: string | null;
+}
+
+// ─── Trade Activity Metadata (for admin/renderer) ─────────────────────────────
+
+export interface ChartMarkupMetadata {
+  chartMarkup: {
+    imageUrl: string;
+    expected?: ChartMarkupZone; // stripped for student
+    threshold?: number; // stripped for student
+    feedback?: string;
+  };
+}
+
+export interface RiskCalculatorMetadata {
+  riskCalc: {
+    balance: number;
+    riskPercent: number;
+    entryPrice: number;
+    stopPrice: number;
+    contractValue?: number;
+    rounding?: number;
+    tolerancePercent?: number; // stripped for student
+    feedback?: string; // stripped for student
+  };
 }
 
 // ─── Submission Review (GET /submissions/:activityId) ─────────────────────────

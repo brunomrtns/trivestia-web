@@ -3,11 +3,17 @@ import { MultipleChoiceRenderer } from './MultipleChoiceRenderer';
 import { MultipleSelectRenderer } from './MultipleSelectRenderer';
 import { TextInputRenderer } from './TextInputRenderer';
 import { OrderingRenderer } from './OrderingRenderer';
+import { ChartMarkupRenderer } from './ChartMarkupRenderer';
+import { RiskCalculatorRenderer } from './RiskCalculatorRenderer';
 import type {
   SingleSelectAnswer,
   MultiSelectAnswer,
   TextInputAnswer,
-  OrderingAnswer
+  OrderingAnswer,
+  ChartMarkupAnswer,
+  RiskCalculatorAnswer,
+  ChartMarkupFeedback,
+  RiskCalculatorFeedback
 } from '@/types/api';
 
 interface Props {
@@ -15,6 +21,7 @@ interface Props {
   question: Question;
   value: Answer | null;
   onChange: (answer: Answer) => void;
+  feedback?: Record<string, unknown> | null;
 }
 
 /**
@@ -25,7 +32,8 @@ export function QuestionRenderer({
   activityType,
   question,
   value,
-  onChange
+  onChange,
+  feedback
 }: Props) {
   switch (activityType) {
     case 'MULTIPLE_CHOICE':
@@ -72,6 +80,26 @@ export function QuestionRenderer({
           question={question}
           value={value as TextInputAnswer | null}
           onChange={onChange}
+        />
+      );
+
+    case 'CHART_MARKUP':
+      return (
+        <ChartMarkupRenderer
+          question={question}
+          value={value as ChartMarkupAnswer | null}
+          onChange={onChange}
+          feedback={feedback as ChartMarkupFeedback | null}
+        />
+      );
+
+    case 'RISK_CALCULATOR':
+      return (
+        <RiskCalculatorRenderer
+          question={question}
+          value={value as RiskCalculatorAnswer | null}
+          onChange={onChange}
+          feedback={feedback as RiskCalculatorFeedback | null}
         />
       );
 
