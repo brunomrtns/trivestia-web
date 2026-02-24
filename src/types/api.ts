@@ -14,6 +14,12 @@ export type ActivityType =
 
 export type ProgressStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
 
+export type StepType =
+  | 'CONTENT_TEXT'
+  | 'CONTENT_VIDEO'
+  | 'CONTENT_IMAGE'
+  | 'ACTIVITY';
+
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
 export interface User {
@@ -22,6 +28,45 @@ export interface User {
   email: string;
   role: Role;
   createdAt: string;
+  lastLoginAt?: string | null;
+}
+
+// ─── Admin: User Management ───────────────────────────────────────────────────
+
+export interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  createdAt: string;
+  lastLoginAt: string | null;
+}
+
+export interface AdminUserDetail extends AdminUser {
+  _count: { submissions: number; progress: number };
+  progress: {
+    score: number;
+    status: ProgressStatus;
+    completedAt: string | null;
+    lesson: { id: string; title: string };
+  }[];
+}
+
+export interface PaginatedUsers {
+  data: AdminUser[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface ListUsersParams {
+  search?: string;
+  role?: Role;
+  page?: number;
+  pageSize?: number;
 }
 
 export interface AuthResponse {
@@ -181,6 +226,104 @@ export interface Progress {
   status: ProgressStatus;
   completedAt: string | null;
   lesson?: LessonSummary;
+}
+
+// ─── Lesson Steps (Timeline / Etapas) ─────────────────────────────────────────
+
+export interface LessonStepDTO {
+  id: string;
+  type: StepType;
+  title: string;
+  content: Record<string, unknown>;
+  order: number;
+  isOptional: boolean;
+  estimatedMinutes: number | null;
+  isVirtual: boolean;
+  isViewed: boolean;
+}
+
+export interface LessonTimelineDTO {
+  lesson: {
+    id: string;
+    title: string;
+    order: number;
+    moduleId: string;
+  };
+  steps: LessonStepDTO[];
+  progress: {
+    viewed: number;
+    total: number;
+  };
+}
+
+export interface CreateStepDTO {
+  type: StepType;
+  title: string;
+  content: Record<string, unknown>;
+  order: number;
+  isOptional?: boolean;
+  estimatedMinutes?: number;
+}
+
+export interface UpdateStepDTO {
+  type?: StepType;
+  title?: string;
+  content?: Record<string, unknown>;
+  order?: number;
+  isOptional?: boolean;
+  estimatedMinutes?: number | null;
+}
+
+export interface ReorderStepsDTO {
+  orders: { stepId: string; order: number }[];
+}
+
+// ─── Course Interactive (Curso Interativo) ────────────────────────────────────
+
+export interface CourseInteractiveLessonProgress {
+  status: ProgressStatus;
+  percent: number;
+  score: number | null;
+  completedAt: string | null;
+}
+
+export interface CourseInteractiveTimelineSummary {
+  totalSteps: number;
+  viewedSteps: number;
+  totalActivities: number;
+  completedActivities: number;
+}
+
+export interface CourseInteractiveLesson {
+  id: string;
+  title: string;
+  order: number;
+  moduleId: string;
+  progress: CourseInteractiveLessonProgress;
+  timelineSummary: CourseInteractiveTimelineSummary;
+}
+
+export interface CourseInteractiveModule {
+  id: string;
+  title: string;
+  order: number;
+  progress: { percent: number; completedLessons: number; totalLessons: number };
+  lessons: CourseInteractiveLesson[];
+}
+
+export interface CourseInteractiveNext {
+  moduleId: string;
+  lessonId: string;
+  stepId?: string;
+  activityId?: string;
+  kind: 'STEP' | 'ACTIVITY';
+}
+
+export interface CourseInteractiveDTO {
+  course: { id: string; title: string; description: string };
+  progress: { percent: number; completedLessons: number; totalLessons: number };
+  modules: CourseInteractiveModule[];
+  next: CourseInteractiveNext | null;
 }
 
 // ─── Admin DTOs ───────────────────────────────────────────────────────────────

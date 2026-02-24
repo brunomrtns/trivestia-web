@@ -17,23 +17,29 @@ import {
   FileText,
   Zap,
   HelpCircle,
+  Route
 } from 'lucide-react';
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { adminEndpoints } from '@/services/endpoints/admin.endpoints';
 import { cn, getActivityTypeLabel } from '@/lib/utils';
-import type { Module, Lesson, ActivitySummary, ActivityType } from '@/types/api';
+import type {
+  Module,
+  Lesson,
+  ActivitySummary,
+  ActivityType
+} from '@/types/api';
 
 // ─── Schemas ─────────────────────────────────────────────────────────────────
 
 const moduleSchema = z.object({
   title: z.string().min(2, 'Mínimo 2 caracteres'),
-  order: z.coerce.number().min(1, 'Mínimo 1'),
+  order: z.coerce.number().min(1, 'Mínimo 1')
 });
 type ModuleForm = z.infer<typeof moduleSchema>;
 
 const lessonSchema = z.object({
   title: z.string().min(2, 'Mínimo 2 caracteres'),
-  order: z.coerce.number().min(1, 'Mínimo 1'),
+  order: z.coerce.number().min(1, 'Mínimo 1')
 });
 type LessonForm = z.infer<typeof lessonSchema>;
 
@@ -46,8 +52,8 @@ const activitySchema = z.object({
     'TRUE_FALSE',
     'ORDERING',
     'TEXT_INPUT',
-    'SCENARIO',
-  ] as const),
+    'SCENARIO'
+  ] as const)
 });
 type ActivityForm = z.infer<typeof activitySchema>;
 
@@ -57,7 +63,7 @@ const ACTIVITY_TYPES: { value: ActivityType; label: string }[] = [
   { value: 'TRUE_FALSE', label: 'Verdadeiro/Falso' },
   { value: 'ORDERING', label: 'Ordenação' },
   { value: 'TEXT_INPUT', label: 'Resposta Aberta' },
-  { value: 'SCENARIO', label: 'Cenário' },
+  { value: 'SCENARIO', label: 'Cenário' }
 ];
 
 const TYPE_COLORS: Record<ActivityType, string> = {
@@ -66,7 +72,7 @@ const TYPE_COLORS: Record<ActivityType, string> = {
   TRUE_FALSE: 'bg-green-500/10 text-green-600 border-green-200',
   ORDERING: 'bg-orange-500/10 text-orange-600 border-orange-200',
   TEXT_INPUT: 'bg-pink-500/10 text-pink-600 border-pink-200',
-  SCENARIO: 'bg-yellow-500/10 text-yellow-700 border-yellow-200',
+  SCENARIO: 'bg-yellow-500/10 text-yellow-700 border-yellow-200'
 };
 
 // ─── ActivityRow ─────────────────────────────────────────────────────────────
@@ -75,7 +81,7 @@ function ActivityRow({
   lessonId,
   activity,
   onDelete,
-  isDeleting,
+  isDeleting
 }: {
   lessonId: string;
   activity: ActivitySummary;
@@ -85,11 +91,13 @@ function ActivityRow({
   return (
     <div className="flex items-center gap-3 rounded-lg border bg-background px-4 py-2.5">
       <Zap className="h-4 w-4 shrink-0 text-muted-foreground" />
-      <span className="flex-1 truncate text-sm font-medium">{activity.title}</span>
+      <span className="flex-1 truncate text-sm font-medium">
+        {activity.title}
+      </span>
       <span
         className={cn(
           'shrink-0 rounded-full border px-2 py-0.5 text-xs font-medium',
-          TYPE_COLORS[activity.type] ?? 'bg-muted text-muted-foreground',
+          TYPE_COLORS[activity.type] ?? 'bg-muted text-muted-foreground'
         )}
       >
         {getActivityTypeLabel(activity.type)}
@@ -120,11 +128,13 @@ function ActivityRow({
 // ─── LessonSection ────────────────────────────────────────────────────────────
 
 function LessonSection({
+  courseId,
   moduleId,
   lesson,
   onDeleteLesson,
-  isDeletingLesson,
+  isDeletingLesson
 }: {
+  courseId: string;
   moduleId: string;
   lesson: Lesson;
   onDeleteLesson: (id: string) => void;
@@ -138,28 +148,33 @@ function LessonSection({
   const { data: activities, isLoading: loadingActivities } = useQuery({
     queryKey: ['admin-activities', lesson.id],
     queryFn: () => learningEndpoints.getActivities(lesson.id),
-    enabled: expanded,
+    enabled: expanded
   });
 
   const actForm = useForm<ActivityForm>({
     resolver: zodResolver(activitySchema),
-    defaultValues: { title: '', order: (activities?.length ?? 0) + 1, type: 'MULTIPLE_CHOICE' },
+    defaultValues: {
+      title: '',
+      order: (activities?.length ?? 0) + 1,
+      type: 'MULTIPLE_CHOICE'
+    }
   });
 
   const lessonEditForm = useForm<LessonForm>({
     resolver: zodResolver(lessonSchema),
-    defaultValues: { title: lesson.title, order: lesson.order },
+    defaultValues: { title: lesson.title, order: lesson.order }
   });
 
   const createActivityMut = useMutation({
-    mutationFn: (data: ActivityForm) => adminEndpoints.createActivity(lesson.id, data),
+    mutationFn: (data: ActivityForm) =>
+      adminEndpoints.createActivity(lesson.id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-activities', lesson.id] });
       setAddingActivity(false);
       actForm.reset({ title: '', order: 1, type: 'MULTIPLE_CHOICE' });
       toast.success('Atividade criada!');
     },
-    onError: () => toast.error('Erro ao criar atividade.'),
+    onError: () => toast.error('Erro ao criar atividade.')
   });
 
   const deleteActivityMut = useMutation({
@@ -168,17 +183,18 @@ function LessonSection({
       qc.invalidateQueries({ queryKey: ['admin-activities', lesson.id] });
       toast.success('Atividade excluída.');
     },
-    onError: () => toast.error('Erro ao excluir atividade.'),
+    onError: () => toast.error('Erro ao excluir atividade.')
   });
 
   const updateLessonMut = useMutation({
-    mutationFn: (data: LessonForm) => adminEndpoints.updateLesson(moduleId, lesson.id, data),
+    mutationFn: (data: LessonForm) =>
+      adminEndpoints.updateLesson(moduleId, lesson.id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-lessons', moduleId] });
       setEditingLesson(false);
       toast.success('Aula atualizada!');
     },
-    onError: () => toast.error('Erro ao atualizar aula.'),
+    onError: () => toast.error('Erro ao atualizar aula.')
   });
 
   return (
@@ -186,7 +202,9 @@ function LessonSection({
       {/* Lesson header */}
       {editingLesson ? (
         <form
-          onSubmit={lessonEditForm.handleSubmit((d) => updateLessonMut.mutate(d))}
+          onSubmit={lessonEditForm.handleSubmit((d) =>
+            updateLessonMut.mutate(d)
+          )}
           className="flex flex-wrap items-center gap-3 p-3"
         >
           <input
@@ -204,7 +222,9 @@ function LessonSection({
             disabled={updateLessonMut.isPending}
             className="flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60"
           >
-            {updateLessonMut.isPending && <Loader2 className="h-3 w-3 animate-spin" />}
+            {updateLessonMut.isPending && (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            )}
             Salvar
           </button>
           <button
@@ -227,11 +247,25 @@ function LessonSection({
               <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
             )}
             <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-            <span className="flex-1 truncate text-sm font-medium">{lesson.title}</span>
-            <span className="text-xs text-muted-foreground">#{lesson.order}</span>
+            <span className="flex-1 truncate text-sm font-medium">
+              {lesson.title}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              #{lesson.order}
+            </span>
           </button>
+          <Link
+            to={`/admin/courses/${courseId}/lessons/${lesson.id}/steps`}
+            className="flex shrink-0 items-center gap-1 rounded-lg border px-3 py-1 text-xs font-medium transition hover:bg-accent"
+          >
+            <Route className="h-3 w-3" />
+            Etapas
+          </Link>
           <button
-            onClick={() => { setEditingLesson(true); setExpanded(true); }}
+            onClick={() => {
+              setEditingLesson(true);
+              setExpanded(true);
+            }}
             className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-accent hover:text-foreground"
             aria-label="Editar aula"
           >
@@ -239,7 +273,8 @@ function LessonSection({
           </button>
           <button
             onClick={() => {
-              if (confirm(`Excluir aula "${lesson.title}"?`)) onDeleteLesson(lesson.id);
+              if (confirm(`Excluir aula "${lesson.title}"?`))
+                onDeleteLesson(lesson.id);
             }}
             disabled={isDeletingLesson}
             className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive disabled:opacity-40"
@@ -269,9 +304,13 @@ function LessonSection({
                   lessonId={lesson.id}
                   activity={act}
                   onDelete={() => {
-                    if (confirm(`Excluir atividade "${act.title}"?`)) deleteActivityMut.mutate(act.id);
+                    if (confirm(`Excluir atividade "${act.title}"?`))
+                      deleteActivityMut.mutate(act.id);
                   }}
-                  isDeleting={deleteActivityMut.isPending && deleteActivityMut.variables === act.id}
+                  isDeleting={
+                    deleteActivityMut.isPending &&
+                    deleteActivityMut.variables === act.id
+                  }
                 />
               ))}
               {activities?.length === 0 && (
@@ -285,7 +324,9 @@ function LessonSection({
           {/* Add activity form */}
           {addingActivity ? (
             <form
-              onSubmit={actForm.handleSubmit((d) => createActivityMut.mutate(d))}
+              onSubmit={actForm.handleSubmit((d) =>
+                createActivityMut.mutate(d)
+              )}
               className="mt-1 flex flex-wrap items-end gap-3 rounded-xl border bg-muted/30 p-3"
             >
               <div className="flex-1 min-w-[140px]">
@@ -334,12 +375,17 @@ function LessonSection({
                   disabled={createActivityMut.isPending}
                   className="flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60"
                 >
-                  {createActivityMut.isPending && <Loader2 className="h-3 w-3 animate-spin" />}
+                  {createActivityMut.isPending && (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  )}
                   Salvar
                 </button>
                 <button
                   type="button"
-                  onClick={() => { setAddingActivity(false); actForm.reset(); }}
+                  onClick={() => {
+                    setAddingActivity(false);
+                    actForm.reset();
+                  }}
                   className="rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-accent"
                 >
                   Cancelar
@@ -367,7 +413,7 @@ function ModuleSection({
   courseId,
   module,
   onDeleteModule,
-  isDeletingModule,
+  isDeletingModule
 }: {
   courseId: string;
   module: Module;
@@ -382,28 +428,29 @@ function ModuleSection({
   const { data: lessons, isLoading: loadingLessons } = useQuery({
     queryKey: ['admin-lessons', module.id],
     queryFn: () => learningEndpoints.getLessons(module.id),
-    enabled: expanded,
+    enabled: expanded
   });
 
   const lessonForm = useForm<LessonForm>({
     resolver: zodResolver(lessonSchema),
-    defaultValues: { title: '', order: (lessons?.length ?? 0) + 1 },
+    defaultValues: { title: '', order: (lessons?.length ?? 0) + 1 }
   });
 
   const moduleEditForm = useForm<ModuleForm>({
     resolver: zodResolver(moduleSchema),
-    defaultValues: { title: module.title, order: module.order },
+    defaultValues: { title: module.title, order: module.order }
   });
 
   const createLessonMut = useMutation({
-    mutationFn: (data: LessonForm) => adminEndpoints.createLesson(module.id, data),
+    mutationFn: (data: LessonForm) =>
+      adminEndpoints.createLesson(module.id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-lessons', module.id] });
       setAddingLesson(false);
       lessonForm.reset({ title: '', order: 1 });
       toast.success('Aula criada!');
     },
-    onError: () => toast.error('Erro ao criar aula.'),
+    onError: () => toast.error('Erro ao criar aula.')
   });
 
   const deleteLessonMut = useMutation({
@@ -412,17 +459,18 @@ function ModuleSection({
       qc.invalidateQueries({ queryKey: ['admin-lessons', module.id] });
       toast.success('Aula excluída.');
     },
-    onError: () => toast.error('Erro ao excluir aula.'),
+    onError: () => toast.error('Erro ao excluir aula.')
   });
 
   const updateModuleMut = useMutation({
-    mutationFn: (data: ModuleForm) => adminEndpoints.updateModule(courseId, module.id, data),
+    mutationFn: (data: ModuleForm) =>
+      adminEndpoints.updateModule(courseId, module.id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-modules', courseId] });
       setEditingModule(false);
       toast.success('Módulo atualizado!');
     },
-    onError: () => toast.error('Erro ao atualizar módulo.'),
+    onError: () => toast.error('Erro ao atualizar módulo.')
   });
 
   return (
@@ -430,7 +478,9 @@ function ModuleSection({
       {/* Module header */}
       {editingModule ? (
         <form
-          onSubmit={moduleEditForm.handleSubmit((d) => updateModuleMut.mutate(d))}
+          onSubmit={moduleEditForm.handleSubmit((d) =>
+            updateModuleMut.mutate(d)
+          )}
           className="flex flex-wrap items-center gap-3 p-4"
         >
           <input
@@ -448,7 +498,9 @@ function ModuleSection({
             disabled={updateModuleMut.isPending}
             className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
           >
-            {updateModuleMut.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+            {updateModuleMut.isPending && (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            )}
             Salvar
           </button>
           <button
@@ -475,11 +527,16 @@ function ModuleSection({
             </div>
             <div className="min-w-0">
               <p className="truncate font-semibold">{module.title}</p>
-              <p className="text-xs text-muted-foreground">Módulo {module.order}</p>
+              <p className="text-xs text-muted-foreground">
+                Módulo {module.order}
+              </p>
             </div>
           </button>
           <button
-            onClick={() => { setEditingModule(true); setExpanded(true); }}
+            onClick={() => {
+              setEditingModule(true);
+              setExpanded(true);
+            }}
             className="rounded-lg p-2 text-muted-foreground transition hover:bg-accent hover:text-foreground"
             aria-label="Editar módulo"
           >
@@ -487,7 +544,11 @@ function ModuleSection({
           </button>
           <button
             onClick={() => {
-              if (confirm(`Excluir módulo "${module.title}"? Todas as aulas serão removidas.`))
+              if (
+                confirm(
+                  `Excluir módulo "${module.title}"? Todas as aulas serão removidas.`
+                )
+              )
                 onDeleteModule(module.id);
             }}
             disabled={isDeletingModule}
@@ -515,11 +576,13 @@ function ModuleSection({
               {lessons?.map((lesson) => (
                 <LessonSection
                   key={lesson.id}
+                  courseId={courseId}
                   moduleId={module.id}
                   lesson={lesson}
                   onDeleteLesson={(id) => deleteLessonMut.mutate(id)}
                   isDeletingLesson={
-                    deleteLessonMut.isPending && deleteLessonMut.variables === lesson.id
+                    deleteLessonMut.isPending &&
+                    deleteLessonMut.variables === lesson.id
                   }
                 />
               ))}
@@ -534,7 +597,9 @@ function ModuleSection({
           {/* Add lesson form */}
           {addingLesson ? (
             <form
-              onSubmit={lessonForm.handleSubmit((d) => createLessonMut.mutate(d))}
+              onSubmit={lessonForm.handleSubmit((d) =>
+                createLessonMut.mutate(d)
+              )}
               className="flex flex-wrap items-end gap-3 rounded-xl border bg-muted/30 p-4"
             >
               <div className="flex-1 min-w-[160px]">
@@ -568,12 +633,17 @@ function ModuleSection({
                   disabled={createLessonMut.isPending}
                   className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
                 >
-                  {createLessonMut.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {createLessonMut.isPending && (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  )}
                   Salvar
                 </button>
                 <button
                   type="button"
-                  onClick={() => { setAddingLesson(false); lessonForm.reset(); }}
+                  onClick={() => {
+                    setAddingLesson(false);
+                    lessonForm.reset();
+                  }}
                   className="rounded-lg border px-3 py-2 text-sm font-medium hover:bg-accent"
                 >
                   Cancelar
@@ -606,29 +676,30 @@ export default function AdminLessonsPage() {
   const { data: course, isLoading: loadingCourse } = useQuery({
     queryKey: ['course', courseId],
     queryFn: () => learningEndpoints.getCourse(courseId!),
-    enabled: !!courseId,
+    enabled: !!courseId
   });
 
   const { data: modules, isLoading: loadingModules } = useQuery({
     queryKey: ['admin-modules', courseId],
     queryFn: () => learningEndpoints.getModules(courseId!),
-    enabled: !!courseId,
+    enabled: !!courseId
   });
 
   const moduleForm = useForm<ModuleForm>({
     resolver: zodResolver(moduleSchema),
-    defaultValues: { title: '', order: (modules?.length ?? 0) + 1 },
+    defaultValues: { title: '', order: (modules?.length ?? 0) + 1 }
   });
 
   const createModuleMut = useMutation({
-    mutationFn: (data: ModuleForm) => adminEndpoints.createModule(courseId!, data),
+    mutationFn: (data: ModuleForm) =>
+      adminEndpoints.createModule(courseId!, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-modules', courseId] });
       setAddingModule(false);
       moduleForm.reset({ title: '', order: 1 });
       toast.success('Módulo criado!');
     },
-    onError: () => toast.error('Erro ao criar módulo.'),
+    onError: () => toast.error('Erro ao criar módulo.')
   });
 
   const deleteModuleMut = useMutation({
@@ -637,7 +708,7 @@ export default function AdminLessonsPage() {
       qc.invalidateQueries({ queryKey: ['admin-modules', courseId] });
       toast.success('Módulo excluído.');
     },
-    onError: () => toast.error('Erro ao excluir módulo.'),
+    onError: () => toast.error('Erro ao excluir módulo.')
   });
 
   return (
@@ -683,7 +754,9 @@ export default function AdminLessonsPage() {
           className="flex flex-wrap items-end gap-3 rounded-2xl border bg-card p-5 shadow-sm"
         >
           <div className="flex-1 min-w-[200px]">
-            <label className="mb-1 block text-sm font-medium">Título do Módulo</label>
+            <label className="mb-1 block text-sm font-medium">
+              Título do Módulo
+            </label>
             <input
               placeholder="Ex: Fundamentos de Análise"
               className="w-full rounded-lg border bg-background px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
@@ -710,12 +783,17 @@ export default function AdminLessonsPage() {
               disabled={createModuleMut.isPending}
               className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
             >
-              {createModuleMut.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+              {createModuleMut.isPending && (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              )}
               Salvar
             </button>
             <button
               type="button"
-              onClick={() => { setAddingModule(false); moduleForm.reset(); }}
+              onClick={() => {
+                setAddingModule(false);
+                moduleForm.reset();
+              }}
               className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-accent"
             >
               Cancelar
@@ -740,7 +818,8 @@ export default function AdminLessonsPage() {
               module={mod}
               onDeleteModule={(id) => deleteModuleMut.mutate(id)}
               isDeletingModule={
-                deleteModuleMut.isPending && deleteModuleMut.variables === mod.id
+                deleteModuleMut.isPending &&
+                deleteModuleMut.variables === mod.id
               }
             />
           ))}

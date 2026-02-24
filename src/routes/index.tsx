@@ -28,12 +28,19 @@ const ActivityPlayerPage = lazy(
   () => import('@/pages/student/ActivityPlayerPage')
 );
 const ProgressPage = lazy(() => import('@/pages/student/ProgressPage'));
+const CourseInteractivePage = lazy(
+  () => import('@/pages/student/CourseInteractivePage')
+);
 
 // Admin
 const AdminCoursesPage = lazy(() => import('@/pages/admin/AdminCoursesPage'));
 const AdminLessonsPage = lazy(() => import('@/pages/admin/AdminLessonsPage'));
 const AdminQuestionsPage = lazy(
   () => import('@/pages/admin/AdminQuestionsPage')
+);
+const AdminUsersPage = lazy(() => import('@/pages/admin/AdminUsersPage'));
+const AdminLessonStepsPage = lazy(
+  () => import('@/pages/admin/AdminLessonStepsPage')
 );
 
 // ─── Loading fallback ────────────────────────────────────────────────────────
@@ -71,6 +78,12 @@ const router = createBrowserRouter([
         element: <AppLayout />,
         children: [
           { path: '/app/dashboard', element: <DashboardPage /> },
+          { path: '/app/courses', element: <CoursesPage /> },
+          { path: '/app/courses/:courseId', element: <CourseDetailPage /> },
+          {
+            path: '/app/courses/:courseId/interactive',
+            element: <CourseInteractivePage />
+          },
           { path: '/app/lessons/:lessonId', element: <LessonPage /> },
           {
             path: '/app/lessons/:lessonId/activities/:activityId',
@@ -95,7 +108,12 @@ const router = createBrowserRouter([
           {
             path: '/admin/lessons/:lessonId/activities/:activityId/questions',
             element: <AdminQuestionsPage />
-          }
+          },
+          {
+            path: '/admin/courses/:courseId/lessons/:lessonId/steps',
+            element: <AdminLessonStepsPage />
+          },
+          { path: '/admin/users', element: <AdminUsersPage /> }
         ]
       }
     ]

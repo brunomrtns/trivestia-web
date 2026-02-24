@@ -3,7 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { ChevronLeft, ChevronRight, Loader2, Trophy, RotateCcw } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  Trophy,
+  RotateCcw
+} from 'lucide-react';
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { progressEndpoints } from '@/services/endpoints/progress.endpoints';
 import { QuestionRenderer } from '@/components/learning/QuestionRenderer';
@@ -11,7 +17,10 @@ import { getActivityTypeLabel, formatPercentage } from '@/lib/utils';
 import type { Answer, SubmissionResult } from '@/types/api';
 
 export default function ActivityPlayerPage() {
-  const { lessonId, activityId } = useParams<{ lessonId: string; activityId: string }>();
+  const { lessonId, activityId } = useParams<{
+    lessonId: string;
+    activityId: string;
+  }>();
   const navigate = useNavigate();
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -22,7 +31,7 @@ export default function ActivityPlayerPage() {
   const { data: activity, isLoading } = useQuery({
     queryKey: ['activity', lessonId, activityId],
     queryFn: () => learningEndpoints.getActivity(lessonId!, activityId!),
-    enabled: !!lessonId && !!activityId,
+    enabled: !!lessonId && !!activityId
   });
 
   // POST /submissions — Bearer ANY
@@ -34,7 +43,7 @@ export default function ActivityPlayerPage() {
     },
     onError: () => {
       toast.error('Erro ao enviar respostas. Tente novamente.');
-    },
+    }
   });
 
   if (isLoading || !activity) {
@@ -52,7 +61,8 @@ export default function ActivityPlayerPage() {
 
   // Tela de resultado
   if (result) {
-    const pct = result.percentage ?? Math.round((result.score / result.maxScore) * 100);
+    const pct =
+      result.percentage ?? Math.round((result.score / result.maxScore) * 100);
     const passed = pct >= 60;
 
     return (
@@ -61,10 +71,16 @@ export default function ActivityPlayerPage() {
         animate={{ opacity: 1, scale: 1 }}
         className="flex min-h-[60vh] flex-col items-center justify-center text-center"
       >
-        <div className={`mb-6 flex h-24 w-24 items-center justify-center rounded-full ${passed ? 'bg-green-100' : 'bg-yellow-100'}`}>
-          <Trophy className={`h-12 w-12 ${passed ? 'text-green-500' : 'text-yellow-500'}`} />
+        <div
+          className={`mb-6 flex h-24 w-24 items-center justify-center rounded-full ${passed ? 'bg-green-100' : 'bg-yellow-100'}`}
+        >
+          <Trophy
+            className={`h-12 w-12 ${passed ? 'text-green-500' : 'text-yellow-500'}`}
+          />
         </div>
-        <h1 className="mb-2 text-4xl font-extrabold">{formatPercentage(pct)}</h1>
+        <h1 className="mb-2 text-4xl font-extrabold">
+          {formatPercentage(pct)}
+        </h1>
         <p className="mb-1 text-lg font-semibold">
           {passed ? 'Parabéns! Você passou.' : 'Continue praticando!'}
         </p>
@@ -106,7 +122,10 @@ export default function ActivityPlayerPage() {
     }
     submitMutation.mutate({
       activityId: activity.id,
-      responses: questions.map((q) => ({ questionId: q.id, answer: answers[q.id] })),
+      responses: questions.map((q) => ({
+        questionId: q.id,
+        answer: answers[q.id]
+      }))
     });
   };
 
@@ -179,7 +198,9 @@ export default function ActivityPlayerPage() {
             disabled={submitMutation.isPending}
             className="flex items-center gap-2 rounded-xl bg-green-600 px-6 py-2.5 text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-40"
           >
-            {submitMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+            {submitMutation.isPending && (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            )}
             Enviar atividade
           </button>
         )}

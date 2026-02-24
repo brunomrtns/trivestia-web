@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { BookOpen, ChevronRight, Layers } from 'lucide-react';
@@ -16,6 +16,10 @@ function CourseCardSkeleton() {
 }
 
 export default function CoursesPage() {
+  const location = useLocation();
+  // Quando montado dentro do AppLayout (/app/courses), os links mantêm o contexto autenticado
+  const base = location.pathname.startsWith('/app') ? '/app' : '';
+
   // GET /courses — público
   const {
     data: courses,
@@ -54,7 +58,7 @@ export default function CoursesPage() {
                 transition={{ delay: i * 0.05 }}
               >
                 <Link
-                  to={`/courses/${course.id}`}
+                  to={`${base}/courses/${course.id}`}
                   className="group flex flex-col rounded-2xl border bg-card p-6 shadow-sm transition-all hover:shadow-md hover:border-primary/40"
                 >
                   <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">

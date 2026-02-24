@@ -7,7 +7,8 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Shield
+  Shield,
+  Users
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/features/auth/auth.store';
@@ -19,12 +20,13 @@ interface SidebarProps {
 
 const studentLinks = [
   { to: '/app/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/courses', icon: GraduationCap, label: 'Cursos' },
+  { to: '/app/courses', icon: GraduationCap, label: 'Cursos' },
   { to: '/app/progress', icon: BarChart3, label: 'Progresso' }
 ];
 
 const adminLinks = [
-  { to: '/admin/courses', icon: Settings, label: 'Gerenciar Cursos' }
+  { to: '/admin/courses', icon: Settings, label: 'Gerenciar Cursos' },
+  { to: '/admin/users', icon: Users, label: 'Usuários' }
 ];
 
 export function Sidebar({ collapsed, onCollapse }: SidebarProps) {

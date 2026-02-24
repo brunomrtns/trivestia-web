@@ -6,14 +6,22 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, Loader2, BookOpen, X, Settings2 } from 'lucide-react';
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Loader2,
+  BookOpen,
+  X,
+  Settings2
+} from 'lucide-react';
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { adminEndpoints } from '@/services/endpoints/admin.endpoints';
 import type { Course } from '@/types/api';
 
 const schema = z.object({
   title: z.string().min(3, 'Mínimo 3 caracteres'),
-  description: z.string().min(10, 'Mínimo 10 caracteres'),
+  description: z.string().min(10, 'Mínimo 10 caracteres')
 });
 type FormData = z.infer<typeof schema>;
 
@@ -25,13 +33,23 @@ interface CourseFormProps {
 }
 
 function CourseForm({ initial, onSave, onCancel, loading }: CourseFormProps) {
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors }
+  } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { title: initial?.title ?? '', description: initial?.description ?? '' },
+    defaultValues: {
+      title: initial?.title ?? '',
+      description: initial?.description ?? ''
+    }
   });
 
   return (
-    <form onSubmit={handleSubmit(onSave)} className="space-y-4 rounded-2xl border bg-card p-5 shadow-sm">
+    <form
+      onSubmit={handleSubmit(onSave)}
+      className="space-y-4 rounded-2xl border bg-card p-5 shadow-sm"
+    >
       <div>
         <label className="mb-1 block text-sm font-medium">Título</label>
         <input
@@ -39,7 +57,11 @@ function CourseForm({ initial, onSave, onCancel, loading }: CourseFormProps) {
           className="w-full rounded-lg border bg-background px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           {...register('title')}
         />
-        {errors.title && <p className="mt-1 text-xs text-destructive">{errors.title.message}</p>}
+        {errors.title && (
+          <p className="mt-1 text-xs text-destructive">
+            {errors.title.message}
+          </p>
+        )}
       </div>
       <div>
         <label className="mb-1 block text-sm font-medium">Descrição</label>
@@ -49,7 +71,11 @@ function CourseForm({ initial, onSave, onCancel, loading }: CourseFormProps) {
           className="w-full resize-none rounded-lg border bg-background px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           {...register('description')}
         />
-        {errors.description && <p className="mt-1 text-xs text-destructive">{errors.description.message}</p>}
+        {errors.description && (
+          <p className="mt-1 text-xs text-destructive">
+            {errors.description.message}
+          </p>
+        )}
       </div>
       <div className="flex gap-2">
         <button
@@ -60,7 +86,11 @@ function CourseForm({ initial, onSave, onCancel, loading }: CourseFormProps) {
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
           Salvar
         </button>
-        <button type="button" onClick={onCancel} className="rounded-lg border px-4 py-2 text-sm font-medium transition hover:bg-accent">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="rounded-lg border px-4 py-2 text-sm font-medium transition hover:bg-accent"
+        >
           Cancelar
         </button>
       </div>
@@ -76,29 +106,40 @@ export default function AdminCoursesPage() {
   // GET /courses — público
   const { data: courses, isLoading } = useQuery({
     queryKey: ['courses'],
-    queryFn: learningEndpoints.getCourses,
+    queryFn: learningEndpoints.getCourses
   });
 
   // POST /courses — Bearer ADMIN
   const createMut = useMutation({
     mutationFn: (data: FormData) => adminEndpoints.createCourse(data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['courses'] }); setCreating(false); toast.success('Curso criado!'); },
-    onError: () => toast.error('Erro ao criar curso.'),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['courses'] });
+      setCreating(false);
+      toast.success('Curso criado!');
+    },
+    onError: () => toast.error('Erro ao criar curso.')
   });
 
   // PATCH /courses/:id — Bearer ADMIN
   const updateMut = useMutation({
     mutationFn: ({ id, data }: { id: string; data: FormData }) =>
       adminEndpoints.updateCourse(id, data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['courses'] }); setEditing(null); toast.success('Curso atualizado!'); },
-    onError: () => toast.error('Erro ao atualizar curso.'),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['courses'] });
+      setEditing(null);
+      toast.success('Curso atualizado!');
+    },
+    onError: () => toast.error('Erro ao atualizar curso.')
   });
 
   // DELETE /courses/:id — Bearer ADMIN
   const deleteMut = useMutation({
     mutationFn: (id: string) => adminEndpoints.deleteCourse(id),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['courses'] }); toast.success('Curso excluído.'); },
-    onError: () => toast.error('Erro ao excluir curso.'),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['courses'] });
+      toast.success('Curso excluído.');
+    },
+    onError: () => toast.error('Erro ao excluir curso.')
   });
 
   return (
@@ -106,7 +147,9 @@ export default function AdminCoursesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-extrabold">Gerenciar Cursos</h1>
-          <p className="text-muted-foreground">Crie, edite e organize os cursos da plataforma.</p>
+          <p className="text-muted-foreground">
+            Crie, edite e organize os cursos da plataforma.
+          </p>
         </div>
         {!creating && (
           <button
@@ -145,7 +188,9 @@ export default function AdminCoursesPage() {
               {editing?.id === course.id ? (
                 <CourseForm
                   initial={course}
-                  onSave={(data) => updateMut.mutateAsync({ id: course.id, data })}
+                  onSave={(data) =>
+                    updateMut.mutateAsync({ id: course.id, data })
+                  }
                   onCancel={() => setEditing(null)}
                   loading={updateMut.isPending}
                 />
@@ -156,7 +201,9 @@ export default function AdminCoursesPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold truncate">{course.title}</p>
-                    <p className="text-sm text-muted-foreground truncate">{course.description}</p>
+                    <p className="text-sm text-muted-foreground truncate">
+                      {course.description}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <Link
@@ -176,12 +223,17 @@ export default function AdminCoursesPage() {
                     </button>
                     <button
                       onClick={() => {
-                        if (confirm(`Excluir "${course.title}"?`)) deleteMut.mutate(course.id);
+                        if (confirm(`Excluir "${course.title}"?`))
+                          deleteMut.mutate(course.id);
                       }}
                       className="rounded-lg p-2 text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
                       aria-label="Excluir"
                     >
-                      {deleteMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                      {deleteMut.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
                     </button>
                   </div>
                 </div>

@@ -1,4 +1,4 @@
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
@@ -6,16 +6,16 @@ import {
   BookOpen,
   FileText,
   Lock,
-  PlayCircle,
-  ChevronLeft
+  PlayCircle
 } from 'lucide-react';
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { useAuthStore } from '@/features/auth/auth.store';
 
 export default function CourseDetailPage() {
   const { courseId } = useParams<{ courseId: string }>();
-  const navigate = useNavigate();
+  const location = useLocation();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const base = location.pathname.startsWith('/app') ? '/app' : '';
 
   // GET /courses/:id — público
   const { data: course, isLoading: loadingCourse } = useQuery({
@@ -49,7 +49,7 @@ export default function CourseDetailPage() {
     <div className="container py-16">
       {/* Breadcrumb */}
       <nav className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
-        <Link to="/courses" className="hover:text-foreground">
+        <Link to={`${base}/courses`} className="hover:text-foreground">
           Cursos
         </Link>
         <ChevronRight className="h-4 w-4" />
@@ -72,6 +72,15 @@ export default function CourseDetailPage() {
           >
             <PlayCircle className="h-5 w-5" />
             Começar curso
+          </Link>
+        )}
+        {isAuthenticated && (
+          <Link
+            to={`/app/courses/${courseId}/interactive`}
+            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:opacity-90"
+          >
+            <PlayCircle className="h-5 w-5" />
+            Continuar curso
           </Link>
         )}
       </div>
@@ -99,7 +108,7 @@ function ModuleAccordion({
   title,
   index,
   isAuthenticated,
-  courseId,
+  courseId
 }: {
   moduleId: string;
   title: string;

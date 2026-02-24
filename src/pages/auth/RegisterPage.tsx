@@ -15,7 +15,7 @@ const schema = z.object({
     .string()
     .min(8, 'Mínimo de 8 caracteres')
     .regex(/[A-Z]/, 'Precisa de pelo menos uma letra maiúscula')
-    .regex(/[0-9]/, 'Precisa de pelo menos um número'),
+    .regex(/[0-9]/, 'Precisa de pelo menos um número')
 });
 
 type FormData = z.infer<typeof schema>;
@@ -29,7 +29,7 @@ export default function RegisterPage() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors }
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
   const onSubmit = async (data: FormData) => {
@@ -71,7 +71,9 @@ export default function RegisterPage() {
             {...register('name')}
           />
           {errors.name && (
-            <p className="mt-1 text-xs text-destructive">{errors.name.message}</p>
+            <p className="mt-1 text-xs text-destructive">
+              {errors.name.message}
+            </p>
           )}
         </div>
 
@@ -88,12 +90,17 @@ export default function RegisterPage() {
             {...register('email')}
           />
           {errors.email && (
-            <p className="mt-1 text-xs text-destructive">{errors.email.message}</p>
+            <p className="mt-1 text-xs text-destructive">
+              {errors.email.message}
+            </p>
           )}
         </div>
 
         <div>
-          <label className="mb-1.5 block text-sm font-medium" htmlFor="password">
+          <label
+            className="mb-1.5 block text-sm font-medium"
+            htmlFor="password"
+          >
             Senha
           </label>
           <div className="relative">
@@ -110,11 +117,17 @@ export default function RegisterPage() {
               onClick={() => setShowPwd((v) => !v)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
             >
-              {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {showPwd ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
             </button>
           </div>
           {errors.password && (
-            <p className="mt-1 text-xs text-destructive">{errors.password.message}</p>
+            <p className="mt-1 text-xs text-destructive">
+              {errors.password.message}
+            </p>
           )}
         </div>
 

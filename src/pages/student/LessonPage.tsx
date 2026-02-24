@@ -1,55 +1,81 @@
+import { useState, useEffect } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { AnimatePresence } from 'framer-motion';
 import {
   ChevronLeft,
   ChevronRight,
   Zap,
   Loader2,
-  BookOpen,
+  BookOpen
 } from 'lucide-react';
-import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
-import { getActivityTypeLabel, cn } from '@/lib/utils';
-import type { ActivityType } from '@/types/api';
+import { stepsEndpoints } from '@/services/endpoints/steps.endpoints';
+import { LessonTimeline } from '@/components/learning/LessonTimeline';
+import { StepPlayer } from '@/components/learning/StepPlayer';
 
-const TYPE_COLORS: Record<ActivityType, string> = {
-  MULTIPLE_CHOICE: 'bg-blue-500/10 text-blue-600 border-blue-200',
-  MULTIPLE_SELECT: 'bg-purple-500/10 text-purple-600 border-purple-200',
-  TRUE_FALSE: 'bg-green-500/10 text-green-600 border-green-200',
-  ORDERING: 'bg-orange-500/10 text-orange-600 border-orange-200',
-  TEXT_INPUT: 'bg-pink-500/10 text-pink-600 border-pink-200',
-  SCENARIO: 'bg-yellow-500/10 text-yellow-700 border-yellow-200',
-};
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function LessonPage() {
   const { lessonId } = useParams<{ lessonId: string }>();
   const location = useLocation();
+  const queryClient = useQueryClient();
 
-  // Título pode vir via state de navegação (passado pelo CourseDetailPage)
-  const lessonTitle: string | undefined = (location.state as { lessonTitle?: string } | null)?.lessonTitle;
-  const courseId: string | undefined = (location.state as { courseId?: string } | null)?.courseId;
+  const lessonTitle: string | undefined = (
+    location.state as { lessonTitle?: string } | null
+  )?.lessonTitle;
+  const courseId: string | undefined = (
+    location.state as { courseId?: string } | null
+  )?.courseId;
 
-  const { data: activities, isLoading } = useQuery({
-    queryKey: ['activities', lessonId],
-    queryFn: () => learningEndpoints.getActivities(lessonId!),
-    enabled: !!lessonId,
+  const [currentStep, setCurrentStep] = useState(0);
+
+  // ── Queries ──────────────────────────────────────────────────────────────
+
+  const { data: timeline, isLoading } = useQuery({
+    queryKey: ['timeline', lessonId],
+    queryFn: () => stepsEndpoints.getTimeline(lessonId!),
+    enabled: !!lessonId
   });
 
+  // Mark step as viewed when displayed
+  useEffect(() => {
+    if (!timeline?.steps.length) return;
+    const step = timeline.steps[currentStep];
+    if (!step || step.isViewed || step.isVirtual) return;
+
+    stepsEndpoints.markViewed(lessonId!, step.id).then(() => {
+      queryClient.invalidateQueries({ queryKey: ['timeline', lessonId] });
+    });
+  }, [currentStep, timeline, lessonId, queryClient]);
+
+  // ── Derived ──────────────────────────────────────────────────────────────
+
+  const steps = timeline?.steps ?? [];
+  const activeStep = steps[currentStep];
+
   return (
-    <div className="container max-w-3xl py-12">
-      {/* Breadcrumb / voltar */}
-      <nav className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
-        {courseId ? (
-          <Link to={`/courses/${courseId}`} className="flex items-center gap-1 hover:text-foreground transition-colors">
-            <ChevronLeft className="h-4 w-4" />
-            Voltar ao curso
-          </Link>
-        ) : (
-          <Link to="/courses" className="flex items-center gap-1 hover:text-foreground transition-colors">
-            <ChevronLeft className="h-4 w-4" />
-            Cursos
-          </Link>
-        )}
+    <div className="container max-w-5xl py-12">
+      {/* Breadcrumb */}
+      <nav className="mb-6 flex items-center text-sm text-muted-foreground">
+        <div className="flex items-center gap-2">
+          {courseId ? (
+            <Link
+              to={`/courses/${courseId}`}
+              className="flex items-center gap-1 hover:text-foreground transition-colors"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Voltar ao curso
+            </Link>
+          ) : (
+            <Link
+              to="/courses"
+              className="flex items-center gap-1 hover:text-foreground transition-colors"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Cursos
+            </Link>
+          )}
+        </div>
       </nav>
 
       {/* Header */}
@@ -58,61 +84,89 @@ export default function LessonPage() {
           <BookOpen className="h-7 w-7 text-primary" />
         </div>
         <h1 className="text-3xl font-extrabold">
-          {lessonTitle ?? 'Atividades da aula'}
+          {timeline?.lesson.title ?? lessonTitle ?? 'Atividades da aula'}
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Selecione uma atividade abaixo para iniciar.
+          {`Etapa ${currentStep + 1} de ${steps.length}${timeline?.progress ? ` · ${timeline.progress.viewed}/${timeline.progress.total} concluídas` : ''}`}
         </p>
       </div>
 
-      {/* Activities list */}
-      {isLoading ? (
+      {/* Loading */}
+      {isLoading && (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      ) : activities && activities.length > 0 ? (
-        <div className="space-y-3">
-          {activities.map((activity, i) => (
-            <motion.div
-              key={activity.id}
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.06 }}
-            >
-              <Link
-                to={`/app/lessons/${lessonId}/activities/${activity.id}`}
-                className="group flex items-center gap-4 rounded-2xl border bg-card px-5 py-4 shadow-sm transition-all hover:border-primary/40 hover:shadow-md"
-              >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-                  <Zap className="h-5 w-5 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold truncate group-hover:text-primary transition-colors">
-                    {activity.title}
-                  </p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    {activity.questions?.length ?? 0} questão(ões)
-                  </p>
-                </div>
-                <span
-                  className={cn(
-                    'shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium',
-                    TYPE_COLORS[activity.type] ?? 'bg-muted text-muted-foreground',
-                  )}
-                >
-                  {getActivityTypeLabel(activity.type)}
-                </span>
-                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-              </Link>
-            </motion.div>
-          ))}
-        </div>
-      ) : (
-        <div className="py-20 text-center text-muted-foreground">
-          <Zap className="mx-auto mb-4 h-12 w-12 opacity-30" />
-          <p>Nenhuma atividade disponível nesta aula ainda.</p>
-        </div>
       )}
+
+      {/* ─── Interactive mode (always) ─────────────────────────────────────── */}
+      {!isLoading && (
+        <>
+          {steps.length > 0 ? (
+            <div className="flex gap-8">
+              {/* Sidebar */}
+              <aside className="hidden w-64 shrink-0 lg:block">
+                <div className="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto rounded-2xl border bg-card p-3 shadow-sm">
+                  <LessonTimeline
+                    steps={steps}
+                    currentIndex={currentStep}
+                    onSelect={setCurrentStep}
+                  />
+                </div>
+              </aside>
+
+              {/* Content area */}
+              <div className="flex-1 min-w-0">
+                <AnimatePresence mode="wait">
+                  {activeStep && (
+                    <StepPlayer
+                      key={activeStep.id}
+                      step={activeStep}
+                      lessonId={lessonId!}
+                    />
+                  )}
+                </AnimatePresence>
+
+                {/* Navigation buttons */}
+                <div className="mt-6 flex items-center justify-between">
+                  <button
+                    disabled={currentStep === 0}
+                    onClick={() => setCurrentStep((s) => s - 1)}
+                    className="flex items-center gap-1.5 rounded-xl border bg-card px-4 py-2.5 text-sm font-medium shadow-sm transition-all hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Anterior
+                  </button>
+
+                  {/* Mobile step indicator */}
+                  <span className="text-xs text-muted-foreground lg:hidden">
+                    {currentStep + 1}/{steps.length}
+                  </span>
+
+                  <button
+                    disabled={currentStep >= steps.length - 1}
+                    onClick={() => setCurrentStep((s) => s + 1)}
+                    className="flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Próxima
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <EmptyState />
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="py-20 text-center text-muted-foreground">
+      <Zap className="mx-auto mb-4 h-12 w-12 opacity-30" />
+      <p>Nenhuma atividade disponível nesta aula ainda.</p>
     </div>
   );
 }

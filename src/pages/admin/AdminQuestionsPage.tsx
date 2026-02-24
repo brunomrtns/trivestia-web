@@ -5,7 +5,14 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { Plus, Trash2, Loader2, CheckCircle2, XCircle, ChevronLeft } from 'lucide-react';
+import {
+  Plus,
+  Trash2,
+  Loader2,
+  CheckCircle2,
+  XCircle,
+  ChevronLeft
+} from 'lucide-react';
 import { adminEndpoints } from '@/services/endpoints/admin.endpoints';
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { getActivityTypeLabel } from '@/lib/utils';
@@ -15,7 +22,7 @@ import type { ActivityType } from '@/types/api';
 const optionSchema = z.object({
   text: z.string().min(1, 'Obrigatório'),
   isCorrect: z.boolean(),
-  order: z.number(),
+  order: z.number()
 });
 
 const questionSchema = z.object({
@@ -23,7 +30,7 @@ const questionSchema = z.object({
   explanation: z.string().optional(),
   difficulty: z.number().min(1).max(5).default(3),
   weight: z.number().min(1).default(1),
-  options: z.array(optionSchema).min(1),
+  options: z.array(optionSchema).min(1)
 });
 
 type QuestionFormData = z.infer<typeof questionSchema>;
@@ -32,7 +39,7 @@ function QuestionForm({
   activityType,
   onSave,
   onCancel,
-  loading,
+  loading
 }: {
   activityType: ActivityType;
   onSave: (data: QuestionFormData) => Promise<void>;
@@ -41,24 +48,35 @@ function QuestionForm({
 }) {
   const showOptions = activityType !== 'TEXT_INPUT';
 
-  const { register, handleSubmit, control, formState: { errors } } =
-    useForm<QuestionFormData>({
-      resolver: zodResolver(questionSchema),
-      defaultValues: {
-        difficulty: 3,
-        weight: 1,
-        options: showOptions ? [
-          { text: '', isCorrect: false, order: 0 },
-          { text: '', isCorrect: false, order: 1 },
-        ] : [],
-      },
-    });
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors }
+  } = useForm<QuestionFormData>({
+    resolver: zodResolver(questionSchema),
+    defaultValues: {
+      difficulty: 3,
+      weight: 1,
+      options: showOptions
+        ? [
+            { text: '', isCorrect: false, order: 0 },
+            { text: '', isCorrect: false, order: 1 }
+          ]
+        : []
+    }
+  });
 
-  const { fields, append, remove } = useFieldArray({ control, name: 'options' });
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'options'
+  });
 
   // Para MULTIPLE_CHOICE / TRUE_FALSE / SCENARIO: radio (apenas 1 correta)
   // Para MULTIPLE_SELECT: checkbox (n corretas)
-  const isSingleSelect = ['MULTIPLE_CHOICE', 'TRUE_FALSE', 'SCENARIO'].includes(activityType);
+  const isSingleSelect = ['MULTIPLE_CHOICE', 'TRUE_FALSE', 'SCENARIO'].includes(
+    activityType
+  );
 
   return (
     <form
@@ -72,11 +90,17 @@ function QuestionForm({
           className="w-full resize-none rounded-lg border bg-background px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           {...register('statement')}
         />
-        {errors.statement && <p className="mt-1 text-xs text-destructive">{errors.statement.message}</p>}
+        {errors.statement && (
+          <p className="mt-1 text-xs text-destructive">
+            {errors.statement.message}
+          </p>
+        )}
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium">Explicação (pós-resposta)</label>
+        <label className="mb-1 block text-sm font-medium">
+          Explicação (pós-resposta)
+        </label>
         <textarea
           rows={2}
           className="w-full resize-none rounded-lg border bg-background px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
@@ -86,7 +110,9 @@ function QuestionForm({
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="mb-1 block text-sm font-medium">Dificuldade (1-5)</label>
+          <label className="mb-1 block text-sm font-medium">
+            Dificuldade (1-5)
+          </label>
           <input
             type="number"
             min={1}
@@ -113,12 +139,18 @@ function QuestionForm({
             <label className="text-sm font-medium">
               Opções{' '}
               <span className="text-xs text-muted-foreground">
-                ({isSingleSelect ? 'marque a correta' : 'marque todas as corretas'})
+                (
+                {isSingleSelect
+                  ? 'marque a correta'
+                  : 'marque todas as corretas'}
+                )
               </span>
             </label>
             <button
               type="button"
-              onClick={() => append({ text: '', isCorrect: false, order: fields.length })}
+              onClick={() =>
+                append({ text: '', isCorrect: false, order: fields.length })
+              }
               className="flex items-center gap-1 rounded-lg border px-3 py-1 text-xs font-medium hover:bg-accent"
             >
               <Plus className="h-3 w-3" />
@@ -161,7 +193,11 @@ function QuestionForm({
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
           Salvar questão
         </button>
-        <button type="button" onClick={onCancel} className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-accent">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-accent"
+        >
           Cancelar
         </button>
       </div>
@@ -170,7 +206,10 @@ function QuestionForm({
 }
 
 export default function AdminQuestionsPage() {
-  const { lessonId, activityId } = useParams<{ lessonId: string; activityId: string }>();
+  const { lessonId, activityId } = useParams<{
+    lessonId: string;
+    activityId: string;
+  }>();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [adding, setAdding] = useState(false);
@@ -179,7 +218,7 @@ export default function AdminQuestionsPage() {
   const { data: activity, isLoading: loadingActivity } = useQuery({
     queryKey: ['activity', lessonId, activityId],
     queryFn: () => learningEndpoints.getActivity(lessonId!, activityId!),
-    enabled: !!lessonId && !!activityId,
+    enabled: !!lessonId && !!activityId
   });
 
   // Para recuperar o tipo da activity, precisamos buscá-la via um endpoint de listagem
@@ -187,17 +226,18 @@ export default function AdminQuestionsPage() {
   const { data: questions, isLoading } = useQuery({
     queryKey: ['admin-questions', activityId],
     queryFn: () => adminEndpoints.getQuestions(activityId!),
-    enabled: !!activityId,
+    enabled: !!activityId
   });
 
   const createMut = useMutation({
-    mutationFn: (data: QuestionFormData) => adminEndpoints.createQuestion(activityId!, data),
+    mutationFn: (data: QuestionFormData) =>
+      adminEndpoints.createQuestion(activityId!, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-questions', activityId] });
       setAdding(false);
       toast.success('Questão criada!');
     },
-    onError: () => toast.error('Erro ao criar questão.'),
+    onError: () => toast.error('Erro ao criar questão.')
   });
 
   const deleteMut = useMutation({
@@ -206,7 +246,7 @@ export default function AdminQuestionsPage() {
       qc.invalidateQueries({ queryKey: ['admin-questions', activityId] });
       toast.success('Questão excluída.');
     },
-    onError: () => toast.error('Erro ao excluir questão.'),
+    onError: () => toast.error('Erro ao excluir questão.')
   });
 
   const activityType: ActivityType = activity?.type ?? 'MULTIPLE_CHOICE';
@@ -227,7 +267,7 @@ export default function AdminQuestionsPage() {
               {loadingActivity ? (
                 <span className="inline-block h-8 w-48 animate-pulse rounded bg-muted" />
               ) : (
-                activity?.title ?? 'Questões'
+                (activity?.title ?? 'Questões')
               )}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -264,8 +304,19 @@ export default function AdminQuestionsPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {(questions as { id: string; statement: string; options: { isCorrect: boolean; text: string }[] }[] | undefined)?.map((q, i) => (
-            <div key={q.id} className="rounded-2xl border bg-card p-5 shadow-sm">
+          {(
+            questions as
+              | {
+                  id: string;
+                  statement: string;
+                  options: { isCorrect: boolean; text: string }[];
+                }[]
+              | undefined
+          )?.map((q, i) => (
+            <div
+              key={q.id}
+              className="rounded-2xl border bg-card p-5 shadow-sm"
+            >
               <div className="mb-3 flex items-start justify-between gap-4">
                 <p className="font-medium">
                   <span className="mr-2 text-muted-foreground">#{i + 1}</span>
@@ -273,7 +324,8 @@ export default function AdminQuestionsPage() {
                 </p>
                 <button
                   onClick={() => {
-                    if (confirm('Excluir esta questão?')) deleteMut.mutate(q.id);
+                    if (confirm('Excluir esta questão?'))
+                      deleteMut.mutate(q.id);
                   }}
                   className="shrink-0 rounded-lg p-1.5 text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
                 >
@@ -282,16 +334,18 @@ export default function AdminQuestionsPage() {
               </div>
               {q.options?.length > 0 && (
                 <ul className="space-y-1.5">
-                  {q.options.map((opt: { isCorrect: boolean; text: string }, j: number) => (
-                    <li key={j} className="flex items-center gap-2 text-sm">
-                      {opt.isCorrect ? (
-                        <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <XCircle className="h-4 w-4 text-muted-foreground" />
-                      )}
-                      {opt.text}
-                    </li>
-                  ))}
+                  {q.options.map(
+                    (opt: { isCorrect: boolean; text: string }, j: number) => (
+                      <li key={j} className="flex items-center gap-2 text-sm">
+                        {opt.isCorrect ? (
+                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <XCircle className="h-4 w-4 text-muted-foreground" />
+                        )}
+                        {opt.text}
+                      </li>
+                    )
+                  )}
                 </ul>
               )}
             </div>

@@ -5,13 +5,13 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  type DragEndEvent,
+  type DragEndEvent
 } from '@dnd-kit/core';
 import {
   SortableContext,
   verticalListSortingStrategy,
   useSortable,
-  arrayMove,
+  arrayMove
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
@@ -24,8 +24,14 @@ interface Props {
 }
 
 function SortableItem({ option }: { option: QuestionOption }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: option.id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id: option.id });
 
   return (
     <div
@@ -72,10 +78,16 @@ export function OrderingRenderer({ question, value, onChange }: Props) {
       <p className="text-xs text-muted-foreground">
         Arraste para ordenar (ou use teclado: Espaço + Setas)
       </p>
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
         <SortableContext items={items} strategy={verticalListSortingStrategy}>
           {items.map((id) =>
-            optionMap[id] ? <SortableItem key={id} option={optionMap[id]} /> : null,
+            optionMap[id] ? (
+              <SortableItem key={id} option={optionMap[id]} />
+            ) : null
           )}
         </SortableContext>
       </DndContext>

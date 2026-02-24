@@ -8,7 +8,12 @@ interface Props {
   trueFalse?: boolean; // limita as opções a 2 (TRUE_FALSE / SCENARIO)
 }
 
-export function MultipleChoiceRenderer({ question, value, onChange, trueFalse }: Props) {
+export function MultipleChoiceRenderer({
+  question,
+  value,
+  onChange,
+  trueFalse
+}: Props) {
   const options = trueFalse ? question.options.slice(0, 2) : question.options;
 
   return (
@@ -24,7 +29,7 @@ export function MultipleChoiceRenderer({ question, value, onChange, trueFalse }:
               'w-full rounded-xl border px-4 py-3.5 text-left text-sm font-medium transition-all',
               selected
                 ? 'border-primary bg-primary/10 text-primary'
-                : 'hover:border-primary/40 hover:bg-accent',
+                : 'hover:border-primary/40 hover:bg-accent'
             )}
           >
             <span className="mr-3 inline-flex h-6 w-6 items-center justify-center rounded-full border text-xs font-bold">

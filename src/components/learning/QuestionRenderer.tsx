@@ -3,7 +3,12 @@ import { MultipleChoiceRenderer } from './MultipleChoiceRenderer';
 import { MultipleSelectRenderer } from './MultipleSelectRenderer';
 import { TextInputRenderer } from './TextInputRenderer';
 import { OrderingRenderer } from './OrderingRenderer';
-import type { SingleSelectAnswer, MultiSelectAnswer, TextInputAnswer, OrderingAnswer } from '@/types/api';
+import type {
+  SingleSelectAnswer,
+  MultiSelectAnswer,
+  TextInputAnswer,
+  OrderingAnswer
+} from '@/types/api';
 
 interface Props {
   activityType: ActivityType;
@@ -16,7 +21,12 @@ interface Props {
  * Dispatcher central: renderiza o renderer correto com base em activity.type.
  * Não existe Question.type — o tipo é herdado da Activity.
  */
-export function QuestionRenderer({ activityType, question, value, onChange }: Props) {
+export function QuestionRenderer({
+  activityType,
+  question,
+  value,
+  onChange
+}: Props) {
   switch (activityType) {
     case 'MULTIPLE_CHOICE':
       return (
