@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, Loader2, BookOpen, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, BookOpen, X, Settings2 } from 'lucide-react';
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { adminEndpoints } from '@/services/endpoints/admin.endpoints';
 import type { Course } from '@/types/api';
@@ -158,6 +159,14 @@ export default function AdminCoursesPage() {
                     <p className="text-sm text-muted-foreground truncate">{course.description}</p>
                   </div>
                   <div className="flex items-center gap-2">
+                    <Link
+                      to={`/admin/courses/${course.id}/lessons`}
+                      className="flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-2 text-xs font-semibold text-primary transition hover:bg-primary/20"
+                      aria-label="Gerenciar módulos e aulas"
+                    >
+                      <Settings2 className="h-3.5 w-3.5" />
+                      Gerenciar
+                    </Link>
                     <button
                       onClick={() => setEditing(course)}
                       className="rounded-lg p-2 text-muted-foreground transition hover:bg-accent hover:text-foreground"

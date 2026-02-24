@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { Plus, Trash2, Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { Plus, Trash2, Loader2, CheckCircle2, XCircle, ChevronLeft } from 'lucide-react';
 import { adminEndpoints } from '@/services/endpoints/admin.endpoints';
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { getActivityTypeLabel } from '@/lib/utils';
@@ -170,9 +170,17 @@ function QuestionForm({
 }
 
 export default function AdminQuestionsPage() {
-  const { activityId } = useParams<{ activityId: string }>();
+  const { lessonId, activityId } = useParams<{ lessonId: string; activityId: string }>();
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const [adding, setAdding] = useState(false);
+
+  // Busca a atividade para obter o tipo real
+  const { data: activity, isLoading: loadingActivity } = useQuery({
+    queryKey: ['activity', lessonId, activityId],
+    queryFn: () => learningEndpoints.getActivity(lessonId!, activityId!),
+    enabled: !!lessonId && !!activityId,
+  });
 
   // Para recuperar o tipo da activity, precisamos buscá-la via um endpoint de listagem
   // Aqui buscamos as questions diretamente — o activityType virá junto
@@ -201,28 +209,44 @@ export default function AdminQuestionsPage() {
     onError: () => toast.error('Erro ao excluir questão.'),
   });
 
-  // Determina o ActivityType a partir da primeira questão ou deixa padrão
-  // Na prática o admin deve navegar via /admin/courses → activity type conhecido
-  const activityType: ActivityType = 'MULTIPLE_CHOICE';
+  const activityType: ActivityType = activity?.type ?? 'MULTIPLE_CHOICE';
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-extrabold">Questões</h1>
-          <p className="text-sm text-muted-foreground">
-            Tipo: <strong>{getActivityTypeLabel(activityType)}</strong>
-          </p>
+      <div>
+        <button
+          onClick={() => navigate(-1)}
+          className="mb-3 flex items-center gap-1.5 text-sm text-muted-foreground transition hover:text-foreground"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Voltar
+        </button>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-extrabold">
+              {loadingActivity ? (
+                <span className="inline-block h-8 w-48 animate-pulse rounded bg-muted" />
+              ) : (
+                activity?.title ?? 'Questões'
+              )}
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Tipo:{' '}
+              <strong className="text-foreground">
+                {loadingActivity ? '...' : getActivityTypeLabel(activityType)}
+              </strong>
+            </p>
+          </div>
+          {!adding && (
+            <button
+              onClick={() => setAdding(true)}
+              className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+            >
+              <Plus className="h-4 w-4" />
+              Nova questão
+            </button>
+          )}
         </div>
-        {!adding && (
-          <button
-            onClick={() => setAdding(true)}
-            className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
-          >
-            <Plus className="h-4 w-4" />
-            Nova questão
-          </button>
-        )}
       </div>
 
       {adding && (

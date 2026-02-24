@@ -91,7 +91,7 @@ const router = createBrowserRouter([
             element: <AdminLessonsPage />
           },
           {
-            path: '/admin/activities/:activityId/questions',
+            path: '/admin/lessons/:lessonId/activities/:activityId/questions',
             element: <AdminQuestionsPage />
           }
         ]

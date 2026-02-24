@@ -1,7 +1,16 @@
-import { Link, Outlet } from 'react-router-dom';
-import { BookOpen } from 'lucide-react';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { BookOpen, LayoutDashboard, LogOut } from 'lucide-react';
+import { useAuthStore } from '@/features/auth/auth.store';
 
 export function PublicLayout() {
+  const { isAuthenticated, user, logout } = useAuthStore();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur">
@@ -17,12 +26,35 @@ export function PublicLayout() {
             >
               Cursos
             </Link>
-            <Link
-              to="/login"
-              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-            >
-              Entrar
-            </Link>
+            {isAuthenticated ? (
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-muted-foreground">
+                  {user?.name}
+                </span>
+                <Link
+                  to="/app/dashboard"
+                  className="flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  Dashboard
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                  aria-label="Sair"
+                  title="Sair"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+              >
+                Entrar
+              </Link>
+            )}
           </nav>
         </div>
       </header>
