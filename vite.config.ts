@@ -9,5 +9,9 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src')
     }
+  },
+  optimizeDeps: {
+    // sim-core é CJS (CommonJS); forçar pré-bundling via esbuild p/ converter em ESM
+    include: ['@trivestia/sim-core']
   }
 });

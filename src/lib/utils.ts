@@ -48,7 +48,8 @@ export function getActivityTypeLabel(type: string): string {
     TEXT_INPUT: 'Resposta Aberta',
     SCENARIO: 'Cenário',
     CHART_MARKUP: 'Marcação de Gráfico',
-    RISK_CALCULATOR: 'Calculadora de Risco'
+    RISK_CALCULATOR: 'Calculadora de Risco',
+    SIM_TRADING_CHALLENGE: 'Simulação de Trading'
   };
   return labels[type] ?? type;
 }

@@ -32,6 +32,11 @@ const CourseInteractivePage = lazy(
   () => import('@/pages/student/CourseInteractivePage')
 );
 
+const PracticeLabPage = lazy(() => import('@/pages/student/PracticeLabPage'));
+const PracticeHistoryPage = lazy(
+  () => import('@/pages/student/PracticeHistoryPage')
+);
+
 // Admin
 const AdminCoursesPage = lazy(() => import('@/pages/admin/AdminCoursesPage'));
 const AdminLessonsPage = lazy(() => import('@/pages/admin/AdminLessonsPage'));
@@ -89,6 +94,14 @@ const router = createBrowserRouter([
             path: '/app/lessons/:lessonId/activities/:activityId',
             element: <ActivityPlayerPage />
           },
+          // Canonical activity player (suporta SIM_TRADING_CHALLENGE)
+          {
+            path: '/app/activity/:activityId',
+            element: <ActivityPlayerPage />
+          },
+          // Practice Mode (Laboratório de Trading)
+          { path: '/app/lab', element: <PracticeLabPage /> },
+          { path: '/app/lab/history', element: <PracticeHistoryPage /> },
           { path: '/app/progress', element: <ProgressPage /> }
         ]
       }

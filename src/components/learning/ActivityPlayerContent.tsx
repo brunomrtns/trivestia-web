@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { useMutation } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import {
@@ -10,36 +10,33 @@ import {
   Trophy,
   RotateCcw
 } from 'lucide-react';
-import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { progressEndpoints } from '@/services/endpoints/progress.endpoints';
-import { simulationEndpoints } from '@/services/endpoints/simulation.endpoints';
 import { QuestionRenderer } from '@/components/learning/QuestionRenderer';
-import { SimTradingTerminal } from '@/components/sim-trading/SimTradingTerminal';
-import { ChallengeBriefingScreen } from '@/components/sim-trading/ChallengeBriefingScreen';
-import { HelpDrawer } from '@/components/sim-trading/HelpDrawer';
-import { useTutorialProgress } from '@/components/sim-trading/useTutorialProgress';
 import { getActivityTypeLabel, formatPercentage } from '@/lib/utils';
-import type { Answer, SubmissionResult } from '@/types/api';
+import type { Activity, Answer, SubmissionResult } from '@/types/api';
 
-export default function ActivityPlayerPage() {
-  const { lessonId, activityId } = useParams<{
-    lessonId?: string;
-    activityId: string;
-  }>();
+interface ActivityPlayerContentProps {
+  activity: Activity;
+  /** Label for the back button text (default: "Ir ao Dashboard") */
+  backLabel?: string;
+  /** Where to navigate on "back" (default: /app/dashboard) */
+  backTo?: string;
+  /** Extra content rendered in the header area */
+  headerExtra?: React.ReactNode;
+}
+
+export function ActivityPlayerContent({
+  activity,
+  backLabel = 'Ir ao Dashboard',
+  backTo = '/app/dashboard',
+  headerExtra
+}: ActivityPlayerContentProps) {
   const navigate = useNavigate();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
   const [result, setResult] = useState<SubmissionResult | null>(null);
 
-  // GET /lessons/:lessonId/activities/:activityId — Bearer ANY
-  const { data: activity, isLoading } = useQuery({
-    queryKey: ['activity', lessonId, activityId],
-    queryFn: () => learningEndpoints.getActivity(lessonId!, activityId!),
-    enabled: !!lessonId && !!activityId
-  });
-
-  // POST /submissions — Bearer ANY
   const submitMutation = useMutation({
     mutationFn: progressEndpoints.submit,
     onSuccess: (data) => {
@@ -50,24 +47,6 @@ export default function ActivityPlayerPage() {
       toast.error('Erro ao enviar respostas. Tente novamente.');
     }
   });
-
-  if (isLoading || !activity) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  // ─── Desafio de Trading: briefing → terminal ──────────────────────────────────
-  if (activity.type === 'SIM_TRADING_CHALLENGE') {
-    return (
-      <SimTradingChallengeFlow
-        activityId={activityId!}
-        onGoBack={() => navigate(-1)}
-      />
-    );
-  }
 
   const questions = activity.questions;
   const totalQuestions = questions.length;
@@ -94,7 +73,6 @@ export default function ActivityPlayerPage() {
       result.percentage ?? Math.round((result.score / result.maxScore) * 100);
     const passed = pct >= 60;
 
-    // Build a map of feedback by questionId from result
     const feedbackMap: Record<string, Record<string, unknown>> = {};
     if (result.results) {
       result.results.forEach((r) => {
@@ -106,7 +84,6 @@ export default function ActivityPlayerPage() {
 
     return (
       <div className="mx-auto max-w-2xl space-y-6">
-        {/* Score header */}
         <motion.div
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -130,7 +107,6 @@ export default function ActivityPlayerPage() {
           </p>
         </motion.div>
 
-        {/* Per-question review (only for trade activities with feedback) */}
         {Object.keys(feedbackMap).length > 0 && (
           <div className="space-y-4">
             <h2 className="text-lg font-bold">Revisão das questões</h2>
@@ -157,7 +133,6 @@ export default function ActivityPlayerPage() {
           </div>
         )}
 
-        {/* Actions */}
         <div className="flex justify-center gap-3 pb-8">
           <button
             onClick={() => {
@@ -171,10 +146,10 @@ export default function ActivityPlayerPage() {
             Tentar novamente
           </button>
           <button
-            onClick={() => navigate('/app/dashboard')}
+            onClick={() => navigate(backTo)}
             className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
           >
-            Ir ao Dashboard
+            {backLabel}
           </button>
         </div>
       </div>
@@ -202,6 +177,8 @@ export default function ActivityPlayerPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
+      {headerExtra}
+
       {/* Header */}
       <div>
         <div className="mb-2 flex items-center justify-between text-sm text-muted-foreground">
@@ -277,94 +254,5 @@ export default function ActivityPlayerPage() {
         )}
       </div>
     </div>
-  );
-}
-
-// ─── Sim Trading Challenge Flow (Briefing → Terminal) ─────────────────────────
-
-type ChallengePhase = 'BRIEFING' | 'TERMINAL';
-
-function SimTradingChallengeFlow({
-  activityId,
-  onGoBack
-}: {
-  activityId: string;
-  onGoBack: () => void;
-}) {
-  const [phase, setPhase] = useState<ChallengePhase>('BRIEFING');
-  const [helpOpen, setHelpOpen] = useState(false);
-  const tutorial = useTutorialProgress();
-
-  // Buscar briefing
-  const {
-    data: briefing,
-    isLoading,
-    error
-  } = useQuery({
-    queryKey: ['challenge-briefing', activityId],
-    queryFn: () => simulationEndpoints.getChallengeBriefing(activityId),
-    retry: false
-  });
-
-  // Loading
-  if (isLoading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  // Erro (incluindo 409 já aprovado tratado no briefing)
-  if (error && !briefing) {
-    const errMsg =
-      (error as { response?: { status?: number } })?.response?.status === 409
-        ? 'Você já foi aprovado neste desafio.'
-        : 'Erro ao carregar o desafio.';
-
-    return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
-        <Trophy className="h-12 w-12 text-emerald-400" />
-        <h2 className="text-lg font-semibold">{errMsg}</h2>
-        <button
-          onClick={onGoBack}
-          className="rounded-lg border px-4 py-2 text-sm font-medium transition hover:bg-accent"
-        >
-          Voltar
-        </button>
-      </div>
-    );
-  }
-
-  if (!briefing) return null;
-
-  // PHASE: BRIEFING
-  if (phase === 'BRIEFING') {
-    return (
-      <>
-        <ChallengeBriefingScreen
-          briefing={briefing}
-          onStart={() => setPhase('TERMINAL')}
-          onGoBack={onGoBack}
-          onOpenHelp={() => setHelpOpen(true)}
-        />
-        <HelpDrawer
-          open={helpOpen}
-          onClose={() => setHelpOpen(false)}
-          onRestartTutorial={tutorial.restart}
-        />
-      </>
-    );
-  }
-
-  // PHASE: TERMINAL
-  return (
-    <SimTradingTerminal
-      mode="CHALLENGE"
-      activityId={activityId}
-      onComplete={onGoBack}
-      onOpenHelp={() => setHelpOpen(true)}
-      showOnboarding={!tutorial.completed}
-    />
   );
 }

@@ -1,5 +1,25 @@
 // DTOs alinhados ao backend trademaster-api (Prisma schema + endpoints reais)
 
+// ─── Re-exports sim-core ──────────────────────────────────────────────────────
+
+export type {
+  Candle,
+  CandleConfig,
+  ExecutionConfig,
+  ScoringConfig,
+  ScoreResult,
+  SimulationResult,
+  SimulationState,
+  ScenarioPayload,
+  ScenarioConfig,
+  OrderRequest,
+  OrderSide,
+  OrderType,
+  Fill,
+  Position,
+  SimEvent
+} from '@trivestia/sim-core';
+
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
 export type Role = 'ADMIN' | 'STUDENT';
@@ -12,7 +32,8 @@ export type ActivityType =
   | 'TEXT_INPUT'
   | 'SCENARIO'
   | 'CHART_MARKUP'
-  | 'RISK_CALCULATOR';
+  | 'RISK_CALCULATOR'
+  | 'SIM_TRADING_CHALLENGE';
 
 export type ProgressStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
 
@@ -434,4 +455,84 @@ export interface CreateQuestionDTO {
   order?: number;
   options: { text: string; isCorrect: boolean; order: number }[];
   metadata?: Record<string, unknown>;
+}
+
+// ─── Simulation / Challenge ───────────────────────────────────────────────────
+
+export interface ChallengeBriefingData {
+  activityId: string;
+  title: string;
+  description: string | null;
+  objectives: {
+    minPnlPercent: number;
+    maxDrawdownPercent: number;
+    minTradeCount: number;
+  } | null;
+  rules: {
+    initialBalance: number;
+    maxEvents: number;
+    maxLeverage: number;
+    allowShort: boolean;
+    feeBps: number;
+  };
+  alreadyPassed: boolean;
+  lastAttempt?: {
+    score: number;
+    passed: boolean;
+    attemptCount: number;
+  };
+}
+
+export interface ChallengeSubmitResponse {
+  submissionId: string;
+  score: number;
+  maxScore: number;
+  passed: boolean;
+  result: SimulationResult;
+  scoreResult: ScoreResult | null;
+  tamperDetected: boolean;
+}
+
+export interface PracticeScenarioRequest {
+  numCandles?: number;
+  timeframeMs?: number;
+  volatility?: number;
+  trend?: number;
+  spreadBps?: number;
+  initialBalance?: number;
+}
+
+export interface PracticeScenarioResponse {
+  sessionId: string;
+  candles: Candle[];
+  executionConfig: ExecutionConfig;
+  scenarioToken: string;
+  maxEvents: number;
+}
+
+export interface PracticeSubmitResponse {
+  sessionId: string;
+  result: SimulationResult;
+}
+
+export interface PracticeHistoryItem {
+  id: string;
+  createdAt: string;
+  hasResult: boolean;
+  result: {
+    totalPnlPercent: number;
+    tradeCount: number;
+    winRate: number;
+    maxDrawdownPercent: number;
+  } | null;
+}
+
+export interface PracticeHistoryResponse {
+  sessions: PracticeHistoryItem[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
 }

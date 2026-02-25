@@ -54,7 +54,8 @@ const activitySchema = z.object({
     'TEXT_INPUT',
     'SCENARIO',
     'CHART_MARKUP',
-    'RISK_CALCULATOR'
+    'RISK_CALCULATOR',
+    'SIM_TRADING_CHALLENGE'
   ] as const)
 });
 type ActivityForm = z.infer<typeof activitySchema>;
@@ -67,7 +68,8 @@ const ACTIVITY_TYPES: { value: ActivityType; label: string }[] = [
   { value: 'TEXT_INPUT', label: 'Resposta Aberta' },
   { value: 'SCENARIO', label: 'Cenário' },
   { value: 'CHART_MARKUP', label: 'Marcação de Gráfico' },
-  { value: 'RISK_CALCULATOR', label: 'Calculadora de Risco' }
+  { value: 'RISK_CALCULATOR', label: 'Calculadora de Risco' },
+  { value: 'SIM_TRADING_CHALLENGE', label: 'Simulação de Trading' }
 ];
 
 const TYPE_COLORS: Record<ActivityType, string> = {
@@ -78,7 +80,8 @@ const TYPE_COLORS: Record<ActivityType, string> = {
   TEXT_INPUT: 'bg-pink-500/10 text-pink-600 border-pink-200',
   SCENARIO: 'bg-yellow-500/10 text-yellow-700 border-yellow-200',
   CHART_MARKUP: 'bg-teal-500/10 text-teal-600 border-teal-200',
-  RISK_CALCULATOR: 'bg-indigo-500/10 text-indigo-600 border-indigo-200'
+  RISK_CALCULATOR: 'bg-indigo-500/10 text-indigo-600 border-indigo-200',
+  SIM_TRADING_CHALLENGE: 'bg-emerald-500/10 text-emerald-600 border-emerald-200'
 };
 
 // ─── ActivityRow ─────────────────────────────────────────────────────────────

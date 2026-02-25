@@ -11,8 +11,43 @@ import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { getActivityTypeLabel } from '@/lib/utils';
 import { ChartMarkupQuestionForm } from '@/components/admin/ChartMarkupQuestionForm';
 import { RiskCalculatorQuestionForm } from '@/components/admin/RiskCalculatorQuestionForm';
+import { SimTradingQuestionForm } from '@/components/admin/SimTradingQuestionForm';
 import { QuestionPreviewCard } from '@/components/admin/QuestionPreviewCard';
 import type { ActivityType } from '@/types/api';
+
+// ─── SimConfigSummary ────────────────────────────────────────────────────────
+
+function SimConfigSummary({ cfg }: { cfg: Record<string, unknown> }) {
+  const cc = cfg.candleConfig as Record<string, unknown> | undefined;
+  const ec = cfg.executionConfig as Record<string, unknown> | undefined;
+  const sc = cfg.scoringConfig as Record<string, unknown> | undefined;
+  const tfs = cc?.timeframeMs
+    ? (() => {
+        const m = (cc.timeframeMs as number) / 60_000;
+        return m >= 60 ? `${m / 60}h` : `${m}min`;
+      })()
+    : '—';
+  const items = [
+    { label: 'Candles', value: `${cc?.numCandles ?? '—'} × ${tfs}` },
+    { label: 'Preço inicial', value: `$${cc?.startPrice ?? '—'}` },
+    { label: 'Volatilidade', value: String(cc?.volatility ?? '—') },
+    { label: 'Saldo inicial', value: `$${ec?.initialBalance ?? '—'}` },
+    { label: 'Taxa', value: `${ec?.feeBps ?? '—'} bps` },
+    { label: 'PnL mín.', value: `${sc?.passingPnlPercent ?? '—'}%` },
+    { label: 'DD máx.', value: `${sc?.maxDrawdownPercent ?? '—'}%` },
+    { label: 'Trades mín.', value: String(sc?.minTradeCount ?? '—') }
+  ];
+  return (
+    <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 rounded-lg bg-muted/40 px-4 py-3 text-xs">
+      {items.map(({ label, value }) => (
+        <div key={label} className="flex items-center gap-1">
+          <span className="text-muted-foreground">{label}:</span>
+          <span className="font-mono font-semibold">{value}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 // Schema para criação de questão com opções dinâmicas
 const optionSchema = z.object({
@@ -277,10 +312,17 @@ export default function AdminQuestionsPage() {
           {!adding && (
             <button
               onClick={() => setAdding(true)}
-              className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+              disabled={
+                activityType === 'SIM_TRADING_CHALLENGE' &&
+                Array.isArray(questions) &&
+                questions.length > 0
+              }
+              className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
             >
               <Plus className="h-4 w-4" />
-              Nova questão
+              {activityType === 'SIM_TRADING_CHALLENGE'
+                ? 'Configurar Cenário'
+                : 'Nova questão'}
             </button>
           )}
         </div>
@@ -295,6 +337,13 @@ export default function AdminQuestionsPage() {
           />
         ) : activityType === 'RISK_CALCULATOR' ? (
           <RiskCalculatorQuestionForm
+            onSave={(data) => createMut.mutateAsync(data as any)}
+            onCancel={() => setAdding(false)}
+            loading={createMut.isPending}
+          />
+        ) : activityType === 'SIM_TRADING_CHALLENGE' ? (
+          <SimTradingQuestionForm
+            initialData={questions?.[0]?.metadata?.jsonData}
             onSave={(data) => createMut.mutateAsync(data as any)}
             onCancel={() => setAdding(false)}
             loading={createMut.isPending}
@@ -331,7 +380,9 @@ export default function AdminQuestionsPage() {
               <div className="mb-1 flex items-start justify-between gap-4">
                 <p className="font-medium">
                   <span className="mr-2 text-muted-foreground">#{i + 1}</span>
-                  {q.statement}
+                  {activityType === 'SIM_TRADING_CHALLENGE'
+                    ? 'Configuração do Cenário de Trading'
+                    : q.statement}
                 </p>
                 <button
                   onClick={() => {
@@ -345,6 +396,13 @@ export default function AdminQuestionsPage() {
               </div>
 
               <QuestionPreviewCard activityType={activityType} question={q} />
+
+              {activityType === 'SIM_TRADING_CHALLENGE' &&
+                q.metadata?.jsonData && (
+                  <SimConfigSummary
+                    cfg={q.metadata.jsonData as Record<string, unknown>}
+                  />
+                )}
             </div>
           ))}
 

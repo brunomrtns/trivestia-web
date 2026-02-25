@@ -8,7 +8,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Shield,
-  Users
+  Users,
+  TrendingUp
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/features/auth/auth.store';
@@ -20,7 +21,8 @@ interface SidebarProps {
 
 const studentLinks = [
   { to: '/app/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/app/courses', icon: GraduationCap, label: 'Cursos' },
+  { to: '/app/courses', icon: GraduationCap, label: 'Cursos', alsoMatch: ['/app/lessons'] },
+  { to: '/app/lab', icon: TrendingUp, label: 'Laboratório', alsoMatch: ['/app/activity'] },
   { to: '/app/progress', icon: BarChart3, label: 'Progresso' }
 ];
 
@@ -53,8 +55,12 @@ export function Sidebar({ collapsed, onCollapse }: SidebarProps) {
 
       {/* Nav */}
       <nav className="flex-1 space-y-1 overflow-y-auto p-2">
-        {links.map(({ to, icon: Icon, label }) => {
-          const active = location.pathname.startsWith(to);
+        {links.map(({ to, icon: Icon, label, alsoMatch }) => {
+          const active =
+            location.pathname.startsWith(to) ||
+            (alsoMatch?.some((prefix) =>
+              location.pathname.startsWith(prefix)
+            ) ?? false);
           return (
             <Link
               key={to}

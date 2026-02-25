@@ -45,7 +45,7 @@ export default function DashboardPage() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-extrabold">
-          Olá, {user?.name?.split(' ')[0]} 👋
+          Olá, {user?.name?.split(' ')[0]}
         </h1>
         <p className="mt-1 text-muted-foreground">Continue de onde parou.</p>
       </div>
