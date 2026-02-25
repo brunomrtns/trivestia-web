@@ -1,0 +1,21 @@
+{
+  "name": "@trivestia/sim-core",
+  "version": "1.0.0",
+  "description": "Deterministic trading simulation engine — shared between FE and BE",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "@types/jest": "^29.0.0"
+  }
+}

@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Exceção: dist do sim-core vendorizado precisa estar no repositório para o deploy na Vercel
+!packages/sim-core/dist
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
