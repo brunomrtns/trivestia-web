@@ -100,11 +100,11 @@ function QuestionForm({
             { text: 'Falso', isCorrect: false, order: 1 }
           ]
         : showOptions
-        ? [
-            { text: '', isCorrect: false, order: 0 },
-            { text: '', isCorrect: false, order: 1 }
-          ]
-        : []
+          ? [
+              { text: '', isCorrect: false, order: 0 },
+              { text: '', isCorrect: false, order: 1 }
+            ]
+          : []
     }
   });
 
