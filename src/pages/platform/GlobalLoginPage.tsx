@@ -73,30 +73,27 @@ export default function GlobalLoginPage() {
       const { platformAccount, tenants } = resolved;
 
       if (!platformAccount && tenants.length === 0) {
-        // Nenhuma conta — CHOICE mostra opcoes de cadastro
+        // Nenhuma conta — CHOICE mostra opções de cadastro
         setPhase('CHOICE');
         return;
       }
 
       if (platformAccount && tenants.length === 0) {
-        // Somente professor — pula direto para senha
+        // Professor sem escola — pede senha para criar escola
         setLoginCtx({ type: 'platform' });
         setPhase('PASSWORD');
         return;
       }
 
-      if (!platformAccount && tenants.length === 1) {
-        // Somente aluno em uma escola — pula direto para senha
-        setLoginCtx({
-          type: 'tenant',
-          slug: tenants[0].slug,
-          name: tenants[0].name
-        });
-        setPhase('PASSWORD');
+      if (tenants.length === 1) {
+        // Uma escola (professor ou aluno) — vai direto para login da escola
+        navigate(
+          `/t/${tenants[0].slug}/login?email=${encodeURIComponent(data.email)}`
+        );
         return;
       }
 
-      // Multiplas opcoes (N tenants ou plataforma + tenants) — mostra CHOICE
+      // Múltiplas escolas — mostra CHOICE para escolher qual
       setPhase('CHOICE');
     } catch {
       toast.error('Erro ao verificar e-mail. Tente novamente.');
@@ -175,14 +172,8 @@ export default function GlobalLoginPage() {
     resolveResult &&
     !resolveResult.platformAccount &&
     resolveResult.tenants.length === 0;
-  const isMultiContext =
-    resolveResult &&
-    resolveResult.platformAccount &&
-    resolveResult.tenants.length >= 1;
-  const isMultiTenant =
-    resolveResult &&
-    !resolveResult.platformAccount &&
-    resolveResult.tenants.length > 1;
+  const isMultiTenantChoice =
+    resolveResult && resolveResult.tenants.length > 1;
 
   // ─── Render ────────────────────────────────────────────────────────────────
 
@@ -314,15 +305,15 @@ export default function GlobalLoginPage() {
               </>
             )}
 
-            {/* Aluno em multiplas escolas */}
-            {isMultiTenant && (
+            {/* Múltiplas escolas — escolher qual */}
+            {isMultiTenantChoice && (
               <>
                 <h1 className="mb-2 text-2xl font-extrabold">
                   Selecionar escola
                 </h1>
                 <p className="mb-6 text-sm text-muted-foreground">
-                  Sua conta existe em mais de uma escola. Escolha em qual deseja
-                  entrar.
+                  Este e-mail está associado a mais de uma escola. Escolha em
+                  qual deseja entrar.
                 </p>
 
                 <div className="space-y-2">
@@ -330,62 +321,14 @@ export default function GlobalLoginPage() {
                     <button
                       key={t.slug}
                       onClick={() =>
-                        selectCtx({
-                          type: 'tenant',
-                          slug: t.slug,
-                          name: t.name
-                        })
+                        navigate(
+                          `/t/${t.slug}/login?email=${encodeURIComponent(email)}`
+                        )
                       }
                       className="flex w-full items-center justify-between rounded-xl border bg-card px-4 py-3.5 text-sm font-medium transition-colors hover:bg-accent"
                     >
                       {t.name}
                       <span className="text-xs text-muted-foreground">
-                        /t/{t.slug}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-
-            {/* Conta de professor + aluno em escola(s) */}
-            {isMultiContext && (
-              <>
-                <h1 className="mb-2 text-2xl font-extrabold">
-                  Como deseja entrar?
-                </h1>
-                <p className="mb-6 text-sm text-muted-foreground">
-                  Este e-mail possui conta de professor e tambem esta associado
-                  a escolas como aluno.
-                </p>
-
-                <div className="space-y-2">
-                  <button
-                    onClick={() => selectCtx({ type: 'platform' })}
-                    className="flex w-full flex-col items-start rounded-xl border-2 border-primary bg-primary/5 px-4 py-3.5 text-left text-sm transition-colors hover:bg-primary/10"
-                  >
-                    <span className="font-semibold">
-                      Professor — conta da plataforma
-                    </span>
-                    <span className="mt-0.5 text-xs text-muted-foreground">
-                      Acesse o workspace para gerenciar sua escola
-                    </span>
-                  </button>
-
-                  {resolveResult!.tenants.map((t) => (
-                    <button
-                      key={t.slug}
-                      onClick={() =>
-                        selectCtx({
-                          type: 'tenant',
-                          slug: t.slug,
-                          name: t.name
-                        })
-                      }
-                      className="flex w-full flex-col items-start rounded-xl border px-4 py-3.5 text-left text-sm transition-colors hover:bg-accent"
-                    >
-                      <span className="font-semibold">Aluno — {t.name}</span>
-                      <span className="mt-0.5 text-xs text-muted-foreground">
                         /t/{t.slug}
                       </span>
                     </button>

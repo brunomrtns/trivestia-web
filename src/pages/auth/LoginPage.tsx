@@ -33,11 +33,18 @@ export default function LoginPage() {
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // E-mail pode vir pré-preenchido via query param (?email=...) quando
+  // o usuário passa pelo GlobalLoginPage
+  const prefilledEmail = searchParams.get('email') ?? '';
+
   const {
     register,
     handleSubmit,
     formState: { errors }
-  } = useForm<FormData>({ resolver: zodResolver(schema) });
+  } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: { email: prefilledEmail, password: '' }
+  });
 
   const slug = tenantSlug ?? '';
   const base = tenantSlug ? `/t/${tenantSlug}` : '';
@@ -80,18 +87,33 @@ export default function LoginPage() {
           <label className="mb-1.5 block text-sm font-medium" htmlFor="email">
             E-mail
           </label>
-          <input
-            id="email"
-            type="email"
-            autoComplete="email"
-            placeholder="voce@email.com"
-            className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm outline-none ring-offset-background transition focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50"
-            {...register('email')}
-          />
-          {errors.email && (
-            <p className="mt-1 text-xs text-destructive">
-              {errors.email.message}
-            </p>
+          {prefilledEmail ? (
+            // E-mail pré-preenchido pelo GlobalLoginPage — exibe bloqueado
+            <div className="flex items-center justify-between rounded-lg border bg-muted/40 px-4 py-2.5 text-sm">
+              <span>{prefilledEmail}</span>
+              <a
+                href="/login"
+                className="text-xs text-muted-foreground hover:text-foreground hover:underline"
+              >
+                Trocar
+              </a>
+            </div>
+          ) : (
+            <>
+              <input
+                id="email"
+                type="email"
+                autoComplete="email"
+                placeholder="voce@email.com"
+                className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm outline-none ring-offset-background transition focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50"
+                {...register('email')}
+              />
+              {errors.email && (
+                <p className="mt-1 text-xs text-destructive">
+                  {errors.email.message}
+                </p>
+              )}
+            </>
           )}
         </div>
 
