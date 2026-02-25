@@ -1,6 +1,7 @@
 import { Menu, LogOut, User as UserIcon } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/auth.store';
+import { useTenant } from '@/hooks/useTenant';
 
 interface TopbarProps {
   onMenuClick: () => void;
@@ -9,11 +10,20 @@ interface TopbarProps {
 export function Topbar({ onMenuClick }: TopbarProps) {
   const { user, logout } = useAuthStore();
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
+  const { tenant } = useTenant(); // usa cache do React Query — sem chamada extra
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
-    navigate(tenantSlug ? `/t/${tenantSlug}/login` : '/login');
+    if (!tenantSlug) {
+      navigate('/login');
+      return;
+    }
+    // Passa o nome da escola para que a LoginPage mostre o badge imediatamente
+    const schoolParam = tenant?.name
+      ? `?school=${encodeURIComponent(tenant.name)}`
+      : '';
+    navigate(`/t/${tenantSlug}/login${schoolParam}`);
   };
 
   return (

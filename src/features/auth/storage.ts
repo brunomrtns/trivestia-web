@@ -5,7 +5,9 @@ const KEYS = {
   token: '@tm:token',
   refreshToken: '@tm:refreshToken',
   user: '@tm:user',
-  lastTenantSlug: '@tm:lastTenantSlug'
+  lastTenantSlug: '@tm:lastTenantSlug',
+  /** Slug do tenant onde o user está autenticado. Definido só no login. */
+  authSlug: '@tm:authSlug'
 } as const;
 
 export const authStorage = {
@@ -27,11 +29,18 @@ export const authStorage = {
   setLastTenantSlug: (slug: string): void =>
     localStorage.setItem(KEYS.lastTenantSlug, slug),
 
+  /** Slug do tenant autenticado — fonte de verdade para os guards. */
+  getAuthSlug: (): string | null => localStorage.getItem(KEYS.authSlug),
+
+  setAuthSlug: (slug: string): void =>
+    localStorage.setItem(KEYS.authSlug, slug),
+
   clearSession: (): void => {
     // Chamadas separadas — localStorage.removeItem só aceita 1 chave por vez
     localStorage.removeItem(KEYS.token);
     localStorage.removeItem(KEYS.refreshToken);
     localStorage.removeItem(KEYS.user);
-    // lastTenantSlug FICA -- para redirecionar ao último tenant
+    localStorage.removeItem(KEYS.authSlug); // limpa o tenant autenticado
+    // lastTenantSlug FICA -- para redirecionar ao último tenant visitado
   }
 };

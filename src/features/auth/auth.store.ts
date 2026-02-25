@@ -28,12 +28,15 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setAuth: (user, token, refreshToken, tenantSlug) => {
     authStorage.setSession(token, refreshToken, JSON.stringify(user));
-    if (tenantSlug) authStorage.setLastTenantSlug(tenantSlug);
+    if (tenantSlug) {
+      authStorage.setLastTenantSlug(tenantSlug);
+      authStorage.setAuthSlug(tenantSlug); // slug de autenticação — imune a navegação
+    }
     set({
       user,
       token,
       isAuthenticated: true,
-      tenantSlug: tenantSlug ?? authStorage.getLastTenantSlug()
+      tenantSlug: tenantSlug ?? authStorage.getAuthSlug() ?? authStorage.getLastTenantSlug()
     });
   },
 
@@ -46,7 +49,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   loadSession: () => {
     const token = authStorage.getToken();
     const userStr = authStorage.getUser();
-    const slug = authStorage.getLastTenantSlug();
+    // authSlug é definido apenas no login e nunca sobrescrito por navegação
+    const slug = authStorage.getAuthSlug() ?? authStorage.getLastTenantSlug();
     if (token && userStr) {
       try {
         const user: User = JSON.parse(userStr);

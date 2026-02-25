@@ -16,7 +16,10 @@ export function TenantPublicLayout() {
 
   const handleLogout = () => {
     logout();
-    navigate(`${base}/login`);
+    const schoolParam = tenant?.name
+      ? `?school=${encodeURIComponent(tenant.name)}`
+      : '';
+    navigate(`${base}/login${schoolParam}`);
   };
 
   return (

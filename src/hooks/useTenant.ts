@@ -4,6 +4,7 @@ import { apiTenant } from '@/services/api/apiTenant';
 import type { TenantPublicProfile } from '@/types/api';
 import { useEffect } from 'react';
 import { authStorage } from '@/features/auth/storage';
+import { useAuthStore } from '@/features/auth/auth.store';
 
 /**
  * Hook que le :tenantSlug dos params e carrega o perfil publico do tenant.
@@ -39,12 +40,16 @@ export function useTenant() {
     };
   }, [query.data?.themeJson]);
 
-  // Salvar ultimo slug
+  // Salvar ultimo slug — mas NÃO sobrescrever quando o user está logado em outro tenant
+  const { isAuthenticated, tenantSlug: authTenantSlug } = useAuthStore();
   useEffect(() => {
     if (tenantSlug) {
-      authStorage.setLastTenantSlug(tenantSlug);
+      // Só persiste se: não está autenticado, ou o tenant da URL é o mesmo do login
+      if (!isAuthenticated || authTenantSlug === tenantSlug) {
+        authStorage.setLastTenantSlug(tenantSlug);
+      }
     }
-  }, [tenantSlug]);
+  }, [tenantSlug, isAuthenticated, authTenantSlug]);
 
   return {
     slug: tenantSlug ?? '',
