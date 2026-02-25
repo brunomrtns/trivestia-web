@@ -275,7 +275,7 @@ export function useSimEngine({
       if (!engineRef.current) return;
       const candleIndex = state.visibleCount - 1;
       engineRef.current.processEvent(
-        { type: 'CANCEL_ORDER', orderId },
+        { type: 'CANCEL_ORDER', orderId, candleIndex },
         candleIndex
       );
       const newState = engineRef.current.getState();

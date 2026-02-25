@@ -1,3 +1,4 @@
+import type React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   BookOpen,
@@ -14,19 +15,26 @@ import {
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/features/auth/auth.store';
 
+interface NavLink {
+  to: string;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  alsoMatch?: string[];
+}
+
 interface SidebarProps {
   collapsed: boolean;
   onCollapse: () => void;
 }
 
-const studentLinks = [
+const studentLinks: NavLink[] = [
   { to: '/app/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/app/courses', icon: GraduationCap, label: 'Cursos', alsoMatch: ['/app/lessons'] },
   { to: '/app/lab', icon: TrendingUp, label: 'Laboratório', alsoMatch: ['/app/activity'] },
   { to: '/app/progress', icon: BarChart3, label: 'Progresso' }
 ];
 
-const adminLinks = [
+const adminLinks: NavLink[] = [
   { to: '/admin/courses', icon: Settings, label: 'Gerenciar Cursos' },
   { to: '/admin/users', icon: Users, label: 'Usuários' }
 ];

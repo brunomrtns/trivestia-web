@@ -2,7 +2,7 @@
 
 // ─── Re-exports sim-core ──────────────────────────────────────────────────────
 
-export type {
+import type {
   Candle,
   CandleConfig,
   ExecutionConfig,
@@ -19,6 +19,24 @@ export type {
   Position,
   SimEvent
 } from '@trivestia/sim-core';
+
+export type {
+  Candle,
+  CandleConfig,
+  ExecutionConfig,
+  ScoringConfig,
+  ScoreResult,
+  SimulationResult,
+  SimulationState,
+  ScenarioPayload,
+  ScenarioConfig,
+  OrderRequest,
+  OrderSide,
+  OrderType,
+  Fill,
+  Position,
+  SimEvent
+};
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
