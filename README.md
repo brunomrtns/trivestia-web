@@ -9,6 +9,7 @@
 O Trivestia é uma plataforma de **educação financeira voltada para investidores**. Este web app é o espelho do app mobile (`trivestia-app`) no navegador, com a mesma hierarquia de conteúdo (**Curso → Módulo → Aula → Atividade → Questão**) e os mesmos seis tipos de atividade. A identidade visual usa um tema escuro premium com a paleta "Precision Learning".
 
 O app tem **três camadas de acesso**:
+
 - **Pública** (`/`, `/courses`, `/courses/:id`) — qualquer visitante
 - **Aluno autenticado** (`/app/*`) — estudar, responder, ver progresso
 - **Administrador** (`/admin/*`) — gerenciar cursos, aulas, questões e usuários
@@ -17,23 +18,23 @@ O app tem **três camadas de acesso**:
 
 ## Stack Técnica
 
-| Camada | Tecnologia |
-|---|---|
-| Framework | React 18.3 |
-| Linguagem | TypeScript 5.7 |
-| Build tool | Vite 6.2 |
-| Estilo | TailwindCSS 3.4 (CSS variables + dark mode via `class`) |
-| Componentes | Radix UI primitives (padrão shadcn/ui) |
-| Roteamento | React Router v6 (`createBrowserRouter`, lazy loading) |
-| Estado global | Zustand 4.5 |
-| Cache e fetching | TanStack React Query 5 (`staleTime: 5 min`) |
-| HTTP Client | Axios 1.7 (interceptor hardened com refresh queue) |
-| Formulários | React Hook Form 7.54 + Zod 3.24 |
-| Animações | Framer Motion 11.15 |
-| Drag-and-drop | @dnd-kit/core + @dnd-kit/sortable (atividades de ordenação) |
-| Ícones | Lucide React |
-| Toasts | Sonner |
-| Deploy | Vercel (SPA, rewrite `/*` → `index.html`) |
+| Camada           | Tecnologia                                                  |
+| ---------------- | ----------------------------------------------------------- |
+| Framework        | React 18.3                                                  |
+| Linguagem        | TypeScript 5.7                                              |
+| Build tool       | Vite 6.2                                                    |
+| Estilo           | TailwindCSS 3.4 (CSS variables + dark mode via `class`)     |
+| Componentes      | Radix UI primitives (padrão shadcn/ui)                      |
+| Roteamento       | React Router v6 (`createBrowserRouter`, lazy loading)       |
+| Estado global    | Zustand 4.5                                                 |
+| Cache e fetching | TanStack React Query 5 (`staleTime: 5 min`)                 |
+| HTTP Client      | Axios 1.7 (interceptor hardened com refresh queue)          |
+| Formulários      | React Hook Form 7.54 + Zod 3.24                             |
+| Animações        | Framer Motion 11.15                                         |
+| Drag-and-drop    | @dnd-kit/core + @dnd-kit/sortable (atividades de ordenação) |
+| Ícones           | Lucide React                                                |
+| Toasts           | Sonner                                                      |
+| Deploy           | Vercel (SPA, rewrite `/*` → `index.html`)                   |
 
 ---
 
@@ -126,7 +127,7 @@ src/
 O cliente em `services/api/client.ts` implementa o padrão de refresh com fila:
 
 1. **Request interceptor**: injeta `Authorization: Bearer <token>` em toda requisição.
-2. **Response interceptor (401)**: 
+2. **Response interceptor (401)**:
    - Ignora erros em rotas `/auth/` para evitar loop.
    - Define flag `_retry` para evitar tentativa dupla.
    - Usa lock `isRefreshing` e `failedQueue` para serializar múltiplas requisições simultâneas que expiraram.
@@ -139,16 +140,16 @@ O cliente em `services/api/client.ts` implementa o padrão de refresh com fila:
 
 O tema é uma extensão do Tailwind com CSS variables definidas em `globals.css`:
 
-| Token CSS | Cor | Uso |
-|---|---|---|
-| `--color-bg` | `#0C0E14` | Fundo principal |
-| `--color-surface` | `#141720` | Cards e painéis elevados |
-| `--color-brand` | `#4361EE` | Primária (Indigo) — CTAs, foco |
-| `--color-accent` | `#D4943A` | Secundária (Âmbar) — scores, destaques |
-| `--color-success` | `#2DC653` | Feedback positivo |
-| `--color-error` | `#E63946` | Feedback negativo |
-| `--color-text-primary` | `#F0F2F8` | Texto principal |
-| `--color-text-secondary` | `#8B8FA8` | Texto auxiliar e labels |
+| Token CSS                | Cor       | Uso                                    |
+| ------------------------ | --------- | -------------------------------------- |
+| `--color-bg`             | `#0C0E14` | Fundo principal                        |
+| `--color-surface`        | `#141720` | Cards e painéis elevados               |
+| `--color-brand`          | `#4361EE` | Primária (Indigo) — CTAs, foco         |
+| `--color-accent`         | `#D4943A` | Secundária (Âmbar) — scores, destaques |
+| `--color-success`        | `#2DC653` | Feedback positivo                      |
+| `--color-error`          | `#E63946` | Feedback negativo                      |
+| `--color-text-primary`   | `#F0F2F8` | Texto principal                        |
+| `--color-text-secondary` | `#8B8FA8` | Texto auxiliar e labels                |
 
 Dark mode configurado via estratégia `class` no `tailwind.config.js`. A classe `dark` é aplicada estaticamente na tag `<html>`.
 
@@ -158,14 +159,14 @@ Dark mode configurado via estratégia `class` no `tailwind.config.js`. A classe 
 
 O `QuestionRenderer` despacha para o renderer correto com base em `activity.type`:
 
-| `ActivityType` | Componente | Experiência |
-|---|---|---|
-| `MULTIPLE_CHOICE` | `MultipleChoiceRenderer` | Radio buttons — 1 opção correta |
-| `TRUE_FALSE` | `MultipleChoiceRenderer` | 2 opções: Verdadeiro / Falso |
-| `SCENARIO` | `MultipleChoiceRenderer` | Contexto narrativo + radio buttons |
-| `MULTIPLE_SELECT` | `MultipleSelectRenderer` | Checkboxes — N opções corretas |
-| `ORDERING` | `OrderingRenderer` | Drag-and-drop com `@dnd-kit` para reordenar |
-| `TEXT_INPUT` | `TextInputRenderer` | Campo de texto livre |
+| `ActivityType`    | Componente               | Experiência                                 |
+| ----------------- | ------------------------ | ------------------------------------------- |
+| `MULTIPLE_CHOICE` | `MultipleChoiceRenderer` | Radio buttons — 1 opção correta             |
+| `TRUE_FALSE`      | `MultipleChoiceRenderer` | 2 opções: Verdadeiro / Falso                |
+| `SCENARIO`        | `MultipleChoiceRenderer` | Contexto narrativo + radio buttons          |
+| `MULTIPLE_SELECT` | `MultipleSelectRenderer` | Checkboxes — N opções corretas              |
+| `ORDERING`        | `OrderingRenderer`       | Drag-and-drop com `@dnd-kit` para reordenar |
+| `TEXT_INPUT`      | `TextInputRenderer`      | Campo de texto livre                        |
 
 ---
 
@@ -179,6 +180,39 @@ X-Frame-Options: DENY
 X-Content-Type-Options: nosniff
 Referrer-Policy: strict-origin-when-cross-origin
 ```
+
+---
+
+## Dependência Local: `@trivestia/sim-core`
+
+A engine de simulação de trading (`@trivestia/sim-core`) **não está publicada no npm** — ela é uma biblioteca interna compartilhada entre o backend e o frontend. Para que o deploy na Vercel funcione, o pacote precisa estar presente **dentro do repositório**, em `packages/sim-core/`.
+
+```
+trivestia-web/
+└── packages/
+    └── sim-core/
+        ├── package.json
+        └── dist/          ← arquivos compilados (commitados no repositório)
+```
+
+O `package.json` aponta para ele com `"file:./packages/sim-core"`. O `.gitignore` tem uma exceção explícita (`!packages/sim-core/dist`) para que o `dist/` seja rastreado pelo git e esteja disponível na Vercel. Se você clonar o repositório do zero e a pasta `packages/sim-core` não existir (ou o `dist/` estiver vazio), siga os passos:
+
+```bash
+# 1. Compilar o sim-core (repositório irmão)
+cd ../sim-core
+npm run build
+
+# 2. Copiar o pacote compilado para dentro deste repositório
+mkdir -p ../trivestia-web/packages/sim-core
+cp package.json ../trivestia-web/packages/sim-core/
+cp -r dist/ ../trivestia-web/packages/sim-core/dist/
+
+# 3. Reinstalar dependências
+cd ../trivestia-web
+yarn install
+```
+
+> ⚠️ Sempre que o `sim-core` for atualizado, repita os passos acima e commite o `packages/sim-core/dist/` atualizado para manter o deploy da Vercel sincronizado.
 
 ---
 

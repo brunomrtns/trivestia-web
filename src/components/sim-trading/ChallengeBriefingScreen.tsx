@@ -101,9 +101,7 @@ export function ChallengeBriefingScreen({
               Simulação de Trading
             </span>
           </div>
-          <h1 className="text-2xl font-bold leading-tight">
-            {briefing.title}
-          </h1>
+          <h1 className="text-2xl font-bold leading-tight">{briefing.title}</h1>
           {briefing.description && (
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
               {briefing.description}
@@ -295,10 +293,7 @@ function ObjectiveCard({
 
   return (
     <div
-      className={cn(
-        'flex flex-col gap-2 rounded-lg border p-4',
-        borderColor
-      )}
+      className={cn('flex flex-col gap-2 rounded-lg border p-4', borderColor)}
     >
       {icon}
       <div>

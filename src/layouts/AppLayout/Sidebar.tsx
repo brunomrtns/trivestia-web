@@ -29,8 +29,18 @@ interface SidebarProps {
 
 const studentLinks: NavLink[] = [
   { to: '/app/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/app/courses', icon: GraduationCap, label: 'Cursos', alsoMatch: ['/app/lessons'] },
-  { to: '/app/lab', icon: TrendingUp, label: 'Laboratório', alsoMatch: ['/app/activity'] },
+  {
+    to: '/app/courses',
+    icon: GraduationCap,
+    label: 'Cursos',
+    alsoMatch: ['/app/lessons']
+  },
+  {
+    to: '/app/lab',
+    icon: TrendingUp,
+    label: 'Laboratório',
+    alsoMatch: ['/app/activity']
+  },
   { to: '/app/progress', icon: BarChart3, label: 'Progresso' }
 ];
 
@@ -68,7 +78,8 @@ export function Sidebar({ collapsed, onCollapse }: SidebarProps) {
             location.pathname.startsWith(to) ||
             (alsoMatch?.some((prefix) =>
               location.pathname.startsWith(prefix)
-            ) ?? false);
+            ) ??
+              false);
           return (
             <Link
               key={to}

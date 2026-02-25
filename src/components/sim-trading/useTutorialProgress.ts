@@ -64,7 +64,11 @@ function setState(next: Partial<TutorialState>) {
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useTutorialProgress() {
-  const state = useSyncExternalStore(subscribe, getSnapshot, () => DEFAULT_STATE);
+  const state = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    () => DEFAULT_STATE
+  );
 
   const setStep = useCallback((step: number) => {
     setState({ currentStep: step });
