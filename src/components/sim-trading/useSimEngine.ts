@@ -122,6 +122,7 @@ const INITIAL: SimEngineState = {
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
 interface UseSimEngineOptions {
+  slug: string;
   mode: 'CHALLENGE' | 'PRACTICE';
   activityId?: string; // CHALLENGE only
   practiceToken?: string; // PRACTICE only — passed after createScenario
@@ -132,6 +133,7 @@ interface UseSimEngineOptions {
 }
 
 export function useSimEngine({
+  slug,
   mode,
   activityId,
   practiceToken,
@@ -147,7 +149,7 @@ export function useSimEngine({
   useEffect(() => {
     if (mode === 'CHALLENGE' && activityId) {
       simulationEndpoints
-        .getChallengeScenario(activityId)
+        .getChallengeScenario(slug, activityId)
         .then((scenario) => {
           const eng = new SimulationEngine(
             scenario.candles,
@@ -319,14 +321,14 @@ export function useSimEngine({
 
     try {
       if (mode === 'CHALLENGE') {
-        const res = await simulationEndpoints.submitChallenge({
+        const res = await simulationEndpoints.submitChallenge(slug, {
           scenarioToken: state.token,
           events: state.events,
           clientStateHash
         });
         dispatch({ type: 'SUBMITTED', submitResult: res });
       } else {
-        const res = await simulationEndpoints.submitPractice({
+        const res = await simulationEndpoints.submitPractice(slug, {
           scenarioToken: state.token,
           events: state.events,
           clientStateHash

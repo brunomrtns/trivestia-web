@@ -1,4 +1,4 @@
-import { apiClient } from '../api/client';
+import { apiTenant } from '../api/apiTenant';
 import type {
   LessonTimelineDTO,
   LessonStepDTO,
@@ -7,48 +7,49 @@ import type {
   ReorderStepsDTO
 } from '@/types/api';
 
-// ─── Student (Bearer) ────────────────────────────────────────────────────────
-
 export const stepsEndpoints = {
-  /** GET /lessons/:lessonId/timeline */
-  getTimeline: (lessonId: string) =>
-    apiClient
+  /** GET /t/:slug/lessons/:lessonId/timeline */
+  getTimeline: (slug: string, lessonId: string) =>
+    apiTenant(slug)
       .get<LessonTimelineDTO>(`/lessons/${lessonId}/timeline`)
       .then((r) => r.data),
 
-  /** POST /lessons/:lessonId/steps/:stepId/view */
-  markViewed: (lessonId: string, stepId: string) =>
-    apiClient
+  /** POST /t/:slug/lessons/:lessonId/steps/:stepId/view */
+  markViewed: (slug: string, lessonId: string, stepId: string) =>
+    apiTenant(slug)
       .post<{ success: boolean }>(`/lessons/${lessonId}/steps/${stepId}/view`)
       .then((r) => r.data),
 
-  // ─── Admin (ADMIN Bearer) ──────────────────────────────────────────────────
-
-  /** POST /lessons/:lessonId/steps */
-  createStep: (lessonId: string, data: CreateStepDTO) =>
-    apiClient
+  /** POST /t/:slug/lessons/:lessonId/steps */
+  createStep: (slug: string, lessonId: string, data: CreateStepDTO) =>
+    apiTenant(slug)
       .post<LessonStepDTO>(`/lessons/${lessonId}/steps`, data)
       .then((r) => r.data),
 
-  /** PATCH /lessons/:lessonId/steps/:stepId */
-  updateStep: (lessonId: string, stepId: string, data: UpdateStepDTO) =>
-    apiClient
+  /** PATCH /t/:slug/lessons/:lessonId/steps/:stepId */
+  updateStep: (
+    slug: string,
+    lessonId: string,
+    stepId: string,
+    data: UpdateStepDTO
+  ) =>
+    apiTenant(slug)
       .patch<LessonStepDTO>(`/lessons/${lessonId}/steps/${stepId}`, data)
       .then((r) => r.data),
 
-  /** DELETE /lessons/:lessonId/steps/:stepId */
-  deleteStep: (lessonId: string, stepId: string) =>
-    apiClient.delete(`/lessons/${lessonId}/steps/${stepId}`),
+  /** DELETE /t/:slug/lessons/:lessonId/steps/:stepId */
+  deleteStep: (slug: string, lessonId: string, stepId: string) =>
+    apiTenant(slug).delete(`/lessons/${lessonId}/steps/${stepId}`),
 
-  /** PATCH /lessons/:lessonId/steps/reorder */
-  reorderSteps: (lessonId: string, data: ReorderStepsDTO) =>
-    apiClient
+  /** PATCH /t/:slug/lessons/:lessonId/steps/reorder */
+  reorderSteps: (slug: string, lessonId: string, data: ReorderStepsDTO) =>
+    apiTenant(slug)
       .patch<{ success: boolean }>(`/lessons/${lessonId}/steps/reorder`, data)
       .then((r) => r.data),
 
-  /** POST /lessons/:lessonId/steps/generate */
-  generateSteps: (lessonId: string) =>
-    apiClient
+  /** POST /t/:slug/lessons/:lessonId/steps/generate */
+  generateSteps: (slug: string, lessonId: string) =>
+    apiTenant(slug)
       .post<LessonStepDTO[]>(`/lessons/${lessonId}/steps/generate`)
       .then((r) => r.data)
 };

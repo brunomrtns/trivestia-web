@@ -7,6 +7,7 @@ import { LessonTimeline } from '@/components/learning/LessonTimeline';
 import { StepPlayer } from '@/components/learning/StepPlayer';
 
 interface CourseInlineLessonPlayerProps {
+  slug: string;
   lessonId: string;
   /** If a specific stepId should be focused on mount */
   initialStepId?: string;
@@ -15,6 +16,7 @@ interface CourseInlineLessonPlayerProps {
 }
 
 export function CourseInlineLessonPlayer({
+  slug,
   lessonId,
   initialStepId,
   onLessonComplete
@@ -23,8 +25,8 @@ export function CourseInlineLessonPlayer({
   const [currentStep, setCurrentStep] = useState(0);
 
   const { data: timeline, isLoading } = useQuery({
-    queryKey: ['timeline', lessonId],
-    queryFn: () => stepsEndpoints.getTimeline(lessonId),
+    queryKey: ['timeline', slug, lessonId],
+    queryFn: () => stepsEndpoints.getTimeline(slug, lessonId),
     staleTime: 2 * 60 * 1000
   });
 
@@ -42,8 +44,8 @@ export function CourseInlineLessonPlayer({
   useEffect(() => {
     if (!activeStep || activeStep.isViewed || activeStep.isVirtual) return;
 
-    stepsEndpoints.markViewed(lessonId, activeStep.id).then(() => {
-      queryClient.invalidateQueries({ queryKey: ['timeline', lessonId] });
+    stepsEndpoints.markViewed(slug, lessonId, activeStep.id).then(() => {
+      queryClient.invalidateQueries({ queryKey: ['timeline', slug, lessonId] });
     });
   }, [activeStep, lessonId, queryClient]);
 
@@ -99,6 +101,7 @@ export function CourseInlineLessonPlayer({
           {activeStep && (
             <StepPlayer
               key={activeStep.id}
+              slug={slug}
               step={activeStep}
               lessonId={lessonId}
             />

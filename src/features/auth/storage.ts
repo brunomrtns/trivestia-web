@@ -4,7 +4,8 @@
 const KEYS = {
   token: '@tm:token',
   refreshToken: '@tm:refreshToken',
-  user: '@tm:user'
+  user: '@tm:user',
+  lastTenantSlug: '@tm:lastTenantSlug'
 } as const;
 
 export const authStorage = {
@@ -20,10 +21,17 @@ export const authStorage = {
 
   getUser: (): string | null => localStorage.getItem(KEYS.user),
 
+  getLastTenantSlug: (): string | null =>
+    localStorage.getItem(KEYS.lastTenantSlug),
+
+  setLastTenantSlug: (slug: string): void =>
+    localStorage.setItem(KEYS.lastTenantSlug, slug),
+
   clearSession: (): void => {
     // Chamadas separadas — localStorage.removeItem só aceita 1 chave por vez
     localStorage.removeItem(KEYS.token);
     localStorage.removeItem(KEYS.refreshToken);
     localStorage.removeItem(KEYS.user);
+    // lastTenantSlug FICA -- para redirecionar ao último tenant
   }
 };

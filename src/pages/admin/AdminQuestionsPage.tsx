@@ -62,6 +62,8 @@ const questionSchema = z.object({
   difficulty: z.number().min(1).max(5).default(3),
   weight: z.number().min(1).default(1),
   options: z.array(optionSchema),
+  // Indice da opcao correta (single-select). Transformado em isCorrect no submit.
+  correctIndex: z.coerce.number().optional(),
   metadata: z.object({ jsonData: z.record(z.unknown()) }).optional()
 });
 
@@ -79,6 +81,7 @@ function QuestionForm({
   loading: boolean;
 }) {
   const showOptions = activityType !== 'TEXT_INPUT';
+  const isTrueFalse = activityType === 'TRUE_FALSE';
 
   const {
     register,
@@ -90,7 +93,13 @@ function QuestionForm({
     defaultValues: {
       difficulty: 3,
       weight: 1,
-      options: showOptions
+      correctIndex: undefined,
+      options: isTrueFalse
+        ? [
+            { text: 'Verdadeiro', isCorrect: false, order: 0 },
+            { text: 'Falso', isCorrect: false, order: 1 }
+          ]
+        : showOptions
         ? [
             { text: '', isCorrect: false, order: 0 },
             { text: '', isCorrect: false, order: 1 }
@@ -110,9 +119,23 @@ function QuestionForm({
     activityType
   );
 
+  // Transforma correctIndex -> isCorrect antes de chamar onSave
+  const handleFormSubmit = async (data: QuestionFormData) => {
+    const processedData = {
+      ...data,
+      options: isSingleSelect
+        ? data.options.map((opt, i) => ({
+            ...opt,
+            isCorrect: i === Number(data.correctIndex)
+          }))
+        : data.options
+    };
+    await onSave(processedData);
+  };
+
   return (
     <form
-      onSubmit={handleSubmit(onSave)}
+      onSubmit={handleSubmit(handleFormSubmit)}
       className="space-y-5 rounded-2xl border bg-card p-6 shadow-sm"
     >
       <div>
@@ -178,31 +201,51 @@ function QuestionForm({
                 )
               </span>
             </label>
-            <button
-              type="button"
-              onClick={() =>
-                append({ text: '', isCorrect: false, order: fields.length })
-              }
-              className="flex items-center gap-1 rounded-lg border px-3 py-1 text-xs font-medium hover:bg-accent"
-            >
-              <Plus className="h-3 w-3" />
-              Adicionar
-            </button>
+            {/* TRUE_FALSE tem opcoes fixas — nao permite adicionar */}
+            {!isTrueFalse && (
+              <button
+                type="button"
+                onClick={() =>
+                  append({ text: '', isCorrect: false, order: fields.length })
+                }
+                className="flex items-center gap-1 rounded-lg border px-3 py-1 text-xs font-medium hover:bg-accent"
+              >
+                <Plus className="h-3 w-3" />
+                Adicionar
+              </button>
+            )}
           </div>
 
           {fields.map((field, index) => (
             <div key={field.id} className="flex items-center gap-3">
-              <input
-                type={isSingleSelect ? 'radio' : 'checkbox'}
-                {...register(`options.${index}.isCorrect`)}
-                className="h-4 w-4 accent-primary"
-              />
+              {isSingleSelect ? (
+                // Radio em grupo unico: todos compartilham name='correctIndex'
+                // Assim o browser garante selecao exclusiva
+                <input
+                  type="radio"
+                  value={String(index)}
+                  {...register('correctIndex')}
+                  className="h-4 w-4 accent-primary"
+                />
+              ) : (
+                // Checkbox individual por opcao
+                <input
+                  type="checkbox"
+                  {...register(`options.${index}.isCorrect`)}
+                  className="h-4 w-4 accent-primary"
+                />
+              )}
               <input
                 placeholder={`Opção ${index + 1}`}
-                className="flex-1 rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+                // TRUE_FALSE: texto fixo, nao editavel
+                readOnly={isTrueFalse}
+                className={`flex-1 rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring ${
+                  isTrueFalse ? 'cursor-default opacity-70' : ''
+                }`}
                 {...register(`options.${index}.text`)}
               />
-              {fields.length > 1 && (
+              {/* TRUE_FALSE: sem remocao; outros: so se tiver mais de 2 */}
+              {!isTrueFalse && fields.length > 2 && (
                 <button
                   type="button"
                   onClick={() => remove(index)}
@@ -238,34 +281,36 @@ function QuestionForm({
 }
 
 export default function AdminQuestionsPage() {
-  const { lessonId, activityId } = useParams<{
+  const { lessonId, activityId, tenantSlug } = useParams<{
     lessonId: string;
     activityId: string;
+    tenantSlug: string;
   }>();
+  const slug = tenantSlug ?? '';
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [adding, setAdding] = useState(false);
 
   // Busca a atividade para obter o tipo real
   const { data: activity, isLoading: loadingActivity } = useQuery({
-    queryKey: ['activity', lessonId, activityId],
-    queryFn: () => learningEndpoints.getActivity(lessonId!, activityId!),
+    queryKey: ['activity', slug, lessonId, activityId],
+    queryFn: () => learningEndpoints.getActivity(slug, lessonId!, activityId!),
     enabled: !!lessonId && !!activityId
   });
 
   // Para recuperar o tipo da activity, precisamos buscá-la via um endpoint de listagem
   // Aqui buscamos as questions diretamente — o activityType virá junto
   const { data: questions, isLoading } = useQuery({
-    queryKey: ['admin-questions', activityId],
-    queryFn: () => adminEndpoints.getQuestions(activityId!),
+    queryKey: ['admin-questions', slug, activityId],
+    queryFn: () => adminEndpoints.getQuestions(slug, activityId!),
     enabled: !!activityId
   });
 
   const createMut = useMutation({
     mutationFn: (data: QuestionFormData) =>
-      adminEndpoints.createQuestion(activityId!, data),
+      adminEndpoints.createQuestion(slug, activityId!, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin-questions', activityId] });
+      qc.invalidateQueries({ queryKey: ['admin-questions', slug, activityId] });
       setAdding(false);
       toast.success('Questão criada!');
     },
@@ -273,9 +318,10 @@ export default function AdminQuestionsPage() {
   });
 
   const deleteMut = useMutation({
-    mutationFn: (id: string) => adminEndpoints.deleteQuestion(activityId!, id),
+    mutationFn: (id: string) =>
+      adminEndpoints.deleteQuestion(slug, activityId!, id),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin-questions', activityId] });
+      qc.invalidateQueries({ queryKey: ['admin-questions', slug, activityId] });
       toast.success('Questão excluída.');
     },
     onError: () => toast.error('Erro ao excluir questão.')

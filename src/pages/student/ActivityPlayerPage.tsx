@@ -22,10 +22,12 @@ import { getActivityTypeLabel, formatPercentage } from '@/lib/utils';
 import type { Answer, SubmissionResult } from '@/types/api';
 
 export default function ActivityPlayerPage() {
-  const { lessonId, activityId } = useParams<{
+  const { lessonId, activityId, tenantSlug } = useParams<{
     lessonId?: string;
     activityId: string;
+    tenantSlug: string;
   }>();
+  const slug = tenantSlug ?? '';
   const navigate = useNavigate();
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -34,14 +36,17 @@ export default function ActivityPlayerPage() {
 
   // GET /lessons/:lessonId/activities/:activityId — Bearer ANY
   const { data: activity, isLoading } = useQuery({
-    queryKey: ['activity', lessonId, activityId],
-    queryFn: () => learningEndpoints.getActivity(lessonId!, activityId!),
+    queryKey: ['activity', slug, lessonId, activityId],
+    queryFn: () => learningEndpoints.getActivity(slug, lessonId!, activityId!),
     enabled: !!lessonId && !!activityId
   });
 
   // POST /submissions — Bearer ANY
   const submitMutation = useMutation({
-    mutationFn: progressEndpoints.submit,
+    mutationFn: (data: {
+      activityId: string;
+      responses: { questionId: string; answer: Answer }[];
+    }) => progressEndpoints.submit(slug, data),
     onSuccess: (data) => {
       setResult(data);
       toast.success('Atividade concluída!');
@@ -63,6 +68,7 @@ export default function ActivityPlayerPage() {
   if (activity.type === 'SIM_TRADING_CHALLENGE') {
     return (
       <SimTradingChallengeFlow
+        slug={slug}
         activityId={activityId!}
         onGoBack={() => navigate(-1)}
       />
@@ -171,7 +177,7 @@ export default function ActivityPlayerPage() {
             Tentar novamente
           </button>
           <button
-            onClick={() => navigate('/app/dashboard')}
+            onClick={() => navigate(`/t/${slug}/app/dashboard`)}
             className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
           >
             Ir ao Dashboard
@@ -285,9 +291,11 @@ export default function ActivityPlayerPage() {
 type ChallengePhase = 'BRIEFING' | 'TERMINAL';
 
 function SimTradingChallengeFlow({
+  slug,
   activityId,
   onGoBack
 }: {
+  slug: string;
   activityId: string;
   onGoBack: () => void;
 }) {
@@ -301,8 +309,8 @@ function SimTradingChallengeFlow({
     isLoading,
     error
   } = useQuery({
-    queryKey: ['challenge-briefing', activityId],
-    queryFn: () => simulationEndpoints.getChallengeBriefing(activityId),
+    queryKey: ['challenge-briefing', slug, activityId],
+    queryFn: () => simulationEndpoints.getChallengeBriefing(slug, activityId),
     retry: false
   });
 
@@ -360,6 +368,7 @@ function SimTradingChallengeFlow({
   // PHASE: TERMINAL
   return (
     <SimTradingTerminal
+      slug={slug}
       mode="CHALLENGE"
       activityId={activityId}
       onComplete={onGoBack}

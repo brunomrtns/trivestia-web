@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   BarChart3,
@@ -20,10 +21,13 @@ function StatusIcon({ status }: { status: ProgressStatus }) {
 }
 
 export default function ProgressPage() {
+  const { tenantSlug } = useParams<{ tenantSlug: string }>();
+  const slug = tenantSlug ?? '';
+
   // GET /progress — Bearer ANY
   const { data: progress, isLoading } = useQuery({
-    queryKey: ['progress'],
-    queryFn: progressEndpoints.getProgress
+    queryKey: ['progress', slug],
+    queryFn: () => progressEndpoints.getProgress(slug)
   });
 
   const completed = progress?.filter((p) => p.status === 'COMPLETED') ?? [];

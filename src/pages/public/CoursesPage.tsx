@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { BookOpen, ChevronRight, Layers } from 'lucide-react';
@@ -17,8 +17,13 @@ function CourseCardSkeleton() {
 
 export default function CoursesPage() {
   const location = useLocation();
-  // Quando montado dentro do AppLayout (/app/courses), os links mantêm o contexto autenticado
-  const base = location.pathname.startsWith('/app') ? '/app' : '';
+  const { tenantSlug } = useParams<{ tenantSlug: string }>();
+  const slug = tenantSlug ?? '';
+
+  // Quando montado dentro do AppLayout (/t/:slug/app/courses), os links mantêm o contexto autenticado
+  const base = location.pathname.includes('/app')
+    ? `/t/${slug}/app`
+    : `/t/${slug}`;
 
   // GET /courses — público
   const {
@@ -26,8 +31,8 @@ export default function CoursesPage() {
     isLoading,
     isError
   } = useQuery({
-    queryKey: ['courses'],
-    queryFn: learningEndpoints.getCourses
+    queryKey: ['courses', slug],
+    queryFn: () => learningEndpoints.getCourses(slug)
   });
 
   return (

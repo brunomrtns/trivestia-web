@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -99,21 +99,23 @@ function CourseForm({ initial, onSave, onCancel, loading }: CourseFormProps) {
 }
 
 export default function AdminCoursesPage() {
+  const { tenantSlug } = useParams<{ tenantSlug: string }>();
+  const slug = tenantSlug ?? '';
   const qc = useQueryClient();
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<Course | null>(null);
 
   // GET /courses — público
   const { data: courses, isLoading } = useQuery({
-    queryKey: ['courses'],
-    queryFn: learningEndpoints.getCourses
+    queryKey: ['courses', slug],
+    queryFn: () => learningEndpoints.getCourses(slug)
   });
 
   // POST /courses — Bearer ADMIN
   const createMut = useMutation({
-    mutationFn: (data: FormData) => adminEndpoints.createCourse(data),
+    mutationFn: (data: FormData) => adminEndpoints.createCourse(slug, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['courses'] });
+      qc.invalidateQueries({ queryKey: ['courses', slug] });
       setCreating(false);
       toast.success('Curso criado!');
     },
@@ -123,9 +125,9 @@ export default function AdminCoursesPage() {
   // PATCH /courses/:id — Bearer ADMIN
   const updateMut = useMutation({
     mutationFn: ({ id, data }: { id: string; data: FormData }) =>
-      adminEndpoints.updateCourse(id, data),
+      adminEndpoints.updateCourse(slug, id, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['courses'] });
+      qc.invalidateQueries({ queryKey: ['courses', slug] });
       setEditing(null);
       toast.success('Curso atualizado!');
     },
@@ -134,9 +136,9 @@ export default function AdminCoursesPage() {
 
   // DELETE /courses/:id — Bearer ADMIN
   const deleteMut = useMutation({
-    mutationFn: (id: string) => adminEndpoints.deleteCourse(id),
+    mutationFn: (id: string) => adminEndpoints.deleteCourse(slug, id),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['courses'] });
+      qc.invalidateQueries({ queryKey: ['courses', slug] });
       toast.success('Curso excluído.');
     },
     onError: () => toast.error('Erro ao excluir curso.')
@@ -207,7 +209,7 @@ export default function AdminCoursesPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Link
-                      to={`/admin/courses/${course.id}/lessons`}
+                      to={`/t/${slug}/admin/courses/${course.id}/lessons`}
                       className="flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-2 text-xs font-semibold text-primary transition hover:bg-primary/20"
                       aria-label="Gerenciar módulos e aulas"
                     >

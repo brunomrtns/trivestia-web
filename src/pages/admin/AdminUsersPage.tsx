@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -111,15 +112,17 @@ function ConfirmRoleDialog({
 // ─── User Detail Modal ────────────────────────────────────────────────────────
 
 function UserDetailModal({
+  slug,
   userId,
   onClose
 }: {
+  slug: string;
   userId: string;
   onClose: () => void;
 }) {
   const { data, isLoading } = useQuery({
-    queryKey: ['admin-user-detail', userId],
-    queryFn: () => adminUsersEndpoints.getUser(userId)
+    queryKey: ['admin-user-detail', slug, userId],
+    queryFn: () => adminUsersEndpoints.getUser(slug, userId)
   });
 
   return (
@@ -239,6 +242,8 @@ function UserDetailModal({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function AdminUsersPage() {
+  const { tenantSlug } = useParams<{ tenantSlug: string }>();
+  const slug = tenantSlug ?? '';
   const currentUser = useAuthStore((s) => s.user);
   const qc = useQueryClient();
 
@@ -265,17 +270,19 @@ export default function AdminUsersPage() {
   }, [search, roleFilter]);
 
   const { data, isLoading, isFetching } = useQuery({
-    queryKey: ['admin-users', params],
-    queryFn: () => adminUsersEndpoints.listUsers(params),
+    queryKey: ['admin-users', slug, params],
+    queryFn: () => adminUsersEndpoints.listUsers(slug, params),
     placeholderData: (prev) => prev
   });
 
   const updateRoleMutation = useMutation({
     mutationFn: ({ id, role }: { id: string; role: Role }) =>
-      adminUsersEndpoints.updateRole(id, role),
+      adminUsersEndpoints.updateRole(slug, id, role),
     onSuccess: (updated) => {
-      qc.invalidateQueries({ queryKey: ['admin-users'] });
-      qc.invalidateQueries({ queryKey: ['admin-user-detail', updated.id] });
+      qc.invalidateQueries({ queryKey: ['admin-users', slug] });
+      qc.invalidateQueries({
+        queryKey: ['admin-user-detail', slug, updated.id]
+      });
       toast.success(
         updated.role === 'ADMIN'
           ? `${updated.name} foi promovido a Administrador.`
@@ -480,6 +487,7 @@ export default function AdminUsersPage() {
       <AnimatePresence>
         {detailUserId && (
           <UserDetailModal
+            slug={slug}
             userId={detailUserId}
             onClose={() => setDetailUserId(null)}
           />

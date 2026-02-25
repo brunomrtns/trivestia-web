@@ -21,6 +21,7 @@ import type { Candle, ScenarioPayload, OrderRequest } from '@/types/api';
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 interface SimTradingTerminalProps {
+  slug: string;
   mode: 'CHALLENGE' | 'PRACTICE';
   activityId?: string; // CHALLENGE
   practiceToken?: string; // PRACTICE
@@ -38,6 +39,7 @@ type BottomTab = 'orders' | 'fills' | 'metrics';
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function SimTradingTerminal({
+  slug,
   mode,
   activityId,
   practiceToken,
@@ -65,6 +67,7 @@ export function SimTradingTerminal({
   }, [externalHelpOpen]);
 
   const engine = useSimEngine({
+    slug,
     mode,
     activityId,
     practiceToken,

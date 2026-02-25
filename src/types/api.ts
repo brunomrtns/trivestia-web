@@ -40,7 +40,7 @@ export type {
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
-export type Role = 'ADMIN' | 'STUDENT';
+export type Role = 'SUPER_ADMIN' | 'OWNER' | 'ADMIN' | 'STUDENT';
 
 export type ActivityType =
   | 'MULTIPLE_CHOICE'
@@ -60,6 +60,39 @@ export type StepType =
   | 'CONTENT_VIDEO'
   | 'CONTENT_IMAGE'
   | 'ACTIVITY';
+
+// ─── Tenant ───────────────────────────────────────────────────────────────────
+
+export interface TenantPublicProfile {
+  id: string;
+  slug: string;
+  name: string;
+  bio: string | null;
+  logoUrl: string | null;
+  themeJson: Record<string, string> | null;
+}
+
+export interface CreateTenantPublicData {
+  name: string;
+  slug: string;
+  bio?: string;
+  ownerName: string;
+  ownerEmail: string;
+  ownerPassword: string;
+}
+
+export interface CreateTenantClaimData {
+  name: string;
+  slug: string;
+  bio?: string;
+}
+
+export interface TenantCreatedResponse {
+  tenant: { id: string; slug: string; name: string };
+  user: User;
+  token: string;
+  refreshToken: string;
+}
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
@@ -553,4 +586,133 @@ export interface PracticeHistoryResponse {
     total: number;
     pages: number;
   };
+}
+
+// ─── Super Admin Types ────────────────────────────────────────────────────────
+
+export interface SuperTenant {
+  id: string;
+  slug: string;
+  name: string;
+  bio: string | null;
+  logoUrl: string | null;
+  enabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+  _count: { users: number; courses: number };
+}
+
+export interface SuperTenantDetail extends SuperTenant {
+  themeJson: Record<string, string> | null;
+  users: { id: string; name: string; email: string; role: Role }[];
+}
+
+export interface PaginatedSuperTenants {
+  data: SuperTenant[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface CreateTenantSuperData {
+  name: string;
+  slug: string;
+  bio?: string;
+  enabled?: boolean;
+  ownerName?: string;
+  ownerEmail?: string;
+  ownerPassword?: string;
+}
+
+export interface UpdateTenantSuperData {
+  name?: string;
+  slug?: string;
+  bio?: string | null;
+  logoUrl?: string | null;
+  enabled?: boolean;
+}
+
+export interface SuperUser {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  tenantId: string;
+  createdAt: string;
+  lastLoginAt: string | null;
+  tenant: { slug: string; name: string };
+}
+
+export interface PaginatedSuperUsers {
+  data: SuperUser[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface ListSuperUsersParams {
+  search?: string;
+  role?: Role;
+  tenantId?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface ListSuperTenantsParams {
+  search?: string;
+  enabled?: 'true' | 'false';
+  page?: number;
+  pageSize?: number;
+}
+
+export interface PlatformStats {
+  tenants: { total: number; active: number };
+  users: number;
+  courses: number;
+}
+
+// ─── Platform Auth ────────────────────────────────────────────────────────────
+
+export type PlatformRole = 'SUPER_ADMIN' | 'DOMAIN_ADMIN';
+
+export interface PlatformUser {
+  id: string;
+  name: string;
+  email: string;
+  role: PlatformRole;
+  tenantId?: string | null;
+}
+
+export interface PlatformAuthResponse {
+  user: PlatformUser;
+  token: string;
+  refreshToken: string;
+}
+
+export interface ResolveEmailResponse {
+  platformAccount: boolean;
+  tenants: Array<{ slug: string; name: string }>;
+}
+
+export interface PlatformMeResponse {
+  user: PlatformUser;
+  hasSchool: boolean;
+  tenantSlug: string | null;
+  tenantName: string | null;
+}
+
+export interface CreatePlatformTenantData {
+  name: string;
+  slug: string;
+  bio?: string;
+}
+
+export interface PlatformTenantCreatedResponse {
+  tenant: { id: string; slug: string; name: string };
 }

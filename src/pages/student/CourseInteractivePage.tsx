@@ -9,7 +9,11 @@ import { CourseOutlineSidebar } from '@/components/learning/CourseOutlineSidebar
 import { CourseInlineLessonPlayer } from '@/components/learning/CourseInlineLessonPlayer';
 
 export default function CourseInteractivePage() {
-  const { courseId } = useParams<{ courseId: string }>();
+  const { courseId, tenantSlug } = useParams<{
+    courseId: string;
+    tenantSlug: string;
+  }>();
+  const slug = tenantSlug ?? '';
   const queryClient = useQueryClient();
 
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
@@ -17,11 +21,12 @@ export default function CourseInteractivePage() {
   const [initialStepId, setInitialStepId] = useState<string | undefined>();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // ── Query ────────────────────────────────────────────────────────────────
+  // ── Query ────────────────────────────────────────────────────────────────────────
 
   const { data, isLoading } = useQuery({
-    queryKey: ['course-interactive', courseId],
-    queryFn: () => courseInteractiveEndpoints.getCourseInteractive(courseId!),
+    queryKey: ['course-interactive', slug, courseId],
+    queryFn: () =>
+      courseInteractiveEndpoints.getCourseInteractive(slug, courseId!),
     enabled: !!courseId,
     staleTime: 5 * 60 * 1000
   });
@@ -56,7 +61,7 @@ export default function CourseInteractivePage() {
   const handleLessonComplete = useCallback(() => {
     // Refresh interactive data to get updated next
     queryClient.invalidateQueries({
-      queryKey: ['course-interactive', courseId]
+      queryKey: ['course-interactive', slug, courseId]
     });
 
     // Find the next lesson after the current one
@@ -106,7 +111,7 @@ export default function CourseInteractivePage() {
         <GraduationCap className="h-12 w-12 opacity-30" />
         <p>Curso não encontrado.</p>
         <Link
-          to="/app/courses"
+          to={`/t/${slug}/app/courses`}
           className="text-sm text-primary hover:underline"
         >
           Voltar aos cursos
@@ -121,7 +126,7 @@ export default function CourseInteractivePage() {
       <div className="shrink-0 border-b bg-background px-4 py-3 lg:px-6">
         <div className="flex items-center gap-3">
           <Link
-            to={`/app/courses/${courseId}`}
+            to={`/t/${slug}/app/courses/${courseId}`}
             className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -230,6 +235,7 @@ export default function CourseInteractivePage() {
                 animate={{ opacity: 1, y: 0 }}
               >
                 <CourseInlineLessonPlayer
+                  slug={slug}
                   lessonId={activeLessonId}
                   initialStepId={initialStepId}
                   onLessonComplete={handleLessonComplete}

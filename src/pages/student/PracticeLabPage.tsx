@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -33,6 +33,8 @@ const TIMEFRAMES = [
 type Phase = 'hub' | 'terminal';
 
 export default function PracticeLabPage() {
+  const { tenantSlug } = useParams<{ tenantSlug: string }>();
+  const slug = tenantSlug ?? '';
   const [phase, setPhase] = useState<Phase>('hub');
   const [practiceToken, setPracticeToken] = useState<string>('');
   const [practiceCandles, setPracticeCandles] = useState<Candle[]>([]);
@@ -59,7 +61,7 @@ export default function PracticeLabPage() {
   const onStart = async (data: ConfigForm) => {
     setLoading(true);
     try {
-      const res = await simulationEndpoints.createPracticeScenario(data);
+      const res = await simulationEndpoints.createPracticeScenario(slug, data);
       // Backend retorna { sessionId, candles, executionConfig, scenarioToken, maxEvents }
       // Montar ScenarioPayload para o hook
       const scenario: ScenarioPayload = {
@@ -83,6 +85,7 @@ export default function PracticeLabPage() {
   if (phase === 'terminal' && practiceToken && practiceScenario) {
     return (
       <SimTradingTerminal
+        slug={slug}
         mode="PRACTICE"
         practiceToken={practiceToken}
         practiceCandles={practiceCandles}
@@ -106,7 +109,7 @@ export default function PracticeLabPage() {
           </p>
         </div>
         <Link
-          to="/app/lab/history"
+          to={`/t/${slug}/app/lab/history`}
           className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition hover:bg-accent"
         >
           <History className="h-3.5 w-3.5" />

@@ -16,7 +16,11 @@ import { StepPlayer } from '@/components/learning/StepPlayer';
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function LessonPage() {
-  const { lessonId } = useParams<{ lessonId: string }>();
+  const { lessonId, tenantSlug } = useParams<{
+    lessonId: string;
+    tenantSlug: string;
+  }>();
+  const slug = tenantSlug ?? '';
   const location = useLocation();
   const queryClient = useQueryClient();
 
@@ -32,8 +36,8 @@ export default function LessonPage() {
   // ── Queries ──────────────────────────────────────────────────────────────
 
   const { data: timeline, isLoading } = useQuery({
-    queryKey: ['timeline', lessonId],
-    queryFn: () => stepsEndpoints.getTimeline(lessonId!),
+    queryKey: ['timeline', slug, lessonId],
+    queryFn: () => stepsEndpoints.getTimeline(slug, lessonId!),
     enabled: !!lessonId
   });
 
@@ -43,10 +47,10 @@ export default function LessonPage() {
     const step = timeline.steps[currentStep];
     if (!step || step.isViewed || step.isVirtual) return;
 
-    stepsEndpoints.markViewed(lessonId!, step.id).then(() => {
-      queryClient.invalidateQueries({ queryKey: ['timeline', lessonId] });
+    stepsEndpoints.markViewed(slug, lessonId!, step.id).then(() => {
+      queryClient.invalidateQueries({ queryKey: ['timeline', slug, lessonId] });
     });
-  }, [currentStep, timeline, lessonId, queryClient]);
+  }, [currentStep, timeline, lessonId, slug, queryClient]);
 
   // ── Derived ──────────────────────────────────────────────────────────────
 
@@ -60,7 +64,7 @@ export default function LessonPage() {
         <div className="flex items-center gap-2">
           {courseId ? (
             <Link
-              to={`/courses/${courseId}`}
+              to={`/t/${slug}/courses/${courseId}`}
               className="flex items-center gap-1 hover:text-foreground transition-colors"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -68,7 +72,7 @@ export default function LessonPage() {
             </Link>
           ) : (
             <Link
-              to="/courses"
+              to={`/t/${slug}/courses`}
               className="flex items-center gap-1 hover:text-foreground transition-colors"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -120,6 +124,7 @@ export default function LessonPage() {
                   {activeStep && (
                     <StepPlayer
                       key={activeStep.id}
+                      slug={slug}
                       step={activeStep}
                       lessonId={lessonId!}
                     />

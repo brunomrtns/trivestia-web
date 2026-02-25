@@ -4,11 +4,12 @@ import { ExternalLink, Play } from 'lucide-react';
 import type { LessonStepDTO } from '@/types/api';
 
 interface StepPlayerProps {
+  slug: string;
   step: LessonStepDTO;
   lessonId: string;
 }
 
-export function StepPlayer({ step, lessonId }: StepPlayerProps) {
+export function StepPlayer({ slug, step, lessonId }: StepPlayerProps) {
   const navigate = useNavigate();
   const content = step.content as Record<string, unknown>;
 
@@ -44,7 +45,7 @@ export function StepPlayer({ step, lessonId }: StepPlayerProps) {
           title={step.title}
           onOpen={() =>
             navigate(
-              `/app/lessons/${lessonId}/activities/${content.activityId}`
+              `/t/${slug}/app/lessons/${lessonId}/activities/${content.activityId}`
             )
           }
         />

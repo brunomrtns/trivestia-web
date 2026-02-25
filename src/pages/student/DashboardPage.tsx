@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   BookOpen,
@@ -12,20 +12,23 @@ import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { progressEndpoints } from '@/services/endpoints/progress.endpoints';
 import { useAuthStore } from '@/features/auth/auth.store';
 import { getProgressLabel, getProgressColor } from '@/lib/utils';
+import { tenantPath } from '@/lib/tenant';
 
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
+  const { tenantSlug } = useParams<{ tenantSlug: string }>();
+  const slug = tenantSlug ?? '';
 
   // GET /courses — público
   const { data: courses, isLoading: loadingCourses } = useQuery({
-    queryKey: ['courses'],
-    queryFn: learningEndpoints.getCourses
+    queryKey: ['courses', slug],
+    queryFn: () => learningEndpoints.getCourses(slug)
   });
 
   // GET /progress — Bearer ANY
   const { data: progress, isLoading: loadingProgress } = useQuery({
-    queryKey: ['progress'],
-    queryFn: progressEndpoints.getProgress
+    queryKey: ['progress', slug],
+    queryFn: () => progressEndpoints.getProgress(slug)
   });
 
   const completed =
@@ -105,7 +108,7 @@ export default function DashboardPage() {
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-bold">Cursos disponíveis</h2>
           <Link
-            to="/app/courses"
+            to={tenantPath(slug, '/app/courses')}
             className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
           >
             Ver todos <ChevronRight className="h-4 w-4" />
@@ -126,7 +129,7 @@ export default function DashboardPage() {
             {courses?.map((course) => (
               <Link
                 key={course.id}
-                to={`/app/courses/${course.id}`}
+                to={tenantPath(slug, `/app/courses/${course.id}`)}
                 className="group rounded-2xl border bg-card p-5 shadow-sm transition-all hover:shadow-md hover:border-primary/40"
               >
                 <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
@@ -150,7 +153,7 @@ export default function DashboardPage() {
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-bold">Atividade recente</h2>
             <Link
-              to="/app/progress"
+              to={tenantPath(slug, '/app/progress')}
               className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
             >
               Ver tudo <ChevronRight className="h-4 w-4" />

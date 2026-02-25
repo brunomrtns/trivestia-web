@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
@@ -22,9 +22,13 @@ type FormData = z.infer<typeof schema>;
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const setAuth = useAuthStore((s) => s.setAuth);
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const slug = tenantSlug ?? '';
+  const base = tenantSlug ? `/t/${tenantSlug}` : '';
 
   const {
     register,
@@ -35,11 +39,10 @@ export default function RegisterPage() {
   const onSubmit = async (data: FormData) => {
     setLoading(true);
     try {
-      // POST /auth/register
-      const res = await authEndpoints.register(data);
-      setAuth(res.user, res.token, res.refreshToken);
+      const res = await authEndpoints.register(slug, data);
+      setAuth(res.user, res.token, res.refreshToken, slug);
       toast.success('Conta criada com sucesso!');
-      navigate('/app/dashboard', { replace: true });
+      navigate(`${base}/app/dashboard`, { replace: true });
     } catch {
       toast.error('Não foi possível criar a conta. Tente outro e-mail.');
     } finally {
@@ -52,7 +55,10 @@ export default function RegisterPage() {
       <h1 className="mb-2 text-3xl font-extrabold">Criar conta</h1>
       <p className="mb-8 text-muted-foreground">
         Já tem conta?{' '}
-        <Link to="/login" className="font-medium text-primary hover:underline">
+        <Link
+          to={`${base}/login`}
+          className="font-medium text-primary hover:underline"
+        >
           Entrar
         </Link>
       </p>

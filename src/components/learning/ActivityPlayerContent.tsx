@@ -16,6 +16,7 @@ import { getActivityTypeLabel, formatPercentage } from '@/lib/utils';
 import type { Activity, Answer, SubmissionResult } from '@/types/api';
 
 interface ActivityPlayerContentProps {
+  slug: string;
   activity: Activity;
   /** Label for the back button text (default: "Ir ao Dashboard") */
   backLabel?: string;
@@ -26,19 +27,24 @@ interface ActivityPlayerContentProps {
 }
 
 export function ActivityPlayerContent({
+  slug,
   activity,
   backLabel = 'Ir ao Dashboard',
-  backTo = '/app/dashboard',
+  backTo,
   headerExtra
 }: ActivityPlayerContentProps) {
   const navigate = useNavigate();
+  const resolvedBackTo = backTo ?? `/t/${slug}/app/dashboard`;
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
   const [result, setResult] = useState<SubmissionResult | null>(null);
 
   const submitMutation = useMutation({
-    mutationFn: progressEndpoints.submit,
+    mutationFn: (data: {
+      activityId: string;
+      responses: { questionId: string; answer: Answer }[];
+    }) => progressEndpoints.submit(slug, data),
     onSuccess: (data) => {
       setResult(data);
       toast.success('Atividade concluída!');
@@ -146,7 +152,7 @@ export function ActivityPlayerContent({
             Tentar novamente
           </button>
           <button
-            onClick={() => navigate(backTo)}
+            onClick={() => navigate(resolvedBackTo)}
             className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
           >
             {backLabel}

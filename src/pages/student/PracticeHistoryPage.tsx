@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   ChevronLeft,
@@ -12,11 +12,13 @@ import { simulationEndpoints } from '@/services/endpoints/simulation.endpoints';
 import { cn } from '@/lib/utils';
 
 export default function PracticeHistoryPage() {
+  const { tenantSlug } = useParams<{ tenantSlug: string }>();
+  const slug = tenantSlug ?? '';
   const [page, setPage] = useState(1);
 
   const { data, isLoading } = useQuery({
-    queryKey: ['practice-history', page],
-    queryFn: () => simulationEndpoints.getPracticeHistory(page, 10)
+    queryKey: ['practice-history', slug, page],
+    queryFn: () => simulationEndpoints.getPracticeHistory(slug, page, 10)
   });
 
   return (
@@ -24,7 +26,7 @@ export default function PracticeHistoryPage() {
       {/* Header */}
       <div className="mb-6 flex items-center gap-3">
         <Link
-          to="/app/lab"
+          to={`/t/${slug}/app/lab`}
           className="flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition hover:bg-accent"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
@@ -41,7 +43,10 @@ export default function PracticeHistoryPage() {
       ) : !data || data.sessions.length === 0 ? (
         <div className="rounded-xl border bg-card p-8 text-center text-sm text-muted-foreground">
           Nenhuma sessão de prática ainda.{' '}
-          <Link to="/app/lab" className="text-primary hover:underline">
+          <Link
+            to={`/t/${slug}/app/lab`}
+            className="text-primary hover:underline"
+          >
             Começar agora
           </Link>
         </div>

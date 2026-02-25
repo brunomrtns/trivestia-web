@@ -1,4 +1,4 @@
-import { apiClient } from '../api/client';
+import { apiTenant } from '../api/apiTenant';
 import type {
   Progress,
   SubmissionResult,
@@ -6,29 +6,29 @@ import type {
   SubmitActivityRequest
 } from '@/types/api';
 
-// POST /submissions           — Bearer ANY
-// GET  /submissions/:id       — Bearer ANY
-// GET  /progress              — Bearer ANY
-// GET  /progress/lessons/:id  — Bearer ANY
-// GET  /progress/lessons/:id/unlocked — Bearer ANY
 export const progressEndpoints = {
-  submit: (data: SubmitActivityRequest) =>
-    apiClient.post<SubmissionResult>('/submissions', data).then((r) => r.data),
+  submit: (slug: string, data: SubmitActivityRequest) =>
+    apiTenant(slug)
+      .post<SubmissionResult>('/submissions', data)
+      .then((r) => r.data),
 
-  getSubmission: (activityId: string) =>
-    apiClient
+  getSubmission: (slug: string, activityId: string) =>
+    apiTenant(slug)
       .get<SubmissionResponse>(`/submissions/${activityId}`)
       .then((r) => r.data),
 
-  getProgress: () => apiClient.get<Progress[]>('/progress').then((r) => r.data),
+  getProgress: (slug: string) =>
+    apiTenant(slug)
+      .get<Progress[]>('/progress')
+      .then((r) => r.data),
 
-  getLessonProgress: (lessonId: string) =>
-    apiClient
+  getLessonProgress: (slug: string, lessonId: string) =>
+    apiTenant(slug)
       .get<Progress>(`/progress/lessons/${lessonId}`)
       .then((r) => r.data),
 
-  isLessonUnlocked: (lessonId: string) =>
-    apiClient
+  isLessonUnlocked: (slug: string, lessonId: string) =>
+    apiTenant(slug)
       .get<{ unlocked: boolean }>(`/progress/lessons/${lessonId}/unlocked`)
       .then((r) => r.data)
 };

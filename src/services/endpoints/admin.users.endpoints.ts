@@ -1,4 +1,4 @@
-import { apiClient } from '../api/client';
+import { apiTenant } from '../api/apiTenant';
 import type {
   PaginatedUsers,
   AdminUserDetail,
@@ -7,20 +7,19 @@ import type {
   Role
 } from '@/types/api';
 
-// GET  /admin/users
-// GET  /admin/users/:id
-// PATCH /admin/users/:id/role
 export const adminUsersEndpoints = {
-  listUsers: (params: ListUsersParams = {}) =>
-    apiClient
+  listUsers: (slug: string, params: ListUsersParams = {}) =>
+    apiTenant(slug)
       .get<PaginatedUsers>('/admin/users', { params })
       .then((r) => r.data),
 
-  getUser: (id: string) =>
-    apiClient.get<AdminUserDetail>(`/admin/users/${id}`).then((r) => r.data),
+  getUser: (slug: string, id: string) =>
+    apiTenant(slug)
+      .get<AdminUserDetail>(`/admin/users/${id}`)
+      .then((r) => r.data),
 
-  updateRole: (id: string, role: Role) =>
-    apiClient
+  updateRole: (slug: string, id: string, role: Role) =>
+    apiTenant(slug)
       .patch<AdminUser>(`/admin/users/${id}/role`, { role })
       .then((r) => r.data)
 };

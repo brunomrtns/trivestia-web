@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { AppRouter } from './routes';
 import { useAuthStore } from './features/auth/auth.store';
+import { usePlatformAuthStore } from './features/platform/platform.store';
 import '@/styles/globals.css';
 
 const queryClient = new QueryClient({
@@ -15,8 +16,9 @@ const queryClient = new QueryClient({
   }
 });
 
-// Hidrata o store a partir do localStorage antes do primeiro render
+// Hidrata os stores a partir do localStorage antes do primeiro render
 useAuthStore.getState().loadSession();
+usePlatformAuthStore.getState().loadSession();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

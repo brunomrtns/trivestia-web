@@ -1,10 +1,18 @@
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { BookOpen, LayoutDashboard, LogOut } from 'lucide-react';
 import { useAuthStore } from '@/features/auth/auth.store';
+import { authStorage } from '@/features/auth/storage';
 
 export function PublicLayout() {
-  const { isAuthenticated, user, logout } = useAuthStore();
+  const { isAuthenticated, user, logout, tenantSlug } = useAuthStore();
   const navigate = useNavigate();
+
+  // Slug do último tenant visitado (fonte de verdade para links globais)
+  const slug = tenantSlug ?? authStorage.getLastTenantSlug();
+
+  const coursesHref = slug ? `/t/${slug}/courses` : '/courses';
+  const dashboardHref = slug ? `/t/${slug}/app/dashboard` : '/app/dashboard';
+  const loginHref = slug ? `/t/${slug}/login` : '/login';
 
   const handleLogout = () => {
     logout();
@@ -21,7 +29,7 @@ export function PublicLayout() {
           </Link>
           <nav className="flex items-center gap-6">
             <Link
-              to="/courses"
+              to={coursesHref}
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               Cursos
@@ -32,7 +40,7 @@ export function PublicLayout() {
                   {user?.name}
                 </span>
                 <Link
-                  to="/app/dashboard"
+                  to={dashboardHref}
                   className="flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
                 >
                   <LayoutDashboard className="h-4 w-4" />

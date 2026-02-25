@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   ArrowRight,
@@ -9,7 +9,8 @@ import {
   CheckCircle2,
   Star
 } from 'lucide-react';
-
+import { useAuthStore } from '@/features/auth/auth.store';
+import { authStorage } from '@/features/auth/storage';
 const features = [
   {
     icon: Layers,
@@ -45,6 +46,14 @@ const stats = [
 ];
 
 export default function LandingPage() {
+  const { isAuthenticated, tenantSlug } = useAuthStore();
+  const slug = tenantSlug ?? authStorage.getLastTenantSlug();
+
+  // Aluno/admin autenticado vai direto para o dashboard
+  if (isAuthenticated && slug) {
+    return <Navigate to={`/t/${slug}/app/dashboard`} replace />;
+  }
+
   return (
     <div className="overflow-hidden">
       {/* Hero */}
@@ -72,17 +81,17 @@ export default function LandingPage() {
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4">
               <Link
-                to="/register"
+                to="/login"
                 className="flex items-center gap-2 rounded-xl bg-primary px-8 py-3.5 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:opacity-90 hover:shadow-xl"
               >
-                Começar gratuitamente
+                Entrar
                 <ArrowRight className="h-5 w-5" />
               </Link>
               <Link
-                to="/courses"
+                to="/create-school"
                 className="rounded-xl border px-8 py-3.5 text-base font-semibold transition-colors hover:bg-accent"
               >
-                Ver cursos
+                Criar escola
               </Link>
             </div>
           </motion.div>
@@ -154,7 +163,7 @@ export default function LandingPage() {
               Acesse gratuitamente e descubra como investir com inteligência.
             </p>
             <Link
-              to="/register"
+              to={slug ? `/t/${slug}/register` : '/login'}
               className="inline-flex items-center gap-2 rounded-xl bg-white px-8 py-3.5 text-base font-bold text-primary shadow-lg transition-all hover:scale-105"
             >
               Criar conta grátis

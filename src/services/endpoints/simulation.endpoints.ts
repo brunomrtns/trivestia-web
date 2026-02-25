@@ -1,4 +1,4 @@
-import { apiClient } from '../api/client';
+import { apiTenant } from '../api/apiTenant';
 import type {
   ScenarioPayload,
   SimEvent,
@@ -10,52 +10,54 @@ import type {
   PracticeHistoryResponse
 } from '@/types/api';
 
-// ─── Challenge ────────────────────────────────────────────────────────────────
-
 export const simulationEndpoints = {
-  /** GET /sim/challenge/:activityId/briefing — Bearer ANY */
-  getChallengeBriefing: (activityId: string) =>
-    apiClient
+  /** GET /t/:slug/sim/challenge/:activityId/briefing */
+  getChallengeBriefing: (slug: string, activityId: string) =>
+    apiTenant(slug)
       .get<ChallengeBriefingData>(`/sim/challenge/${activityId}/briefing`)
       .then((r) => r.data),
 
-  /** GET /sim/challenge/:activityId/scenario — Bearer ANY */
-  getChallengeScenario: (activityId: string) =>
-    apiClient
+  /** GET /t/:slug/sim/challenge/:activityId/scenario */
+  getChallengeScenario: (slug: string, activityId: string) =>
+    apiTenant(slug)
       .get<ScenarioPayload>(`/sim/challenge/${activityId}/scenario`)
       .then((r) => r.data),
 
-  /** POST /sim/challenge/submit — Bearer ANY */
-  submitChallenge: (body: {
-    scenarioToken: string;
-    events: SimEvent[];
-    clientStateHash: string;
-  }) =>
-    apiClient
+  /** POST /t/:slug/sim/challenge/submit */
+  submitChallenge: (
+    slug: string,
+    body: {
+      scenarioToken: string;
+      events: SimEvent[];
+      clientStateHash: string;
+    }
+  ) =>
+    apiTenant(slug)
       .post<ChallengeSubmitResponse>('/sim/challenge/submit', body)
       .then((r) => r.data),
 
-  // ─── Practice ──────────────────────────────────────────────────────────────
-
-  /** POST /sim/practice/scenario — Bearer ANY */
-  createPracticeScenario: (body: PracticeScenarioRequest) =>
-    apiClient
+  /** POST /t/:slug/sim/practice/scenario */
+  createPracticeScenario: (slug: string, body: PracticeScenarioRequest) =>
+    apiTenant(slug)
       .post<PracticeScenarioResponse>('/sim/practice/scenario', body)
       .then((r) => r.data),
 
-  /** POST /sim/practice/submit — Bearer ANY */
-  submitPractice: (body: {
-    scenarioToken: string;
-    events: SimEvent[];
-    clientStateHash: string;
-  }) =>
-    apiClient
+  /** POST /t/:slug/sim/practice/submit */
+  submitPractice: (
+    slug: string,
+    body: {
+      scenarioToken: string;
+      events: SimEvent[];
+      clientStateHash: string;
+    }
+  ) =>
+    apiTenant(slug)
       .post<PracticeSubmitResponse>('/sim/practice/submit', body)
       .then((r) => r.data),
 
-  /** GET /sim/practice/history?page=&limit= — Bearer ANY */
-  getPracticeHistory: (page = 1, limit = 10) =>
-    apiClient
+  /** GET /t/:slug/sim/practice/history */
+  getPracticeHistory: (slug: string, page = 1, limit = 10) =>
+    apiTenant(slug)
       .get<PracticeHistoryResponse>('/sim/practice/history', {
         params: { page, limit }
       })

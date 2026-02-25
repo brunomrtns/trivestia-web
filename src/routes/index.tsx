@@ -2,20 +2,41 @@ import { lazy, Suspense } from 'react';
 import {
   createBrowserRouter,
   RouterProvider,
-  Navigate
+  Navigate,
+  useLocation
 } from 'react-router-dom';
 import { AuthGuard } from './guards/AuthGuard';
 import { AdminGuard } from './guards/AdminGuard';
+import { SuperAdminGuard } from './guards/SuperAdminGuard';
+import { PlatformGuard } from './guards/PlatformGuard';
 import { PublicLayout } from '@/layouts/PublicLayout';
-import { AuthLayout } from '@/layouts/AuthLayout';
+import { TenantPublicLayout } from '@/layouts/TenantPublicLayout';
+import { TenantAuthLayout } from '@/layouts/TenantAuthLayout';
 import { AppLayout } from '@/layouts/AppLayout/AppLayout';
+import { SuperAdminLayout } from '@/layouts/SuperAdminLayout/SuperAdminLayout';
+import { WorkspaceLayout } from '@/layouts/WorkspaceLayout/WorkspaceLayout';
+import { authStorage } from '@/features/auth/storage';
+import { useAuthStore } from '@/features/auth/auth.store';
 
 // ─── Lazy pages ───────────────────────────────────────────────────────────────
 
-// Public
+// Public / Platform
 const LandingPage = lazy(() => import('@/pages/public/LandingPage'));
 const CoursesPage = lazy(() => import('@/pages/public/CoursesPage'));
 const CourseDetailPage = lazy(() => import('@/pages/public/CourseDetailPage'));
+const CreateSchoolPage = lazy(() => import('@/pages/public/CreateSchoolPage'));
+const GlobalLoginPage = lazy(() => import('@/pages/platform/GlobalLoginPage'));
+
+// Workspace (professor)
+const WorkspacePage = lazy(() => import('@/pages/workspace/WorkspacePage'));
+const WorkspaceCreateSchoolPage = lazy(
+  () => import('@/pages/workspace/CreateSchoolPage')
+);
+
+// Platform
+const ProfessorRegisterPage = lazy(
+  () => import('@/pages/platform/ProfessorRegisterPage')
+);
 
 // Auth
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
@@ -48,6 +69,16 @@ const AdminLessonStepsPage = lazy(
   () => import('@/pages/admin/AdminLessonStepsPage')
 );
 
+// Super Admin
+const SuperDashboardPage = lazy(
+  () => import('@/pages/super/SuperDashboardPage')
+);
+const SuperTenantsPage = lazy(() => import('@/pages/super/SuperTenantsPage'));
+const SuperTenantEditPage = lazy(
+  () => import('@/pages/super/SuperTenantEditPage')
+);
+const SuperUsersPage = lazy(() => import('@/pages/super/SuperUsersPage'));
+
 // ─── Loading fallback ────────────────────────────────────────────────────────
 
 function PageLoader() {
@@ -58,79 +89,179 @@ function PageLoader() {
   );
 }
 
+// ─── Legacy redirect helper ──────────────────────────────────────────────────
+/**
+ * Redireciona paths legados (/login, /register, /app/*, /courses, …)
+ * levando em conta o estado de autenticação e o último tenant visitado.
+ *
+ * Fluxo:
+ *  - Autenticado  + slug  → /t/:slug/app/dashboard   (ou /app/courses para paths de cursos)
+ *  - Sem auth     + slug  → /t/:slug/login            (ou /register se o path era /register)
+ *  - Sem slug             → /create-school
+ */
+function LegacyRedirect() {
+  const { isAuthenticated, isLoading } = useAuthStore();
+  const { pathname } = useLocation();
+  const slug = authStorage.getLastTenantSlug();
+
+  // loadSession() é síncrono (main.tsx), mas checamos por segurança
+  if (isLoading) return null;
+
+  if (!slug) return <Navigate to="/create-school" replace />;
+
+  if (isAuthenticated) {
+    // Preserva intenção de navegar para cursos
+    if (pathname.startsWith('/courses')) {
+      const rest = pathname.slice('/courses'.length); // '' | '/:id'
+      return <Navigate to={`/t/${slug}/app/courses${rest}`} replace />;
+    }
+    return <Navigate to={`/t/${slug}/app/dashboard`} replace />;
+  }
+
+  // Não autenticado — preserva intenção de registro vs login
+  if (pathname === '/register')
+    return <Navigate to={`/t/${slug}/register`} replace />;
+  if (pathname.startsWith('/courses')) {
+    const rest = pathname.slice('/courses'.length);
+    return <Navigate to={`/t/${slug}/courses${rest}`} replace />;
+  }
+  return <Navigate to={`/t/${slug}/login`} replace />;
+}
+
+// ─── Rotas tenant-scoped ─────────────────────────────────────────────────────
+
+const tenantAppRoutes = [
+  { path: 'dashboard', element: <DashboardPage /> },
+  { path: 'courses', element: <CoursesPage /> },
+  { path: 'courses/:courseId', element: <CourseDetailPage /> },
+  { path: 'courses/:courseId/interactive', element: <CourseInteractivePage /> },
+  { path: 'lessons/:lessonId', element: <LessonPage /> },
+  {
+    path: 'lessons/:lessonId/activities/:activityId',
+    element: <ActivityPlayerPage />
+  },
+  { path: 'activity/:activityId', element: <ActivityPlayerPage /> },
+  { path: 'lab', element: <PracticeLabPage /> },
+  { path: 'lab/history', element: <PracticeHistoryPage /> },
+  { path: 'progress', element: <ProgressPage /> }
+];
+
+const tenantAdminRoutes = [
+  { path: 'courses', element: <AdminCoursesPage /> },
+  { path: 'courses/:courseId/lessons', element: <AdminLessonsPage /> },
+  {
+    path: 'lessons/:lessonId/activities/:activityId/questions',
+    element: <AdminQuestionsPage />
+  },
+  {
+    path: 'courses/:courseId/lessons/:lessonId/steps',
+    element: <AdminLessonStepsPage />
+  },
+  { path: 'users', element: <AdminUsersPage /> }
+];
+
 // ─── Router ──────────────────────────────────────────────────────────────────
 
 const router = createBrowserRouter([
+  // ── Global pages (sem tenant) ────────────────────────────────────────────
   {
     element: <PublicLayout />,
-    children: [
-      { path: '/', element: <LandingPage /> },
-      { path: '/courses', element: <CoursesPage /> },
-      { path: '/courses/:courseId', element: <CourseDetailPage /> }
-    ]
+    children: [{ path: '/', element: <LandingPage /> }]
   },
+  { path: '/create-school', element: <CreateSchoolPage /> },
+
+  // ── Login global (2-step: professor + aluno) ─────────────────────────────
+  { path: '/login', element: <GlobalLoginPage /> },
+
+  // ── Workspace (professor autenticado) ────────────────────────────────────
   {
-    element: <AuthLayout />,
-    children: [
-      { path: '/login', element: <LoginPage /> },
-      { path: '/register', element: <RegisterPage /> }
-    ]
-  },
-  {
-    element: <AuthGuard />,
+    element: <PlatformGuard />,
     children: [
       {
-        element: <AppLayout />,
+        path: '/workspace',
+        element: <WorkspaceLayout />,
         children: [
-          { path: '/app/dashboard', element: <DashboardPage /> },
-          { path: '/app/courses', element: <CoursesPage /> },
-          { path: '/app/courses/:courseId', element: <CourseDetailPage /> },
-          {
-            path: '/app/courses/:courseId/interactive',
-            element: <CourseInteractivePage />
-          },
-          { path: '/app/lessons/:lessonId', element: <LessonPage /> },
-          {
-            path: '/app/lessons/:lessonId/activities/:activityId',
-            element: <ActivityPlayerPage />
-          },
-          // Canonical activity player (suporta SIM_TRADING_CHALLENGE)
-          {
-            path: '/app/activity/:activityId',
-            element: <ActivityPlayerPage />
-          },
-          // Practice Mode (Laboratório de Trading)
-          { path: '/app/lab', element: <PracticeLabPage /> },
-          { path: '/app/lab/history', element: <PracticeHistoryPage /> },
-          { path: '/app/progress', element: <ProgressPage /> }
+          { index: true, element: <WorkspacePage /> },
+          { path: 'create-school', element: <WorkspaceCreateSchoolPage /> }
         ]
       }
     ]
   },
+
+  // ── Registro de professor (conta da plataforma) ────────────────────────────
+  { path: '/register', element: <ProfessorRegisterPage /> },
+
+  // ── Legacy routes — redireciona para tenant ──────────────────────────────
+  { path: '/app/*', element: <LegacyRedirect /> },
+  { path: '/admin/*', element: <LegacyRedirect /> },
+  { path: '/courses', element: <LegacyRedirect /> },
+  { path: '/courses/:courseId', element: <LegacyRedirect /> },
+
+  // ── Tenant routes (/t/:tenantSlug/*) ─────────────────────────────────────
   {
-    element: <AdminGuard />,
+    path: '/t/:tenantSlug',
     children: [
+      // Public tenant pages
       {
-        element: <AppLayout />,
+        element: <TenantPublicLayout />,
         children: [
-          { path: '/admin/courses', element: <AdminCoursesPage /> },
+          { index: true, element: <CoursesPage /> },
+          { path: 'courses', element: <CoursesPage /> },
+          { path: 'courses/:courseId', element: <CourseDetailPage /> }
+        ]
+      },
+      // Auth pages (login/register)
+      {
+        element: <TenantAuthLayout />,
+        children: [
+          { path: 'login', element: <LoginPage /> },
+          { path: 'register', element: <RegisterPage /> }
+        ]
+      },
+      // Authenticated student routes
+      {
+        element: <AuthGuard />,
+        children: [
           {
-            path: '/admin/courses/:courseId/lessons',
-            element: <AdminLessonsPage />
-          },
+            path: 'app',
+            element: <AppLayout />,
+            children: tenantAppRoutes
+          }
+        ]
+      },
+      // Admin routes (ADMIN + OWNER)
+      {
+        element: <AdminGuard />,
+        children: [
           {
-            path: '/admin/lessons/:lessonId/activities/:activityId/questions',
-            element: <AdminQuestionsPage />
-          },
-          {
-            path: '/admin/courses/:courseId/lessons/:lessonId/steps',
-            element: <AdminLessonStepsPage />
-          },
-          { path: '/admin/users', element: <AdminUsersPage /> }
+            path: 'admin',
+            element: <AppLayout />,
+            children: tenantAdminRoutes
+          }
         ]
       }
     ]
   },
+
+  // ── Super Admin routes (/super/*) ──────────────────────────────────────────
+  {
+    element: <SuperAdminGuard />,
+    children: [
+      {
+        path: '/super',
+        element: <SuperAdminLayout />,
+        children: [
+          { index: true, element: <Navigate to="/super/dashboard" replace /> },
+          { path: 'dashboard', element: <SuperDashboardPage /> },
+          { path: 'tenants', element: <SuperTenantsPage /> },
+          { path: 'tenants/:tenantId', element: <SuperTenantEditPage /> },
+          { path: 'users', element: <SuperUsersPage /> }
+        ]
+      }
+    ]
+  },
+
+  // ── Catch-all ────────────────────────────────────────────────────────────
   { path: '*', element: <Navigate to="/" /> }
 ]);
 

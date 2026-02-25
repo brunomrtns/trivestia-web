@@ -84,7 +84,7 @@ function StepByStep({
 
   return (
     <div className="space-y-2 rounded-xl border bg-muted/40 p-4 text-sm">
-      <p className="font-semibold text-foreground">📐 Passo a passo</p>
+      <p className="font-semibold text-foreground">Passo a passo</p>
       <ol className="list-inside list-decimal space-y-1.5 text-muted-foreground">
         <li>
           <span className="font-medium text-foreground">Risco em $:</span>{' '}

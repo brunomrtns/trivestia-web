@@ -12,22 +12,28 @@ import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { useAuthStore } from '@/features/auth/auth.store';
 
 export default function CourseDetailPage() {
-  const { courseId } = useParams<{ courseId: string }>();
+  const { courseId, tenantSlug } = useParams<{
+    courseId: string;
+    tenantSlug: string;
+  }>();
   const location = useLocation();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const base = location.pathname.startsWith('/app') ? '/app' : '';
+  const slug = tenantSlug ?? '';
+  const base = location.pathname.includes('/app')
+    ? `/t/${slug}/app`
+    : `/t/${slug}`;
 
   // GET /courses/:id — público
   const { data: course, isLoading: loadingCourse } = useQuery({
-    queryKey: ['course', courseId],
-    queryFn: () => learningEndpoints.getCourse(courseId!),
+    queryKey: ['course', slug, courseId],
+    queryFn: () => learningEndpoints.getCourse(slug, courseId!),
     enabled: !!courseId
   });
 
   // GET /courses/:courseId/modules — público
   const { data: modules, isLoading: loadingModules } = useQuery({
-    queryKey: ['modules', courseId],
-    queryFn: () => learningEndpoints.getModules(courseId!),
+    queryKey: ['modules', slug, courseId],
+    queryFn: () => learningEndpoints.getModules(slug, courseId!),
     enabled: !!courseId
   });
 
@@ -67,7 +73,7 @@ export default function CourseDetailPage() {
         </p>
         {!isAuthenticated && (
           <Link
-            to={`/register`}
+            to={`/t/${slug}/register`}
             className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:opacity-90"
           >
             <PlayCircle className="h-5 w-5" />
@@ -76,7 +82,7 @@ export default function CourseDetailPage() {
         )}
         {isAuthenticated && (
           <Link
-            to={`/app/courses/${courseId}/interactive`}
+            to={`/t/${slug}/app/courses/${courseId}/interactive`}
             className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:opacity-90"
           >
             <PlayCircle className="h-5 w-5" />
@@ -96,6 +102,7 @@ export default function CourseDetailPage() {
             index={i + 1}
             isAuthenticated={isAuthenticated}
             courseId={courseId!}
+            slug={slug}
           />
         ))}
       </div>
@@ -108,18 +115,20 @@ function ModuleAccordion({
   title,
   index,
   isAuthenticated,
-  courseId
+  courseId,
+  slug
 }: {
   moduleId: string;
   title: string;
   index: number;
   isAuthenticated: boolean;
   courseId: string;
+  slug: string;
 }) {
   // GET /modules/:moduleId/lessons — público
   const { data: lessons, isLoading } = useQuery({
-    queryKey: ['lessons', moduleId],
-    queryFn: () => learningEndpoints.getLessons(moduleId)
+    queryKey: ['lessons', slug, moduleId],
+    queryFn: () => learningEndpoints.getLessons(slug, moduleId)
   });
 
   return (
@@ -148,7 +157,7 @@ function ModuleAccordion({
             >
               {isAuthenticated ? (
                 <Link
-                  to={`/app/lessons/${lesson.id}`}
+                  to={`/t/${slug}/app/lessons/${lesson.id}`}
                   state={{ lessonTitle: lesson.title, courseId }}
                   className="flex w-full items-center gap-3 text-muted-foreground transition-colors hover:text-foreground"
                 >

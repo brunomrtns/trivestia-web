@@ -222,11 +222,13 @@ function SortableStepRow({
 // ─── StepFormModal ────────────────────────────────────────────────────────────
 
 function StepFormModal({
+  slug,
   lessonId,
   step,
   nextOrder,
   onClose
 }: {
+  slug: string;
   lessonId: string;
   step?: LessonStepDTO;
   nextOrder: number;
@@ -246,9 +248,9 @@ function StepFormModal({
 
   const createMut = useMutation({
     mutationFn: (data: CreateStepDTO) =>
-      stepsEndpoints.createStep(lessonId, data),
+      stepsEndpoints.createStep(slug, lessonId, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin-steps', lessonId] });
+      qc.invalidateQueries({ queryKey: ['admin-steps', slug, lessonId] });
       toast.success('Etapa criada!');
       onClose();
     },
@@ -257,9 +259,9 @@ function StepFormModal({
 
   const updateMut = useMutation({
     mutationFn: (data: UpdateStepDTO) =>
-      stepsEndpoints.updateStep(lessonId, step!.id, data),
+      stepsEndpoints.updateStep(slug, lessonId, step!.id, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin-steps', lessonId] });
+      qc.invalidateQueries({ queryKey: ['admin-steps', slug, lessonId] });
       toast.success('Etapa atualizada!');
       onClose();
     },
@@ -447,20 +449,22 @@ function StepFormModal({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function AdminLessonStepsPage() {
-  const { lessonId, courseId } = useParams<{
+  const { lessonId, courseId, tenantSlug } = useParams<{
     lessonId: string;
     courseId: string;
+    tenantSlug: string;
   }>();
+  const slug = tenantSlug ?? '';
   const qc = useQueryClient();
 
   const [showForm, setShowForm] = useState(false);
   const [editingStep, setEditingStep] = useState<LessonStepDTO | undefined>();
 
-  // ── Queries ──────────────────────────────────────────────────────────────
+  // ── Queries ──────────────────────────────────────────────────────────────────────
 
   const { data: timeline, isLoading } = useQuery({
-    queryKey: ['admin-steps', lessonId],
-    queryFn: () => stepsEndpoints.getTimeline(lessonId!),
+    queryKey: ['admin-steps', slug, lessonId],
+    queryFn: () => stepsEndpoints.getTimeline(slug, lessonId!),
     enabled: !!lessonId
   });
 
@@ -471,9 +475,9 @@ export default function AdminLessonStepsPage() {
 
   const deleteMut = useMutation({
     mutationFn: (stepId: string) =>
-      stepsEndpoints.deleteStep(lessonId!, stepId),
+      stepsEndpoints.deleteStep(slug, lessonId!, stepId),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin-steps', lessonId] });
+      qc.invalidateQueries({ queryKey: ['admin-steps', slug, lessonId] });
       toast.success('Etapa excluída.');
     },
     onError: () => toast.error('Erro ao excluir etapa.')
@@ -481,18 +485,18 @@ export default function AdminLessonStepsPage() {
 
   const reorderMut = useMutation({
     mutationFn: (orders: { stepId: string; order: number }[]) =>
-      stepsEndpoints.reorderSteps(lessonId!, { orders }),
+      stepsEndpoints.reorderSteps(slug, lessonId!, { orders }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin-steps', lessonId] });
+      qc.invalidateQueries({ queryKey: ['admin-steps', slug, lessonId] });
       toast.success('Ordem atualizada!');
     },
     onError: () => toast.error('Erro ao reordenar.')
   });
 
   const generateMut = useMutation({
-    mutationFn: () => stepsEndpoints.generateSteps(lessonId!),
+    mutationFn: () => stepsEndpoints.generateSteps(slug, lessonId!),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin-steps', lessonId] });
+      qc.invalidateQueries({ queryKey: ['admin-steps', slug, lessonId] });
       toast.success('Etapas geradas a partir das atividades!');
     },
     onError: () => toast.error('Erro ao gerar etapas.')
@@ -526,7 +530,7 @@ export default function AdminLessonStepsPage() {
       <nav className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
         {courseId ? (
           <Link
-            to={`/admin/courses/${courseId}/lessons`}
+            to={`/t/${slug}/admin/courses/${courseId}/lessons`}
             className="flex items-center gap-1 hover:text-foreground transition-colors"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -534,7 +538,7 @@ export default function AdminLessonStepsPage() {
           </Link>
         ) : (
           <Link
-            to="/admin/courses"
+            to={`/t/${slug}/admin/courses`}
             className="flex items-center gap-1 hover:text-foreground transition-colors"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -672,6 +676,7 @@ export default function AdminLessonStepsPage() {
       {/* Form modal */}
       {showForm && (
         <StepFormModal
+          slug={slug}
           lessonId={lessonId!}
           step={editingStep}
           nextOrder={steps.length + 1}

@@ -7,7 +7,14 @@ interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  setAuth: (user: User, token: string, refreshToken: string) => void;
+  /** Slug do tenant corrente (populado via setAuth ou loadSession) */
+  tenantSlug: string | null;
+  setAuth: (
+    user: User,
+    token: string,
+    refreshToken: string,
+    tenantSlug?: string
+  ) => void;
   logout: () => void;
   loadSession: () => void;
 }
@@ -17,25 +24,39 @@ export const useAuthStore = create<AuthState>((set) => ({
   token: null,
   isAuthenticated: false,
   isLoading: true,
+  tenantSlug: null,
 
-  setAuth: (user, token, refreshToken) => {
+  setAuth: (user, token, refreshToken, tenantSlug) => {
     authStorage.setSession(token, refreshToken, JSON.stringify(user));
-    set({ user, token, isAuthenticated: true });
+    if (tenantSlug) authStorage.setLastTenantSlug(tenantSlug);
+    set({
+      user,
+      token,
+      isAuthenticated: true,
+      tenantSlug: tenantSlug ?? authStorage.getLastTenantSlug()
+    });
   },
 
   logout: () => {
     // clearSession é a ÚNICA fonte de verdade — também invocada pelo interceptor Axios
     authStorage.clearSession();
-    set({ user: null, token: null, isAuthenticated: false });
+    set({ user: null, token: null, isAuthenticated: false, tenantSlug: null });
   },
 
   loadSession: () => {
     const token = authStorage.getToken();
     const userStr = authStorage.getUser();
+    const slug = authStorage.getLastTenantSlug();
     if (token && userStr) {
       try {
         const user: User = JSON.parse(userStr);
-        set({ user, token, isAuthenticated: true, isLoading: false });
+        set({
+          user,
+          token,
+          isAuthenticated: true,
+          isLoading: false,
+          tenantSlug: slug
+        });
       } catch {
         authStorage.clearSession();
         set({ isLoading: false });

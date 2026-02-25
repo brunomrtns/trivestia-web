@@ -1,5 +1,5 @@
 import { Menu, LogOut, User as UserIcon } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/auth.store';
 
 interface TopbarProps {
@@ -8,11 +8,12 @@ interface TopbarProps {
 
 export function Topbar({ onMenuClick }: TopbarProps) {
   const { user, logout } = useAuthStore();
+  const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate(tenantSlug ? `/t/${tenantSlug}/login` : '/login');
   };
 
   return (

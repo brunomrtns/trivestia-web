@@ -87,11 +87,13 @@ const TYPE_COLORS: Record<ActivityType, string> = {
 // ─── ActivityRow ─────────────────────────────────────────────────────────────
 
 function ActivityRow({
+  slug,
   lessonId,
   activity,
   onDelete,
   isDeleting
 }: {
+  slug: string;
   lessonId: string;
   activity: ActivitySummary;
   onDelete: () => void;
@@ -112,7 +114,7 @@ function ActivityRow({
         {getActivityTypeLabel(activity.type)}
       </span>
       <Link
-        to={`/admin/lessons/${lessonId}/activities/${activity.id}/questions`}
+        to={`/t/${slug}/admin/lessons/${lessonId}/activities/${activity.id}/questions`}
         className="flex shrink-0 items-center gap-1 rounded-lg border px-3 py-1 text-xs font-medium transition hover:bg-accent"
       >
         <HelpCircle className="h-3 w-3" />
@@ -137,12 +139,14 @@ function ActivityRow({
 // ─── LessonSection ────────────────────────────────────────────────────────────
 
 function LessonSection({
+  slug,
   courseId,
   moduleId,
   lesson,
   onDeleteLesson,
   isDeletingLesson
 }: {
+  slug: string;
   courseId: string;
   moduleId: string;
   lesson: Lesson;
@@ -155,8 +159,8 @@ function LessonSection({
   const [editingLesson, setEditingLesson] = useState(false);
 
   const { data: activities, isLoading: loadingActivities } = useQuery({
-    queryKey: ['admin-activities', lesson.id],
-    queryFn: () => learningEndpoints.getActivities(lesson.id),
+    queryKey: ['admin-activities', slug, lesson.id],
+    queryFn: () => learningEndpoints.getActivities(slug, lesson.id),
     enabled: expanded
   });
 
@@ -176,9 +180,9 @@ function LessonSection({
 
   const createActivityMut = useMutation({
     mutationFn: (data: ActivityForm) =>
-      adminEndpoints.createActivity(lesson.id, data),
+      adminEndpoints.createActivity(slug, lesson.id, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin-activities', lesson.id] });
+      qc.invalidateQueries({ queryKey: ['admin-activities', slug, lesson.id] });
       setAddingActivity(false);
       actForm.reset({ title: '', order: 1, type: 'MULTIPLE_CHOICE' });
       toast.success('Atividade criada!');
@@ -187,9 +191,10 @@ function LessonSection({
   });
 
   const deleteActivityMut = useMutation({
-    mutationFn: (id: string) => adminEndpoints.deleteActivity(lesson.id, id),
+    mutationFn: (id: string) =>
+      adminEndpoints.deleteActivity(slug, lesson.id, id),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin-activities', lesson.id] });
+      qc.invalidateQueries({ queryKey: ['admin-activities', slug, lesson.id] });
       toast.success('Atividade excluída.');
     },
     onError: () => toast.error('Erro ao excluir atividade.')
@@ -197,9 +202,9 @@ function LessonSection({
 
   const updateLessonMut = useMutation({
     mutationFn: (data: LessonForm) =>
-      adminEndpoints.updateLesson(moduleId, lesson.id, data),
+      adminEndpoints.updateLesson(slug, moduleId, lesson.id, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin-lessons', moduleId] });
+      qc.invalidateQueries({ queryKey: ['admin-lessons', slug, moduleId] });
       setEditingLesson(false);
       toast.success('Aula atualizada!');
     },
@@ -264,7 +269,7 @@ function LessonSection({
             </span>
           </button>
           <Link
-            to={`/admin/courses/${courseId}/lessons/${lesson.id}/steps`}
+            to={`/t/${slug}/admin/courses/${courseId}/lessons/${lesson.id}/steps`}
             className="flex shrink-0 items-center gap-1 rounded-lg border px-3 py-1 text-xs font-medium transition hover:bg-accent"
           >
             <Route className="h-3 w-3" />
@@ -310,6 +315,7 @@ function LessonSection({
               {activities?.map((act) => (
                 <ActivityRow
                   key={act.id}
+                  slug={slug}
                   lessonId={lesson.id}
                   activity={act}
                   onDelete={() => {
@@ -425,11 +431,13 @@ function LessonSection({
 // ─── ModuleSection ────────────────────────────────────────────────────────────
 
 function ModuleSection({
+  slug,
   courseId,
   module,
   onDeleteModule,
   isDeletingModule
 }: {
+  slug: string;
   courseId: string;
   module: Module;
   onDeleteModule: (id: string) => void;
@@ -441,8 +449,8 @@ function ModuleSection({
   const [editingModule, setEditingModule] = useState(false);
 
   const { data: lessons, isLoading: loadingLessons } = useQuery({
-    queryKey: ['admin-lessons', module.id],
-    queryFn: () => learningEndpoints.getLessons(module.id),
+    queryKey: ['admin-lessons', slug, module.id],
+    queryFn: () => learningEndpoints.getLessons(slug, module.id),
     enabled: expanded
   });
 
@@ -458,9 +466,9 @@ function ModuleSection({
 
   const createLessonMut = useMutation({
     mutationFn: (data: LessonForm) =>
-      adminEndpoints.createLesson(module.id, data),
+      adminEndpoints.createLesson(slug, module.id, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin-lessons', module.id] });
+      qc.invalidateQueries({ queryKey: ['admin-lessons', slug, module.id] });
       setAddingLesson(false);
       lessonForm.reset({ title: '', order: 1 });
       toast.success('Aula criada!');
@@ -469,9 +477,10 @@ function ModuleSection({
   });
 
   const deleteLessonMut = useMutation({
-    mutationFn: (id: string) => adminEndpoints.deleteLesson(module.id, id),
+    mutationFn: (id: string) =>
+      adminEndpoints.deleteLesson(slug, module.id, id),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin-lessons', module.id] });
+      qc.invalidateQueries({ queryKey: ['admin-lessons', slug, module.id] });
       toast.success('Aula excluída.');
     },
     onError: () => toast.error('Erro ao excluir aula.')
@@ -479,9 +488,9 @@ function ModuleSection({
 
   const updateModuleMut = useMutation({
     mutationFn: (data: ModuleForm) =>
-      adminEndpoints.updateModule(courseId, module.id, data),
+      adminEndpoints.updateModule(slug, courseId, module.id, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin-modules', courseId] });
+      qc.invalidateQueries({ queryKey: ['admin-modules', slug, courseId] });
       setEditingModule(false);
       toast.success('Módulo atualizado!');
     },
@@ -591,6 +600,7 @@ function ModuleSection({
               {lessons?.map((lesson) => (
                 <LessonSection
                   key={lesson.id}
+                  slug={slug}
                   courseId={courseId}
                   moduleId={module.id}
                   lesson={lesson}
@@ -683,20 +693,24 @@ function ModuleSection({
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function AdminLessonsPage() {
-  const { courseId } = useParams<{ courseId: string }>();
+  const { courseId, tenantSlug } = useParams<{
+    courseId: string;
+    tenantSlug: string;
+  }>();
+  const slug = tenantSlug ?? '';
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [addingModule, setAddingModule] = useState(false);
 
   const { data: course, isLoading: loadingCourse } = useQuery({
-    queryKey: ['course', courseId],
-    queryFn: () => learningEndpoints.getCourse(courseId!),
+    queryKey: ['course', slug, courseId],
+    queryFn: () => learningEndpoints.getCourse(slug, courseId!),
     enabled: !!courseId
   });
 
   const { data: modules, isLoading: loadingModules } = useQuery({
-    queryKey: ['admin-modules', courseId],
-    queryFn: () => learningEndpoints.getModules(courseId!),
+    queryKey: ['admin-modules', slug, courseId],
+    queryFn: () => learningEndpoints.getModules(slug, courseId!),
     enabled: !!courseId
   });
 
@@ -707,9 +721,9 @@ export default function AdminLessonsPage() {
 
   const createModuleMut = useMutation({
     mutationFn: (data: ModuleForm) =>
-      adminEndpoints.createModule(courseId!, data),
+      adminEndpoints.createModule(slug, courseId!, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin-modules', courseId] });
+      qc.invalidateQueries({ queryKey: ['admin-modules', slug, courseId] });
       setAddingModule(false);
       moduleForm.reset({ title: '', order: 1 });
       toast.success('Módulo criado!');
@@ -718,9 +732,10 @@ export default function AdminLessonsPage() {
   });
 
   const deleteModuleMut = useMutation({
-    mutationFn: (id: string) => adminEndpoints.deleteModule(courseId!, id),
+    mutationFn: (id: string) =>
+      adminEndpoints.deleteModule(slug, courseId!, id),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin-modules', courseId] });
+      qc.invalidateQueries({ queryKey: ['admin-modules', slug, courseId] });
       toast.success('Módulo excluído.');
     },
     onError: () => toast.error('Erro ao excluir módulo.')
@@ -731,7 +746,7 @@ export default function AdminLessonsPage() {
       {/* Header + Breadcrumb */}
       <div>
         <button
-          onClick={() => navigate('/admin/courses')}
+          onClick={() => navigate(`/t/${slug}/admin/courses`)}
           className="mb-3 flex items-center gap-1.5 text-sm text-muted-foreground transition hover:text-foreground"
         >
           <ChevronLeft className="h-4 w-4" />
@@ -829,6 +844,7 @@ export default function AdminLessonsPage() {
           {modules?.map((mod) => (
             <ModuleSection
               key={mod.id}
+              slug={slug}
               courseId={courseId!}
               module={mod}
               onDeleteModule={(id) => deleteModuleMut.mutate(id)}

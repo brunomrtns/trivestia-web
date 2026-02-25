@@ -1,7 +1,13 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import {
+  Link,
+  Navigate,
+  useNavigate,
+  useSearchParams,
+  useParams
+} from 'react-router-dom';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
@@ -17,9 +23,13 @@ type FormData = z.infer<typeof schema>;
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const [searchParams] = useSearchParams();
-  const returnTo = searchParams.get('returnTo') ?? '/app/dashboard';
-  const setAuth = useAuthStore((s) => s.setAuth);
+  const defaultReturn = tenantSlug
+    ? `/t/${tenantSlug}/app/dashboard`
+    : '/app/dashboard';
+  const returnTo = searchParams.get('returnTo') ?? defaultReturn;
+  const { isAuthenticated, isLoading, setAuth } = useAuthStore();
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -29,12 +39,20 @@ export default function LoginPage() {
     formState: { errors }
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
+  const slug = tenantSlug ?? '';
+  const base = tenantSlug ? `/t/${tenantSlug}` : '';
+
+  // Todos os hooks acima. S\u00f3 agora e permitido retornar condicionalmente.
+  // Ja autenticado \u2014 sai da tela de login para evitar loops
+  if (!isLoading && isAuthenticated) {
+    return <Navigate to={`/t/${slug}/app/dashboard`} replace />;
+  }
+
   const onSubmit = async (data: FormData) => {
     setLoading(true);
     try {
-      // POST /auth/login
-      const res = await authEndpoints.login(data);
-      setAuth(res.user, res.token, res.refreshToken);
+      const res = await authEndpoints.login(slug, data);
+      setAuth(res.user, res.token, res.refreshToken, slug);
       toast.success(`Bem-vindo, ${res.user.name}!`);
       navigate(returnTo, { replace: true });
     } catch {
@@ -50,7 +68,7 @@ export default function LoginPage() {
       <p className="mb-8 text-muted-foreground">
         Novo por aqui?{' '}
         <Link
-          to="/register"
+          to={`${base}/register`}
           className="font-medium text-primary hover:underline"
         >
           Criar conta

@@ -1,31 +1,34 @@
-import { apiClient } from '../api/client';
+import { apiTenant } from '../api/apiTenant';
 import type { Course, Module, Lesson, Activity } from '@/types/api';
 
-// GET /courses                        — público
-// GET /courses/:id                    — público
-// GET /courses/:courseId/modules      — público
-// GET /modules/:moduleId/lessons      — público
-// GET /lessons/:lessonId/activities   — Bearer ANY
-// GET /lessons/:lessonId/activities/:id — Bearer ANY
 export const learningEndpoints = {
-  getCourses: () => apiClient.get<Course[]>('/courses').then((r) => r.data),
+  getCourses: (slug: string) =>
+    apiTenant(slug)
+      .get<Course[]>('/courses')
+      .then((r) => r.data),
 
-  getCourse: (id: string) =>
-    apiClient.get<Course>(`/courses/${id}`).then((r) => r.data),
+  getCourse: (slug: string, id: string) =>
+    apiTenant(slug)
+      .get<Course>(`/courses/${id}`)
+      .then((r) => r.data),
 
-  getModules: (courseId: string) =>
-    apiClient.get<Module[]>(`/courses/${courseId}/modules`).then((r) => r.data),
+  getModules: (slug: string, courseId: string) =>
+    apiTenant(slug)
+      .get<Module[]>(`/courses/${courseId}/modules`)
+      .then((r) => r.data),
 
-  getLessons: (moduleId: string) =>
-    apiClient.get<Lesson[]>(`/modules/${moduleId}/lessons`).then((r) => r.data),
+  getLessons: (slug: string, moduleId: string) =>
+    apiTenant(slug)
+      .get<Lesson[]>(`/modules/${moduleId}/lessons`)
+      .then((r) => r.data),
 
-  getActivities: (lessonId: string) =>
-    apiClient
+  getActivities: (slug: string, lessonId: string) =>
+    apiTenant(slug)
       .get<Activity[]>(`/lessons/${lessonId}/activities`)
       .then((r) => r.data),
 
-  getActivity: (lessonId: string, activityId: string) =>
-    apiClient
+  getActivity: (slug: string, lessonId: string, activityId: string) =>
+    apiTenant(slug)
       .get<Activity>(`/lessons/${lessonId}/activities/${activityId}`)
       .then((r) => r.data)
 };
