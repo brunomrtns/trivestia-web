@@ -88,7 +88,7 @@ export default function GlobalLoginPage() {
       if (tenants.length === 1) {
         // Uma escola (professor ou aluno) — vai direto para login da escola
         navigate(
-          `/t/${tenants[0].slug}/login?email=${encodeURIComponent(data.email)}`
+          `/t/${tenants[0].slug}/login?email=${encodeURIComponent(data.email)}&school=${encodeURIComponent(tenants[0].name)}`
         );
         return;
       }
@@ -322,7 +322,7 @@ export default function GlobalLoginPage() {
                       key={t.slug}
                       onClick={() =>
                         navigate(
-                          `/t/${t.slug}/login?email=${encodeURIComponent(email)}`
+                          `/t/${t.slug}/login?email=${encodeURIComponent(email)}&school=${encodeURIComponent(t.name)}`
                         )
                       }
                       className="flex w-full items-center justify-between rounded-xl border bg-card px-4 py-3.5 text-sm font-medium transition-colors hover:bg-accent"

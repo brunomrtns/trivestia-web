@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { authEndpoints } from '@/services/endpoints/auth.endpoints';
 import { useAuthStore } from '@/features/auth/auth.store';
+import { useTenant } from '@/hooks/useTenant';
 
 const schema = z.object({
   email: z.string().email('E-mail inválido'),
@@ -30,12 +31,17 @@ export default function LoginPage() {
     : '/app/dashboard';
   const returnTo = searchParams.get('returnTo') ?? defaultReturn;
   const { isAuthenticated, isLoading, setAuth } = useAuthStore();
+  const { tenant } = useTenant();
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // E-mail pode vir pré-preenchido via query param (?email=...) quando
-  // o usuário passa pelo GlobalLoginPage
+  // E-mail e nome da escola podem vir pré-preenchidos via query param
+  // quando o usuário passa pelo GlobalLoginPage
   const prefilledEmail = searchParams.get('email') ?? '';
+  const schoolNameParam = searchParams.get('school') ?? '';
+
+  // Nome da escola: query param (instantâneo) ou useTenant (fallback para acesso direto)
+  const displaySchoolName = schoolNameParam || tenant?.name || '';
 
   const {
     register,
@@ -71,6 +77,17 @@ export default function LoginPage() {
 
   return (
     <div className="w-full max-w-sm">
+      {/* Nome da escola — visível especialmente no mobile onde o painel lateral não aparece */}
+      {displaySchoolName && (
+        <div className="mb-4 flex items-center gap-2 rounded-full border bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary w-fit">
+          {tenant?.logoUrl ? (
+            <img src={tenant.logoUrl} alt="" className="h-3.5 w-3.5 rounded-full" />
+          ) : (
+            <span className="inline-block h-2 w-2 rounded-full bg-primary" />
+          )}
+          {displaySchoolName}
+        </div>
+      )}
       <h1 className="mb-2 text-3xl font-extrabold">Entrar</h1>
       <p className="mb-8 text-muted-foreground">
         Novo por aqui?{' '}
@@ -129,6 +146,7 @@ export default function LoginPage() {
               id="password"
               type={showPwd ? 'text' : 'password'}
               autoComplete="current-password"
+              autoFocus={!!prefilledEmail}
               placeholder="••••••••"
               className="w-full rounded-lg border bg-background px-4 py-2.5 pr-10 text-sm outline-none ring-offset-background transition focus:ring-2 focus:ring-ring focus:ring-offset-2"
               {...register('password')}

@@ -36,7 +36,14 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { IChartApi } from 'lightweight-charts';
 
 /** Janela de candles a mostrar quando o total exceder esse valor. */
-const TARGET_BARS = 80;
+const TARGET_BARS = 130;
+
+/**
+ * Largura em pixels de cada candle no zoom inicial.
+ * Valor menor = mais candles visíveis = menos zoom.
+ * 8px é um tamanho confortável para leitura sem ser gigante.
+ */
+const INITIAL_BAR_SPACING = 8;
 
 interface Options {
   visibleCount: number;
@@ -80,8 +87,10 @@ export function useAutoZoomTimeScale(
 
     programmaticCall(() => {
       if (visibleCount <= TARGET_BARS) {
-        // Poucos candles: mostrar tudo.
-        chart.timeScale().fitContent();
+        // Poucos candles (início do playback): usa barSpacing fixo para evitar
+        // que 1 candle ocupe a tela inteira (fitContent() causaria zoom extremo).
+        chart.timeScale().applyOptions({ barSpacing: INITIAL_BAR_SPACING });
+        chart.timeScale().scrollToRealTime();
       } else {
         // Muitos candles: mostrar apenas os últimos TARGET_BARS.
         chart.timeScale().setVisibleLogicalRange({
