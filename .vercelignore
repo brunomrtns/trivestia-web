@@ -1,6 +1,4 @@
 node_modules
-!packages/sim-core/node_modules
-!packages/sim-core/dist
 .env
 .env.local
 .env.development
@@ -9,5 +7,3 @@ node_modules
 .git/
 .gitignore
 README.md
-dist
-!dist/index.html

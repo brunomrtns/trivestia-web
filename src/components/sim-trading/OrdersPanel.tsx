@@ -1,6 +1,6 @@
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { SimulationState } from '@/types/api';
+import type { SimulationState, OrderRequest } from '@/types/api';
 
 interface OrdersPanelProps {
   engineState: SimulationState;
@@ -25,7 +25,7 @@ export function OrdersPanel({
 
   return (
     <div className="space-y-1.5">
-      {orders.map((o) => (
+      {orders.map((o: OrderRequest) => (
         <div
           key={o.id}
           className="flex items-center gap-2 rounded-md border bg-card px-3 py-2 text-xs"
