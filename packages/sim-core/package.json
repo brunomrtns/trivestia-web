@@ -2,8 +2,16 @@
   "name": "@trivestia/sim-core",
   "version": "1.0.0",
   "description": "Deterministic trading simulation engine — shared between FE and BE",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
   "files": [
     "dist"
   ],
