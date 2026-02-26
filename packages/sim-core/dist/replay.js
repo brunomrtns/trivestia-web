@@ -1,6 +1,6 @@
+import * as execution_1 from "./execution.js";
+import * as hash_1 from "./hash.js";
 export { replaySimulation as replaySimulation };
-const execution_1 = require("./execution");
-const hash_1 = require("./hash");
 /**
  * Executa replay completo: candles + events → SimulationResult.
  * FIX v3.0.1: eventCount é o length real do array de events, não state.tradeCount.

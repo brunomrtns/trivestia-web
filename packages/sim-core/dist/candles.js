@@ -1,6 +1,6 @@
+import * as prng_1 from "./prng.js";
+import * as spread_1 from "./spread.js";
 export { generateCandleSeries as generateCandleSeries };
-const prng_1 = require("./prng");
-const spread_1 = require("./spread");
 /**
  * Gera série de candles OHLCV com bid/ask determinísticos.
  * Mesmo CandleConfig → mesma série em qualquer plataforma.
