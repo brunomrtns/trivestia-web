@@ -93,7 +93,6 @@ function PageLoader() {
 /**
  * Redireciona paths legados (/login, /register, /app/*, /courses, …)
  * levando em conta o estado de autenticação e o último tenant visitado.
- *
  * Fluxo:
  *  - Autenticado  + slug  → /t/:slug/app/dashboard   (ou /app/courses para paths de cursos)
  *  - Sem auth     + slug  → /t/:slug/login            (ou /register se o path era /register)
