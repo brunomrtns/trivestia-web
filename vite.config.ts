@@ -15,12 +15,16 @@ export default defineConfig({
     }
   },
   optimizeDeps: {
-    // sim-core é CJS (CommonJS); forçar pré-bundling via esbuild p/ converter em ESM
-    include: ['@trivestia/sim-core']
+    // sim-core é ESM; incluir para pré-bundling
+    include: ['@trivestia/sim-core'],
+    esbuildOptions: {
+      mainFields: ['module', 'main']
+    }
   },
   build: {
     commonjsOptions: {
-      include: [/packages\/sim-core/, /node_modules/]
+      include: [/node_modules/],
+      exclude: [/packages\/sim-core/]
     }
   }
 });
