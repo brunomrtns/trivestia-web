@@ -1,10 +1,9 @@
-exports.SimulationEngine = void 0;
 /**
  * Motor de execução determinístico.
  * Processa eventos (PLACE_ORDER, CANCEL_ORDER, MODIFY_ORDER) e avança candles.
  * Suporta MARKET, LIMIT, STOP, SL/TP, average-in, flip, force-close.
  */
-class SimulationEngine {
+export class SimulationEngine {
     constructor(candles, config) {
         this.candles = candles;
         this.config = config;
@@ -360,7 +359,6 @@ class SimulationEngine {
         this.state.equity = round2(this.state.balance + pos.unrealizedPnl);
     }
 }
-export { SimulationEngine as SimulationEngine };
 function round2(n) {
     return Math.round(n * 100) / 100;
 }

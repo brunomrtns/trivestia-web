@@ -3,7 +3,7 @@ node_modules
 .env.local
 .env.development
 .env.test
-*.log
+\*.log
 .git/
 .gitignore
 README.md

@@ -8,7 +8,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@trivestia/sim-core': path.resolve(__dirname, './packages/sim-core/dist/index.js')
+      '@trivestia/sim-core': path.resolve(
+        __dirname,
+        './packages/sim-core/dist/index.js'
+      )
     }
   },
   optimizeDeps: {
