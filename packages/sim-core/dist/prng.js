@@ -1,9 +1,7 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createPRNG = createPRNG;
-exports.randInt = randInt;
-exports.randFloat = randFloat;
-exports.randGaussian = randGaussian;
+export { createPRNG as createPRNG };
+export { randInt as randInt };
+export { randFloat as randFloat };
+export { randGaussian as randGaussian };
 /**
  * Mulberry32 — PRNG determinístico de 32 bits.
  * Produz a mesma sequência para o mesmo seed em qualquer plataforma.

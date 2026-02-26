@@ -1,5 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.SimulationEngine = void 0;
 /**
  * Motor de execução determinístico.
@@ -362,7 +360,7 @@ class SimulationEngine {
         this.state.equity = round2(this.state.balance + pos.unrealizedPnl);
     }
 }
-exports.SimulationEngine = SimulationEngine;
+export { SimulationEngine as SimulationEngine };
 function round2(n) {
     return Math.round(n * 100) / 100;
 }

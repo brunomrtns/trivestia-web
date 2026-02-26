@@ -1,6 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.scoreSimulation = scoreSimulation;
+export { scoreSimulation as scoreSimulation };
 function scoreSimulation(result, config) {
     const failReasons = [];
     // ─── Verificar condições de reprovação ────────────────

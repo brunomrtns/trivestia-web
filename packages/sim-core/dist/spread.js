@@ -1,6 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.calculateSpread = calculateSpread;
+export { calculateSpread as calculateSpread };
 /**
  * Calcula o spread em basis points para um candle.
  * FIXED: spread constante.

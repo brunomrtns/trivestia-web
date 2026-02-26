@@ -1,6 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.replaySimulation = replaySimulation;
+export { replaySimulation as replaySimulation };
 const execution_1 = require("./execution");
 const hash_1 = require("./hash");
 /**

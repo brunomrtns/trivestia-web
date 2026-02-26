@@ -1,6 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateCandleSeries = generateCandleSeries;
+export { generateCandleSeries as generateCandleSeries };
 const prng_1 = require("./prng");
 const spread_1 = require("./spread");
 /**

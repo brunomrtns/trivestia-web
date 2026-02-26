@@ -1,7 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.computeStateHash = computeStateHash;
-exports.stableStringify = stableStringify;
+export { computeStateHash as computeStateHash };
+export { stableStringify as stableStringify };
 /**
  * Hash determinístico cross-platform usando FNV-1a 64-bit
  * (implementação JS pura, sem dependências de runtime).
