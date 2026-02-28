@@ -55,6 +55,8 @@ export type ActivityType =
 
 export type ProgressStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
 
+export type ActivityReviewPolicy = 'IMMEDIATE' | 'AFTER_DATE' | 'NEVER';
+
 export type StepType =
   | 'CONTENT_TEXT'
   | 'CONTENT_VIDEO'
@@ -201,6 +203,8 @@ export interface Activity {
   order: number;
   lessonId: string;
   type: ActivityType;
+  reviewPolicy: ActivityReviewPolicy;
+  reviewAfterDate: string | null;
   questions: Question[];
 }
 
@@ -208,6 +212,7 @@ export interface Activity {
 export interface Question {
   id: string;
   statement: string;
+  imageUrl?: string | null;
   difficulty: number;
   explanation: string;
   weight: number;
@@ -347,15 +352,19 @@ export interface SubmissionResponse {
   score: number;
   maxScore: number;
   completedAt: string;
+  reviewPolicy: ActivityReviewPolicy;
+  reviewAllowed: boolean;
+  reviewAvailableAt: string | null;
   responses: {
     questionId: string;
     isCorrect: boolean;
     earnedScore: number;
     question: {
       statement: string;
-      explanation: string;
+      imageUrl?: string | null;
       weight: number;
-      options: QuestionOption[]; // student nunca recebe isCorrect aqui
+      explanation?: string; // só presente se reviewAllowed === true
+      options: (QuestionOption | AdminQuestionOption)[]; // isCorrect só se reviewAllowed
     };
   }[];
 }
@@ -496,10 +505,13 @@ export interface CreateActivityDTO {
   title: string;
   order: number;
   type: ActivityType;
+  reviewPolicy?: ActivityReviewPolicy;
+  reviewAfterDate?: string | null;
 }
 
 export interface CreateQuestionDTO {
   statement: string;
+  imageUrl?: string | null;
   difficulty?: number;
   explanation?: string;
   weight?: number;

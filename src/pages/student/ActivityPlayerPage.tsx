@@ -8,7 +8,11 @@ import {
   ChevronRight,
   Loader2,
   Trophy,
-  RotateCcw
+  RotateCcw,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Lock
 } from 'lucide-react';
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { progressEndpoints } from '@/services/endpoints/progress.endpoints';
@@ -19,7 +23,7 @@ import { ChallengeBriefingScreen } from '@/components/sim-trading/ChallengeBrief
 import { HelpDrawer } from '@/components/sim-trading/HelpDrawer';
 import { useTutorialProgress } from '@/components/sim-trading/useTutorialProgress';
 import { getActivityTypeLabel, formatPercentage } from '@/lib/utils';
-import type { Answer, SubmissionResult } from '@/types/api';
+import type { Answer, SubmissionResult, SubmissionResponse } from '@/types/api';
 
 export default function ActivityPlayerPage() {
   const { lessonId, activityId, tenantSlug } = useParams<{
@@ -54,6 +58,14 @@ export default function ActivityPlayerPage() {
     onError: () => {
       toast.error('Erro ao enviar respostas. Tente novamente.');
     }
+  });
+
+  // GET /submissions/:activityId — carregado após submissao concluída
+  const { data: submissionReview, isLoading: loadingReview } = useQuery({
+    queryKey: ['submission-review', slug, activityId],
+    queryFn: () => progressEndpoints.getSubmission(slug, activityId!),
+    enabled: !!result && !!activityId,
+    staleTime: 0
   });
 
   if (isLoading || !activity) {
@@ -100,16 +112,6 @@ export default function ActivityPlayerPage() {
       result.percentage ?? Math.round((result.score / result.maxScore) * 100);
     const passed = pct >= 60;
 
-    // Build a map of feedback by questionId from result
-    const feedbackMap: Record<string, Record<string, unknown>> = {};
-    if (result.results) {
-      result.results.forEach((r) => {
-        if (r.feedback) {
-          feedbackMap[r.questionId] = r.feedback;
-        }
-      });
-    }
-
     return (
       <div className="mx-auto max-w-2xl space-y-6">
         {/* Score header */}
@@ -136,30 +138,142 @@ export default function ActivityPlayerPage() {
           </p>
         </motion.div>
 
-        {/* Per-question review (only for trade activities with feedback) */}
-        {Object.keys(feedbackMap).length > 0 && (
+        {/* ─── Revisão condicional das questões ─────────────────────────────── */}
+        {loadingReview && (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div>
+        )}
+
+        {submissionReview && !loadingReview && (
           <div className="space-y-4">
             <h2 className="text-lg font-bold">Revisão das questões</h2>
-            {questions.map((q, idx) => (
-              <div
-                key={q.id}
-                className="rounded-2xl border bg-card p-6 shadow-sm"
-              >
-                <p className="mb-2 text-xs font-medium text-muted-foreground">
-                  Questão {idx + 1}
-                </p>
-                <p className="mb-4 text-base font-semibold leading-relaxed">
-                  {q.statement}
-                </p>
-                <QuestionRenderer
-                  activityType={activity.type}
-                  question={q}
-                  value={answers[q.id] ?? null}
-                  onChange={() => {}}
-                  feedback={feedbackMap[q.id] ?? null}
-                />
+
+            {/* Política: NEVER */}
+            {submissionReview.reviewPolicy === 'NEVER' && (
+              <div className="flex items-center gap-3 rounded-xl border bg-card p-4 text-sm text-muted-foreground">
+                <Lock className="h-5 w-5 shrink-0" />
+                O professor optou por não liberar o gabarito desta atividade.
               </div>
-            ))}
+            )}
+
+            {/* Política: AFTER_DATE ainda bloqueada */}
+            {submissionReview.reviewPolicy === 'AFTER_DATE' &&
+              !submissionReview.reviewAllowed && (
+                <div className="flex items-center gap-3 rounded-xl border bg-card p-4 text-sm text-muted-foreground">
+                  <Clock className="h-5 w-5 shrink-0 text-yellow-500" />
+                  <span>
+                    O gabarito será liberado em{' '}
+                    <strong className="text-foreground">
+                      {submissionReview.reviewAvailableAt
+                        ? new Date(
+                            submissionReview.reviewAvailableAt
+                          ).toLocaleString('pt-BR')
+                        : 'data a definir'}
+                    </strong>
+                    .
+                  </span>
+                </div>
+              )}
+
+            {/* Revisão permitida: questão por questão */}
+            {submissionReview.reviewAllowed &&
+              submissionReview.responses.map((r, idx) => {
+                const feedbackEntry = result?.results?.find(
+                  (x) => x.questionId === r.questionId
+                );
+                return (
+                  <div
+                    key={r.questionId}
+                    className={`rounded-2xl border p-5 shadow-sm ${
+                      r.isCorrect
+                        ? 'border-green-500/30 bg-green-500/5'
+                        : 'border-red-500/30 bg-red-500/5'
+                    }`}
+                  >
+                    {/* Cabeçalho com resultado */}
+                    <div className="mb-3 flex items-center gap-2">
+                      {r.isCorrect ? (
+                        <CheckCircle2 className="h-5 w-5 text-green-500" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-red-500" />
+                      )}
+                      <span className="text-xs font-semibold text-muted-foreground">
+                        Questão {idx + 1} ·{' '}
+                        {r.isCorrect ? 'Correta' : 'Incorreta'} ·{' '}
+                        +{r.earnedScore}/{r.question.weight} pts
+                      </span>
+                    </div>
+
+                    {/* Enunciado */}
+                    <p className="mb-3 text-sm font-semibold leading-relaxed">
+                      {r.question.statement}
+                    </p>
+
+                    {/* Imagem do enunciado */}
+                    {r.question.imageUrl && (
+                      <img
+                        src={r.question.imageUrl}
+                        alt="Imagem da questão"
+                        className="mb-3 max-h-48 w-full rounded-xl object-contain bg-muted/30"
+                      />
+                    )}
+
+                    {/* Opções com gabarito (isCorrect presente quando review liberado) */}
+                    {r.question.options.length > 0 && (
+                      <div className="mb-3 space-y-1.5">
+                        {r.question.options.map((opt) => {
+                          const withCorrect = opt as typeof opt & {
+                            isCorrect?: boolean;
+                          };
+                          return (
+                            <div
+                              key={opt.id}
+                              className={`flex items-start gap-2 rounded-lg px-3 py-2 text-sm ${
+                                withCorrect.isCorrect
+                                  ? 'bg-green-500/10 text-green-700 dark:text-green-400'
+                                  : 'bg-muted/30 text-muted-foreground'
+                              }`}
+                            >
+                              <span className="mt-0.5 h-3 w-3 shrink-0">
+                                {withCorrect.isCorrect ? '✓' : '–'}
+                              </span>
+                              {opt.text}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Explicação */}
+                    {r.question.explanation && (
+                      <div className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-sm text-primary/90">
+                        <span className="mr-1 font-semibold">Explicação:</span>
+                        {r.question.explanation}
+                      </div>
+                    )}
+
+                    {/* Feedback de atividades especiais (ChartMarkup, RiskCalc) */}
+                    {feedbackEntry?.feedback && (
+                      <QuestionRenderer
+                        activityType={activity.type}
+                        question={{
+                          id: r.questionId,
+                          statement: r.question.statement,
+                          difficulty: 1,
+                          explanation: '',
+                          weight: r.question.weight,
+                          order: idx,
+                          options: []
+                        }}
+                        value={answers[r.questionId] ?? null}
+                        onChange={() => {}}
+                        feedback={feedbackEntry.feedback}
+                      />
+                    )}
+                  </div>
+                );
+              })}
           </div>
         )}
 

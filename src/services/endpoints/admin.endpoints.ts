@@ -5,12 +5,16 @@ import type {
   Lesson,
   Activity,
   ActivityType,
+  ActivityReviewPolicy,
   CreateCourseDTO,
   UpdateCourseDTO,
   CreateModuleDTO,
   CreateLessonDTO,
   CreateActivityDTO,
-  CreateQuestionDTO
+  CreateQuestionDTO,
+  CreateStepDTO,
+  UpdateStepDTO,
+  LessonStepDTO
 } from '@/types/api';
 
 // Todos os endpoints admin exigem Bearer ADMIN
@@ -77,7 +81,13 @@ export const adminEndpoints = {
     slug: string,
     lessonId: string,
     id: string,
-    data: Partial<{ title: string; order: number; type: ActivityType }>
+    data: Partial<{
+      title: string;
+      order: number;
+      type: ActivityType;
+      reviewPolicy: ActivityReviewPolicy;
+      reviewAfterDate: string | null;
+    }>
   ) =>
     apiTenant(slug)
       .patch<Activity>(`/lessons/${lessonId}/activities/${id}`, data)
@@ -108,5 +118,40 @@ export const adminEndpoints = {
       .then((r) => r.data),
 
   deleteQuestion: (slug: string, activityId: string, id: string) =>
-    apiTenant(slug).delete(`/activities/${activityId}/questions/${id}`)
+    apiTenant(slug).delete(`/activities/${activityId}/questions/${id}`),
+
+  // ─── Lesson Steps ─────────────────────────────────────────────────────────
+  createStep: (slug: string, lessonId: string, data: CreateStepDTO) =>
+    apiTenant(slug)
+      .post<LessonStepDTO>(`/lessons/${lessonId}/steps`, data)
+      .then((r) => r.data),
+
+  updateStep: (slug: string, lessonId: string, stepId: string, data: UpdateStepDTO) =>
+    apiTenant(slug)
+      .patch<LessonStepDTO>(`/lessons/${lessonId}/steps/${stepId}`, data)
+      .then((r) => r.data),
+
+  deleteStep: (slug: string, lessonId: string, stepId: string) =>
+    apiTenant(slug).delete(`/lessons/${lessonId}/steps/${stepId}`),
+
+  reorderSteps: (slug: string, lessonId: string, orders: { stepId: string; order: number }[]) =>
+    apiTenant(slug)
+      .patch(`/lessons/${lessonId}/steps/reorder`, { orders })
+      .then((r) => r.data),
+
+  generateSteps: (slug: string, lessonId: string) =>
+    apiTenant(slug)
+      .post(`/lessons/${lessonId}/steps/generate`)
+      .then((r) => r.data),
+
+  // ─── Upload ─────────────────────────────────────────────────
+  uploadQuestionImage: (slug: string, file: File) => {
+    const form = new FormData();
+    form.append('image', file);
+    return apiTenant(slug)
+      .post<{ url: string }>('/upload/question-image', form, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      .then((r) => r.data.url);
+  }
 };

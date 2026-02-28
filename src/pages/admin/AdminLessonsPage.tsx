@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -17,16 +17,38 @@ import {
   FileText,
   Zap,
   HelpCircle,
-  Route
+  GripVertical,
+  Video,
+  Image
 } from 'lucide-react';
+import {
+  DndContext,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+  type DragEndEvent
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { adminEndpoints } from '@/services/endpoints/admin.endpoints';
+import { StepFormModal } from '@/components/admin/StepFormModal';
 import { cn, getActivityTypeLabel } from '@/lib/utils';
 import type {
   Module,
   Lesson,
-  ActivitySummary,
-  ActivityType
+  ActivityType,
+  ActivityReviewPolicy,
+  LessonStepDTO,
+  StepType
 } from '@/types/api';
 
 // ─── Schemas ─────────────────────────────────────────────────────────────────
@@ -56,9 +78,19 @@ const activitySchema = z.object({
     'CHART_MARKUP',
     'RISK_CALCULATOR',
     'SIM_TRADING_CHALLENGE'
-  ] as const)
+  ] as const),
+  reviewPolicy: z
+    .enum(['IMMEDIATE', 'AFTER_DATE', 'NEVER'] as const)
+    .default('IMMEDIATE'),
+  reviewAfterDate: z.string().optional().nullable()
 });
 type ActivityForm = z.infer<typeof activitySchema>;
+
+const REVIEW_POLICIES: { value: ActivityReviewPolicy; label: string; description: string }[] = [
+  { value: 'IMMEDIATE', label: 'Imediata', description: 'Aluno vê gabarito logo após responder' },
+  { value: 'AFTER_DATE', label: 'Após data', description: 'Gabarito liberado após data específica' },
+  { value: 'NEVER', label: 'Nunca', description: 'Gabarito nunca é exibido' }
+];
 
 const ACTIVITY_TYPES: { value: ActivityType; label: string }[] = [
   { value: 'MULTIPLE_CHOICE', label: 'Múltipla Escolha' },
@@ -84,47 +116,144 @@ const TYPE_COLORS: Record<ActivityType, string> = {
   SIM_TRADING_CHALLENGE: 'bg-emerald-500/10 text-emerald-600 border-emerald-200'
 };
 
-// ─── ActivityRow ─────────────────────────────────────────────────────────────
+const STEP_ICON: Record<StepType, React.ReactNode> = {
+  ACTIVITY: <Zap className="h-4 w-4 shrink-0 text-amber-500" />,
+  CONTENT_TEXT: <FileText className="h-4 w-4 shrink-0 text-blue-500" />,
+  CONTENT_VIDEO: <Video className="h-4 w-4 shrink-0 text-purple-500" />,
+  CONTENT_IMAGE: <Image className="h-4 w-4 shrink-0 text-green-500" />
+};
 
-function ActivityRow({
+const STEP_LABEL: Record<StepType, string> = {
+  ACTIVITY: 'Atividade',
+  CONTENT_TEXT: 'Texto',
+  CONTENT_VIDEO: 'Vídeo',
+  CONTENT_IMAGE: 'Imagem'
+};
+
+const STEP_BADGE_COLOR: Record<StepType, string> = {
+  ACTIVITY: 'bg-amber-500/10 text-amber-700 border-amber-200',
+  CONTENT_TEXT: 'bg-blue-500/10 text-blue-700 border-blue-200',
+  CONTENT_VIDEO: 'bg-purple-500/10 text-purple-700 border-purple-200',
+  CONTENT_IMAGE: 'bg-green-500/10 text-green-700 border-green-200'
+};
+
+// ─── SortableStepRow ──────────────────────────────────────────────────────────
+
+function SortableStepRow({
   slug,
   lessonId,
-  activity,
+  step,
+  onEdit,
   onDelete,
   isDeleting
 }: {
   slug: string;
   lessonId: string;
-  activity: ActivitySummary;
+  step: LessonStepDTO;
+  onEdit: () => void;
   onDelete: () => void;
   isDeleting: boolean;
 }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id: step.id, disabled: step.isVirtual });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 10 : undefined
+  };
+
+  const activityId =
+    step.type === 'ACTIVITY'
+      ? (step.content as { activityId?: string }).activityId
+      : undefined;
+
+  // For ACTIVITY steps, extract the activity type from content if available
+  const activityType = step.type === 'ACTIVITY'
+    ? (step.content as { activityType?: ActivityType }).activityType
+    : undefined;
+
   return (
-    <div className="flex items-center gap-3 rounded-lg border bg-background px-4 py-2.5">
-      <Zap className="h-4 w-4 shrink-0 text-muted-foreground" />
-      <span className="flex-1 truncate text-sm font-medium">
-        {activity.title}
-      </span>
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-2 rounded-lg border bg-background px-3 py-2.5"
+    >
+      {/* Drag handle — disabled for virtual steps */}
+      <button
+        {...(step.isVirtual ? {} : { ...attributes, ...listeners })}
+        disabled={step.isVirtual}
+        className={cn(
+          'rounded p-0.5 text-muted-foreground/40',
+          step.isVirtual
+            ? 'cursor-default opacity-30'
+            : 'cursor-grab touch-none hover:text-muted-foreground active:cursor-grabbing'
+        )}
+        aria-label="Arrastar"
+      >
+        <GripVertical className="h-4 w-4" />
+      </button>
+
+      {STEP_ICON[step.type]}
+
+      <span className="flex-1 truncate text-sm font-medium">{step.title}</span>
+
+      {/* Activity type badge (if available in content) */}
+      {step.type === 'ACTIVITY' && activityType && (
+        <span
+          className={cn(
+            'shrink-0 rounded-full border px-2 py-0.5 text-xs font-medium',
+            TYPE_COLORS[activityType] ?? 'bg-muted text-muted-foreground'
+          )}
+        >
+          {getActivityTypeLabel(activityType)}
+        </span>
+      )}
+
+      {/* Step type badge */}
       <span
         className={cn(
           'shrink-0 rounded-full border px-2 py-0.5 text-xs font-medium',
-          TYPE_COLORS[activity.type] ?? 'bg-muted text-muted-foreground'
+          STEP_BADGE_COLOR[step.type]
         )}
       >
-        {getActivityTypeLabel(activity.type)}
+        {STEP_LABEL[step.type]}
       </span>
-      <Link
-        to={`/t/${slug}/admin/lessons/${lessonId}/activities/${activity.id}/questions`}
-        className="flex shrink-0 items-center gap-1 rounded-lg border px-3 py-1 text-xs font-medium transition hover:bg-accent"
-      >
-        <HelpCircle className="h-3 w-3" />
-        Questões
-      </Link>
+
+      {/* Questões link for ACTIVITY steps */}
+      {step.type === 'ACTIVITY' && activityId && (
+        <Link
+          to={`/t/${slug}/admin/lessons/${lessonId}/activities/${activityId}/questions`}
+          className="flex shrink-0 items-center gap-1 rounded-lg border px-3 py-1 text-xs font-medium transition hover:bg-accent"
+        >
+          <HelpCircle className="h-3 w-3" />
+          Questões
+        </Link>
+      )}
+
+      {/* Edit button for non-virtual content steps */}
+      {!step.isVirtual && step.type !== 'ACTIVITY' && (
+        <button
+          onClick={onEdit}
+          className="shrink-0 rounded-lg p-1.5 text-muted-foreground transition hover:bg-accent hover:text-foreground"
+          aria-label="Editar etapa"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </button>
+      )}
+
       <button
         onClick={onDelete}
         disabled={isDeleting}
         className="shrink-0 rounded-lg p-1.5 text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive disabled:opacity-40"
-        aria-label="Excluir atividade"
+        aria-label="Excluir etapa"
       >
         {isDeleting ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -140,7 +269,6 @@ function ActivityRow({
 
 function LessonSection({
   slug,
-  courseId,
   moduleId,
   lesson,
   onDeleteLesson,
@@ -155,49 +283,153 @@ function LessonSection({
 }) {
   const qc = useQueryClient();
   const [expanded, setExpanded] = useState(false);
-  const [addingActivity, setAddingActivity] = useState(false);
   const [editingLesson, setEditingLesson] = useState(false);
+  const [addingStep, setAddingStep] = useState(false);
+  const [stepKind, setStepKind] = useState<'ACTIVITY' | 'CONTENT'>('ACTIVITY');
+  const [editingStep, setEditingStep] = useState<LessonStepDTO | null>(null);
+  const [showContentModal, setShowContentModal] = useState(false);
+  const [localSteps, setLocalSteps] = useState<LessonStepDTO[]>([]);
 
-  const { data: activities, isLoading: loadingActivities } = useQuery({
-    queryKey: ['admin-activities', slug, lesson.id],
-    queryFn: () => learningEndpoints.getActivities(slug, lesson.id),
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const { data: timeline, isLoading: loadingSteps } = useQuery({
+    queryKey: ['admin-timeline', slug, lesson.id],
+    queryFn: () => learningEndpoints.getTimeline(slug, lesson.id),
     enabled: expanded
   });
 
+  // Sync local state when data arrives
+  useEffect(() => {
+    if (timeline?.steps) setLocalSteps(timeline.steps);
+  }, [timeline?.steps]);
+
+  const generateMut = useMutation({
+    mutationFn: () => adminEndpoints.generateSteps(slug, lesson.id),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: ['admin-timeline', slug, lesson.id] }),
+    onError: () =>
+      qc.invalidateQueries({ queryKey: ['admin-timeline', slug, lesson.id] })
+  });
+
+  // Auto-materialize: whenever there are virtual steps, create real steps for them silently
+  useEffect(() => {
+    if (!timeline) return;
+    const hasVirtual = timeline.steps.some((s) => s.isVirtual);
+    if (hasVirtual && !generateMut.isPending) {
+      generateMut.mutate();
+    }
+  }, [timeline]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const reorderMut = useMutation({
+    mutationFn: (orders: { stepId: string; order: number }[]) =>
+      adminEndpoints.reorderSteps(slug, lesson.id, orders),
+    onError: () => {
+      toast.error('Erro ao reordenar etapas.');
+      if (timeline?.steps) setLocalSteps(timeline.steps);
+    }
+  });
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIdx = localSteps.findIndex((s) => s.id === String(active.id));
+    const newIdx = localSteps.findIndex((s) => s.id === String(over.id));
+    const reordered = arrayMove(localSteps, oldIdx, newIdx);
+    setLocalSteps(reordered);
+
+    if (reordered.some((s) => s.isVirtual)) {
+      toast.info('Aguardando materialização das etapas...');
+      return;
+    }
+
+    reorderMut.mutate(
+      reordered.map((s, i) => ({ stepId: s.id, order: i + 1 }))
+    );
+  }
+
+  const deleteStepMut = useMutation({
+    mutationFn: async ({
+      stepId,
+      type,
+      activityId
+    }: {
+      stepId: string;
+      type: StepType;
+      activityId?: string;
+    }) => {
+      await adminEndpoints.deleteStep(slug, lesson.id, stepId);
+      if (type === 'ACTIVITY' && activityId) {
+        await adminEndpoints.deleteActivity(slug, lesson.id, activityId).catch(() => {});
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-timeline', slug, lesson.id] });
+      toast.success('Etapa excluída.');
+    },
+    onError: () => toast.error('Erro ao excluir etapa.')
+  });
+
+  // ─── Activity form ──────────────────────────────────────────────────────────
   const actForm = useForm<ActivityForm>({
     resolver: zodResolver(activitySchema),
     defaultValues: {
       title: '',
-      order: (activities?.length ?? 0) + 1,
-      type: 'MULTIPLE_CHOICE'
+      order: 1,
+      type: 'MULTIPLE_CHOICE',
+      reviewPolicy: 'IMMEDIATE',
+      reviewAfterDate: null
     }
   });
 
-  const lessonEditForm = useForm<LessonForm>({
-    resolver: zodResolver(lessonSchema),
-    defaultValues: { title: lesson.title, order: lesson.order }
-  });
-
-  const createActivityMut = useMutation({
-    mutationFn: (data: ActivityForm) =>
-      adminEndpoints.createActivity(slug, lesson.id, data),
+  const createActivityStepMut = useMutation({
+    mutationFn: async (data: ActivityForm) => {
+      const activity = await adminEndpoints.createActivity(slug, lesson.id, data);
+      await adminEndpoints.createStep(slug, lesson.id, {
+        type: 'ACTIVITY',
+        title: activity.title,
+        content: { activityId: activity.id, activityType: activity.type },
+        order: (localSteps.length ?? 0) + 1
+      });
+    },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin-activities', slug, lesson.id] });
-      setAddingActivity(false);
-      actForm.reset({ title: '', order: 1, type: 'MULTIPLE_CHOICE' });
-      toast.success('Atividade criada!');
+      qc.invalidateQueries({ queryKey: ['admin-timeline', slug, lesson.id] });
+      setAddingStep(false);
+      actForm.reset({
+        title: '',
+        order: 1,
+        type: 'MULTIPLE_CHOICE',
+        reviewPolicy: 'IMMEDIATE',
+        reviewAfterDate: null
+      });
+      toast.success('Atividade adicionada!');
     },
     onError: () => toast.error('Erro ao criar atividade.')
   });
 
-  const deleteActivityMut = useMutation({
-    mutationFn: (id: string) =>
-      adminEndpoints.deleteActivity(slug, lesson.id, id),
+  const createContentStepMut = useMutation({
+    mutationFn: (data: { type: StepType; title: string }) =>
+      adminEndpoints.createStep(slug, lesson.id, {
+        type: data.type,
+        title: data.title,
+        content: {},
+        order: (localSteps.length ?? 0) + 1
+      }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin-activities', slug, lesson.id] });
-      toast.success('Atividade excluída.');
+      qc.invalidateQueries({ queryKey: ['admin-timeline', slug, lesson.id] });
+      setAddingStep(false);
+      toast.success('Etapa criada!');
     },
-    onError: () => toast.error('Erro ao excluir atividade.')
+    onError: () => toast.error('Erro ao criar etapa.')
+  });
+
+  // ─── Lesson edit form ───────────────────────────────────────────────────────
+  const lessonEditForm = useForm<LessonForm>({
+    resolver: zodResolver(lessonSchema),
+    defaultValues: { title: lesson.title, order: lesson.order }
   });
 
   const updateLessonMut = useMutation({
@@ -210,6 +442,8 @@ function LessonSection({
     },
     onError: () => toast.error('Erro ao atualizar aula.')
   });
+
+  const hasVirtualSteps = localSteps.some((s) => s.isVirtual);
 
   return (
     <div className="rounded-xl border bg-card">
@@ -268,13 +502,6 @@ function LessonSection({
               #{lesson.order}
             </span>
           </button>
-          <Link
-            to={`/t/${slug}/admin/courses/${courseId}/lessons/${lesson.id}/steps`}
-            className="flex shrink-0 items-center gap-1 rounded-lg border px-3 py-1 text-xs font-medium transition hover:bg-accent"
-          >
-            <Route className="h-3 w-3" />
-            Etapas
-          </Link>
           <button
             onClick={() => {
               setEditingLesson(true);
@@ -303,126 +530,260 @@ function LessonSection({
         </div>
       )}
 
-      {/* Activities */}
+      {/* Steps list */}
       {expanded && (
         <div className="space-y-2 border-t px-4 pb-4 pt-3">
-          {loadingActivities ? (
-            <div className="flex items-center justify-center py-4">
-              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+          {loadingSteps ? (
+            <div className="flex items-center justify-center gap-2 py-4 text-xs text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+              Carregando…
             </div>
           ) : (
             <>
-              {activities?.map((act) => (
-                <ActivityRow
-                  key={act.id}
-                  slug={slug}
-                  lessonId={lesson.id}
-                  activity={act}
-                  onDelete={() => {
-                    if (confirm(`Excluir atividade "${act.title}"?`))
-                      deleteActivityMut.mutate(act.id);
-                  }}
-                  isDeleting={
-                    deleteActivityMut.isPending &&
-                    deleteActivityMut.variables === act.id
-                  }
-                />
-              ))}
-              {activities?.length === 0 && (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={localSteps.map((s) => s.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {localSteps.map((step) => (
+                    <SortableStepRow
+                      key={step.id}
+                      slug={slug}
+                      lessonId={lesson.id}
+                      step={step}
+                      onEdit={() => setEditingStep(step)}
+                      onDelete={() => {
+                        if (!confirm(`Excluir "${step.title}"?`)) return;
+                        const activityId =
+                          step.type === 'ACTIVITY'
+                            ? (step.content as { activityId?: string })
+                                .activityId
+                            : undefined;
+                        deleteStepMut.mutate({
+                          stepId: step.id,
+                          type: step.type,
+                          activityId
+                        });
+                      }}
+                      isDeleting={
+                        deleteStepMut.isPending &&
+                        (deleteStepMut.variables as { stepId: string })
+                          ?.stepId === step.id
+                      }
+                    />
+                  ))}
+                </SortableContext>
+              </DndContext>
+
+              {localSteps.length === 0 && (
                 <p className="py-2 text-center text-xs text-muted-foreground">
-                  Nenhuma atividade nesta aula.
+                  Nenhuma etapa nesta aula.
+                </p>
+              )}
+
+              {hasVirtualSteps && (
+                <p className="flex items-center gap-1.5 py-1 text-xs text-muted-foreground">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Preparando drag &amp; drop…
                 </p>
               )}
             </>
           )}
 
-          {/* Add activity form */}
-          {addingActivity ? (
-            <form
-              onSubmit={actForm.handleSubmit((d) =>
-                createActivityMut.mutate(d)
-              )}
-              className="mt-1 flex flex-wrap items-end gap-3 rounded-xl border bg-muted/30 p-3"
-            >
-              <div className="flex-1 min-w-[140px]">
-                <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                  Título
-                </label>
-                <input
-                  className="w-full rounded-lg border bg-background px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-ring"
-                  {...actForm.register('title')}
-                />
-                {actForm.formState.errors.title && (
-                  <p className="mt-0.5 text-xs text-destructive">
-                    {actForm.formState.errors.title.message}
-                  </p>
-                )}
-              </div>
-              <div className="w-16">
-                <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                  Ordem
-                </label>
-                <input
-                  type="number"
-                  min={1}
-                  className="w-full rounded-lg border bg-background px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-ring"
-                  {...actForm.register('order')}
-                />
-              </div>
-              <div className="flex-1 min-w-[160px]">
-                <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                  Tipo
-                </label>
-                <select
-                  className="w-full rounded-lg border bg-background px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-ring"
-                  {...actForm.register('type')}
-                >
-                  {ACTIVITY_TYPES.slice()
-                    .sort((a, b) =>
-                      a.label.localeCompare(b.label, 'pt-BR', {
-                        sensitivity: 'base'
-                      })
-                    )
-                    .map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                </select>
-              </div>
-              <div className="flex gap-2">
+          {/* Add step form */}
+          {addingStep ? (
+            <div className="mt-1 rounded-xl border bg-muted/30 p-3">
+              {/* Kind selector */}
+              <div className="mb-3 flex gap-2">
                 <button
-                  type="submit"
-                  disabled={createActivityMut.isPending}
-                  className="flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60"
-                >
-                  {createActivityMut.isPending && (
-                    <Loader2 className="h-3 w-3 animate-spin" />
+                  type="button"
+                  onClick={() => setStepKind('ACTIVITY')}
+                  className={cn(
+                    'flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition',
+                    stepKind === 'ACTIVITY'
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'hover:bg-accent'
                   )}
-                  Salvar
+                >
+                  <Zap className="h-3.5 w-3.5" />
+                  Atividade
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    setAddingActivity(false);
-                    actForm.reset();
-                  }}
-                  className="rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-accent"
+                  onClick={() => setStepKind('CONTENT')}
+                  className={cn(
+                    'flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition',
+                    stepKind === 'CONTENT'
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'hover:bg-accent'
+                  )}
                 >
-                  Cancelar
+                  <FileText className="h-3.5 w-3.5" />
+                  Conteúdo
                 </button>
               </div>
-            </form>
+
+              {/* ── Activity form ── */}
+              {stepKind === 'ACTIVITY' && (
+                <form
+                  onSubmit={actForm.handleSubmit((d) =>
+                    createActivityStepMut.mutate(d)
+                  )}
+                  className="flex flex-wrap items-end gap-3"
+                >
+                  <div className="flex-1 min-w-[140px]">
+                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                      Título
+                    </label>
+                    <input
+                      className="w-full rounded-lg border bg-background px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-ring"
+                      {...actForm.register('title')}
+                    />
+                    {actForm.formState.errors.title && (
+                      <p className="mt-0.5 text-xs text-destructive">
+                        {actForm.formState.errors.title.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-[160px]">
+                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                      Tipo
+                    </label>
+                    <select
+                      className="w-full rounded-lg border bg-background px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-ring"
+                      {...actForm.register('type')}
+                    >
+                      {ACTIVITY_TYPES.slice()
+                        .sort((a, b) =>
+                          a.label.localeCompare(b.label, 'pt-BR', {
+                            sensitivity: 'base'
+                          })
+                        )
+                        .map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                  <div className="flex-1 min-w-[160px]">
+                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                      Revisão
+                    </label>
+                    <select
+                      className="w-full rounded-lg border bg-background px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-ring"
+                      {...actForm.register('reviewPolicy')}
+                    >
+                      {REVIEW_POLICIES.map((p) => (
+                        <option key={p.value} value={p.value}>
+                          {p.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {actForm.watch('reviewPolicy') === 'AFTER_DATE' && (
+                    <div className="flex-1 min-w-[160px]">
+                      <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                        Liberar revisão em
+                      </label>
+                      <input
+                        type="datetime-local"
+                        className="w-full rounded-lg border bg-background px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-ring"
+                        {...actForm.register('reviewAfterDate')}
+                      />
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <button
+                      type="submit"
+                      disabled={createActivityStepMut.isPending}
+                      className="flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60"
+                    >
+                      {createActivityStepMut.isPending && (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      )}
+                      Salvar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAddingStep(false);
+                        actForm.reset();
+                      }}
+                      className="rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-accent"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {/* ── Content step form ── */}
+              {stepKind === 'CONTENT' && (
+                <div className="flex flex-col gap-3">
+                  <p className="text-xs text-muted-foreground">
+                    Clique em "Adicionar" para abrir o editor completo de conteúdo.
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAddingStep(false);
+                        setShowContentModal(true);
+                      }}
+                      className="flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
+                    >
+                      <Plus className="h-3 w-3" />
+                      Adicionar conteúdo
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAddingStep(false)}
+                      className="rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-accent"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           ) : (
             <button
-              onClick={() => setAddingActivity(true)}
+              onClick={() => setAddingStep(true)}
               className="mt-1 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed py-2 text-xs font-medium text-muted-foreground transition hover:border-primary hover:text-primary"
             >
               <Plus className="h-3.5 w-3.5" />
-              Adicionar atividade
+              Adicionar etapa
             </button>
           )}
         </div>
+      )}
+
+      {/* Edit content step modal */}
+      {editingStep !== null && (
+        <StepFormModal
+          slug={slug}
+          lessonId={lesson.id}
+          step={editingStep}
+          nextOrder={localSteps.length + 1}
+          queryKey={['admin-timeline', slug, lesson.id]}
+          onClose={() => setEditingStep(null)}
+        />
+      )}
+
+      {/* Create content step modal */}
+      {showContentModal && (
+        <StepFormModal
+          slug={slug}
+          lessonId={lesson.id}
+          nextOrder={localSteps.length + 1}
+          queryKey={['admin-timeline', slug, lesson.id]}
+          onClose={() => setShowContentModal(false)}
+        />
       )}
     </div>
   );

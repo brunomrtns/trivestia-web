@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { Plus, Trash2, Loader2, ChevronLeft } from 'lucide-react';
+import { Plus, Trash2, Loader2, ChevronLeft, ImagePlus, X } from 'lucide-react';
 import { adminEndpoints } from '@/services/endpoints/admin.endpoints';
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { getActivityTypeLabel } from '@/lib/utils';
@@ -58,6 +58,7 @@ const optionSchema = z.object({
 
 const questionSchema = z.object({
   statement: z.string().min(5, 'Mínimo 5 caracteres'),
+  imageUrl: z.string().url().optional().nullable(),
   explanation: z.string().optional(),
   difficulty: z.number().min(1).max(5).default(3),
   weight: z.number().min(1).default(1),
@@ -73,20 +74,29 @@ function QuestionForm({
   activityType,
   onSave,
   onCancel,
-  loading
+  loading,
+  slug
 }: {
   activityType: ActivityType;
   onSave: (data: QuestionFormData) => Promise<void>;
   onCancel: () => void;
   loading: boolean;
+  slug: string;
 }) {
   const showOptions = activityType !== 'TEXT_INPUT';
   const isTrueFalse = activityType === 'TRUE_FALSE';
+
+  // Estado do upload de imagem
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors }
   } = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema),
@@ -113,6 +123,21 @@ function QuestionForm({
     name: 'options'
   });
 
+  // Ao selecionar arquivo: cria preview local
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    setValue('imageUrl', null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
   // Para MULTIPLE_CHOICE / TRUE_FALSE / SCENARIO: radio (apenas 1 correta)
   // Para MULTIPLE_SELECT: checkbox (n corretas)
   const isSingleSelect = ['MULTIPLE_CHOICE', 'TRUE_FALSE', 'SCENARIO'].includes(
@@ -121,8 +146,25 @@ function QuestionForm({
 
   // Transforma correctIndex -> isCorrect antes de chamar onSave
   const handleFormSubmit = async (data: QuestionFormData) => {
+    let imageUrl = data.imageUrl ?? null;
+
+    // Se há um arquivo novo selecionado, faz upload antes de salvar
+    if (imageFile) {
+      try {
+        setUploading(true);
+        imageUrl = await adminEndpoints.uploadQuestionImage(slug, imageFile);
+      } catch {
+        toast.error('Erro ao fazer upload da imagem.');
+        setUploading(false);
+        return;
+      } finally {
+        setUploading(false);
+      }
+    }
+
     const processedData = {
       ...data,
+      imageUrl,
       options: isSingleSelect
         ? data.options.map((opt, i) => ({
             ...opt,
@@ -150,6 +192,46 @@ function QuestionForm({
             {errors.statement.message}
           </p>
         )}
+      </div>
+
+      {/* Upload de imagem opcional para o enunciado */}
+      <div>
+        <label className="mb-1 block text-sm font-medium">
+          Imagem do enunciado{' '}
+          <span className="font-normal text-muted-foreground">(opcional)</span>
+        </label>
+        {imagePreview ? (
+          <div className="relative overflow-hidden rounded-xl border">
+            <img
+              src={imagePreview}
+              alt="Preview"
+              className="max-h-48 w-full object-contain bg-muted/30"
+            />
+            <button
+              type="button"
+              onClick={handleRemoveImage}
+              className="absolute right-2 top-2 rounded-full bg-black/50 p-1.5 text-white hover:bg-destructive"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-muted-foreground/30 py-6 text-sm text-muted-foreground transition hover:border-primary/50 hover:text-foreground"
+          >
+            <ImagePlus className="h-5 w-5" />
+            Clique para adicionar imagem (JPG, PNG, WebP — máx. 5 MB)
+          </button>
+        )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          onChange={handleFileChange}
+        />
       </div>
 
       <div>
@@ -262,11 +344,11 @@ function QuestionForm({
       <div className="flex gap-2">
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || uploading}
           className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
         >
-          {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-          Salvar questão
+          {(loading || uploading) && <Loader2 className="h-4 w-4 animate-spin" />}
+          {uploading ? 'Enviando imagem...' : 'Salvar questão'}
         </button>
         <button
           type="button"
@@ -397,6 +479,7 @@ export default function AdminQuestionsPage() {
         ) : (
           <QuestionForm
             activityType={activityType}
+            slug={slug}
             onSave={(data) => createMut.mutateAsync(data)}
             onCancel={() => setAdding(false)}
             loading={createMut.isPending}
