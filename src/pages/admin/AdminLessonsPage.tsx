@@ -274,6 +274,7 @@ function SortableStepRow({
 
 function LessonSection({
   slug,
+  courseId,
   moduleId,
   lesson,
   onDeleteLesson,
