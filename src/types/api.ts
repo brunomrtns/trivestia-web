@@ -479,6 +479,85 @@ export interface CourseInteractiveDTO {
   next: CourseInteractiveNext | null;
 }
 
+// ─── Dashboard DTOs ───────────────────────────────────────────────────────────
+
+export interface DashboardContinueNext {
+  kind: 'STEP' | 'ACTIVITY';
+  stepId: string | null;
+  activityId: string | null;
+}
+
+export interface DashboardContinueDTO {
+  hasContinuation: boolean;
+  course: { id: string; title: string } | null;
+  module: { id: string; title: string } | null;
+  lesson: {
+    id: string;
+    title: string;
+    progress: { percent: number; status: ProgressStatus };
+  } | null;
+  next: DashboardContinueNext | null;
+}
+
+export interface DashboardLabSummaryDTO {
+  totalSessions: number;
+  completedSessions: number;
+  avgPnlPercent: number;
+  bestPnlPercent: number;
+  avgWinRate: number;
+  avgMaxDrawdown: number;
+  lastSessionAt: string | null;
+}
+
+// ─── Announcements DTOs ───────────────────────────────────────────────────────
+
+export type AnnouncementPriority = 'INFO' | 'WARNING' | 'CRITICAL';
+
+export interface AnnouncementItem {
+  id: string;
+  title: string;
+  body: string;
+  priority: AnnouncementPriority;
+  publishedAt: string;
+  expiresAt: string | null;
+  author: { name: string };
+  isRead: boolean;
+}
+
+export interface AnnouncementAdminItem extends Omit<AnnouncementItem, 'isRead'> {
+  isExpired: boolean;
+  readCount: number;
+}
+
+export interface AnnouncementListDTO {
+  data: AnnouncementItem[];
+  pagination: { page: number; pageSize: number; total: number; totalPages: number };
+  unreadCount: number;
+}
+
+export interface AnnouncementAdminListDTO {
+  data: AnnouncementAdminItem[];
+  pagination: { page: number; pageSize: number; total: number; totalPages: number };
+}
+
+export interface AnnouncementUnreadCountDTO {
+  count: number;
+}
+
+export interface CreateAnnouncementRequest {
+  title: string;
+  body: string;
+  priority?: AnnouncementPriority;
+  expiresAt?: string | null;
+}
+
+export interface UpdateAnnouncementRequest {
+  title?: string;
+  body?: string;
+  priority?: AnnouncementPriority;
+  expiresAt?: string | null;
+}
+
 // ─── Admin DTOs ───────────────────────────────────────────────────────────────
 
 export interface CreateCourseDTO {

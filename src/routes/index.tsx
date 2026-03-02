@@ -68,6 +68,12 @@ const AdminUsersPage = lazy(() => import('@/pages/admin/AdminUsersPage'));
 const AdminLessonStepsPage = lazy(
   () => import('@/pages/admin/AdminLessonStepsPage')
 );
+const AnnouncementsPage = lazy(
+  () => import('@/pages/student/AnnouncementsPage')
+);
+const AdminAnnouncementsPage = lazy(
+  () => import('@/pages/admin/AdminAnnouncementsPage')
+);
 
 // Super Admin
 const SuperDashboardPage = lazy(
@@ -142,7 +148,8 @@ const tenantAppRoutes = [
   { path: 'activity/:activityId', element: <ActivityPlayerPage /> },
   { path: 'lab', element: <PracticeLabPage /> },
   { path: 'lab/history', element: <PracticeHistoryPage /> },
-  { path: 'progress', element: <ProgressPage /> }
+  { path: 'progress', element: <ProgressPage /> },
+  { path: 'announcements', element: <AnnouncementsPage /> }
 ];
 
 const tenantAdminRoutes = [
@@ -156,7 +163,8 @@ const tenantAdminRoutes = [
     path: 'courses/:courseId/lessons/:lessonId/steps',
     element: <AdminLessonStepsPage />
   },
-  { path: 'users', element: <AdminUsersPage /> }
+  { path: 'users', element: <AdminUsersPage /> },
+  { path: 'announcements', element: <AdminAnnouncementsPage /> }
 ];
 
 // ─── Router ──────────────────────────────────────────────────────────────────

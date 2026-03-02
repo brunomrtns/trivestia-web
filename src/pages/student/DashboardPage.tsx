@@ -10,9 +10,12 @@ import {
 } from 'lucide-react';
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { progressEndpoints } from '@/services/endpoints/progress.endpoints';
+import { dashboardEndpoints } from '@/services/endpoints/dashboard.endpoints';
 import { useAuthStore } from '@/features/auth/auth.store';
 import { getProgressLabel, getProgressColor } from '@/lib/utils';
 import { tenantPath } from '@/lib/tenant';
+import { ContinueCard, ContinueCardSkeleton } from '@/components/dashboard/ContinueCard';
+import { LabSummaryCard, LabSummaryCardSkeleton } from '@/components/dashboard/LabSummaryCard';
 
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
@@ -29,6 +32,21 @@ export default function DashboardPage() {
   const { data: progress, isLoading: loadingProgress } = useQuery({
     queryKey: ['progress', slug],
     queryFn: () => progressEndpoints.getProgress(slug)
+  });
+
+  // GET /dashboard/continue
+  const { data: continueData, isLoading: loadingContinue } = useQuery({
+    queryKey: ['dashboard-continue', slug],
+    queryFn: () => dashboardEndpoints.getContinue(slug),
+    staleTime: 2 * 60_000,
+    refetchOnWindowFocus: true
+  });
+
+  // GET /dashboard/lab-summary
+  const { data: labSummary, isLoading: loadingLabSummary } = useQuery({
+    queryKey: ['dashboard-lab-summary', slug],
+    queryFn: () => dashboardEndpoints.getLabSummary(slug),
+    staleTime: 5 * 60_000
   });
 
   const completed =
@@ -52,6 +70,17 @@ export default function DashboardPage() {
         </h1>
         <p className="mt-1 text-muted-foreground">Continue de onde parou.</p>
       </div>
+
+      {/* Continue Card */}
+      {loadingContinue ? (
+        <ContinueCardSkeleton />
+      ) : continueData ? (
+        <ContinueCard
+          data={continueData}
+          slug={slug}
+          hasAnyCompleted={completed > 0}
+        />
+      ) : null}
 
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -102,6 +131,13 @@ export default function DashboardPage() {
           </motion.div>
         ))}
       </div>
+
+      {/* Lab Summary */}
+      {loadingLabSummary ? (
+        <LabSummaryCardSkeleton />
+      ) : labSummary ? (
+        <LabSummaryCard data={labSummary} slug={slug} />
+      ) : null}
 
       {/* Cursos */}
       <div>

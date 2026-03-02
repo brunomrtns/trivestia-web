@@ -1,4 +1,5 @@
 import { Menu, LogOut, User as UserIcon } from 'lucide-react';
+import { AnnouncementBell } from '@/components/announcements/AnnouncementBell';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/auth.store';
 import { useTenant } from '@/hooks/useTenant';
@@ -37,6 +38,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
       </button>
 
       <div className="flex items-center gap-3">
+        <AnnouncementBell />
         <div className="flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm">
           <UserIcon className="h-4 w-4 text-muted-foreground" />
           <span className="font-medium">{user?.name ?? '...'}</span>

@@ -13,7 +13,8 @@ import {
   Users,
   TrendingUp,
   Zap,
-  Globe
+  Globe,
+  Megaphone
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/features/auth/auth.store';
@@ -63,7 +64,12 @@ function buildLinks(slug: string) {
       icon: Settings,
       label: 'Gerenciar Cursos'
     },
-    { to: tenantPath(slug, '/admin/users'), icon: Users, label: 'Usuários' }
+    { to: tenantPath(slug, '/admin/users'), icon: Users, label: 'Usuários' },
+    {
+      to: tenantPath(slug, '/admin/announcements'),
+      icon: Megaphone,
+      label: 'Avisos'
+    }
   ];
 
   return { studentLinks, adminLinks };
