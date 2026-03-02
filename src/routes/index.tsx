@@ -74,6 +74,9 @@ const AnnouncementsPage = lazy(
 const AdminAnnouncementsPage = lazy(
   () => import('@/pages/admin/AdminAnnouncementsPage')
 );
+const AdminPeriodsPage = lazy(
+  () => import('@/pages/admin/AdminPeriodsPage')
+);
 
 // Super Admin
 const SuperDashboardPage = lazy(
@@ -155,6 +158,7 @@ const tenantAppRoutes = [
 const tenantAdminRoutes = [
   { path: 'courses', element: <AdminCoursesPage /> },
   { path: 'courses/:courseId/lessons', element: <AdminLessonsPage /> },
+  { path: 'courses/:courseId/periods', element: <AdminPeriodsPage /> },
   {
     path: 'lessons/:lessonId/activities/:activityId/questions',
     element: <AdminQuestionsPage />

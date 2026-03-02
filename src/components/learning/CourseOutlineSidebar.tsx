@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
   ChevronDown,
@@ -6,9 +7,12 @@ import {
   BookOpen,
   CheckCircle2,
   Circle,
-  Loader2
+  Loader2,
+  Lock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { progressEndpoints } from '@/services/endpoints/progress.endpoints';
+import { LessonLockBadge } from './LessonLockBadge';
 import type {
   CourseInteractiveModule,
   CourseInteractiveLesson,
@@ -39,12 +43,14 @@ const STATUS_CONFIG: Record<
 // ─── Component ────────────────────────────────────────────────────────────────
 
 interface CourseOutlineSidebarProps {
+  slug: string;
   modules: CourseInteractiveModule[];
   activeLessonId: string | null;
   onSelectLesson: (lessonId: string, moduleId: string) => void;
 }
 
 export function CourseOutlineSidebar({
+  slug,
   modules,
   activeLessonId,
   onSelectLesson
@@ -111,6 +117,7 @@ export function CourseOutlineSidebar({
                 {mod.lessons.map((lesson) => (
                   <LessonRow
                     key={lesson.id}
+                    slug={slug}
                     lesson={lesson}
                     isActive={lesson.id === activeLessonId}
                     onSelect={() => onSelectLesson(lesson.id, mod.id)}
@@ -128,10 +135,12 @@ export function CourseOutlineSidebar({
 // ─── LessonRow ────────────────────────────────────────────────────────────────
 
 function LessonRow({
+  slug,
   lesson,
   isActive,
   onSelect
 }: {
+  slug: string;
   lesson: CourseInteractiveLesson;
   isActive: boolean;
   onSelect: () => void;
@@ -139,31 +148,53 @@ function LessonRow({
   const config = STATUS_CONFIG[lesson.progress.status];
   const StatusIcon = config.icon;
 
+  // Only query lock status when lesson is not completed (could be locked)
+  const { data: unlock } = useQuery({
+    queryKey: ['lesson-unlock', slug, lesson.id],
+    queryFn: () => progressEndpoints.isLessonUnlocked(slug, lesson.id),
+    enabled: lesson.progress.status !== 'COMPLETED',
+    staleTime: 30 * 1000
+  });
+
+  const isLocked = unlock ? !unlock.unlocked : false;
+
   return (
     <button
       onClick={onSelect}
       className={cn(
-        'group flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm transition',
+        'group flex w-full flex-col items-start gap-0.5 rounded-lg px-3 py-2 text-left text-sm transition',
         isActive
           ? 'bg-primary/10 text-primary font-semibold'
+          : isLocked
+          ? 'opacity-60 cursor-pointer hover:bg-accent/30'
           : 'text-foreground hover:bg-accent/50'
       )}
     >
-      <StatusIcon
-        className={cn(
-          'h-4 w-4 shrink-0',
-          isActive ? 'text-primary' : config.color,
-          lesson.progress.status === 'IN_PROGRESS' &&
-            !isActive &&
-            'animate-spin'
+      <div className="flex w-full items-center gap-2.5">
+        {isLocked ? (
+          <Lock className="h-4 w-4 shrink-0 text-muted-foreground" />
+        ) : (
+          <StatusIcon
+            className={cn(
+              'h-4 w-4 shrink-0',
+              isActive ? 'text-primary' : config.color,
+              lesson.progress.status === 'IN_PROGRESS' &&
+                !isActive &&
+                'animate-spin'
+            )}
+          />
         )}
-      />
-      <span className="flex-1 truncate">{lesson.title}</span>
-      {lesson.progress.percent > 0 && lesson.progress.percent < 100 && (
-        <span className="shrink-0 text-xs text-muted-foreground">
-          {lesson.progress.percent}%
-        </span>
+        <span className="flex-1 truncate">{lesson.title}</span>
+        {lesson.progress.percent > 0 && lesson.progress.percent < 100 && (
+          <span className="shrink-0 text-xs text-muted-foreground">
+            {lesson.progress.percent}%
+          </span>
+        )}
+      </div>
+      {unlock && !unlock.unlocked && (
+        <LessonLockBadge unlock={unlock} className="ml-6 mt-0.5" />
       )}
     </button>
   );
 }
+

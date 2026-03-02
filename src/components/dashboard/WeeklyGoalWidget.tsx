@@ -14,7 +14,7 @@ interface WeeklyGoalWidgetProps {
 // ─── Ring Progress (SVG) ──────────────────────────────────────────────────────
 
 interface RingProps {
-  value: number;   // 0..1
+  value: number; // 0..1
   size?: number;
   strokeWidth?: number;
 }
@@ -124,7 +124,9 @@ export function WeeklyGoalWidget({ data, slug }: WeeklyGoalWidgetProps) {
                 <Flame
                   className={cn(
                     'h-5 w-5',
-                    currentStreak > 0 ? 'text-orange-500' : 'text-muted-foreground'
+                    currentStreak > 0
+                      ? 'text-orange-500'
+                      : 'text-muted-foreground'
                   )}
                 />
                 <div>
@@ -141,7 +143,9 @@ export function WeeklyGoalWidget({ data, slug }: WeeklyGoalWidgetProps) {
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <Trophy className="h-4 w-4" />
                   <div>
-                    <p className="text-sm font-bold leading-none">{longestStreak}</p>
+                    <p className="text-sm font-bold leading-none">
+                      {longestStreak}
+                    </p>
                     <p className="text-xs">recorde</p>
                   </div>
                 </div>
@@ -153,7 +157,10 @@ export function WeeklyGoalWidget({ data, slug }: WeeklyGoalWidgetProps) {
               {weekDays.map((day, i) => {
                 const isToday = day.date === today;
                 return (
-                  <div key={day.date} className="flex flex-col items-center gap-1">
+                  <div
+                    key={day.date}
+                    className="flex flex-col items-center gap-1"
+                  >
                     <span className="text-[10px] font-medium text-muted-foreground">
                       {DAY_LABELS[i]}
                     </span>
@@ -161,9 +168,7 @@ export function WeeklyGoalWidget({ data, slug }: WeeklyGoalWidgetProps) {
                       title={`${day.date}: ${day.count} atividade(s)`}
                       className={cn(
                         'h-6 w-6 rounded-md transition-colors',
-                        day.hit
-                          ? 'bg-primary'
-                          : 'bg-muted',
+                        day.hit ? 'bg-primary' : 'bg-muted',
                         isToday && !day.hit && 'ring-2 ring-primary/50',
                         isToday && day.hit && 'ring-2 ring-primary'
                       )}

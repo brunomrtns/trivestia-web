@@ -19,7 +19,9 @@ import {
   HelpCircle,
   GripVertical,
   Video,
-  Image
+  Image,
+  Lock,
+  ShieldCheck
 } from 'lucide-react';
 import {
   DndContext,
@@ -61,7 +63,10 @@ type ModuleForm = z.infer<typeof moduleSchema>;
 
 const lessonSchema = z.object({
   title: z.string().min(2, 'Mínimo 2 caracteres'),
-  order: z.coerce.number().min(1, 'Mínimo 1')
+  order: z.coerce.number().min(1, 'Mínimo 1'),
+  availableFrom: z.string().optional(),
+  prerequisiteLessonId: z.string().optional(),
+  prerequisiteMinScore: z.coerce.number().min(0).max(100).optional()
 });
 type LessonForm = z.infer<typeof lessonSchema>;
 
@@ -284,6 +289,7 @@ function LessonSection({
   const qc = useQueryClient();
   const [expanded, setExpanded] = useState(false);
   const [editingLesson, setEditingLesson] = useState(false);
+  const [showAccessRules, setShowAccessRules] = useState(false);
   const [addingStep, setAddingStep] = useState(false);
   const [stepKind, setStepKind] = useState<'ACTIVITY' | 'CONTENT'>('ACTIVITY');
   const [editingStep, setEditingStep] = useState<LessonStepDTO | null>(null);
@@ -429,18 +435,47 @@ function LessonSection({
   // ─── Lesson edit form ───────────────────────────────────────────────────────
   const lessonEditForm = useForm<LessonForm>({
     resolver: zodResolver(lessonSchema),
-    defaultValues: { title: lesson.title, order: lesson.order }
+    defaultValues: {
+      title: lesson.title,
+      order: lesson.order,
+      availableFrom: lesson.availableFrom
+        ? new Date(lesson.availableFrom).toISOString().slice(0, 16)
+        : '',
+      prerequisiteLessonId: lesson.prerequisiteLessonId ?? '',
+      prerequisiteMinScore: lesson.prerequisiteMinScore ?? 0
+    }
   });
+
+  // Load all lessons in the same course for prereq selector
+  const { data: courseData } = useQuery({
+    queryKey: ['course-full', slug, courseId],
+    queryFn: () => learningEndpoints.getCourse(slug, courseId),
+    enabled: editingLesson
+  });
+
+  const allCourseLessons = courseData?.modules?.flatMap(
+    (m) => (m.lessons ?? []).map((l) => ({ ...l, moduleTitle: m.title }))
+  ) ?? [];
 
   const updateLessonMut = useMutation({
     mutationFn: (data: LessonForm) =>
-      adminEndpoints.updateLesson(slug, moduleId, lesson.id, data),
+      adminEndpoints.updateLesson(slug, moduleId, lesson.id, {
+        title: data.title,
+        order: data.order,
+        availableFrom: data.availableFrom
+          ? new Date(data.availableFrom).toISOString()
+          : null,
+        prerequisiteLessonId: data.prerequisiteLessonId || null,
+        prerequisiteMinScore:
+          data.prerequisiteMinScore != null ? Number(data.prerequisiteMinScore) : null
+      }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-lessons', slug, moduleId] });
       setEditingLesson(false);
       toast.success('Aula atualizada!');
     },
-    onError: () => toast.error('Erro ao atualizar aula.')
+    onError: (e: { response?: { data?: { message?: string } } }) =>
+      toast.error(e?.response?.data?.message ?? 'Erro ao atualizar aula.')
   });
 
   const hasVirtualSteps = localSteps.some((s) => s.isVirtual);
@@ -453,35 +488,105 @@ function LessonSection({
           onSubmit={lessonEditForm.handleSubmit((d) =>
             updateLessonMut.mutate(d)
           )}
-          className="flex flex-wrap items-center gap-3 p-3"
+          className="space-y-3 p-3"
         >
-          <input
-            className="flex-1 min-w-[160px] rounded-lg border bg-background px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-ring"
-            {...lessonEditForm.register('title')}
-          />
-          <input
-            type="number"
-            min={1}
-            className="w-16 rounded-lg border bg-background px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-ring"
-            {...lessonEditForm.register('order')}
-          />
-          <button
-            type="submit"
-            disabled={updateLessonMut.isPending}
-            className="flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60"
-          >
-            {updateLessonMut.isPending && (
-              <Loader2 className="h-3 w-3 animate-spin" />
+          {/* Basic fields row */}
+          <div className="flex flex-wrap items-center gap-3">
+            <input
+              className="flex-1 min-w-[160px] rounded-lg border bg-background px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-ring"
+              {...lessonEditForm.register('title')}
+            />
+            <input
+              type="number"
+              min={1}
+              className="w-16 rounded-lg border bg-background px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-ring"
+              {...lessonEditForm.register('order')}
+            />
+            <button
+              type="submit"
+              disabled={updateLessonMut.isPending}
+              className="flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60"
+            >
+              {updateLessonMut.isPending && (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              )}
+              Salvar
+            </button>
+            <button
+              type="button"
+              onClick={() => setEditingLesson(false)}
+              className="rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-accent"
+            >
+              Cancelar
+            </button>
+          </div>
+
+          {/* Access Rules accordion */}
+          <div className="rounded-lg border bg-muted/30">
+            <button
+              type="button"
+              onClick={() => setShowAccessRules(!showAccessRules)}
+              className="flex w-full items-center gap-2 px-3 py-2 text-xs font-semibold text-muted-foreground hover:text-foreground"
+            >
+              {showAccessRules
+                ? <ChevronDown className="h-3.5 w-3.5" />
+                : <ChevronRight className="h-3.5 w-3.5" />
+              }
+              <ShieldCheck className="h-3.5 w-3.5" />
+              Regras de acesso
+            </button>
+            {showAccessRules && (
+              <div className="border-t px-3 pb-3 pt-2.5 space-y-3">
+                {/* availableFrom */}
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                    Disponível a partir de (opcional)
+                  </label>
+                  <input
+                    type="datetime-local"
+                    className="w-full rounded-lg border bg-background px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-ring"
+                    {...lessonEditForm.register('availableFrom')}
+                  />
+                </div>
+
+                {/* prerequisiteLessonId */}
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <Lock className="h-3 w-3" />
+                    Aula pré-requisito (opcional)
+                  </label>
+                  <select
+                    className="w-full rounded-lg border bg-background px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-ring"
+                    {...lessonEditForm.register('prerequisiteLessonId')}
+                  >
+                    <option value="">— Nenhum —</option>
+                    {allCourseLessons
+                      .filter((l) => l.id !== lesson.id)
+                      .map((l) => (
+                        <option key={l.id} value={l.id}>
+                          [{l.moduleTitle}] {l.title}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+
+                {/* prerequisiteMinScore */}
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                    Nota mínima no pré-requisito (0 = só completar)
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    step={1}
+                    className="w-24 rounded-lg border bg-background px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-ring"
+                    {...lessonEditForm.register('prerequisiteMinScore')}
+                  />
+                </div>
+              </div>
             )}
-            Salvar
-          </button>
-          <button
-            type="button"
-            onClick={() => setEditingLesson(false)}
-            className="rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-accent"
-          >
-            Cancelar
-          </button>
+          </div>
         </form>
       ) : (
         <div className="flex items-center gap-3 px-4 py-3">

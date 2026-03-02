@@ -13,7 +13,8 @@ import {
   Loader2,
   BookOpen,
   X,
-  Settings2
+  Settings2,
+  Calendar
 } from 'lucide-react';
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { adminEndpoints } from '@/services/endpoints/admin.endpoints';
@@ -21,7 +22,8 @@ import type { Course } from '@/types/api';
 
 const schema = z.object({
   title: z.string().min(3, 'Mínimo 3 caracteres'),
-  description: z.string().min(10, 'Mínimo 10 caracteres')
+  description: z.string().min(10, 'Mínimo 10 caracteres'),
+  deadline: z.string().optional()
 });
 type FormData = z.infer<typeof schema>;
 
@@ -41,13 +43,23 @@ function CourseForm({ initial, onSave, onCancel, loading }: CourseFormProps) {
     resolver: zodResolver(schema),
     defaultValues: {
       title: initial?.title ?? '',
-      description: initial?.description ?? ''
+      description: initial?.description ?? '',
+      deadline: initial?.deadline
+        ? new Date(initial.deadline).toISOString().slice(0, 16)
+        : ''
     }
   });
 
+  const handleSave = (data: FormData) => {
+    return onSave({
+      ...data,
+      deadline: data.deadline ? new Date(data.deadline).toISOString() : undefined
+    });
+  };
+
   return (
     <form
-      onSubmit={handleSubmit(onSave)}
+      onSubmit={handleSubmit(handleSave)}
       className="space-y-4 rounded-2xl border bg-card p-5 shadow-sm"
     >
       <div>
@@ -76,6 +88,20 @@ function CourseForm({ initial, onSave, onCancel, loading }: CourseFormProps) {
             {errors.description.message}
           </p>
         )}
+      </div>
+      <div>
+        <label className="mb-1 block text-sm font-medium flex items-center gap-1.5">
+          <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+          Prazo final (opcional)
+        </label>
+        <input
+          type="datetime-local"
+          className="w-full rounded-lg border bg-background px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          {...register('deadline')}
+        />
+        <p className="mt-1 text-xs text-muted-foreground">
+          Após esta data, alunos não poderão enviar respostas.
+        </p>
       </div>
       <div className="flex gap-2">
         <button
@@ -206,6 +232,12 @@ export default function AdminCoursesPage() {
                     <p className="text-sm text-muted-foreground truncate">
                       {course.description}
                     </p>
+                    {course.deadline && (
+                      <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1 mt-0.5">
+                        <Calendar className="h-3 w-3" />
+                        Prazo: {new Date(course.deadline).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <Link
@@ -215,6 +247,14 @@ export default function AdminCoursesPage() {
                     >
                       <Settings2 className="h-3.5 w-3.5" />
                       Gerenciar
+                    </Link>
+                    <Link
+                      to={`/t/${slug}/admin/courses/${course.id}/periods`}
+                      className="flex items-center gap-1.5 rounded-lg bg-amber-500/10 px-3 py-2 text-xs font-semibold text-amber-600 dark:text-amber-400 transition hover:bg-amber-500/20"
+                      aria-label="Períodos avaliativos"
+                    >
+                      <Calendar className="h-3.5 w-3.5" />
+                      Períodos
                     </Link>
                     <button
                       onClick={() => setEditing(course)}

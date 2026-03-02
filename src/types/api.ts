@@ -162,6 +162,7 @@ export interface Course {
   id: string;
   title: string;
   description: string;
+  deadline: string | null;
   createdAt: string;
   modules?: Module[];
 }
@@ -185,7 +186,58 @@ export interface Lesson {
   title: string;
   order: number;
   moduleId: string;
+  availableFrom: string | null;
+  prerequisiteLessonId: string | null;
+  prerequisiteMinScore: number | null;
   activities?: ActivitySummary[];
+}
+
+// ─── Lock / Unlock ────────────────────────────────────────────────────────────
+
+export type LockReason =
+  | 'COURSE_EXPIRED'
+  | 'NOT_AVAILABLE_YET'
+  | 'PREREQUISITE_NOT_MET'
+  | 'PREVIOUS_LESSON_INCOMPLETE';
+
+export interface LessonUnlockDTO {
+  unlocked: boolean;
+  reason: LockReason | null;
+  detail: Record<string, unknown> | null;
+}
+
+// ─── Períodos Avaliativos ─────────────────────────────────────────────────────
+
+export interface PeriodModuleItem {
+  id: string;
+  moduleId: string;
+  module: { id: string; title: string; order: number };
+}
+
+export interface PeriodDTO {
+  id: string;
+  tenantId: string;
+  courseId: string;
+  title: string;
+  startDate: string;
+  endDate: string;
+  createdAt: string;
+  updatedAt: string;
+  modules: PeriodModuleItem[];
+}
+
+export interface CreatePeriodRequest {
+  title: string;
+  startDate: string;
+  endDate: string;
+  moduleIds: string[];
+}
+
+export interface UpdatePeriodRequest {
+  title?: string;
+  startDate?: string;
+  endDate?: string;
+  moduleIds?: string[];
 }
 
 // ─── Activity / Question ──────────────────────────────────────────────────────
@@ -593,6 +645,7 @@ export interface CreateCourseDTO {
 export interface UpdateCourseDTO {
   title?: string;
   description?: string;
+  deadline?: string | null;
 }
 
 export interface CreateModuleDTO {
@@ -603,6 +656,9 @@ export interface CreateModuleDTO {
 export interface CreateLessonDTO {
   title: string;
   order: number;
+  availableFrom?: string | null;
+  prerequisiteLessonId?: string | null;
+  prerequisiteMinScore?: number | null;
 }
 
 export interface CreateActivityDTO {

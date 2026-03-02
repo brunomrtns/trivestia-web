@@ -3,7 +3,8 @@ import type {
   Progress,
   SubmissionResult,
   SubmissionResponse,
-  SubmitActivityRequest
+  SubmitActivityRequest,
+  LessonUnlockDTO
 } from '@/types/api';
 
 export const progressEndpoints = {
@@ -29,6 +30,6 @@ export const progressEndpoints = {
 
   isLessonUnlocked: (slug: string, lessonId: string) =>
     apiTenant(slug)
-      .get<{ unlocked: boolean }>(`/progress/lessons/${lessonId}/unlocked`)
+      .get<LessonUnlockDTO>(`/progress/lessons/${lessonId}/unlocked`)
       .then((r) => r.data)
 };

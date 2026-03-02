@@ -12,7 +12,8 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
-  Lock
+  Lock,
+  AlertTriangle
 } from 'lucide-react';
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { progressEndpoints } from '@/services/endpoints/progress.endpoints';
@@ -82,6 +83,15 @@ export default function ActivityPlayerPage() {
     staleTime: 0,
     retry: false
   });
+
+  // Verifica se o prazo do curso expirou (bloqueia submissão, mas não exibe)
+  const { data: unlock } = useQuery({
+    queryKey: ['lesson-unlock', slug, lessonId],
+    queryFn: () => progressEndpoints.isLessonUnlocked(slug, lessonId!),
+    enabled: !!lessonId,
+    staleTime: 60 * 1000
+  });
+  const isCourseExpired = unlock?.reason === 'COURSE_EXPIRED';
 
   // Aguarda: carregamento da atividade E verificação de submissão existente
   // Inclui caso: refetch em background com 0 questões no cache (evita currentQuestion=undefined)
@@ -392,6 +402,14 @@ export default function ActivityPlayerPage() {
         </motion.div>
       </AnimatePresence>
 
+      {/* Banner prazo encerrado */}
+      {isCourseExpired && (
+        <div className="flex items-center gap-3 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
+          <AlertTriangle className="h-5 w-5 shrink-0" />
+          O prazo deste curso foi encerrado. Novas submissões não são permitidas.
+        </div>
+      )}
+
       {/* Navegação */}
       <div className="flex items-center justify-between">
         <button
@@ -415,7 +433,7 @@ export default function ActivityPlayerPage() {
         ) : (
           <button
             onClick={handleSubmit}
-            disabled={submitMutation.isPending}
+            disabled={submitMutation.isPending || isCourseExpired}
             className="flex items-center gap-2 rounded-xl bg-green-600 px-6 py-2.5 text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-40"
           >
             {submitMutation.isPending && (

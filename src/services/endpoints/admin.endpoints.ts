@@ -14,7 +14,10 @@ import type {
   CreateQuestionDTO,
   CreateStepDTO,
   UpdateStepDTO,
-  LessonStepDTO
+  LessonStepDTO,
+  PeriodDTO,
+  CreatePeriodRequest,
+  UpdatePeriodRequest
 } from '@/types/api';
 
 // Todos os endpoints admin exigem Bearer ADMIN
@@ -153,5 +156,24 @@ export const adminEndpoints = {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
       .then((r) => r.data.url);
-  }
+  },
+
+  // ─── Períodos Avaliativos ──────────────────────────────────
+  listPeriods: (slug: string, courseId: string) =>
+    apiTenant(slug)
+      .get<PeriodDTO[]>(`/courses/${courseId}/periods`)
+      .then((r) => r.data),
+
+  createPeriod: (slug: string, courseId: string, data: CreatePeriodRequest) =>
+    apiTenant(slug)
+      .post<PeriodDTO>(`/courses/${courseId}/periods`, data)
+      .then((r) => r.data),
+
+  updatePeriod: (slug: string, courseId: string, id: string, data: UpdatePeriodRequest) =>
+    apiTenant(slug)
+      .patch<PeriodDTO>(`/courses/${courseId}/periods/${id}`, data)
+      .then((r) => r.data),
+
+  deletePeriod: (slug: string, courseId: string, id: string) =>
+    apiTenant(slug).delete(`/courses/${courseId}/periods/${id}`)
 };
