@@ -102,7 +102,9 @@ export default function AdminAnnouncementsPage() {
   }) => {
     const payload = {
       ...values,
-      expiresAt: values.expiresAt || undefined
+      expiresAt: values.expiresAt
+        ? new Date(values.expiresAt).toISOString()
+        : undefined
     };
     if (editing) {
       updateMutation.mutate({ id: editing.id, values: payload });

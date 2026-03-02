@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Bell, ArrowRight } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { announcementsEndpoints } from '@/services/endpoints/announcements.endpoints';
 import { tenantPath } from '@/lib/tenant';
@@ -54,6 +54,17 @@ export function AnnouncementBell() {
 
   const count = unreadData?.count ?? 0;
 
+  // Marca todos como lidos ao abrir o dropdown
+  const markAllMutation = useMutation({
+    mutationFn: () => announcementsEndpoints.markAllRead(slug),
+    onSuccess: () => {
+      // Zera o cache do count imediatamente
+      queryClient.setQueryData(['announcements-unread', slug], { count: 0 });
+      // Invalida preview para refletir isRead=true
+      queryClient.invalidateQueries({ queryKey: ['announcements-preview', slug] });
+    }
+  });
+
   // Preview dos últimos 5 — só busca ao abrir
   const { data: previewData } = useQuery({
     queryKey: ['announcements-preview', slug],
@@ -68,6 +79,10 @@ export function AnnouncementBell() {
       if (!prev) {
         refetchCount();
         queryClient.invalidateQueries({ queryKey: ['announcements-preview', slug] });
+        // Marca todos como lidos se houver não-lidos
+        if ((unreadData?.count ?? 0) > 0) {
+          markAllMutation.mutate();
+        }
       }
       return !prev;
     });
