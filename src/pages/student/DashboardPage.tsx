@@ -16,6 +16,7 @@ import { getProgressLabel, getProgressColor } from '@/lib/utils';
 import { tenantPath } from '@/lib/tenant';
 import { ContinueCard, ContinueCardSkeleton } from '@/components/dashboard/ContinueCard';
 import { LabSummaryCard, LabSummaryCardSkeleton } from '@/components/dashboard/LabSummaryCard';
+import { WeeklyGoalWidget, WeeklyGoalWidgetSkeleton } from '@/components/dashboard/WeeklyGoalWidget';
 
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
@@ -46,6 +47,13 @@ export default function DashboardPage() {
   const { data: labSummary, isLoading: loadingLabSummary } = useQuery({
     queryKey: ['dashboard-lab-summary', slug],
     queryFn: () => dashboardEndpoints.getLabSummary(slug),
+    staleTime: 5 * 60_000
+  });
+
+  // GET /dashboard/goals
+  const { data: goalsData, isLoading: loadingGoals } = useQuery({
+    queryKey: ['dashboard-goals', slug],
+    queryFn: () => dashboardEndpoints.getGoals(slug),
     staleTime: 5 * 60_000
   });
 
@@ -80,6 +88,13 @@ export default function DashboardPage() {
           slug={slug}
           hasAnyCompleted={completed > 0}
         />
+      ) : null}
+
+      {/* Weekly Goal + Streak */}
+      {loadingGoals ? (
+        <WeeklyGoalWidgetSkeleton />
+      ) : goalsData ? (
+        <WeeklyGoalWidget data={goalsData} slug={slug} />
       ) : null}
 
       {/* Stats */}

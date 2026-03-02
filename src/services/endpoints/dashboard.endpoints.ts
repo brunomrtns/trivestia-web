@@ -1,5 +1,11 @@
 import { apiTenant } from '../api/apiTenant';
-import type { DashboardContinueDTO, DashboardLabSummaryDTO } from '@/types/api';
+import type {
+  DashboardContinueDTO,
+  DashboardLabSummaryDTO,
+  DashboardGoalsDTO,
+  UpdateGoalRequest,
+  UpdateGoalResponse
+} from '@/types/api';
 
 export const dashboardEndpoints = {
   /** GET /t/:slug/dashboard/continue */
@@ -12,5 +18,17 @@ export const dashboardEndpoints = {
   getLabSummary: (slug: string) =>
     apiTenant(slug)
       .get<DashboardLabSummaryDTO>('/dashboard/lab-summary')
+      .then((r) => r.data),
+
+  /** GET /t/:slug/dashboard/goals */
+  getGoals: (slug: string) =>
+    apiTenant(slug)
+      .get<DashboardGoalsDTO>('/dashboard/goals')
+      .then((r) => r.data),
+
+  /** PATCH /t/:slug/dashboard/goals */
+  updateGoal: (slug: string, data: UpdateGoalRequest) =>
+    apiTenant(slug)
+      .patch<UpdateGoalResponse>('/dashboard/goals', data)
       .then((r) => r.data)
 };

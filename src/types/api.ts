@@ -509,6 +509,31 @@ export interface DashboardLabSummaryDTO {
   lastSessionAt: string | null;
 }
 
+// ─── Goals / Streak DTOs ─────────────────────────────────────────────────────
+
+export interface WeekDayEntry {
+  date: string;   // 'YYYY-MM-DD'
+  count: number;
+  hit: boolean;
+}
+
+export interface DashboardGoalsDTO {
+  weeklyTarget: number;
+  weeklyCompleted: number;
+  currentStreak: number;
+  longestStreak: number;
+  lastActivityDate: string | null;
+  weekDays: WeekDayEntry[];
+}
+
+export interface UpdateGoalRequest {
+  weeklyTarget: number;
+}
+
+export interface UpdateGoalResponse {
+  weeklyTarget: number;
+}
+
 // ─── Announcements DTOs ───────────────────────────────────────────────────────
 
 export type AnnouncementPriority = 'INFO' | 'WARNING' | 'CRITICAL';
