@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import {
@@ -34,15 +34,18 @@ export default function ActivityPlayerPage() {
   const slug = tenantSlug ?? '';
   const navigate = useNavigate();
 
+  const qc = useQueryClient();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
   const [result, setResult] = useState<SubmissionResult | null>(null);
 
   // GET /lessons/:lessonId/activities/:activityId — Bearer ANY
-  const { data: activity, isLoading } = useQuery({
+  // staleTime:0 garante que novas questões criadas pelo admin aparecem sem F5
+  const { data: activity, isLoading, isFetching } = useQuery({
     queryKey: ['activity', slug, lessonId, activityId],
     queryFn: () => learningEndpoints.getActivity(slug, lessonId!, activityId!),
-    enabled: !!lessonId && !!activityId
+    enabled: !!lessonId && !!activityId,
+    staleTime: 0
   });
 
   // POST /submissions — Bearer ANY
@@ -53,6 +56,8 @@ export default function ActivityPlayerPage() {
     }) => progressEndpoints.submit(slug, data),
     onSuccess: (data) => {
       setResult(data);
+      // Força reload da revisão após submissão
+      qc.invalidateQueries({ queryKey: ['submission-review', slug, activityId] });
       toast.success('Atividade concluída!');
     },
     onError: () => {
@@ -60,15 +65,27 @@ export default function ActivityPlayerPage() {
     }
   });
 
-  // GET /submissions/:activityId — carregado após submissao concluída
+  // GET /submissions/:activityId — sempre carregado para detectar submissão existente
+  // 404 = sem submissão ainda → retorna null (não é erro)
   const { data: submissionReview, isLoading: loadingReview } = useQuery({
     queryKey: ['submission-review', slug, activityId],
-    queryFn: () => progressEndpoints.getSubmission(slug, activityId!),
-    enabled: !!result && !!activityId,
-    staleTime: 0
+    queryFn: async () => {
+      try {
+        return await progressEndpoints.getSubmission(slug, activityId!);
+      } catch (err: unknown) {
+        const status = (err as { response?: { status?: number } })?.response?.status;
+        if (status === 404) return null; // sem submissão ainda
+        throw err;
+      }
+    },
+    enabled: !!activityId,
+    staleTime: 0,
+    retry: false
   });
 
-  if (isLoading || !activity) {
+  // Aguarda: carregamento da atividade E verificação de submissão existente
+  // Inclui caso: refetch em background com 0 questões no cache (evita currentQuestion=undefined)
+  if (isLoading || !activity || (!result && loadingReview) || (isFetching && activity.questions.length === 0)) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -91,7 +108,7 @@ export default function ActivityPlayerPage() {
   const totalQuestions = questions.length;
 
   // Atividade sem questões
-  if (totalQuestions === 0) {
+  if (totalQuestions === 0 && !isFetching) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
         <p className="text-lg font-semibold">Nenhuma questão cadastrada</p>
@@ -106,10 +123,22 @@ export default function ActivityPlayerPage() {
   const currentQuestion = questions[currentIndex];
   const progress = ((currentIndex + 1) / totalQuestions) * 100;
 
-  // Tela de resultado
-  if (result) {
+  // Guard: questão atual inexistente (nunca deveria chegar aqui, mas previne crash)
+  if (!currentQuestion) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Tela de resultado: exibe se acabou de submeter OU se já tinha submissão anterior
+  // submissionReview=null significa sem submissão; submissionReview=object significa já submeteu
+  if (result !== null || (submissionReview != null)) {
+    const score = result?.score ?? submissionReview?.score ?? 0;
+    const maxScore = result?.maxScore ?? submissionReview?.maxScore ?? 1;
     const pct =
-      result.percentage ?? Math.round((result.score / result.maxScore) * 100);
+      result?.percentage ?? (maxScore > 0 ? Math.round((score / maxScore) * 100) : 0);
     const passed = pct >= 60;
 
     return (
@@ -134,7 +163,7 @@ export default function ActivityPlayerPage() {
             {passed ? 'Parabéns! Você passou.' : 'Continue praticando!'}
           </p>
           <p className="mb-8 text-muted-foreground">
-            {result.score} de {result.maxScore} pontos
+            {score} de {maxScore} pontos
           </p>
         </motion.div>
 

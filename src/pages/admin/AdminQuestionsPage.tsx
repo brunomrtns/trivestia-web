@@ -393,6 +393,7 @@ export default function AdminQuestionsPage() {
       adminEndpoints.createQuestion(slug, activityId!, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-questions', slug, activityId] });
+      qc.invalidateQueries({ queryKey: ['activity', slug, lessonId, activityId] });
       setAdding(false);
       toast.success('Questão criada!');
     },
@@ -404,6 +405,7 @@ export default function AdminQuestionsPage() {
       adminEndpoints.deleteQuestion(slug, activityId!, id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-questions', slug, activityId] });
+      qc.invalidateQueries({ queryKey: ['activity', slug, lessonId, activityId] });
       toast.success('Questão excluída.');
     },
     onError: () => toast.error('Erro ao excluir questão.')
