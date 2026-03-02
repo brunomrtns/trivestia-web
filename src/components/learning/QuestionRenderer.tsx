@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Portal } from '@/components/ui/Portal';
 import { X, ZoomIn } from 'lucide-react';
 import type { ActivityType, Question, Answer } from '@/types/api';
 import { MultipleChoiceRenderer } from './MultipleChoiceRenderer';
@@ -50,6 +51,7 @@ function QuestionImage({ url }: { url: string }) {
       </div>
 
       {open && (
+        <Portal>
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
           onClick={() => setOpen(false)}
@@ -67,6 +69,7 @@ function QuestionImage({ url }: { url: string }) {
             onClick={(e) => e.stopPropagation()}
           />
         </div>
+        </Portal>
       )}
     </>
   );

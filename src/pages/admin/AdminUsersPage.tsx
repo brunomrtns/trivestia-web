@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { Portal } from '@/components/ui/Portal';
 import { useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -63,6 +64,7 @@ function ConfirmRoleDialog({
 }: ConfirmRoleDialogProps) {
   const isPromotion = newRole === 'ADMIN';
   return (
+    <Portal>
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
@@ -106,6 +108,7 @@ function ConfirmRoleDialog({
         </div>
       </motion.div>
     </div>
+    </Portal>
   );
 }
 
@@ -126,6 +129,7 @@ function UserDetailModal({
   });
 
   return (
+    <Portal>
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -236,6 +240,7 @@ function UserDetailModal({
         ) : null}
       </motion.div>
     </div>
+    </Portal>
   );
 }
 

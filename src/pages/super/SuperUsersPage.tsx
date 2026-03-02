@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Portal } from '@/components/ui/Portal';
 import { Search, Shield, Crown, Zap, User as UserIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { superadminEndpoints } from '@/services/endpoints/superadmin.endpoints';
@@ -65,6 +66,7 @@ function ChangeRoleModal({
   });
 
   return (
+    <Portal>
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="mx-4 w-full max-w-sm rounded-xl border bg-card p-6 shadow-xl">
         <h3 className="mb-2 font-bold">Alterar Role</h3>
@@ -102,6 +104,7 @@ function ChangeRoleModal({
         </div>
       </div>
     </div>
+    </Portal>
   );
 }
 

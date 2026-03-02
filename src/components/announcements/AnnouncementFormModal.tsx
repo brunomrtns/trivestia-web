@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Portal } from '@/components/ui/Portal';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -67,6 +68,7 @@ export function AnnouncementFormModal({
   const isEdit = !!initial;
 
   return (
+    <Portal>
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-lg rounded-2xl bg-card shadow-xl">
         {/* Header */}
@@ -163,5 +165,6 @@ export function AnnouncementFormModal({
         </form>
       </div>
     </div>
+    </Portal>
   );
 }

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Portal } from '@/components/ui/Portal';
 import { useNavigate } from 'react-router-dom';
 import {
   Search,
@@ -45,6 +46,7 @@ function CreateTenantModal({ onClose }: { onClose: () => void }) {
       .replace(/^-|-$/g, '');
 
   return (
+    <Portal>
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="mx-4 w-full max-w-lg rounded-xl border bg-card p-6 shadow-xl">
         <h2 className="mb-4 text-lg font-bold">Nova Escola</h2>
@@ -158,6 +160,7 @@ function CreateTenantModal({ onClose }: { onClose: () => void }) {
         </div>
       </div>
     </div>
+    </Portal>
   );
 }
 

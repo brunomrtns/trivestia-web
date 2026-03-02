@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Portal } from '@/components/ui/Portal';
 import {
   X,
   HelpCircle,
@@ -182,7 +183,7 @@ export function HelpDrawer({
   if (!open) return null;
 
   return (
-    <>
+    <Portal>
       {/* Backdrop */}
       <div
         className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
@@ -313,7 +314,7 @@ export function HelpDrawer({
           )}
         </div>
       </div>
-    </>
+    </Portal>
   );
 }
 

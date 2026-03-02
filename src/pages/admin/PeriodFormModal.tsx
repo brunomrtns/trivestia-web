@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Portal } from '@/components/ui/Portal';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -91,6 +92,7 @@ export default function PeriodFormModal({ slug, courseId, initial, onClose, onSa
   }, [onClose]);
 
   return (
+    <Portal>
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
       <div className="w-full max-w-md rounded-2xl bg-card shadow-2xl">
         {/* Modal Header */}
@@ -219,5 +221,6 @@ export default function PeriodFormModal({ slug, courseId, initial, onClose, onSa
         </form>
       </div>
     </div>
+    </Portal>
   );
 }

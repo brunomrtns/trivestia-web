@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Portal } from '@/components/ui/Portal';
 import { X, Target } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -48,6 +49,7 @@ export function GoalConfigModal({
   };
 
   return (
+    <Portal>
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-sm rounded-2xl bg-card shadow-xl">
         {/* Header */}
@@ -126,5 +128,6 @@ export function GoalConfigModal({
         </div>
       </div>
     </div>
+    </Portal>
   );
 }
