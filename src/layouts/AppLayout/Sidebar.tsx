@@ -15,7 +15,8 @@ import {
   TrendingUp,
   Zap,
   Globe,
-  Megaphone
+  Megaphone,
+  SlidersHorizontal
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/features/auth/auth.store';
@@ -56,6 +57,11 @@ function buildLinks(slug: string, t: (key: string) => string) {
       to: tenantPath(slug, '/app/progress'),
       icon: BarChart3,
       label: t('common.nav.progress')
+    },
+    {
+      to: tenantPath(slug, '/app/settings'),
+      icon: SlidersHorizontal,
+      label: t('common.nav.settings')
     }
   ];
 

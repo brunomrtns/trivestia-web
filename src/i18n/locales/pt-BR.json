@@ -18,7 +18,8 @@
       "courses": "Cursos",
       "lab": "Laboratório",
       "progress": "Progresso",
-      "announcements": "Avisos"
+      "announcements": "Avisos",
+      "settings": "Configurações"
     },
     "fields": {
       "email": "E-mail",
@@ -761,7 +762,15 @@
         "streakDay_other": "dias seguidos",
         "record": "recorde",
         "activityTooltip": "{{date}}: {{count}} atividade(s)",
-        "days": ["S", "T", "Q", "Q", "S", "S", "D"],
+        "days": [
+          "S",
+          "T",
+          "Q",
+          "Q",
+          "S",
+          "S",
+          "D"
+        ],
         "aria": {
           "configure": "Configurar meta"
         }
@@ -917,6 +926,34 @@
         "avgDrawdown": "Drawdown médio",
         "lastSession": "Última sessão",
         "avgWinRate": "Taxa de acerto média"
+      }
+    },
+    "settings": {
+      "title": "Configurações",
+      "subtitle": "Gerencie suas preferências pessoais",
+      "unsavedChanges": "Alterações não salvas",
+      "general": {
+        "title": "Geral",
+        "language": "Idioma",
+        "languageHint": "Idioma utilizado na interface da plataforma"
+      },
+      "audio": {
+        "title": "Áudio e Dispositivos",
+        "description": "Configure os dispositivos de áudio para futuras funcionalidades de voz e comunicação ao vivo.",
+        "microphone": "Microfone",
+        "speaker": "Alto-falante",
+        "defaultDevice": "Dispositivo padrão do sistema",
+        "permissionRequired": "Para listar os dispositivos disponíveis, é necessário permitir o acesso ao microfone.",
+        "grantPermission": "Permitir acesso",
+        "requesting": "Solicitando permissão...",
+        "permissionDenied": "Permissão negada",
+        "permissionDeniedHint": "Para alterar isso, acesse as configurações do seu navegador e habilite o acesso ao microfone para este site.",
+        "speakerNotSupported": "A seleção de alto-falante pode não ser suportada pelo seu navegador.",
+        "refreshDevices": "Atualizar lista de dispositivos"
+      },
+      "toast": {
+        "saved": "Configurações salvas com sucesso!",
+        "error": "Erro ao salvar as configurações. Tente novamente."
       }
     }
   },
