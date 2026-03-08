@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -18,6 +19,7 @@ import type { ActivityType } from '@/types/api';
 // ─── SimConfigSummary ────────────────────────────────────────────────────────
 
 function SimConfigSummary({ cfg }: { cfg: Record<string, unknown> }) {
+  const { t } = useTranslation();
   const cc = cfg.candleConfig as Record<string, unknown> | undefined;
   const ec = cfg.executionConfig as Record<string, unknown> | undefined;
   const sc = cfg.scoringConfig as Record<string, unknown> | undefined;
@@ -28,14 +30,14 @@ function SimConfigSummary({ cfg }: { cfg: Record<string, unknown> }) {
       })()
     : '—';
   const items = [
-    { label: 'Candles', value: `${cc?.numCandles ?? '—'} × ${tfs}` },
-    { label: 'Preço inicial', value: `$${cc?.startPrice ?? '—'}` },
-    { label: 'Volatilidade', value: String(cc?.volatility ?? '—') },
-    { label: 'Saldo inicial', value: `$${ec?.initialBalance ?? '—'}` },
-    { label: 'Taxa', value: `${ec?.feeBps ?? '—'} bps` },
-    { label: 'PnL mín.', value: `${sc?.passingPnlPercent ?? '—'}%` },
-    { label: 'DD máx.', value: `${sc?.maxDrawdownPercent ?? '—'}%` },
-    { label: 'Trades mín.', value: String(sc?.minTradeCount ?? '—') }
+    { label: t('admin.questions.simConfig.candles'), value: `${cc?.numCandles ?? '—'} × ${tfs}` },
+    { label: t('admin.questions.simConfig.startPrice'), value: `$${cc?.startPrice ?? '—'}` },
+    { label: t('admin.questions.simConfig.volatility'), value: String(cc?.volatility ?? '—') },
+    { label: t('admin.questions.simConfig.initialBalance'), value: `$${ec?.initialBalance ?? '—'}` },
+    { label: t('admin.questions.simConfig.fee'), value: `${ec?.feeBps ?? '—'} bps` },
+    { label: t('admin.questions.simConfig.minPnL'), value: `${sc?.passingPnlPercent ?? '—'}%` },
+    { label: t('admin.questions.simConfig.maxDD'), value: `${sc?.maxDrawdownPercent ?? '—'}%` },
+    { label: t('admin.questions.simConfig.minTrades'), value: String(sc?.minTradeCount ?? '—') }
   ];
   return (
     <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 rounded-lg bg-muted/40 px-4 py-3 text-xs">
@@ -49,26 +51,18 @@ function SimConfigSummary({ cfg }: { cfg: Record<string, unknown> }) {
   );
 }
 
-// Schema para criação de questão com opções dinâmicas
-const optionSchema = z.object({
-  text: z.string().min(1, 'Obrigatório'),
-  isCorrect: z.boolean(),
-  order: z.number()
-});
+// ─── Schema (definido dentro de QuestionForm para usar t()) ──────────────────────
 
-const questionSchema = z.object({
-  statement: z.string().min(5, 'Mínimo 5 caracteres'),
-  imageUrl: z.string().url().optional().nullable(),
-  explanation: z.string().optional(),
-  difficulty: z.number().min(1).max(5).default(3),
-  weight: z.number().min(1).default(1),
-  options: z.array(optionSchema),
-  // Indice da opcao correta (single-select). Transformado em isCorrect no submit.
-  correctIndex: z.coerce.number().optional(),
-  metadata: z.object({ jsonData: z.record(z.unknown()) }).optional()
-});
-
-type QuestionFormData = z.infer<typeof questionSchema>;
+type QuestionFormData = {
+  statement: string;
+  imageUrl?: string | null;
+  explanation?: string;
+  difficulty: number;
+  weight: number;
+  options: { text: string; isCorrect: boolean; order: number }[];
+  correctIndex?: number;
+  metadata?: { jsonData: Record<string, unknown> };
+};
 
 function QuestionForm({
   activityType,
@@ -85,6 +79,24 @@ function QuestionForm({
 }) {
   const showOptions = activityType !== 'TEXT_INPUT';
   const isTrueFalse = activityType === 'TRUE_FALSE';
+  const { t } = useTranslation();
+
+  const optionSchema = z.object({
+    text: z.string().min(1, t('common.validation.required')),
+    isCorrect: z.boolean(),
+    order: z.number()
+  });
+
+  const questionSchema = z.object({
+    statement: z.string().min(5, t('admin.questions.validation.statement')),
+    imageUrl: z.string().url().optional().nullable(),
+    explanation: z.string().optional(),
+    difficulty: z.number().min(1).max(5).default(3),
+    weight: z.number().min(1).default(1),
+    options: z.array(optionSchema),
+    correctIndex: z.coerce.number().optional(),
+    metadata: z.object({ jsonData: z.record(z.unknown()) }).optional()
+  });
 
   // Estado do upload de imagem
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -181,7 +193,7 @@ function QuestionForm({
       className="space-y-5 rounded-2xl border bg-card p-6 shadow-sm"
     >
       <div>
-        <label className="mb-1 block text-sm font-medium">Enunciado</label>
+        <label className="mb-1 block text-sm font-medium">{t('admin.chartMarkupForm.statementLabel')}</label>
         <textarea
           rows={3}
           className="w-full resize-none rounded-lg border bg-background px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
@@ -198,7 +210,7 @@ function QuestionForm({
       <div>
         <label className="mb-1 block text-sm font-medium">
           Imagem do enunciado{' '}
-          <span className="font-normal text-muted-foreground">(opcional)</span>
+          <span className="font-normal text-muted-foreground">{t('common.misc.optional')}</span>
         </label>
         {imagePreview ? (
           <div className="relative overflow-hidden rounded-xl border">
@@ -236,7 +248,7 @@ function QuestionForm({
 
       <div>
         <label className="mb-1 block text-sm font-medium">
-          Explicação (pós-resposta)
+          {t('admin.chartMarkupForm.explanationLabel')}
         </label>
         <textarea
           rows={2}
@@ -248,7 +260,7 @@ function QuestionForm({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="mb-1 block text-sm font-medium">
-            Dificuldade (1-5)
+            {t('admin.chartMarkupForm.difficultyLabel')}
           </label>
           <input
             type="number"
@@ -259,7 +271,7 @@ function QuestionForm({
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium">Peso</label>
+          <label className="mb-1 block text-sm font-medium">{t('admin.chartMarkupForm.weightLabel')}</label>
           <input
             type="number"
             min={1}
@@ -348,14 +360,14 @@ function QuestionForm({
           className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
         >
           {(loading || uploading) && <Loader2 className="h-4 w-4 animate-spin" />}
-          {uploading ? 'Enviando imagem...' : 'Salvar questão'}
+          {uploading ? t('admin.stepForm.uploadingImage') : t('admin.chartMarkupForm.saveButton')}
         </button>
         <button
           type="button"
           onClick={onCancel}
           className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-accent"
         >
-          Cancelar
+          {t('common.actions.cancel')}
         </button>
       </div>
     </form>
@@ -363,6 +375,7 @@ function QuestionForm({
 }
 
 export default function AdminQuestionsPage() {
+  const { t } = useTranslation();
   const { lessonId, activityId, tenantSlug } = useParams<{
     lessonId: string;
     activityId: string;
@@ -421,7 +434,7 @@ export default function AdminQuestionsPage() {
           className="mb-3 flex items-center gap-1.5 text-sm text-muted-foreground transition hover:text-foreground"
         >
           <ChevronLeft className="h-4 w-4" />
-          Voltar
+          {t('common.actions.back')}
         </button>
         <div className="flex items-center justify-between">
           <div>
@@ -512,7 +525,7 @@ export default function AdminQuestionsPage() {
                 <p className="font-medium">
                   <span className="mr-2 text-muted-foreground">#{i + 1}</span>
                   {activityType === 'SIM_TRADING_CHALLENGE'
-                    ? 'Configuração do Cenário de Trading'
+                    ? t('admin.simForm.sectionTitle')
                     : q.statement}
                 </p>
                 <button

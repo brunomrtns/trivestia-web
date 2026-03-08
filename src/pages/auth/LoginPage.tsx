@@ -14,15 +14,15 @@ import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { authEndpoints } from '@/services/endpoints/auth.endpoints';
 import { useAuthStore } from '@/features/auth/auth.store';
 import { useTenant } from '@/hooks/useTenant';
+import { useTranslation } from 'react-i18next';
 
-const schema = z.object({
-  email: z.string().email('E-mail inválido'),
-  password: z.string().min(1, 'Senha obrigatória')
-});
-
-type FormData = z.infer<typeof schema>;
+type FormData = {
+  email: string;
+  password: string;
+};
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const [searchParams] = useSearchParams();
@@ -42,6 +42,11 @@ export default function LoginPage() {
 
   // Nome da escola: query param (instantâneo) ou useTenant (fallback para acesso direto)
   const displaySchoolName = schoolNameParam || tenant?.name || '';
+
+  const schema = z.object({
+    email: z.string().email(t('common.validation.emailInvalid')),
+    password: z.string().min(1, t('common.validation.passwordRequired'))
+  });
 
   const {
     register,
@@ -66,10 +71,10 @@ export default function LoginPage() {
     try {
       const res = await authEndpoints.login(slug, data);
       setAuth(res.user, res.token, res.refreshToken, slug);
-      toast.success(`Bem-vindo, ${res.user.name}!`);
+      toast.success(t('auth.login.toast.success', { name: res.user.name }));
       navigate(returnTo, { replace: true });
     } catch {
-      toast.error('E-mail ou senha inválidos.');
+      toast.error(t('auth.login.toast.error'));
     } finally {
       setLoading(false);
     }
@@ -88,21 +93,21 @@ export default function LoginPage() {
           {displaySchoolName}
         </div>
       )}
-      <h1 className="mb-2 text-3xl font-extrabold">Entrar</h1>
+      <h1 className="mb-2 text-3xl font-extrabold">{t('auth.login.title')}</h1>
       <p className="mb-8 text-muted-foreground">
-        Novo por aqui?{' '}
+        {t('auth.login.newHere')}{' '}
         <Link
           to={`${base}/register`}
           className="font-medium text-primary hover:underline"
         >
-          Criar conta
+          {t('common.actions.register')}
         </Link>
       </p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <div>
           <label className="mb-1.5 block text-sm font-medium" htmlFor="email">
-            E-mail
+            {t('common.fields.email')}
           </label>
           {prefilledEmail ? (
             // E-mail pré-preenchido pelo GlobalLoginPage — exibe bloqueado
@@ -112,7 +117,7 @@ export default function LoginPage() {
                 href="/login"
                 className="text-xs text-muted-foreground hover:text-foreground hover:underline"
               >
-                Trocar
+                {t('auth.login.changeEmail')}
               </a>
             </div>
           ) : (
@@ -121,7 +126,7 @@ export default function LoginPage() {
                 id="email"
                 type="email"
                 autoComplete="email"
-                placeholder="voce@email.com"
+                placeholder={t('common.placeholders.email')}
                 className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm outline-none ring-offset-background transition focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50"
                 {...register('email')}
               />
@@ -139,7 +144,7 @@ export default function LoginPage() {
             className="mb-1.5 block text-sm font-medium"
             htmlFor="password"
           >
-            Senha
+            {t('common.fields.password')}
           </label>
           <div className="relative">
             <input
@@ -176,7 +181,7 @@ export default function LoginPage() {
           className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow transition hover:opacity-90 disabled:opacity-60"
         >
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-          Entrar
+          {t('common.actions.login')}
         </button>
       </form>
     </div>

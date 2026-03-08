@@ -13,12 +13,14 @@ import { progressEndpoints } from '@/services/endpoints/progress.endpoints';
 import { dashboardEndpoints } from '@/services/endpoints/dashboard.endpoints';
 import { useAuthStore } from '@/features/auth/auth.store';
 import { getProgressLabel, getProgressColor } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 import { tenantPath } from '@/lib/tenant';
 import { ContinueCard, ContinueCardSkeleton } from '@/components/dashboard/ContinueCard';
 import { LabSummaryCard, LabSummaryCardSkeleton } from '@/components/dashboard/LabSummaryCard';
 import { WeeklyGoalWidget, WeeklyGoalWidgetSkeleton } from '@/components/dashboard/WeeklyGoalWidget';
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const slug = tenantSlug ?? '';
@@ -74,9 +76,9 @@ export default function DashboardPage() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-extrabold">
-          Olá, {user?.name?.split(' ')[0]}
+          {t('app.dashboard.greeting', { firstName: user?.name?.split(' ')[0] })}
         </h1>
-        <p className="mt-1 text-muted-foreground">Continue de onde parou.</p>
+        <p className="mt-1 text-muted-foreground">{t('app.dashboard.subtitle')}</p>
       </div>
 
       {/* Continue Card */}
@@ -101,25 +103,25 @@ export default function DashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           {
-            label: 'Aulas concluídas',
+            label: t('app.dashboard.stats.completedLessons'),
             value: completed,
             icon: CheckCircle2,
             color: 'text-green-500'
           },
           {
-            label: 'Em andamento',
+            label: t('app.dashboard.stats.inProgress'),
             value: inProgress,
             icon: Clock,
             color: 'text-yellow-500'
           },
           {
-            label: 'Total de aulas',
+            label: t('app.dashboard.stats.totalLessons'),
             value: totalLessons,
             icon: BookOpen,
             color: 'text-primary'
           },
           {
-            label: 'Pontuação média',
+            label: t('app.dashboard.stats.avgScore'),
             value: `${avgScore}%`,
             icon: BarChart3,
             color: 'text-blue-500'
@@ -157,12 +159,12 @@ export default function DashboardPage() {
       {/* Cursos */}
       <div>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold">Cursos disponíveis</h2>
+          <h2 className="text-xl font-bold">{t('app.dashboard.availableCourses')}</h2>
           <Link
             to={tenantPath(slug, '/app/courses')}
             className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
           >
-            Ver todos <ChevronRight className="h-4 w-4" />
+            {t('common.actions.viewAll')} <ChevronRight className="h-4 w-4" />
           </Link>
         </div>
 
@@ -202,12 +204,12 @@ export default function DashboardPage() {
       {progress && progress.length > 0 && (
         <div>
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-bold">Atividade recente</h2>
+            <h2 className="text-xl font-bold">{t('app.dashboard.recentActivity')}</h2>
             <Link
               to={tenantPath(slug, '/app/progress')}
               className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
             >
-              Ver tudo <ChevronRight className="h-4 w-4" />
+              {t('common.actions.seeAll')} <ChevronRight className="h-4 w-4" />
             </Link>
           </div>
           <div className="space-y-3">

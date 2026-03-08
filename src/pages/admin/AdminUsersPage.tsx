@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Portal } from '@/components/ui/Portal';
 import { useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -62,6 +63,7 @@ function ConfirmRoleDialog({
   onCancel,
   isLoading
 }: ConfirmRoleDialogProps) {
+  const { t } = useTranslation();
   const isPromotion = newRole === 'ADMIN';
   return (
     <Portal>
@@ -76,12 +78,12 @@ function ConfirmRoleDialog({
           <AlertTriangle className="h-6 w-6 text-orange-600" />
         </div>
         <h2 className="mb-2 text-lg font-semibold">
-          {isPromotion ? 'Promover a Administrador?' : 'Revogar Acesso Admin?'}
+          {isPromotion ? t('admin.users.role.promoteTitle') : t('admin.users.role.revokeTitle')}
         </h2>
         <p className="mb-6 text-sm text-muted-foreground">
           {isPromotion
-            ? `"${user.name}" terá acesso total ao painel administrativo, incluindo gerenciamento de conteúdo e usuários.`
-            : `"${user.name}" perderá o acesso administrativo e voltará a ser um estudante comum.`}
+            ? t('admin.users.role.promoteMessage', { name: user.name })
+            : t('admin.users.role.revokeMessage', { name: user.name })}
         </p>
         <div className="flex gap-3">
           <button
@@ -96,14 +98,14 @@ function ConfirmRoleDialog({
             )}
           >
             {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-            {isPromotion ? 'Sim, promover' : 'Sim, revogar'}
+            {isPromotion ? t('admin.users.role.promoteConfirm') : t('admin.users.role.revokeConfirm')}
           </button>
           <button
             onClick={onCancel}
             disabled={isLoading}
             className="flex-1 rounded-lg border px-4 py-2 text-sm font-medium transition hover:bg-accent"
           >
-            Cancelar
+            {t('common.actions.cancel')}
           </button>
         </div>
       </motion.div>
@@ -123,6 +125,7 @@ function UserDetailModal({
   userId: string;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const { data, isLoading } = useQuery({
     queryKey: ['admin-user-detail', slug, userId],
     queryFn: () => adminUsersEndpoints.getUser(slug, userId)
@@ -138,7 +141,7 @@ function UserDetailModal({
         className="w-full max-w-lg rounded-2xl border bg-card shadow-xl"
       >
         <div className="flex items-center justify-between border-b px-6 py-4">
-          <h2 className="text-lg font-semibold">Detalhes do Usuário</h2>
+          <h2 className="text-lg font-semibold">{t('admin.users.detail.title')}</h2>
           <button onClick={onClose} className="rounded-lg p-1 hover:bg-accent">
             <X className="h-5 w-5" />
           </button>
@@ -190,7 +193,7 @@ function UserDetailModal({
             {data.progress.length > 0 && (
               <div>
                 <p className="mb-2 text-sm font-medium text-muted-foreground">
-                  Atividade recente
+                  {t('app.dashboard.recentActivity')}
                 </p>
                 <div className="space-y-2">
                   {data.progress.map((p, i) => (
@@ -247,6 +250,7 @@ function UserDetailModal({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function AdminUsersPage() {
+  const { t } = useTranslation();
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const slug = tenantSlug ?? '';
   const currentUser = useAuthStore((s) => s.user);
@@ -296,7 +300,7 @@ export default function AdminUsersPage() {
       setConfirmAction(null);
     },
     onError: (err: { response?: { data?: { message?: string } } }) => {
-      toast.error(err.response?.data?.message ?? 'Erro ao atualizar role.');
+      toast.error(err.response?.data?.message ?? t('super.users.toast.updateError'));
       setConfirmAction(null);
     }
   });
@@ -344,7 +348,7 @@ export default function AdminUsersPage() {
           }}
           className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
         >
-          <option value="">Todos os roles</option>
+          <option value="">{t('super.users.filter.allRoles')}</option>
           <option value="ADMIN">Admin</option>
           <option value="STUDENT">Estudante</option>
         </select>
@@ -366,19 +370,19 @@ export default function AdminUsersPage() {
         ) : users.length === 0 ? (
           <div className="flex h-48 flex-col items-center justify-center gap-2 text-muted-foreground">
             <UserIcon className="h-8 w-8 opacity-40" />
-            <p className="text-sm">Nenhum usuário encontrado.</p>
+            <p className="text-sm">{t('super.users.empty')}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/30 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  <th className="px-4 py-3">Nome</th>
-                  <th className="px-4 py-3">E-mail</th>
-                  <th className="px-4 py-3">Role</th>
+                  <th className="px-4 py-3">{t('super.users.table.name')}</th>
+                  <th className="px-4 py-3">{t('common.fields.email')}</th>
+                  <th className="px-4 py-3">{t('super.users.table.role')}</th>
                   <th className="px-4 py-3">Último login</th>
                   <th className="px-4 py-3">Cadastro</th>
-                  <th className="px-4 py-3 text-right">Ações</th>
+                  <th className="px-4 py-3 text-right">{t('super.users.table.actions')}</th>
                 </tr>
               </thead>
               <tbody

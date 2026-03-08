@@ -1,9 +1,11 @@
 import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { BookOpen, LayoutDashboard, LogOut } from 'lucide-react';
 import { useAuthStore } from '@/features/auth/auth.store';
 import { authStorage } from '@/features/auth/storage';
 
 export function PublicLayout() {
+  const { t } = useTranslation();
   const { isAuthenticated, user, logout, tenantSlug } = useAuthStore();
   const navigate = useNavigate();
 
@@ -32,7 +34,7 @@ export function PublicLayout() {
               to={coursesHref}
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
-              Cursos
+              {t('common.nav.courses')}
             </Link>
             {isAuthenticated ? (
               <div className="flex items-center gap-3">
@@ -44,13 +46,13 @@ export function PublicLayout() {
                   className="flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
                 >
                   <LayoutDashboard className="h-4 w-4" />
-                  Dashboard
+                  {t('common.nav.dashboard')}
                 </Link>
                 <button
                   onClick={handleLogout}
                   className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                  aria-label="Sair"
-                  title="Sair"
+                  aria-label={t('common.aria.logout')}
+                  title={t('common.aria.logout')}
                 >
                   <LogOut className="h-4 w-4" />
                 </button>
@@ -60,7 +62,7 @@ export function PublicLayout() {
                 to="/login"
                 className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
               >
-                Entrar
+                {t('common.actions.login')}
               </Link>
             )}
           </nav>
@@ -70,7 +72,7 @@ export function PublicLayout() {
         <Outlet />
       </main>
       <footer className="border-t py-8 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} Trivestia. Todos os direitos reservados.
+        {t('public.footer.copyright', { year: new Date().getFullYear() })}
       </footer>
     </div>
   );

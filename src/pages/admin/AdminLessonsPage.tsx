@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -53,61 +54,25 @@ import type {
   StepType
 } from '@/types/api';
 
-// ─── Schemas ─────────────────────────────────────────────────────────────────
+// ─── Types ───────────────────────────────────────────────────────────────────
 
-const moduleSchema = z.object({
-  title: z.string().min(2, 'Mínimo 2 caracteres'),
-  order: z.coerce.number().min(1, 'Mínimo 1')
-});
-type ModuleForm = z.infer<typeof moduleSchema>;
+type ModuleForm = { title: string; order: number };
 
-const lessonSchema = z.object({
-  title: z.string().min(2, 'Mínimo 2 caracteres'),
-  order: z.coerce.number().min(1, 'Mínimo 1'),
-  availableFrom: z.string().optional(),
-  prerequisiteLessonId: z.string().optional(),
-  prerequisiteMinScore: z.coerce.number().min(0).max(100).optional()
-});
-type LessonForm = z.infer<typeof lessonSchema>;
+type LessonForm = {
+  title: string;
+  order: number;
+  availableFrom?: string;
+  prerequisiteLessonId?: string;
+  prerequisiteMinScore?: number;
+};
 
-const activitySchema = z.object({
-  title: z.string().min(2, 'Mínimo 2 caracteres'),
-  order: z.coerce.number().min(1, 'Mínimo 1'),
-  type: z.enum([
-    'MULTIPLE_CHOICE',
-    'MULTIPLE_SELECT',
-    'TRUE_FALSE',
-    'ORDERING',
-    'TEXT_INPUT',
-    'SCENARIO',
-    'CHART_MARKUP',
-    'RISK_CALCULATOR',
-    'SIM_TRADING_CHALLENGE'
-  ] as const),
-  reviewPolicy: z
-    .enum(['IMMEDIATE', 'AFTER_DATE', 'NEVER'] as const)
-    .default('IMMEDIATE'),
-  reviewAfterDate: z.string().optional().nullable()
-});
-type ActivityForm = z.infer<typeof activitySchema>;
-
-const REVIEW_POLICIES: { value: ActivityReviewPolicy; label: string; description: string }[] = [
-  { value: 'IMMEDIATE', label: 'Imediata', description: 'Aluno vê gabarito logo após responder' },
-  { value: 'AFTER_DATE', label: 'Após data', description: 'Gabarito liberado após data específica' },
-  { value: 'NEVER', label: 'Nunca', description: 'Gabarito nunca é exibido' }
-];
-
-const ACTIVITY_TYPES: { value: ActivityType; label: string }[] = [
-  { value: 'MULTIPLE_CHOICE', label: 'Múltipla Escolha' },
-  { value: 'MULTIPLE_SELECT', label: 'Múltipla Seleção' },
-  { value: 'TRUE_FALSE', label: 'Verdadeiro/Falso' },
-  { value: 'ORDERING', label: 'Ordenação' },
-  { value: 'TEXT_INPUT', label: 'Resposta Aberta' },
-  { value: 'SCENARIO', label: 'Cenário' },
-  { value: 'CHART_MARKUP', label: 'Marcação de Gráfico' },
-  { value: 'RISK_CALCULATOR', label: 'Calculadora de Risco' },
-  { value: 'SIM_TRADING_CHALLENGE', label: 'Simulação de Trading' }
-];
+type ActivityForm = {
+  title: string;
+  order: number;
+  type: ActivityType;
+  reviewPolicy: ActivityReviewPolicy;
+  reviewAfterDate?: string | null;
+};
 
 const TYPE_COLORS: Record<ActivityType, string> = {
   MULTIPLE_CHOICE: 'bg-blue-500/10 text-blue-600 border-blue-200',
@@ -126,13 +91,6 @@ const STEP_ICON: Record<StepType, React.ReactNode> = {
   CONTENT_TEXT: <FileText className="h-4 w-4 shrink-0 text-blue-500" />,
   CONTENT_VIDEO: <Video className="h-4 w-4 shrink-0 text-purple-500" />,
   CONTENT_IMAGE: <Image className="h-4 w-4 shrink-0 text-green-500" />
-};
-
-const STEP_LABEL: Record<StepType, string> = {
-  ACTIVITY: 'Atividade',
-  CONTENT_TEXT: 'Texto',
-  CONTENT_VIDEO: 'Vídeo',
-  CONTENT_IMAGE: 'Imagem'
 };
 
 const STEP_BADGE_COLOR: Record<StepType, string> = {
@@ -159,6 +117,13 @@ function SortableStepRow({
   onDelete: () => void;
   isDeleting: boolean;
 }) {
+  const { t } = useTranslation();
+  const STEP_LABEL: Record<StepType, string> = {
+    ACTIVITY: t('admin.lessons.stepType.activity'),
+    CONTENT_TEXT: t('admin.lessons.stepType.text'),
+    CONTENT_VIDEO: t('admin.lessons.stepType.video'),
+    CONTENT_IMAGE: t('admin.lessons.stepType.image')
+  };
   const {
     attributes,
     listeners,
@@ -248,7 +213,7 @@ function SortableStepRow({
         <button
           onClick={onEdit}
           className="shrink-0 rounded-lg p-1.5 text-muted-foreground transition hover:bg-accent hover:text-foreground"
-          aria-label="Editar etapa"
+          aria-label={t('admin.lessonSteps.aria.edit')}
         >
           <Pencil className="h-3.5 w-3.5" />
         </button>
@@ -258,7 +223,7 @@ function SortableStepRow({
         onClick={onDelete}
         disabled={isDeleting}
         className="shrink-0 rounded-lg p-1.5 text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive disabled:opacity-40"
-        aria-label="Excluir etapa"
+        aria-label={t('admin.lessonSteps.aria.delete')}
       >
         {isDeleting ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -288,6 +253,40 @@ function LessonSection({
   isDeletingLesson: boolean;
 }) {
   const qc = useQueryClient();
+  const { t } = useTranslation();
+  const lessonSchema = z.object({
+    title: z.string().min(2, t('admin.lessons.validation.title')),
+    order: z.coerce.number().min(1, t('admin.lessons.validation.order')),
+    availableFrom: z.string().optional(),
+    prerequisiteLessonId: z.string().optional(),
+    prerequisiteMinScore: z.coerce.number().min(0).max(100).optional()
+  });
+  const activitySchema = z.object({
+    title: z.string().min(2, t('admin.lessons.validation.title')),
+    order: z.coerce.number().min(1, t('admin.lessons.validation.order')),
+    type: z.enum([
+      'MULTIPLE_CHOICE', 'MULTIPLE_SELECT', 'TRUE_FALSE', 'ORDERING',
+      'TEXT_INPUT', 'SCENARIO', 'CHART_MARKUP', 'RISK_CALCULATOR', 'SIM_TRADING_CHALLENGE'
+    ] as const),
+    reviewPolicy: z.enum(['IMMEDIATE', 'AFTER_DATE', 'NEVER'] as const).default('IMMEDIATE'),
+    reviewAfterDate: z.string().optional().nullable()
+  });
+  const ACTIVITY_TYPES: { value: ActivityType; label: string }[] = [
+    { value: 'MULTIPLE_CHOICE', label: t('admin.lessons.activityType.multipleChoice') },
+    { value: 'MULTIPLE_SELECT', label: t('admin.lessons.activityType.multipleSelect') },
+    { value: 'TRUE_FALSE', label: t('admin.lessons.activityType.trueFalse') },
+    { value: 'ORDERING', label: t('admin.lessons.activityType.ordering') },
+    { value: 'TEXT_INPUT', label: t('admin.lessons.activityType.textInput') },
+    { value: 'SCENARIO', label: t('admin.lessons.activityType.scenario') },
+    { value: 'CHART_MARKUP', label: t('admin.lessons.activityType.chartMarkup') },
+    { value: 'RISK_CALCULATOR', label: t('admin.lessons.activityType.riskCalculator') },
+    { value: 'SIM_TRADING_CHALLENGE', label: t('admin.lessons.activityType.simTrading') }
+  ];
+  const REVIEW_POLICIES: { value: ActivityReviewPolicy; label: string }[] = [
+    { value: 'IMMEDIATE', label: t('admin.lessons.reviewPolicy.immediate') },
+    { value: 'AFTER_DATE', label: t('admin.lessons.reviewPolicy.afterDate') },
+    { value: 'NEVER', label: t('admin.lessons.reviewPolicy.never') }
+  ];
   const [expanded, setExpanded] = useState(false);
   const [editingLesson, setEditingLesson] = useState(false);
   const [showAccessRules, setShowAccessRules] = useState(false);
@@ -375,9 +374,9 @@ function LessonSection({
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-timeline', slug, lesson.id] });
-      toast.success('Etapa excluída.');
+      toast.success(t('admin.lessonSteps.toast.deleted'));
     },
-    onError: () => toast.error('Erro ao excluir etapa.')
+    onError: () => toast.error(t('admin.lessonSteps.toast.deleteError'))
   });
 
   // ─── Activity form ──────────────────────────────────────────────────────────
@@ -428,9 +427,9 @@ function LessonSection({
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-timeline', slug, lesson.id] });
       setAddingStep(false);
-      toast.success('Etapa criada!');
+      toast.success(t('admin.stepForm.toast.created'));
     },
-    onError: () => toast.error('Erro ao criar etapa.')
+    onError: () => toast.error(t('admin.stepForm.toast.createError'))
   });
 
   // ─── Lesson edit form ───────────────────────────────────────────────────────
@@ -511,14 +510,14 @@ function LessonSection({
               {updateLessonMut.isPending && (
                 <Loader2 className="h-3 w-3 animate-spin" />
               )}
-              Salvar
+              {t('admin.stepForm.saveButton')}
             </button>
             <button
               type="button"
               onClick={() => setEditingLesson(false)}
               className="rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-accent"
             >
-              Cancelar
+              {t('common.actions.cancel')}
             </button>
           </div>
 
@@ -687,7 +686,7 @@ function LessonSection({
 
               {localSteps.length === 0 && (
                 <p className="py-2 text-center text-xs text-muted-foreground">
-                  Nenhuma etapa nesta aula.
+                  {t('admin.lessonSteps.empty.title')}
                 </p>
               )}
 
@@ -716,7 +715,7 @@ function LessonSection({
                   )}
                 >
                   <Zap className="h-3.5 w-3.5" />
-                  Atividade
+                  {t('admin.lessons.stepType.activity')}
                 </button>
                 <button
                   type="button"
@@ -729,7 +728,7 @@ function LessonSection({
                   )}
                 >
                   <FileText className="h-3.5 w-3.5" />
-                  Conteúdo
+                  {t('admin.stepForm.contentLabel')}
                 </button>
               </div>
 
@@ -743,7 +742,7 @@ function LessonSection({
                 >
                   <div className="flex-1 min-w-[140px]">
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                      Título
+                      {t('admin.stepForm.titleLabel')}
                     </label>
                     <input
                       className="w-full rounded-lg border bg-background px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-ring"
@@ -757,7 +756,7 @@ function LessonSection({
                   </div>
                   <div className="flex-1 min-w-[160px]">
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                      Tipo
+                      {t('admin.stepForm.typeLabel')}
                     </label>
                     <select
                       className="w-full rounded-lg border bg-background px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-ring"
@@ -812,7 +811,7 @@ function LessonSection({
                       {createActivityStepMut.isPending && (
                         <Loader2 className="h-3 w-3 animate-spin" />
                       )}
-                      Salvar
+                      {t('admin.stepForm.saveButton')}
                     </button>
                     <button
                       type="button"
@@ -822,7 +821,7 @@ function LessonSection({
                       }}
                       className="rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-accent"
                     >
-                      Cancelar
+                      {t('common.actions.cancel')}
                     </button>
                   </div>
                 </form>
@@ -851,7 +850,7 @@ function LessonSection({
                       onClick={() => setAddingStep(false)}
                       className="rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-accent"
                     >
-                      Cancelar
+                      {t('common.actions.cancel')}
                     </button>
                   </div>
                 </div>
@@ -911,6 +910,18 @@ function ModuleSection({
   isDeletingModule: boolean;
 }) {
   const qc = useQueryClient();
+  const { t } = useTranslation();
+  const lessonSchema = z.object({
+    title: z.string().min(2, t('admin.lessons.validation.title')),
+    order: z.coerce.number().min(1, t('admin.lessons.validation.order')),
+    availableFrom: z.string().optional(),
+    prerequisiteLessonId: z.string().optional(),
+    prerequisiteMinScore: z.coerce.number().min(0).max(100).optional()
+  });
+  const moduleSchema = z.object({
+    title: z.string().min(2, t('admin.lessons.validation.title')),
+    order: z.coerce.number().min(1, t('admin.lessons.validation.order'))
+  });
   const [expanded, setExpanded] = useState(false);
   const [addingLesson, setAddingLesson] = useState(false);
   const [editingModule, setEditingModule] = useState(false);
@@ -992,14 +1003,14 @@ function ModuleSection({
             {updateModuleMut.isPending && (
               <Loader2 className="h-4 w-4 animate-spin" />
             )}
-            Salvar
+            {t('admin.stepForm.saveButton')}
           </button>
           <button
             type="button"
             onClick={() => setEditingModule(false)}
             className="rounded-lg border px-3 py-2 text-sm font-medium hover:bg-accent"
           >
-            Cancelar
+            {t('common.actions.cancel')}
           </button>
         </form>
       ) : (
@@ -1128,7 +1139,7 @@ function ModuleSection({
                   {createLessonMut.isPending && (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   )}
-                  Salvar
+                  {t('admin.stepForm.saveButton')}
                 </button>
                 <button
                   type="button"
@@ -1138,7 +1149,7 @@ function ModuleSection({
                   }}
                   className="rounded-lg border px-3 py-2 text-sm font-medium hover:bg-accent"
                 >
-                  Cancelar
+                  {t('common.actions.cancel')}
                 </button>
               </div>
             </form>
@@ -1167,6 +1178,11 @@ export default function AdminLessonsPage() {
   const slug = tenantSlug ?? '';
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const { t } = useTranslation();
+  const moduleSchema = z.object({
+    title: z.string().min(2, t('admin.lessons.validation.title')),
+    order: z.coerce.number().min(1, t('admin.lessons.validation.order'))
+  });
   const [addingModule, setAddingModule] = useState(false);
 
   const { data: course, isLoading: loadingCourse } = useQuery({
@@ -1217,7 +1233,7 @@ export default function AdminLessonsPage() {
           className="mb-3 flex items-center gap-1.5 text-sm text-muted-foreground transition hover:text-foreground"
         >
           <ChevronLeft className="h-4 w-4" />
-          Voltar aos cursos
+          {t('app.course.backToCourses')}
         </button>
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -1283,7 +1299,7 @@ export default function AdminLessonsPage() {
               {createModuleMut.isPending && (
                 <Loader2 className="h-4 w-4 animate-spin" />
               )}
-              Salvar
+              {t('admin.stepForm.saveButton')}
             </button>
             <button
               type="button"
@@ -1293,7 +1309,7 @@ export default function AdminLessonsPage() {
               }}
               className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-accent"
             >
-              Cancelar
+              {t('common.actions.cancel')}
             </button>
           </div>
         </form>

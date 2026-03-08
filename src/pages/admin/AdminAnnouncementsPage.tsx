@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Pencil, Trash2, Megaphone } from 'lucide-react';
@@ -16,12 +17,6 @@ const priorityBadge: Record<AnnouncementPriority, string> = {
   CRITICAL: 'bg-red-500/10 text-red-600'
 };
 
-const priorityLabel: Record<AnnouncementPriority, string> = {
-  INFO: 'Info',
-  WARNING: 'Atenção',
-  CRITICAL: 'Urgente'
-};
-
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('pt-BR', {
     day: '2-digit',
@@ -35,6 +30,7 @@ const PAGE_SIZE = 10;
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function AdminAnnouncementsPage() {
+  const { t } = useTranslation();
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const slug = tenantSlug ?? '';
   const queryClient = useQueryClient();
@@ -60,9 +56,9 @@ export default function AdminAnnouncementsPage() {
     onSuccess: () => {
       invalidate();
       setModalOpen(false);
-      toast.success('Aviso publicado com sucesso!');
+      toast.success(t('admin.announcements.toast.created'));
     },
-    onError: () => toast.error('Erro ao publicar aviso.')
+    onError: () => toast.error(t('admin.announcements.toast.createError'))
   });
 
   const updateMutation = useMutation({
@@ -77,9 +73,9 @@ export default function AdminAnnouncementsPage() {
       invalidate();
       setModalOpen(false);
       setEditing(null);
-      toast.success('Aviso atualizado!');
+      toast.success(t('admin.announcements.toast.updated'));
     },
-    onError: () => toast.error('Erro ao atualizar aviso.')
+    onError: () => toast.error(t('admin.announcements.toast.updateError'))
   });
 
   const deleteMutation = useMutation({
@@ -87,9 +83,9 @@ export default function AdminAnnouncementsPage() {
     onSuccess: () => {
       invalidate();
       setDeletingId(null);
-      toast.success('Aviso removido.');
+      toast.success(t('admin.announcements.toast.deleted'));
     },
-    onError: () => toast.error('Erro ao remover aviso.')
+    onError: () => toast.error(t('admin.announcements.toast.deleteError'))
   });
 
   const totalPages = data ? Math.ceil(data.pagination.total / PAGE_SIZE) : 1;
@@ -129,14 +125,14 @@ export default function AdminAnnouncementsPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Megaphone className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold">Gerenciar Avisos</h1>
+          <h1 className="text-2xl font-bold">{t('admin.announcements.page.title')}</h1>
         </div>
         <button
           onClick={openCreate}
           className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
         >
           <Plus className="h-4 w-4" />
-          Novo Aviso
+          {t('admin.announcements.page.newButton')}
         </button>
       </div>
 
@@ -188,7 +184,7 @@ export default function AdminAnnouncementsPage() {
                   </td>
                   <td className="px-4 py-3">
                     <span className={cn('rounded px-2 py-0.5 text-xs font-bold uppercase', priorityBadge[ann.priority])}>
-                      {priorityLabel[ann.priority]}
+                      {t(`admin.announcements.priority.${ann.priority.toLowerCase()}`)}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{ann.author.name}</td>
@@ -220,7 +216,7 @@ export default function AdminAnnouncementsPage() {
                             onClick={() => setDeletingId(null)}
                             className="rounded-md px-2 py-1 text-xs border hover:bg-accent"
                           >
-                            Cancelar
+                            {t('common.actions.cancel')}
                           </button>
                         </div>
                       ) : (
@@ -249,7 +245,7 @@ export default function AdminAnnouncementsPage() {
             disabled={page === 1}
             className="rounded-md px-3 py-1.5 text-sm border transition-colors hover:bg-accent disabled:opacity-40"
           >
-            Anterior
+            {t('common.pagination.previous')}
           </button>
           <span className="text-sm text-muted-foreground">
             {page} / {totalPages}
@@ -259,7 +255,7 @@ export default function AdminAnnouncementsPage() {
             disabled={page === totalPages}
             className="rounded-md px-3 py-1.5 text-sm border transition-colors hover:bg-accent disabled:opacity-40"
           >
-            Próximo
+            {t('common.pagination.next')}
           </button>
         </div>
       )}

@@ -3,6 +3,7 @@ import { BarChart2, TrendingUp, Trophy, Target, TrendingDown, Clock, ArrowRight 
 import { Link } from 'react-router-dom';
 import { tenantPath } from '@/lib/tenant';
 import type { DashboardLabSummaryDTO } from '@/types/api';
+import { useTranslation } from 'react-i18next';
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
@@ -55,6 +56,7 @@ interface LabSummaryCardProps {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function LabSummaryCard({ data, slug }: LabSummaryCardProps) {
+  const { t } = useTranslation();
   const {
     totalSessions,
     completedSessions,
@@ -78,9 +80,9 @@ export function LabSummaryCard({ data, slug }: LabSummaryCardProps) {
             <BarChart2 className="h-6 w-6 text-blue-500" />
           </div>
           <div>
-            <p className="font-semibold">Ainda sem sessões no laboratório</p>
+            <p className="font-semibold">{t('app.labSummary.empty.title')}</p>
             <p className="text-sm text-muted-foreground">
-              Pratique no simulador e acompanhe sua evolução aqui.
+              {t('app.labSummary.empty.subtitle')}
             </p>
           </div>
         </div>
@@ -88,7 +90,7 @@ export function LabSummaryCard({ data, slug }: LabSummaryCardProps) {
           to={tenantPath(slug, '/app/lab')}
           className="shrink-0 flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 active:scale-95 transition-all"
         >
-          Praticar <ArrowRight className="h-4 w-4" />
+          {t('app.labSummary.empty.button')} <ArrowRight className="h-4 w-4" />
         </Link>
       </motion.div>
     );
@@ -108,34 +110,34 @@ export function LabSummaryCard({ data, slug }: LabSummaryCardProps) {
   const stats: MiniStatProps[] = [
     {
       icon: BarChart2,
-      label: 'Sessões totais',
+      label: t('app.labSummary.stats.totalSessions'),
       value: String(totalSessions)
     },
     {
       icon: Trophy,
-      label: 'Completadas',
+      label: t('app.labSummary.stats.completed'),
       value: String(completedSessions)
     },
     {
       icon: TrendingUp,
-      label: 'PnL médio',
+      label: t('app.labSummary.stats.avgPnl'),
       value: `${avgPnlPercent > 0 ? '+' : ''}${avgPnlPercent.toFixed(2)}%`,
       valueClass: pnlColor(avgPnlPercent)
     },
     {
       icon: Target,
-      label: 'Melhor PnL',
+      label: t('app.labSummary.stats.bestPnl'),
       value: `${bestPnlPercent > 0 ? '+' : ''}${bestPnlPercent.toFixed(2)}%`,
       valueClass: pnlColor(bestPnlPercent)
     },
     {
       icon: TrendingDown,
-      label: 'Drawdown médio',
+      label: t('app.labSummary.stats.avgDrawdown'),
       value: `${avgMaxDrawdown.toFixed(2)}%`
     },
     {
       icon: Clock,
-      label: 'Última sessão',
+      label: t('app.labSummary.stats.lastSession'),
       value: lastAt
     }
   ];
@@ -150,13 +152,13 @@ export function LabSummaryCard({ data, slug }: LabSummaryCardProps) {
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <BarChart2 className="h-5 w-5 text-blue-500" />
-          <h2 className="font-bold">Laboratório de Prática</h2>
+          <h2 className="font-bold">{t('app.labSummary.title')}</h2>
         </div>
         <Link
           to={tenantPath(slug, '/app/lab/history')}
           className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
         >
-          Ver histórico completo <ArrowRight className="h-4 w-4" />
+          {t('app.labSummary.viewHistory')} <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
 
@@ -171,7 +173,7 @@ export function LabSummaryCard({ data, slug }: LabSummaryCardProps) {
       {completedSessions > 0 && (
         <div className="mt-4 flex items-center gap-3">
           <span className="text-xs text-muted-foreground whitespace-nowrap">
-            Taxa de acerto média
+            {t('app.labSummary.stats.avgWinRate')}
           </span>
           <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
             <div

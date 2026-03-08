@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
@@ -9,6 +10,7 @@ import { CourseOutlineSidebar } from '@/components/learning/CourseOutlineSidebar
 import { CourseInlineLessonPlayer } from '@/components/learning/CourseInlineLessonPlayer';
 
 export default function CourseInteractivePage() {
+  const { t } = useTranslation();
   const { courseId, tenantSlug } = useParams<{
     courseId: string;
     tenantSlug: string;
@@ -109,12 +111,12 @@ export default function CourseInteractivePage() {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-muted-foreground">
         <GraduationCap className="h-12 w-12 opacity-30" />
-        <p>Curso não encontrado.</p>
+        <p>{t('app.course.notFound')}</p>
         <Link
           to={`/t/${slug}/app/courses`}
           className="text-sm text-primary hover:underline"
         >
-          Voltar aos cursos
+          {t('app.course.backToCourses')}
         </Link>
       </div>
     );
@@ -130,7 +132,7 @@ export default function CourseInteractivePage() {
             className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ChevronLeft className="h-4 w-4" />
-            Voltar
+            {t('common.actions.back')}
           </Link>
 
           {/* Mobile sidebar toggle */}

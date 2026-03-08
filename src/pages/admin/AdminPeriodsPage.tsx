@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -27,6 +28,7 @@ function formatDate(iso: string) {
 }
 
 export default function AdminPeriodsPage() {
+  const { t } = useTranslation();
   const { tenantSlug, courseId } = useParams<{ tenantSlug: string; courseId: string }>();
   const slug = tenantSlug ?? '';
   const cId = courseId ?? '';
@@ -44,9 +46,9 @@ export default function AdminPeriodsPage() {
     mutationFn: (id: string) => adminEndpoints.deletePeriod(slug, cId, id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['periods', slug, cId] });
-      toast.success('Período excluído.');
+      toast.success(t('admin.periods.toast.deleted'));
     },
-    onError: () => toast.error('Erro ao excluir período.')
+    onError: () => toast.error(t('admin.periods.toast.deleteError'))
   });
 
   return (
@@ -59,11 +61,11 @@ export default function AdminPeriodsPage() {
             className="mb-2 flex items-center gap-1.5 text-sm text-muted-foreground transition hover:text-foreground"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            Voltar aos cursos
+            {t('admin.periods.backButton')}
           </Link>
-          <h1 className="text-3xl font-extrabold">Períodos Avaliativos</h1>
+          <h1 className="text-3xl font-extrabold">{t('admin.periods.title')}</h1>
           <p className="text-muted-foreground">
-            Defina janelas de tempo para grupos de módulos.
+            {t('admin.periods.subtitle')}
           </p>
         </div>
         <button
@@ -71,7 +73,7 @@ export default function AdminPeriodsPage() {
           className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
         >
           <Plus className="h-4 w-4" />
-          Novo período
+          {t('admin.periods.newButton')}
         </button>
       </div>
 
@@ -105,7 +107,7 @@ export default function AdminPeriodsPage() {
                     <p className="font-semibold">{period.title}</p>
                     {active && (
                       <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                        Ativo
+                      {t('admin.periods.status.active')}
                       </span>
                     )}
                   </div>
@@ -127,7 +129,7 @@ export default function AdminPeriodsPage() {
                   <button
                     onClick={() => setEditing(period)}
                     className="rounded-lg p-2 text-muted-foreground transition hover:bg-accent hover:text-foreground"
-                    aria-label="Editar período"
+                    aria-label={t('admin.periods.aria.edit')}
                   >
                     <Pencil className="h-4 w-4" />
                   </button>
@@ -137,7 +139,7 @@ export default function AdminPeriodsPage() {
                         deleteMut.mutate(period.id);
                     }}
                     className="rounded-lg p-2 text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
-                    aria-label="Excluir período"
+                    aria-label={t('admin.periods.aria.delete')}
                   >
                     {deleteMut.isPending
                       ? <Loader2 className="h-4 w-4 animate-spin" />

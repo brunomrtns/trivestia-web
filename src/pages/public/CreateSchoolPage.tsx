@@ -1,4 +1,5 @@
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
@@ -9,30 +10,38 @@ import { tenantEndpoints } from '@/services/endpoints/tenant.endpoints';
 import { useAuthStore } from '@/features/auth/auth.store';
 import { useDebouncedCallback } from '@/hooks/useDebouncedCallback';
 
-const schema = z.object({
-  name: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
-  slug: z
-    .string()
-    .min(3, 'Mínimo de 3 caracteres')
-    .max(40, 'Máximo de 40 caracteres')
-    .regex(
-      /^[a-z0-9]+(-[a-z0-9]+)*$/,
-      'Apenas letras minúsculas, números e hifens'
-    ),
-  bio: z.string().max(300, 'Máximo de 300 caracteres').optional(),
-  ownerName: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
-  ownerEmail: z.string().email('E-mail inválido'),
-  ownerPassword: z
-    .string()
-    .min(8, 'Mínimo de 8 caracteres')
-    .regex(/[A-Z]/, 'Precisa de pelo menos uma letra maiúscula')
-    .regex(/[0-9]/, 'Precisa de pelo menos um número')
-});
+// ─── Schema (definido dentro do componente para usar t()) ──────────────────────────────────
 
-type FormData = z.infer<typeof schema>;
+type FormData = {
+  name: string;
+  slug: string;
+  bio?: string;
+  ownerName: string;
+  ownerEmail: string;
+  ownerPassword: string;
+};
 
 export default function CreateSchoolPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const schema = z.object({
+    name: z.string().min(2, t('common.validation.nameMinLength')),
+    slug: z
+      .string()
+      .min(3, t('common.validation.slugMinLength'))
+      .max(40, t('common.validation.slugMaxLength'))
+      .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, t('common.validation.slugPattern')),
+    bio: z.string().max(300, t('common.validation.bioMaxLength')).optional(),
+    ownerName: z.string().min(2, t('common.validation.nameMinLength')),
+    ownerEmail: z.string().email(t('common.validation.emailInvalid')),
+    ownerPassword: z
+      .string()
+      .min(8, t('common.validation.passwordMinLength'))
+      .regex(/[A-Z]/, t('common.validation.passwordUppercase'))
+      .regex(/[0-9]/, t('common.validation.passwordNumber'))
+  });
+
   const setAuth = useAuthStore((s) => s.setAuth);
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -80,17 +89,17 @@ export default function CreateSchoolPage() {
 
   const onSubmit = async (data: FormData) => {
     if (slugStatus === 'taken') {
-      toast.error('Este slug já está em uso. Escolha outro.');
+      toast.error(t('public.createSchool.toast.slugTaken'));
       return;
     }
     setLoading(true);
     try {
       const res = await tenantEndpoints.createPublic(data);
       setAuth(res.user, res.token, res.refreshToken, res.tenant.slug);
-      toast.success(`Escola "${res.tenant.name}" criada com sucesso!`);
+      toast.success(t('public.createSchool.toast.success', { name: res.tenant.name }));
       navigate(`/t/${res.tenant.slug}/app/dashboard`, { replace: true });
     } catch {
-      toast.error('Não foi possível criar a escola. Tente novamente.');
+      toast.error(t('public.createSchool.toast.error'));
     } finally {
       setLoading(false);
     }
@@ -104,9 +113,9 @@ export default function CreateSchoolPage() {
           <span className="text-2xl font-bold">Trivestia</span>
         </Link>
 
-        <h1 className="mb-2 text-3xl font-extrabold">Criar sua escola</h1>
+        <h1 className="mb-2 text-3xl font-extrabold">{t('public.createSchool.title')}</h1>
         <p className="mb-8 text-muted-foreground">
-          Crie seu espaço de ensino e comece a compartilhar conhecimento.
+          {t('public.createSchool.subtitle')}
         </p>
 
         <form
@@ -117,12 +126,12 @@ export default function CreateSchoolPage() {
           {/* School Name */}
           <div>
             <label className="mb-1.5 block text-sm font-medium" htmlFor="name">
-              Nome da escola
+              {t('public.createSchool.form.schoolName')}
             </label>
             <input
               id="name"
               type="text"
-              placeholder="Ex: Escola de Trading"
+              placeholder={t('public.createSchool.form.schoolNamePlaceholder')}
               className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm outline-none ring-offset-background transition focus:ring-2 focus:ring-ring focus:ring-offset-2"
               {...register('name', {
                 onChange: (e) => {
@@ -141,7 +150,7 @@ export default function CreateSchoolPage() {
           {/* Slug */}
           <div>
             <label className="mb-1.5 block text-sm font-medium" htmlFor="slug">
-              URL da escola
+              {t('public.createSchool.form.schoolUrl')}
             </label>
             <div className="flex items-center gap-1">
               <span className="text-sm text-muted-foreground">/t/</span>
@@ -149,7 +158,7 @@ export default function CreateSchoolPage() {
                 <input
                   id="slug"
                   type="text"
-                  placeholder="minha-escola"
+                  placeholder={t('public.createSchool.form.slugPlaceholder')}
                   className="w-full rounded-lg border bg-background px-4 py-2.5 pr-10 text-sm outline-none ring-offset-background transition focus:ring-2 focus:ring-ring focus:ring-offset-2"
                   {...register('slug', {
                     onChange: (e) => checkSlugAvailability(e.target.value)
@@ -170,7 +179,7 @@ export default function CreateSchoolPage() {
             </div>
             {slugStatus === 'taken' && (
               <p className="mt-1 text-xs text-destructive">
-                Este slug já está em uso.
+                {t('public.createSchool.form.slugTaken')}
               </p>
             )}
             {errors.slug && (
@@ -183,12 +192,12 @@ export default function CreateSchoolPage() {
           {/* Bio */}
           <div>
             <label className="mb-1.5 block text-sm font-medium" htmlFor="bio">
-              Descrição{' '}
-              <span className="text-muted-foreground">(opcional)</span>
+              {t('public.createSchool.form.description')}{' '}
+              <span className="text-muted-foreground">{t('common.misc.optional')}</span>
             </label>
             <textarea
               id="bio"
-              placeholder="Uma breve descrição da sua escola..."
+              placeholder={t('public.createSchool.form.bioPlaceholder')}
               rows={2}
               className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm outline-none ring-offset-background transition focus:ring-2 focus:ring-ring focus:ring-offset-2 resize-none"
               {...register('bio')}
@@ -202,7 +211,7 @@ export default function CreateSchoolPage() {
 
           <hr className="my-2" />
           <p className="text-sm font-medium text-muted-foreground">
-            Dados do proprietário (OWNER)
+          {t('public.createSchool.form.ownerSection')}
           </p>
 
           {/* Owner name */}
@@ -211,13 +220,13 @@ export default function CreateSchoolPage() {
               className="mb-1.5 block text-sm font-medium"
               htmlFor="ownerName"
             >
-              Seu nome
+              {t('public.createSchool.form.ownerName')}
             </label>
             <input
               id="ownerName"
               type="text"
               autoComplete="name"
-              placeholder="Seu nome completo"
+              placeholder={t('public.createSchool.form.ownerNamePlaceholder')}
               className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm outline-none ring-offset-background transition focus:ring-2 focus:ring-ring focus:ring-offset-2"
               {...register('ownerName')}
             />
@@ -234,13 +243,13 @@ export default function CreateSchoolPage() {
               className="mb-1.5 block text-sm font-medium"
               htmlFor="ownerEmail"
             >
-              E-mail
+              {t('common.fields.email')}
             </label>
             <input
               id="ownerEmail"
               type="email"
               autoComplete="email"
-              placeholder="voce@email.com"
+              placeholder={t('common.placeholders.email')}
               className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm outline-none ring-offset-background transition focus:ring-2 focus:ring-ring focus:ring-offset-2"
               {...register('ownerEmail')}
             />
@@ -257,14 +266,14 @@ export default function CreateSchoolPage() {
               className="mb-1.5 block text-sm font-medium"
               htmlFor="ownerPassword"
             >
-              Senha
+              {t('common.fields.password')}
             </label>
             <div className="relative">
               <input
                 id="ownerPassword"
                 type={showPwd ? 'text' : 'password'}
                 autoComplete="new-password"
-                placeholder="Mín. 8 caracteres"
+                placeholder={t('common.placeholders.passwordMin')}
                 className="w-full rounded-lg border bg-background px-4 py-2.5 pr-10 text-sm outline-none ring-offset-background transition focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 {...register('ownerPassword')}
               />
@@ -293,14 +302,14 @@ export default function CreateSchoolPage() {
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow transition hover:opacity-90 disabled:opacity-60"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-            Criar escola
+            {t('public.createSchool.form.submit')}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          Já tem uma escola?{' '}
+          {t('public.createSchool.hasAccount')}{' '}
           <Link to="/" className="font-medium text-primary hover:underline">
-            Acessar
+            {t('common.actions.access')}
           </Link>
         </p>
       </div>

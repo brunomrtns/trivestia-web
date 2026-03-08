@@ -1,5 +1,6 @@
 import { ShieldX, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface WrongTenantGateProps {
   /** Slug do tenant onde o usuário está autenticado */
@@ -11,6 +12,7 @@ interface WrongTenantGateProps {
  * Substitui o redirect para a LoginPage (que causava loop infinito).
  */
 export function WrongTenantGate({ correctSlug }: WrongTenantGateProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
@@ -25,11 +27,9 @@ export function WrongTenantGate({ correctSlug }: WrongTenantGateProps) {
 
         {/* Texto */}
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold text-foreground">Acesso negado</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t('error.wrongTenant.title')}</h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Você está autenticado na escola{' '}
-            <span className="font-semibold text-foreground">{correctSlug}</span>{' '}
-            e não tem permissão para acessar esta escola.
+            {t('error.wrongTenant.message', { correctSlug })}
           </p>
         </div>
 
@@ -41,7 +41,7 @@ export function WrongTenantGate({ correctSlug }: WrongTenantGateProps) {
             }
             className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Ir para minha escola
+            {t('error.wrongTenant.goToMySchool')}
             <ArrowRight className="h-4 w-4" />
           </button>
 
@@ -49,7 +49,7 @@ export function WrongTenantGate({ correctSlug }: WrongTenantGateProps) {
             onClick={() => navigate(-1)}
             className="inline-flex items-center justify-center rounded-md border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted"
           >
-            Voltar
+            {t('common.actions.back')}
           </button>
         </div>
       </div>

@@ -16,7 +16,27 @@
 
 ---
 
-## Lote 1 — Layouts globais + Auth + Dashboard
+## 🔄 Status da Migração (Fase 2 — alterações de código)
+
+> Atualizado em: **08/03/2026**
+
+| Lote | Arquivos alterados | Status |
+|------|--------------------|--------|
+| **Lote 1** | Sidebar.tsx · Topbar.tsx · AuthLayout.tsx · PublicLayout.tsx · LoginPage.tsx · RegisterPage.tsx · WrongTenantGate.tsx | ✅ Concluído |
+| **Lote 2** | DashboardPage.tsx · WeeklyGoalWidget.tsx · ContinueCard.tsx · GoalConfigModal.tsx · AnnouncementsPage.tsx · ProgressPage.tsx · PracticeLabPage.tsx · PracticeHistoryPage.tsx · LabSummaryCard.tsx | ✅ Concluído |
+| **Lote 3** | CourseInteractivePage.tsx · LessonPage.tsx · ActivityPlayerPage.tsx · GlobalLoginPage.tsx · ProfessorRegisterPage.tsx | ✅ Concluído |
+| **Lote 4** | AdminCoursesPage.tsx · AdminAnnouncementsPage.tsx · AdminPeriodsPage.tsx · CoursesPage.tsx · CourseDetailPage.tsx · LandingPage.tsx · CreateSchoolPage.tsx (public) | ✅ Concluído |
+| **Lote 5** | AdminQuestionsPage.tsx · AdminUsersPage.tsx · AdminLessonsPage.tsx | ✅ Concluído |
+| **Lote 6** | AnnouncementBell.tsx · AnnouncementFormModal.tsx · PeriodFormModal.tsx · CourseInteractiveHeader.tsx · CourseOutlineSidebar.tsx · LessonLockBadge.tsx | ⬜ Pendente |
+| **Lote 7** | StepPlayer.tsx · MultipleSelectRenderer.tsx · OrderingRenderer.tsx · TextInputRenderer.tsx · ChartMarkupRenderer.tsx · RiskCalculatorRenderer.tsx · LessonTimeline.tsx · CourseInlineLessonPlayer.tsx | ⬜ Pendente |
+| **Lote 8** | AdminLessonStepsPage.tsx · StepFormModal.tsx · QuestionPreviewCard.tsx · SuperDashboardPage.tsx · SuperTenantsPage.tsx · SuperTenantEditPage.tsx · SuperUsersPage.tsx | ⬜ Pendente |
+| **Lote 9** | ChartMarkupQuestionForm.tsx · RiskCalculatorQuestionForm.tsx · SimTradingQuestionForm.tsx · SuperSidebar.tsx · SuperTopbar.tsx | ⬜ Pendente |
+| **Lote 10** | WorkspaceLayout.tsx · TenantPublicLayout.tsx · WorkspacePage.tsx · workspace/CreateSchoolPage.tsx · ChallengeBriefingScreen.tsx · ResultScreen.tsx · OrderTicket.tsx · HelpDrawer.tsx · AccountSummary.tsx · MetricsPanel.tsx · OnboardingTour.tsx | ⬜ Pendente |
+| **Lote 11** | CandlesChart.tsx · PlaybackControls.tsx · PositionPanel.tsx · FillsPanel.tsx · OrdersPanel.tsx · ScenarioLoader.tsx · SimTradingTerminal.tsx · AdminGuard.tsx · SuperAdminGuard.tsx | ⬜ Pendente |
+
+---
+
+## Lote 1 — Layouts globais + Auth + Dashboard ✅ MIGRADO
 
 **Arquivos cobertos:**
 - `src/layouts/AppLayout/AppLayout.tsx` (sem strings visíveis)
@@ -99,7 +119,7 @@
 
 ---
 
-## Lote 2 — Páginas de aluno + Landing + ContinueCard + WeeklyGoal
+## Lote 2 — Páginas de aluno + Landing + ContinueCard + WeeklyGoal ✅ MIGRADO
 
 **Arquivos cobertos:**
 - `src/components/dashboard/ContinueCard.tsx`
@@ -211,19 +231,19 @@
 
 ---
 
-## Lote 3 — Student pages + Platform pages + Dashboard components
+## Lote 3 — Student pages + Platform pages + Dashboard components ⚠️ PARCIAL
 
 **Arquivos cobertos:**
-- `src/pages/student/ActivityPlayerPage.tsx`
-- `src/pages/student/CourseInteractivePage.tsx`
-- `src/pages/platform/GlobalLoginPage.tsx`
-- `src/pages/platform/ProfessorRegisterPage.tsx`
-- `src/pages/public/CreateSchoolPage.tsx`
-- `src/components/announcements/AnnouncementBell.tsx`
-- `src/components/announcements/AnnouncementFormModal.tsx`
-- `src/components/dashboard/GoalConfigModal.tsx`
-- `src/components/dashboard/LabSummaryCard.tsx`
-- `src/layouts/TenantAuthLayout.tsx` (sem novas chaves — reusa `auth.layout.*`)
+- `src/pages/student/ActivityPlayerPage.tsx` ✅
+- `src/pages/student/CourseInteractivePage.tsx` ✅
+- `src/pages/platform/GlobalLoginPage.tsx` ✅
+- `src/pages/platform/ProfessorRegisterPage.tsx` ✅
+- `src/pages/public/CreateSchoolPage.tsx` ✅
+- `src/components/announcements/AnnouncementBell.tsx` ⬜
+- `src/components/announcements/AnnouncementFormModal.tsx` ⬜
+- `src/components/dashboard/GoalConfigModal.tsx` ✅
+- `src/components/dashboard/LabSummaryCard.tsx` ✅
+- `src/layouts/TenantAuthLayout.tsx` ✅ (sem novas chaves — reusa `auth.layout.*`)
 
 | # | Categoria | Arquivo | Texto PT-BR | Chave | Notas |
 |---|-----------|---------|-------------|-------|-------|
@@ -387,9 +407,9 @@
 
 ---
 
-## Lote 4 — Admin Pages + Learning Components (10 arquivos)
+## Lote 4 — Admin Pages + Learning Components (10 arquivos) ⚠️ PARCIAL
 
-**Arquivos:** AdminQuestionsPage.tsx · AdminCoursesPage.tsx · AdminLessonsPage.tsx · AdminUsersPage.tsx · AdminAnnouncementsPage.tsx · AdminPeriodsPage.tsx · PeriodFormModal.tsx · CourseInteractiveHeader.tsx · CourseOutlineSidebar.tsx · LessonLockBadge.tsx
+**Arquivos:** AdminQuestionsPage.tsx ✅ · AdminCoursesPage.tsx ✅ · AdminLessonsPage.tsx ✅ · AdminUsersPage.tsx ✅ · AdminAnnouncementsPage.tsx ✅ · AdminPeriodsPage.tsx ✅ · PeriodFormModal.tsx ⬜ · CourseInteractiveHeader.tsx ⬜ · CourseOutlineSidebar.tsx ⬜ · LessonLockBadge.tsx ⬜
 
 | # | Categoria | Arquivo | Texto | Chave | Observações |
 |---|-----------|---------|-------|-------|------------|
@@ -495,7 +515,7 @@
 
 ---
 
-## Lote 5 — Learning Components (10 arquivos)
+## Lote 5 — Learning Components (10 arquivos) ⬜ PENDENTE
 
 **Arquivos cobertos:**
 - `src/components/learning/ActivityPlayerContent.tsx` (strings já cobertas via ActivityPlayerPage.tsx no Lote 3)
@@ -575,7 +595,7 @@
 
 ---
 
-## Lote 6 — Admin Components + Super Admin Pages (7 arquivos)
+## Lote 6 — Admin Components + Super Admin Pages (7 arquivos) ⬜ PENDENTE
 
 **Arquivos cobertos:**
 - `src/pages/admin/AdminLessonStepsPage.tsx`
@@ -725,7 +745,7 @@
 
 ---
 
-## Lote 7 — ChartMarkupQuestionForm, RiskCalculatorQuestionForm, SimTradingQuestionForm, SuperAdminLayout
+## Lote 7 — ChartMarkupQuestionForm, RiskCalculatorQuestionForm, SimTradingQuestionForm, SuperAdminLayout ⬜ PENDENTE
 
 ### Arquivos analisados
 | # | Arquivo | Strings encontradas |
@@ -835,7 +855,7 @@
 
 ---
 
-## Lote 8 — WorkspaceLayout, TenantPublicLayout, WorkspacePage, sim-trading (6 componentes)
+## Lote 8 — WorkspaceLayout, TenantPublicLayout, WorkspacePage, sim-trading (6 componentes) ⬜ PENDENTE
 
 ### Arquivos analisados
 | # | Arquivo | Strings encontradas |
@@ -987,6 +1007,143 @@
 - `sim.metrics` — 6 novas chaves
 - `sim.tutorial` — 16 novas chaves (stepOf, closeTitle, skipButton, finishButton, 6 passos × 2)
 - **Total Lote 8: 123 novas chaves** | 2 novos top-level keys (`workspace`, `sim`)
+
+---
+
+## Lote 9 — sim-trading (componentes restantes) ⬜ PENDENTE
+
+### Arquivos analisados
+| # | Arquivo | Strings encontradas |
+|---|---------|---------------------|
+| 1 | `CandlesChart.tsx` | 2 (aria/tooltip botão auto-follow) |
+| 2 | `PlaybackControls.tsx` | 9 |
+| 3 | `PositionPanel.tsx` | 6 |
+| 4 | `FillsPanel.tsx` | 2 |
+| 5 | `OrdersPanel.tsx` | 1 |
+| 6 | `ScenarioLoader.tsx` | 4 |
+| 7 | `SimTradingTerminal.tsx` | 11 |
+
+### Novas entradas
+| # | Categoria | Arquivo | Texto original | Chave i18n sugerida | Observações |
+|---|-----------|---------|----------------|---------------------|-------------|
+| 813 | aria | CandlesChart.tsx | Acompanhamento automático ativo | `sim.candles.autoFollow.active` | aria-label + tooltip quando auto-follow ativado |
+| 814 | aria | CandlesChart.tsx | Reativar acompanhamento automático | `sim.candles.autoFollow.reactivate` | aria-label + tooltip quando auto-follow desativado |
+| 815 | aria | PlaybackControls.tsx | Pausar | `sim.playback.pauseTitle` | title do botão play/pause quando em play |
+| 816 | aria | PlaybackControls.tsx | Iniciar simulação | `sim.playback.playTitle` | title do botão play/pause quando pausado |
+| 817 | ui | PlaybackControls.tsx | Pressione Play para iniciar | `sim.playback.pausedAtStartHint` | rótulo visível quando pausado no início (▶ removido) |
+| 818 | ui | PlaybackControls.tsx | Pausado | `sim.playback.pausedLabel` | rótulo visível quando pausado no meio da simulação |
+| 819 | aria | PlaybackControls.tsx | Avançar 1 candle | `sim.playback.stepForwardTitle` | title do botão step forward |
+| 820 | aria | PlaybackControls.tsx | Pular para o fim | `sim.playback.skipToEndTitle` | title do botão skip to end |
+| 821 | ui | PlaybackControls.tsx | Vel: | `sim.playback.speedLabel` | rótulo abreviado do seletor de velocidade |
+| 822 | ui | PlaybackControls.tsx | Fim | `sim.playback.finished` | estado de simulação concluída (✓ removido) |
+| 823 | ui | PlaybackControls.tsx | Candle {{visible}}/{{total}} | `sim.playback.progress` | `${visibleCount}/${totalCandles}` → `{{visible}}/{{total}}` |
+| 824 | ui | PositionPanel.tsx | Sem posição aberta | `sim.position.flat` | estado FLAT / sem posição aberta |
+| 825 | aria | PositionPanel.tsx | Fechar posição | `sim.position.closeTitle` | title do botão X de fechar posição |
+| 826 | ui | PositionPanel.tsx | Qty | `sim.position.qty` | label da linha de quantidade |
+| 827 | ui | PositionPanel.tsx | Entry | `sim.position.entry` | label da linha de preço de entrada |
+| 828 | ui | PositionPanel.tsx | PnL não realizado | `sim.position.unrealizedPnl` | label da linha de PnL não realizado |
+| 829 | ui | PositionPanel.tsx | PnL realizado | `sim.position.realizedPnl` | label da linha de PnL realizado |
+| 830 | empty | FillsPanel.tsx | Nenhum preenchimento ainda | `sim.fills.empty` | estado vazio sem fills |
+| 831 | ui | FillsPanel.tsx | fee | `sim.fills.feePrefix` | prefixo "fee" antes do valor de taxa em cada fill |
+| 832 | empty | OrdersPanel.tsx | Nenhuma ordem pendente | `sim.orders.empty` | estado vazio sem ordens abertas |
+| 833 | ui | ScenarioLoader.tsx | Desafio já concluído | `sim.scenarioLoader.alreadyPassedTitle` | título quando error === 'ALREADY_PASSED' |
+| 834 | ui | ScenarioLoader.tsx | Você já foi aprovado neste desafio. Veja o resultado nas suas submissões. | `sim.scenarioLoader.alreadyPassedDescription` | texto descritivo do estado já concluído |
+| 835 | ui | ScenarioLoader.tsx | Erro ao carregar cenário | `sim.scenarioLoader.errorTitle` | título genérico de erro de carregamento |
+| 836 | ui | ScenarioLoader.tsx | Tentar Novamente | `sim.scenarioLoader.retryButton` | botão retry (mesmo texto de sim.result.retryButton) |
+| 837 | aria | SimTradingTerminal.tsx | Abrir ajuda | `sim.terminal.helpTitle` | title do botão de ajuda |
+| 838 | ui | SimTradingTerminal.tsx | Ajuda | `sim.terminal.helpButton` | texto visível do botão de ajuda |
+| 839 | ui | SimTradingTerminal.tsx | Iniciar Simulação | `sim.terminal.overlay.startTitle` | título do overlay de pausa inicial (mesmo texto de sim.briefing.startButton) |
+| 840 | ui | SimTradingTerminal.tsx | Continuar | `common.actions.continue` | retomada da simulação pausada no meio — reutiliza chave existente |
+| 841 | ui | SimTradingTerminal.tsx | Clique para começar a avançar as velas | `sim.terminal.overlay.startHint` | subtítulo do overlay inicial |
+| 842 | ui | SimTradingTerminal.tsx | Candle {{visible}}/{{total}} — pausado | `sim.terminal.overlay.pausedHint` | subtítulo do overlay quando pausado no meio |
+| 843 | ui | SimTradingTerminal.tsx | Ordens | `sim.terminal.tabs.orders` | aba de ordens pendentes |
+| 844 | ui | SimTradingTerminal.tsx | Preenchimentos | `sim.terminal.tabs.fills` | aba de fills/execuções |
+| 845 | ui | SimTradingTerminal.tsx | Métricas | `sim.terminal.tabs.metrics` | aba de métricas de performance |
+| 846 | ui | SimTradingTerminal.tsx | Enviar Resultado | `sim.terminal.submitButton` | botão de submissão ao finalizar todas as velas |
+| 847 | loading | SimTradingTerminal.tsx | Enviando... | `sim.terminal.submitting` | estado de loading durante submissão |
+
+### Novas chaves adicionadas ao pt-BR.json
+- `sim.candles` — 2 novas chaves (autoFollow.active, autoFollow.reactivate)
+- `sim.playback` — 9 novas chaves (pauseTitle, playTitle, pausedAtStartHint, pausedLabel, stepForwardTitle, skipToEndTitle, speedLabel, finished, progress)
+- `sim.position` — 6 novas chaves (flat, closeTitle, qty, entry, unrealizedPnl, realizedPnl)
+- `sim.fills` — 2 novas chaves (empty, feePrefix)
+- `sim.orders` — 1 nova chave (empty)
+- `sim.scenarioLoader` — 4 novas chaves (alreadyPassedTitle, alreadyPassedDescription, errorTitle, retryButton)
+- `sim.terminal` — 11 novas chaves (helpTitle, helpButton, submitButton, submitting, overlay.startTitle, overlay.startHint, overlay.pausedHint, tabs.orders, tabs.fills, tabs.metrics) + 1 reutilização (common.actions.continue)
+- **Total Lote 9: 35 novas chaves**
+
+### Correções aplicadas ao pt-BR.json (auditoria pré-lote)
+- `common.validation.required` — removida chave duplicada (mantida 1ª ocorrência, valor "Obrigatório")
+- `learning.chartMarkup.labels.correct/partial/wrong` — emojis removidos (✅ → "Correto", ⚠️ → "Quase", ❌ → "Fora")
+- `learning.riskCalc.feedback.labels.correct/partial/wrong` — emojis removidos (✅ → "Correto", ⚠️ → "Quase", ❌ → "Incorreto")
+
+---
+
+## Lote 10 — Verificação final (guards, hooks, services, workspace/CreateSchoolPage) ⬜ PENDENTE
+
+### Arquivos analisados
+
+| # | Arquivo | Strings encontradas |
+|---|---------|---------------------|
+| 1 | `src/routes/guards/AuthGuard.tsx` | 0 — apenas redirects, sem strings visíveis |
+| 2 | `src/routes/guards/AdminGuard.tsx` | 1 — toast de acesso negado |
+| 3 | `src/routes/guards/PlatformGuard.tsx` | 0 — spinner técnico, sem texto |
+| 4 | `src/routes/guards/SuperAdminGuard.tsx` | 1 — toast de acesso negado |
+| 5 | `src/hooks/useNavigateToActivity.ts` | 0 |
+| 6 | `src/hooks/useTenant.ts` | 0 |
+| 7 | `src/hooks/useDebouncedCallback.ts` | 0 |
+| 8 | `src/features/auth/auth.store.ts` | 0 |
+| 9 | `src/features/platform/platform.store.ts` | 0 |
+| 10 | `src/services/api/client.ts` | 0 — erros internos, sem strings visíveis ao usuário |
+| 11 | `src/components/ui/Portal.tsx` | 0 — wrapper técnico |
+| 12 | `src/pages/workspace/CreateSchoolPage.tsx` | 17 — página diferente da `public/CreateSchoolPage.tsx` |
+
+### Novas entradas
+
+| # | Categoria | Arquivo | Texto original | Chave i18n sugerida | Observações |
+|---|-----------|---------|----------------|---------------------|-------------|
+| 848 | toast | AdminGuard.tsx | Acesso restrito a administradores. | `common.guards.adminOnly` | toast.error ao tentar rota admin sem permissão |
+| 849 | toast | SuperAdminGuard.tsx | Acesso restrito ao Super Admin da plataforma. | `common.guards.superAdminOnly` | toast.error ao tentar rota super sem permissão |
+| 850 | ui | workspace/CreateSchoolPage.tsx | Criar sua escola | `public.createSchool.title` | Reusa public — mesmo texto |
+| 851 | ui | workspace/CreateSchoolPage.tsx | Configure o nome e a URL da sua escola para comecar a publicar cursos. | `workspace.createSchool.subtitle` | NOVA — subtítulo diferente da versão public |
+| 852 | form | workspace/CreateSchoolPage.tsx | Nome da escola | `public.createSchool.form.schoolName` | Reusa public |
+| 853 | form | workspace/CreateSchoolPage.tsx | Ex: Escola de Trading | `public.createSchool.form.schoolNamePlaceholder` | Reusa public |
+| 854 | form | workspace/CreateSchoolPage.tsx | URL da escola | `public.createSchool.form.schoolUrl` | Reusa public |
+| 855 | form | workspace/CreateSchoolPage.tsx | minha-escola | `public.createSchool.form.slugPlaceholder` | Reusa public |
+| 856 | form | workspace/CreateSchoolPage.tsx | Descricao | `workspace.createSchool.form.descriptionLabel` | NOVA — sem acento no código-fonte (bug tipográfico) |
+| 857 | misc | workspace/CreateSchoolPage.tsx | (opcional) | `common.misc.optional` | Reusa common |
+| 858 | form | workspace/CreateSchoolPage.tsx | Uma breve descricao da sua escola... | `public.createSchool.form.bioPlaceholder` | Reusa public |
+| 859 | validation | workspace/CreateSchoolPage.tsx | Nome deve ter no minimo 2 caracteres | `common.validation.nameMinLength` | Reusa common (sem acento no código) |
+| 860 | validation | workspace/CreateSchoolPage.tsx | Minimo de 3 caracteres | `common.validation.slugMinLength` | Reusa common |
+| 861 | validation | workspace/CreateSchoolPage.tsx | Maximo de 40 caracteres | `common.validation.slugMaxLength` | Reusa common |
+| 862 | validation | workspace/CreateSchoolPage.tsx | Apenas letras minusculas, numeros e hifens | `common.validation.slugPattern` | Reusa common |
+| 863 | validation | workspace/CreateSchoolPage.tsx | Maximo de 300 caracteres | `common.validation.bioMaxLength` | Reusa common |
+| 864 | ui | workspace/CreateSchoolPage.tsx | Criar escola | `public.createSchool.form.submit` | Reusa public |
+| 865 | toast | workspace/CreateSchoolPage.tsx | Escola "{{name}}" criada com sucesso! | `public.createSchool.toast.success` | Reusa public |
+| 866 | toast | workspace/CreateSchoolPage.tsx | Erro ao criar escola. | `workspace.createSchool.toast.error` | NOVA — mensagem diferente da versão public |
+
+### Novas chaves adicionadas ao pt-BR.json
+- `common.guards` — 2 novas chaves — `adminOnly`, `superAdminOnly`
+- `workspace.createSchool` — 3 novas chaves — `subtitle`, `form.descriptionLabel`, `toast.error`
+- **Total Lote 10: 5 novas chaves** | Reuses: 14 chaves reutilizadas
+
+---
+
+## Resumo Final da Migração i18n
+
+| Lote | Entradas | Novas chaves | Arquivos cobertos |
+|------|----------|--------------|-------------------|
+| 1 | #1–#65 | 65 | Layouts, Auth, Dashboard |
+| 2 | #66–#158 | 93 | Páginas de aluno, Landing, widgets |
+| 3 | #159–#315 | 157 | ActivityPlayer, modais, layouts tenant |
+| 4 | #316–#414 | 99 | Páginas admin |
+| 5 | #415–#475 | 61 | Renderers de atividade, timeline |
+| 6 | #476–#609 | 134 | AdminLessonSteps, StepForm, SuperAdmin |
+| 7 | #610–#693 | 84 | ChartMarkup/RiskCalc/SimForms, SuperSidebar |
+| 8 | #694–#812 | 123 | WorkspaceLayout, sim-trading (core) |
+| 9 | #813–#847 | 35 | sim-trading (terminais, controles, painéis) |
+| 10 | #848–#866 | 5 | Guards, workspace/CreateSchoolPage |
+| **Total** | **866** | **856** | — |
 
 ---
 

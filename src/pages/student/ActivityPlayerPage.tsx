@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -34,6 +35,7 @@ export default function ActivityPlayerPage() {
   }>();
   const slug = tenantSlug ?? '';
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const qc = useQueryClient();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -59,10 +61,10 @@ export default function ActivityPlayerPage() {
       setResult(data);
       // Força reload da revisão após submissão
       qc.invalidateQueries({ queryKey: ['submission-review', slug, activityId] });
-      toast.success('Atividade concluída!');
+      toast.success(t('app.activity.toast.submitSuccess'));
     },
     onError: () => {
-      toast.error('Erro ao enviar respostas. Tente novamente.');
+      toast.error(t('app.activity.toast.submitError'));
     }
   });
 
@@ -121,10 +123,9 @@ export default function ActivityPlayerPage() {
   if (totalQuestions === 0 && !isFetching) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
-        <p className="text-lg font-semibold">Nenhuma questão cadastrada</p>
+        <p className="text-lg font-semibold">{t('app.activity.empty.title')}</p>
         <p className="text-sm text-muted-foreground">
-          Esta atividade ainda não possui questões. Peça ao administrador para
-          adicioná-las.
+          {t('app.activity.empty.subtitle')}
         </p>
       </div>
     );
@@ -170,10 +171,10 @@ export default function ActivityPlayerPage() {
             {formatPercentage(pct)}
           </h1>
           <p className="mb-1 text-lg font-semibold">
-            {passed ? 'Parabéns! Você passou.' : 'Continue praticando!'}
+            {passed ? t('app.activity.result.passed') : t('app.activity.result.failed')}
           </p>
           <p className="mb-8 text-muted-foreground">
-            {score} de {maxScore} pontos
+            {t('app.activity.result.scoreLabel', { score, maxScore })}
           </p>
         </motion.div>
 
@@ -186,13 +187,13 @@ export default function ActivityPlayerPage() {
 
         {submissionReview && !loadingReview && (
           <div className="space-y-4">
-            <h2 className="text-lg font-bold">Revisão das questões</h2>
+            <h2 className="text-lg font-bold">{t('app.activity.result.reviewTitle')}</h2>
 
             {/* Política: NEVER */}
             {submissionReview.reviewPolicy === 'NEVER' && (
               <div className="flex items-center gap-3 rounded-xl border bg-card p-4 text-sm text-muted-foreground">
                 <Lock className="h-5 w-5 shrink-0" />
-                O professor optou por não liberar o gabarito desta atividade.
+                {t('app.activity.result.policyNever')}
               </div>
             )}
 
@@ -202,15 +203,11 @@ export default function ActivityPlayerPage() {
                 <div className="flex items-center gap-3 rounded-xl border bg-card p-4 text-sm text-muted-foreground">
                   <Clock className="h-5 w-5 shrink-0 text-yellow-500" />
                   <span>
-                    O gabarito será liberado em{' '}
-                    <strong className="text-foreground">
-                      {submissionReview.reviewAvailableAt
-                        ? new Date(
-                            submissionReview.reviewAvailableAt
-                          ).toLocaleString('pt-BR')
-                        : 'data a definir'}
-                    </strong>
-                    .
+                    {t('app.activity.result.policyAfterDate', {
+                      date: submissionReview.reviewAvailableAt
+                        ? new Date(submissionReview.reviewAvailableAt).toLocaleString('pt-BR')
+                        : t('app.activity.result.policyDateFallback')
+                    })}
                   </span>
                 </div>
               )}
@@ -238,9 +235,9 @@ export default function ActivityPlayerPage() {
                         <XCircle className="h-5 w-5 text-red-500" />
                       )}
                       <span className="text-xs font-semibold text-muted-foreground">
-                        Questão {idx + 1} ·{' '}
-                        {r.isCorrect ? 'Correta' : 'Incorreta'} ·{' '}
-                        +{r.earnedScore}/{r.question.weight} pts
+                        {t('app.activity.result.questionN', { n: idx + 1 })} ·{' '}
+                        {r.isCorrect ? t('app.activity.result.correct') : t('app.activity.result.incorrect')} ·{' '}
+                        {t('app.activity.result.questionScore', { earned: r.earnedScore, weight: r.question.weight })}
                       </span>
                     </div>
 
@@ -253,7 +250,7 @@ export default function ActivityPlayerPage() {
                     {r.question.imageUrl && (
                       <img
                         src={r.question.imageUrl}
-                        alt="Imagem da questão"
+                        alt={t('app.activity.result.questionImageAlt')}
                         className="mb-3 max-h-48 w-full rounded-xl object-contain bg-muted/30"
                       />
                     )}
@@ -287,7 +284,7 @@ export default function ActivityPlayerPage() {
                     {/* Explicação */}
                     {r.question.explanation && (
                       <div className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-sm text-primary/90">
-                        <span className="mr-1 font-semibold">Explicação:</span>
+                        <span className="mr-1 font-semibold">{t('app.activity.result.explanationLabel')}</span>
                         {r.question.explanation}
                       </div>
                     )}
@@ -327,13 +324,13 @@ export default function ActivityPlayerPage() {
             className="flex items-center gap-2 rounded-xl border px-5 py-2.5 text-sm font-semibold transition hover:bg-accent"
           >
             <RotateCcw className="h-4 w-4" />
-            Tentar novamente
+            {t('app.activity.result.retry')}
           </button>
           <button
             onClick={() => navigate(`/t/${slug}/app/dashboard`)}
             className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
           >
-            Ir ao Dashboard
+            {t('app.activity.result.goToDashboard')}
           </button>
         </div>
       </div>
@@ -347,7 +344,7 @@ export default function ActivityPlayerPage() {
   const handleSubmit = () => {
     const allAnswered = questions.every((q) => answers[q.id] !== undefined);
     if (!allAnswered) {
-      toast.warning('Responda todas as questões antes de enviar.');
+      toast.warning(t('app.activity.toast.incomplete'));
       return;
     }
     submitMutation.mutate({
@@ -406,7 +403,7 @@ export default function ActivityPlayerPage() {
       {isCourseExpired && (
         <div className="flex items-center gap-3 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
           <AlertTriangle className="h-5 w-5 shrink-0" />
-          O prazo deste curso foi encerrado. Novas submissões não são permitidas.
+          {t('app.activity.expiredBanner')}
         </div>
       )}
 
@@ -418,7 +415,7 @@ export default function ActivityPlayerPage() {
           className="flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition hover:bg-accent disabled:opacity-40"
         >
           <ChevronLeft className="h-4 w-4" />
-          Anterior
+          {t('common.pagination.previous')}
         </button>
 
         {currentIndex < totalQuestions - 1 ? (
@@ -427,7 +424,7 @@ export default function ActivityPlayerPage() {
             disabled={!answers[currentQuestion.id]}
             className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-40"
           >
-            Próxima
+            {t('app.lesson.nav.next')}
             <ChevronRight className="h-4 w-4" />
           </button>
         ) : (
@@ -439,7 +436,7 @@ export default function ActivityPlayerPage() {
             {submitMutation.isPending && (
               <Loader2 className="h-4 w-4 animate-spin" />
             )}
-            Enviar atividade
+            {t('app.activity.nav.submit')}
           </button>
         )}
       </div>
@@ -460,6 +457,7 @@ function SimTradingChallengeFlow({
   activityId: string;
   onGoBack: () => void;
 }) {
+  const { t } = useTranslation();
   const [phase, setPhase] = useState<ChallengePhase>('BRIEFING');
   const [helpOpen, setHelpOpen] = useState(false);
   const tutorial = useTutorialProgress();
@@ -488,8 +486,8 @@ function SimTradingChallengeFlow({
   if (error && !briefing) {
     const errMsg =
       (error as { response?: { status?: number } })?.response?.status === 409
-        ? 'Você já foi aprovado neste desafio.'
-        : 'Erro ao carregar o desafio.';
+        ? t('app.activity.challenge.alreadyApproved')
+        : t('app.activity.challenge.loadError');
 
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
@@ -499,7 +497,7 @@ function SimTradingChallengeFlow({
           onClick={onGoBack}
           className="rounded-lg border px-4 py-2 text-sm font-medium transition hover:bg-accent"
         >
-          Voltar
+          {t('common.actions.back')}
         </button>
       </div>
     );

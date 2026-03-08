@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -20,12 +21,9 @@ import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { adminEndpoints } from '@/services/endpoints/admin.endpoints';
 import type { Course } from '@/types/api';
 
-const schema = z.object({
-  title: z.string().min(3, 'Mínimo 3 caracteres'),
-  description: z.string().min(10, 'Mínimo 10 caracteres'),
-  deadline: z.string().optional()
-});
-type FormData = z.infer<typeof schema>;
+// ─── Schema (definido dentro de CourseForm para usar t()) ───────────────────────
+
+type FormData = { title: string; description: string; deadline?: string };
 
 interface CourseFormProps {
   initial?: Course;
@@ -35,6 +33,14 @@ interface CourseFormProps {
 }
 
 function CourseForm({ initial, onSave, onCancel, loading }: CourseFormProps) {
+  const { t } = useTranslation();
+
+  const schema = z.object({
+    title: z.string().min(3, t('admin.courses.validation.title')),
+    description: z.string().min(10, t('admin.courses.validation.description')),
+    deadline: z.string().optional()
+  });
+
   const {
     register,
     handleSubmit,
@@ -63,9 +69,9 @@ function CourseForm({ initial, onSave, onCancel, loading }: CourseFormProps) {
       className="space-y-4 rounded-2xl border bg-card p-5 shadow-sm"
     >
       <div>
-        <label className="mb-1 block text-sm font-medium">Título</label>
+        <label className="mb-1 block text-sm font-medium">{t('admin.courses.form.title')}</label>
         <input
-          placeholder="Ex: Análise Fundamentalista"
+          placeholder={t('admin.courses.form.titlePlaceholder')}
           className="w-full rounded-lg border bg-background px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           {...register('title')}
         />
@@ -76,10 +82,10 @@ function CourseForm({ initial, onSave, onCancel, loading }: CourseFormProps) {
         )}
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium">Descrição</label>
+        <label className="mb-1 block text-sm font-medium">{t('admin.courses.form.description')}</label>
         <textarea
           rows={3}
-          placeholder="Descreva o conteúdo do curso..."
+          placeholder={t('admin.courses.form.descriptionPlaceholder')}
           className="w-full resize-none rounded-lg border bg-background px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           {...register('description')}
         />
@@ -92,7 +98,7 @@ function CourseForm({ initial, onSave, onCancel, loading }: CourseFormProps) {
       <div>
         <label className="mb-1 block text-sm font-medium flex items-center gap-1.5">
           <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-          Prazo final (opcional)
+          {t('admin.courses.form.deadline')}
         </label>
         <input
           type="datetime-local"
@@ -100,7 +106,7 @@ function CourseForm({ initial, onSave, onCancel, loading }: CourseFormProps) {
           {...register('deadline')}
         />
         <p className="mt-1 text-xs text-muted-foreground">
-          Após esta data, alunos não poderão enviar respostas.
+          {t('admin.courses.form.deadlineHint')}
         </p>
       </div>
       <div className="flex gap-2">
@@ -117,7 +123,7 @@ function CourseForm({ initial, onSave, onCancel, loading }: CourseFormProps) {
           onClick={onCancel}
           className="rounded-lg border px-4 py-2 text-sm font-medium transition hover:bg-accent"
         >
-          Cancelar
+          {t('common.actions.cancel')}
         </button>
       </div>
     </form>
@@ -125,6 +131,7 @@ function CourseForm({ initial, onSave, onCancel, loading }: CourseFormProps) {
 }
 
 export default function AdminCoursesPage() {
+  const { t } = useTranslation();
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const slug = tenantSlug ?? '';
   const qc = useQueryClient();
@@ -143,9 +150,9 @@ export default function AdminCoursesPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['courses', slug] });
       setCreating(false);
-      toast.success('Curso criado!');
+      toast.success(t('admin.courses.toast.created'));
     },
-    onError: () => toast.error('Erro ao criar curso.')
+    onError: () => toast.error(t('admin.courses.toast.error'))
   });
 
   // PATCH /courses/:id — Bearer ADMIN
@@ -174,7 +181,7 @@ export default function AdminCoursesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold">Gerenciar Cursos</h1>
+          <h1 className="text-3xl font-extrabold">{t('admin.nav.manageCourses')}</h1>
           <p className="text-muted-foreground">
             Crie, edite e organize os cursos da plataforma.
           </p>

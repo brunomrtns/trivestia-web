@@ -9,6 +9,7 @@ import {
   Loader2,
   BookOpen
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { stepsEndpoints } from '@/services/endpoints/steps.endpoints';
 import { LessonTimeline } from '@/components/learning/LessonTimeline';
 import { StepPlayer } from '@/components/learning/StepPlayer';
@@ -16,6 +17,7 @@ import { StepPlayer } from '@/components/learning/StepPlayer';
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function LessonPage() {
+  const { t } = useTranslation();
   const { lessonId, tenantSlug } = useParams<{
     lessonId: string;
     tenantSlug: string;
@@ -68,7 +70,7 @@ export default function LessonPage() {
               className="flex items-center gap-1 hover:text-foreground transition-colors"
             >
               <ChevronLeft className="h-4 w-4" />
-              Voltar ao curso
+              {t('app.lesson.backToCourse')}
             </Link>
           ) : (
             <Link
@@ -76,7 +78,7 @@ export default function LessonPage() {
               className="flex items-center gap-1 hover:text-foreground transition-colors"
             >
               <ChevronLeft className="h-4 w-4" />
-              Cursos
+              {t('common.nav.courses')}
             </Link>
           )}
         </div>
@@ -91,7 +93,7 @@ export default function LessonPage() {
           {timeline?.lesson.title ?? lessonTitle ?? 'Atividades da aula'}
         </h1>
         <p className="mt-2 text-muted-foreground">
-          {`Etapa ${currentStep + 1} de ${steps.length}${timeline?.progress ? ` · ${timeline.progress.viewed}/${timeline.progress.total} concluídas` : ''}`}
+          {t('app.lessonPlayer.stepOf', { n: currentStep + 1, total: steps.length })}{timeline?.progress ? ` ${t('app.lessonPlayer.completedSuffix', { viewed: timeline.progress.viewed, total: timeline.progress.total })}` : ''}
         </p>
       </div>
 
@@ -139,7 +141,7 @@ export default function LessonPage() {
                     className="flex items-center gap-1.5 rounded-xl border bg-card px-4 py-2.5 text-sm font-medium shadow-sm transition-all hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <ChevronLeft className="h-4 w-4" />
-                    Anterior
+                    {t('common.pagination.previous')}
                   </button>
 
                   {/* Mobile step indicator */}
@@ -152,7 +154,7 @@ export default function LessonPage() {
                     onClick={() => setCurrentStep((s) => s + 1)}
                     className="flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
                   >
-                    Próxima
+                    {t('app.lesson.nav.next')}
                     <ChevronRight className="h-4 w-4" />
                   </button>
                 </div>
@@ -168,10 +170,11 @@ export default function LessonPage() {
 }
 
 function EmptyState() {
+  const { t } = useTranslation();
   return (
     <div className="py-20 text-center text-muted-foreground">
       <Zap className="mx-auto mb-4 h-12 w-12 opacity-30" />
-      <p>Nenhuma atividade disponível nesta aula ainda.</p>
+      <p>{t('app.lesson.empty')}</p>
     </div>
   );
 }
