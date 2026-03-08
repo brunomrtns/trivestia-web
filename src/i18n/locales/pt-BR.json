@@ -1,0 +1,1160 @@
+{
+  "common": {
+    "actions": {
+      "back": "Voltar",
+      "login": "Entrar",
+      "register": "Criar conta",
+      "viewAll": "Ver todos",
+      "seeAll": "Ver tudo",
+      "continue": "Continuar",
+      "startNow": "Começar agora",
+      "cancel": "Cancelar",
+      "saving": "Salvando...",
+      "saveChanges": "Salvar alterações",
+      "access": "Acessar"
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "courses": "Cursos",
+      "lab": "Laboratório",
+      "progress": "Progresso",
+      "announcements": "Avisos"
+    },
+    "fields": {
+      "email": "E-mail",
+      "password": "Senha",
+      "fullName": "Nome completo",
+      "confirmPassword": "Confirmar senha"
+    },
+    "placeholders": {
+      "email": "voce@email.com",
+      "name": "Seu nome",
+      "passwordMin": "Mín. 8 caracteres",
+      "repeatPassword": "Repita a senha"
+    },
+    "roles": {
+      "superAdmin": "Super Admin",
+      "owner": "Owner",
+      "admin": "Admin",
+      "student": "Aluno"
+    },
+    "aria": {
+      "expandSidebar": "Expandir sidebar",
+      "collapseSidebar": "Colapsar sidebar",
+      "menu": "Menu",
+      "logout": "Sair"
+    },
+    "validation": {
+      "required": "Obrigatório",
+      "emailInvalid": "E-mail inválido",
+      "passwordRequired": "Senha obrigatória",
+      "nameMinLength": "Nome deve ter no mínimo 2 caracteres",
+      "passwordMinLength": "Mínimo de 8 caracteres",
+      "passwordUppercase": "Precisa de pelo menos uma letra maiúscula",
+      "passwordNumber": "Precisa de pelo menos um número",
+      "passwordMatch": "As senhas não conferem",
+      "required": "Obrigatório",
+      "slugMinLength": "Mínimo de 3 caracteres",
+      "slugMaxLength": "Máximo de 40 caracteres",
+      "slugPattern": "Apenas letras minúsculas, números e hifens",
+      "bioMaxLength": "Máximo de 300 caracteres"
+    },
+    "pagination": {
+      "previous": "Anterior",
+      "next": "Próximo"
+    },
+    "priority": {
+      "info": "Informação",
+      "warning": "Atenção",
+      "critical": "Urgente"
+    },
+    "timeframe": {
+      "1min": "1 min",
+      "5min": "5 min",
+      "15min": "15 min",
+      "1h": "1 hora"
+    },
+    "misc": {
+      "optional": "(opcional)",
+      "or": "ou"
+    }
+  },
+  "admin": {
+    "nav": {
+      "manageCourses": "Gerenciar Cursos",
+      "users": "Usuários",
+      "platform": "Plataforma"
+    },
+    "questions": {
+      "validation": {
+        "statement": "Mínimo 5 caracteres",
+        "title": "Mínimo 3 caracteres",
+        "weight": "Mínimo 1"
+      },
+      "simConfig": {
+        "candles": "Candles",
+        "startPrice": "Preço inicial",
+        "volatility": "Volatilidade",
+        "initialBalance": "Saldo inicial",
+        "fee": "Taxa",
+        "minPnL": "PnL mín.",
+        "maxDD": "DD máx.",
+        "minTrades": "Trades mín."
+      },
+      "options": {
+        "true": "Verdadeiro",
+        "false": "Falso"
+      }
+    },
+    "courses": {
+      "validation": {
+        "title": "Mínimo 3 caracteres",
+        "description": "Mínimo 10 caracteres"
+      },
+      "form": {
+        "title": "Título",
+        "description": "Descrição",
+        "deadline": "Prazo final (opcional)",
+        "deadlineHint": "Após esta data, alunos não poderão enviar respostas.",
+        "titlePlaceholder": "Ex: Análise Fundamentalista",
+        "descriptionPlaceholder": "Descreva o conteúdo do curso..."
+      },
+      "toast": {
+        "created": "Curso criado!",
+        "error": "Erro ao criar curso."
+      }
+    },
+    "lessons": {
+      "validation": {
+        "title": "Mínimo 2 caracteres",
+        "order": "Mínimo 1"
+      },
+      "stepType": {
+        "activity": "Atividade",
+        "text": "Texto",
+        "video": "Vídeo",
+        "image": "Imagem"
+      },
+      "activityType": {
+        "multipleChoice": "Múltipla Escolha",
+        "multipleSelect": "Múltipla Seleção",
+        "trueFalse": "Verdadeiro/Falso",
+        "ordering": "Ordenação",
+        "textInput": "Resposta Aberta",
+        "scenario": "Cenário",
+        "chartMarkup": "Marcação de Gráfico",
+        "riskCalculator": "Calculadora de Risco",
+        "simTrading": "Simulação de Trading"
+      },
+      "reviewPolicy": {
+        "immediate": "Imediata",
+        "immediateDesc": "Aluno vê gabarito logo após responder",
+        "afterDate": "Após data",
+        "afterDateDesc": "Gabarito liberado após data específica",
+        "never": "Nunca",
+        "neverDesc": "Gabarito nunca é exibido"
+      }
+    },
+    "users": {
+      "detail": {
+        "title": "Detalhes do Usuário"
+      },
+      "role": {
+        "promoteTitle": "Promover a Administrador?",
+        "promoteMessage": "\"{{name}}\" terá acesso total ao painel administrativo, incluindo gerenciamento de conteúdo e usuários.",
+        "revokeTitle": "Revogar Acesso Admin?",
+        "revokeMessage": "\"{{name}}\" perderá o acesso administrativo e voltará a ser um estudante comum.",
+        "promoteConfirm": "Sim, promover",
+        "revokeConfirm": "Sim, revogar"
+      }
+    },
+    "announcements": {
+      "page": {
+        "title": "Gerenciar Avisos",
+        "newButton": "Novo Aviso"
+      },
+      "priority": {
+        "info": "Info",
+        "warning": "Atenção",
+        "critical": "Urgente"
+      },
+      "toast": {
+        "created": "Aviso publicado com sucesso!",
+        "createError": "Erro ao publicar aviso.",
+        "updated": "Aviso atualizado!",
+        "updateError": "Erro ao atualizar aviso.",
+        "deleted": "Aviso removido.",
+        "deleteError": "Erro ao remover aviso."
+      },
+      "form": {
+        "editTitle": "Editar Aviso",
+        "newTitle": "Novo Aviso",
+        "titleLabel": "Título *",
+        "titlePlaceholder": "Título do aviso...",
+        "priorityLabel": "Prioridade *",
+        "bodyLabel": "Mensagem *",
+        "bodyPlaceholder": "Texto do aviso (suporta quebras de linha)...",
+        "expiresLabel": "Expira em",
+        "publishButton": "Publicar aviso",
+        "validation": {
+          "titleMin": "Mínimo 3 caracteres",
+          "titleMax": "Máximo 200 caracteres",
+          "bodyMax": "Máximo 5000 caracteres"
+        }
+      }
+    },
+    "periods": {
+      "title": "Períodos Avaliativos",
+      "subtitle": "Defina janelas de tempo para grupos de módulos.",
+      "newButton": "Novo período",
+      "backButton": "Voltar aos cursos",
+      "status": {
+        "active": "Ativo"
+      },
+      "toast": {
+        "deleted": "Período excluído.",
+        "deleteError": "Erro ao excluir período."
+      },
+      "aria": {
+        "edit": "Editar período",
+        "delete": "Excluir período"
+      }
+    },
+    "periodForm": {
+      "editTitle": "Editar Período",
+      "createTitle": "Novo Período",
+      "title": "Título",
+      "startDate": "Início",
+      "endDate": "Fim",
+      "validation": {
+        "dateRange": "Data final deve ser posterior à inicial",
+        "title": "Mínimo 3 caracteres",
+        "date": "Obrigatório",
+        "modules": "Selecione ao menos um módulo"
+      },
+      "titlePlaceholder": "Ex: Semestre 1 - 2025",
+      "toast": {
+        "created": "Período criado!",
+        "createError": "Erro ao criar período.",
+        "updated": "Período atualizado!",
+        "updateError": "Erro ao atualizar período."
+      }
+    },
+    "lessonSteps": {
+      "backToLessons": "Voltar às aulas",
+      "title": "Etapas da aula",
+      "generateButton": "Gerar das atividades",
+      "newButton": "Nova etapa",
+      "virtualBanner": {
+        "title": "Etapas virtuais:",
+        "body": "Esta aula ainda não possui etapas persistidas. As etapas abaixo são geradas automaticamente a partir das atividades. Clique em \"Gerar das atividades\" para persistir."
+      },
+      "empty": {
+        "title": "Nenhuma etapa nesta aula.",
+        "subtitle": "Crie etapas manualmente ou gere a partir das atividades."
+      },
+      "aria": {
+        "edit": "Editar etapa",
+        "delete": "Excluir etapa"
+      },
+      "toast": {
+        "deleted": "Etapa excluída.",
+        "deleteError": "Erro ao excluir etapa.",
+        "reordered": "Ordem atualizada!",
+        "reorderError": "Erro ao reordenar.",
+        "generated": "Etapas geradas a partir das atividades!",
+        "generateError": "Erro ao gerar etapas."
+      }
+    },
+    "stepForm": {
+      "editTitle": "Editar etapa",
+      "createTitle": "Nova etapa de conteúdo",
+      "typeLabel": "Tipo",
+      "titleLabel": "Título",
+      "titlePlaceholder": "Ex.: Introdução ao tema",
+      "contentLabel": "Conteúdo",
+      "contentPlaceholder": "Escreva aqui ou cole HTML...",
+      "htmlHint": "Aceita HTML simples: <p>, <b>, <ul>, <li>, etc.",
+      "videoUrlLabel": "URL do vídeo",
+      "videoHint": "YouTube, Vimeo ou qualquer URL de vídeo.",
+      "imageLabel": "Imagem",
+      "imageUploadButton": "Clique para selecionar uma imagem",
+      "imageUrlLabel": "Ou cole uma URL de imagem",
+      "altLabel": "Texto alternativo",
+      "altPlaceholder": "Descrição da imagem (para acessibilidade)",
+      "captionLabel": "Legenda",
+      "captionPlaceholder": "Legenda exibida abaixo da imagem",
+      "durationLabel": "Duração estimada",
+      "uploadingImage": "Enviando imagem…",
+      "saveButton": "Salvar",
+      "createButton": "Criar",
+      "validation": {
+        "titleMin": "Mínimo 2 caracteres"
+      },
+      "toast": {
+        "created": "Etapa criada!",
+        "createError": "Erro ao criar etapa.",
+        "updated": "Etapa atualizada!",
+        "updateError": "Erro ao atualizar etapa.",
+        "uploadError": "Erro ao enviar imagem."
+      }
+    },
+    "questionPreview": {
+      "noImage": "Sem imagem",
+      "chartAlt": "Gráfico gabarito",
+      "zones": "Zonas:",
+      "threshold": "Threshold IoU:",
+      "tolerance": "Tolerância",
+      "contract": "Contrato",
+      "expectedAnswer": "Resposta esperada:",
+      "contracts": "contratos"
+    },
+    "chartMarkupForm": {
+      "statementLabel": "Enunciado",
+      "statementPlaceholder": "Ex: Marque a zona de suporte principal neste gráfico",
+      "explanationLabel": "Explicação (pós-resposta)",
+      "difficultyLabel": "Dificuldade (1-5)",
+      "weightLabel": "Peso",
+      "imageUrlLabel": "URL da imagem do gráfico",
+      "imageUrlPlaceholder": "https://exemplo.com/chart.png",
+      "zoneTypeLabel": "Tipo de zona",
+      "zoneTypes": {
+        "support": "Suporte",
+        "resistance": "Resistência",
+        "supply": "Zona de Oferta",
+        "demand": "Zona de Demanda"
+      },
+      "thresholdLabel": "Threshold IoU (0.1 – 1.0)",
+      "answerZoneLabel": "Gabarito — desenhe a zona esperada",
+      "imagePrompt": "Cole a URL acima para carregar a imagem",
+      "drawButton": "Desenhar gabarito",
+      "drawing": "Desenhando...",
+      "clearButton": "Limpar",
+      "zoneError": "Desenhe a zona esperada no gráfico",
+      "saveButton": "Salvar questão",
+      "validation": {
+        "statement": "Mínimo 5 caracteres",
+        "imageUrl": "URL inválida"
+      }
+    },
+    "riskCalcForm": {
+      "statementLabel": "Enunciado",
+      "statementPlaceholder": "Ex: Calcule o tamanho da posição para este cenário",
+      "explanationLabel": "Explicação (pós-resposta)",
+      "difficultyLabel": "Dificuldade (1-5)",
+      "weightLabel": "Peso",
+      "scenarioTitle": "Dados do cenário",
+      "balanceLabel": "Saldo da conta",
+      "riskPercentLabel": "Risco (%)",
+      "entryPriceLabel": "Preço de entrada",
+      "stopPriceLabel": "Preço do stop",
+      "contractValueLabel": "Valor/contrato",
+      "roundingLabel": "Casas decimais",
+      "toleranceLabel": "Tolerância (%)",
+      "previewTitle": "Preview — resposta esperada",
+      "previewContracts": "contratos / lotes",
+      "saveButton": "Salvar questão",
+      "validation": {
+        "statement": "Mínimo 5 caracteres",
+        "positive": "Deve ser positivo",
+        "maxRisk": "Máximo 100%"
+      }
+    },
+    "simForm": {
+      "sectionTitle": "Configuração do Cenário de Trading",
+      "sectionSubtitle": "Define os parâmetros de candles, execução e pontuação",
+      "candlesSection": "Candles",
+      "executionSection": "Execução",
+      "scoringSection": "Critérios de Aprovação",
+      "weightsSection": "Pesos da Pontuação",
+      "weightsNormalized": "(serão normalizados automaticamente)",
+      "fields": {
+        "numCandles": "Qtd. Candles",
+        "startPrice": "Preço Inicial",
+        "volatility": "Volatilidade (ex: 0.015)",
+        "trend": "Tendência (-1 a 1)",
+        "spreadBps": "Spread (bps)",
+        "initialBalance": "Saldo Inicial ($)",
+        "feeBps": "Taxa (bps)",
+        "maxLeverage": "Alavancagem máx.",
+        "maxPositionSize": "Tamanho máx. posição (%)",
+        "allowShort": "Permitir short",
+        "passingPnl": "PnL mínimo para aprovação (%)",
+        "maxDrawdown": "Drawdown máx. permitido (%)",
+        "minTrades": "Trades mínimos",
+        "weightPnl": "Peso PnL",
+        "weightDrawdown": "Peso Drawdown",
+        "weightSharpe": "Peso Sharpe",
+        "weightWinRate": "Peso Win Rate"
+      },
+      "timeframeOptions": {
+        "1min": "1 min",
+        "5min": "5 min",
+        "15min": "15 min",
+        "1h": "1 hora",
+        "4h": "4 horas"
+      },
+      "saveButton": "Salvar configuração",
+      "validation": {
+        "timeframe": "Use 1, 5, 15, 60 ou 240 min"
+      }
+    }
+  },
+  "auth": {
+    "layout": {
+      "quote": "\"O investimento em conhecimento sempre paga os melhores dividendos.\"",
+      "quoteAuthor": "— Benjamin Franklin"
+    },
+    "login": {
+      "title": "Entrar",
+      "newHere": "Novo por aqui?",
+      "changeEmail": "Trocar",
+      "toast": {
+        "success": "Bem-vindo, {{name}}!",
+        "error": "E-mail ou senha inválidos."
+      }
+    },
+    "register": {
+      "title": "Criar conta",
+      "hasAccount": "Já tem conta?",
+      "toast": {
+        "success": "Conta criada com sucesso!",
+        "error": "Não foi possível criar a conta. Tente outro e-mail."
+      }
+    }
+  },
+  "platform": {
+    "login": {
+      "email": {
+        "title": "Entrar",
+        "subtitle": "Informe seu e-mail para continuar.",
+        "continueButton": "Continuar"
+      },
+      "choice": {
+        "changeEmail": "Trocar e-mail",
+        "notFound": {
+          "title": "Nenhuma conta encontrada",
+          "subtitle": "Este e-mail nao esta associado a nenhuma conta existente.",
+          "createProfessor": "Criar conta de professor",
+          "hasSchool": "Tenho uma escola",
+          "hasSchoolSubtitle": "Informe o identificador da escola para criar uma conta como aluno.",
+          "slugPlaceholder": "slug-da-escola",
+          "accessButton": "Acessar"
+        },
+        "multiTenant": {
+          "title": "Selecionar escola",
+          "subtitle": "Este e-mail está associado a mais de uma escola. Escolha em qual deseja entrar."
+        }
+      },
+      "password": {
+        "platformTitle": "Acesso professor",
+        "schoolBadge": "Escola: {{name}}",
+        "platformBadge": "Conta da plataforma"
+      },
+      "toast": {
+        "success": "Bem-vindo, {{name}}!",
+        "resolveError": "Erro ao verificar e-mail. Tente novamente.",
+        "tenantLoginError": "Conta nao existe nesta escola ou senha incorreta.",
+        "platformLoginError": "Credenciais invalidas."
+      }
+    },
+    "professorRegister": {
+      "title": "Criar conta de professor",
+      "subtitle": "Crie sua conta para comecar a publicar cursos. Voce podera criar sua escola no passo seguinte.",
+      "submitButton": "Criar conta",
+      "hasAccount": "Ja tem conta?",
+      "toast": {
+        "success": "Conta criada com sucesso!",
+        "error": "Erro ao criar conta. Tente novamente."
+      }
+    }
+  },
+  "public": {
+    "footer": {
+      "copyright": "© {{year}} Trivestia. Todos os direitos reservados."
+    },
+    "courses": {
+      "title": "Cursos disponíveis",
+      "subtitle": "Explore nossa grade e encontre o curso ideal para você.",
+      "error": "Não foi possível carregar os cursos. Tente novamente.",
+      "empty": "Nenhum curso disponível ainda.",
+      "card": {
+        "modules": "{{n}} módulos",
+        "viewCourse": "Ver curso"
+      }
+    },
+    "courseDetail": {
+      "startCourse": "Começar curso",
+      "continueCourse": "Continuar curso",
+      "contentTitle": "Conteúdo do curso",
+      "lessonCount": "{{n}} aulas"
+    },
+    "landing": {
+      "badge": "Plataforma de educação financeira",
+      "title": "Invista no seu conhecimento",
+      "subtitle": "Aprenda análise de investimentos, gestão de risco e finanças pessoais com conteúdo prático, interativo e no seu ritmo.",
+      "createSchool": "Criar escola",
+      "featuresSection": {
+        "title": "Tudo que você precisa para aprender",
+        "subtitle": "Uma plataforma completa pensada para quem quer ir além"
+      },
+      "features": {
+        "structured": {
+          "title": "Conteúdo estruturado",
+          "description": "Cursos organizados em módulos e aulas progressivas para uma aprendizagem eficiente."
+        },
+        "activities": {
+          "title": "6 tipos de atividade",
+          "description": "Múltipla escolha, V/F, ordenação, texto livre e cenários para fixar o conhecimento."
+        },
+        "progress": {
+          "title": "Progresso detalhado",
+          "description": "Acompanhe sua evolução com métricas claras de desempenho em cada aula."
+        },
+        "trading": {
+          "title": "Aprenda investindo",
+          "description": "Domine análise fundamentalista, técnica e gestão de risco com didática premium."
+        }
+      },
+      "stats": {
+        "activeStudents": "Alunos ativos",
+        "contentHours": "Horas de conteúdo",
+        "completionRate": "Taxa de conclusão",
+        "avgScore": "Nota média"
+      },
+      "cta": {
+        "title": "Comece sua jornada hoje",
+        "subtitle": "Acesse gratuitamente e descubra como investir com inteligência.",
+        "button": "Criar conta grátis"
+      }
+    },
+    "createSchool": {
+      "title": "Criar sua escola",
+      "subtitle": "Crie seu espaço de ensino e comece a compartilhar conhecimento.",
+      "hasSchool": "Já tem uma escola?",
+      "form": {
+        "schoolName": "Nome da escola",
+        "schoolNamePlaceholder": "Ex: Escola de Trading",
+        "schoolUrl": "URL da escola",
+        "slugPlaceholder": "minha-escola",
+        "slugTaken": "Este slug já está em uso.",
+        "description": "Descrição",
+        "bioPlaceholder": "Uma breve descrição da sua escola...",
+        "ownerSection": "Dados do proprietário (OWNER)",
+        "ownerName": "Seu nome",
+        "ownerNamePlaceholder": "Seu nome completo",
+        "submit": "Criar escola"
+      },
+      "toast": {
+        "slugTaken": "Este slug já está em uso. Escolha outro.",
+        "success": "Escola \"{{name}}\" criada com sucesso!",
+        "error": "Não foi possível criar a escola. Tente novamente."
+      }
+    }
+  },
+  "app": {
+    "dashboard": {
+      "greeting": "Olá, {{firstName}}",
+      "subtitle": "Continue de onde parou.",
+      "availableCourses": "Cursos disponíveis",
+      "recentActivity": "Atividade recente",
+      "stats": {
+        "completedLessons": "Aulas concluídas",
+        "inProgress": "Em andamento",
+        "totalLessons": "Total de aulas",
+        "avgScore": "Pontuação média"
+      },
+      "continueCard": {
+        "label": "Continue de onde parou",
+        "viewCourses": "Ver cursos",
+        "allDone": "Parabéns! Você completou tudo.",
+        "allDoneSubtitle": "Continue explorando os cursos disponíveis.",
+        "startFirst": "Comece seu primeiro curso",
+        "startFirstSubtitle": "Explore os cursos disponíveis e dê o primeiro passo."
+      },
+      "weeklyGoal": {
+        "title": "Meta semanal",
+        "progress": "{{weeklyCompleted}} de {{weeklyTarget}} atividades",
+        "achieved": "Meta!",
+        "streakDay_one": "dia seguido",
+        "streakDay_other": "dias seguidos",
+        "record": "recorde",
+        "activityTooltip": "{{date}}: {{count}} atividade(s)",
+        "days": ["S", "T", "Q", "Q", "S", "S", "D"],
+        "aria": {
+          "configure": "Configurar meta"
+        }
+      }
+    },
+    "announcements": {
+      "title": "Avisos",
+      "unreadCount_one": "{{count}} não lido",
+      "unreadCount_other": "{{count}} não lidos",
+      "markAllRead": "Marcar todos como lidos",
+      "empty": "Nenhum aviso disponível no momento.",
+      "expiresAt": "· expira em {{date}}",
+      "markAsRead": "Marcar como lido",
+      "toast": {
+        "markAllSuccess": "{{count}} aviso(s) marcado(s) como lido(s)."
+      },
+      "priority": {
+        "info": "Info"
+      },
+      "bell": {
+        "viewAll": "Ver todos os avisos",
+        "empty": "Nenhum aviso no momento."
+      },
+      "time": {
+        "now": "agora",
+        "minutes": "{{n}}min",
+        "hours": "{{n}}h",
+        "days": "{{n}}d"
+      }
+    },
+    "progress": {
+      "title": "Meu progresso",
+      "subtitle": "Acompanhe sua evolução em todas as aulas.",
+      "empty": "Nenhuma aula iniciada ainda.",
+      "stats": {
+        "completed": "Concluídas",
+        "avgScore": "Média de pontuação",
+        "totalLessons": "Total de aulas"
+      }
+    },
+    "lab": {
+      "title": "Laboratório de Trading",
+      "subtitle": "Pratique sem pressão. Configure o cenário e treine sua estratégia.",
+      "historyLink": "Histórico",
+      "form": {
+        "title": "Configuração do Cenário",
+        "candles": "Candles (50–500)",
+        "timeframe": "Timeframe",
+        "volatility": "Volatilidade (0.0001–0.1)",
+        "trend": "Tendência (–1 a +1)",
+        "spread": "Spread (bps)",
+        "balance": "Saldo Inicial ($)",
+        "submit": "Iniciar Simulação",
+        "submitLoading": "Criando cenário..."
+      },
+      "toast": {
+        "error": "Erro ao criar sessão de prática"
+      }
+    },
+    "practiceHistory": {
+      "title": "Histórico de Prática",
+      "backToLab": "Laboratório",
+      "empty": "Nenhuma sessão de prática ainda.",
+      "noResult": "Sessão sem resultado"
+    },
+    "lesson": {
+      "backToCourse": "Voltar ao curso",
+      "stepProgress": "Etapa {{n}} de {{total}} · {{viewed}}/{{total}} concluídas",
+      "empty": "Nenhuma atividade disponível nesta aula ainda.",
+      "nav": {
+        "next": "Próxima"
+      }
+    },
+    "lessonPlayer": {
+      "noContent": "Esta aula ainda não possui conteúdo.",
+      "stepOf": "Etapa {{n}} de {{total}}",
+      "completedSuffix": "· {{viewed}}/{{total}} concluídas",
+      "completeLesson": "Concluir aula"
+    },
+    "activity": {
+      "empty": {
+        "title": "Nenhuma questão cadastrada",
+        "subtitle": "Esta atividade ainda não possui questões. Peça ao administrador para adicioná-las."
+      },
+      "expiredBanner": "O prazo deste curso foi encerrado. Novas submissões não são permitidas.",
+      "nav": {
+        "submit": "Enviar atividade"
+      },
+      "result": {
+        "passed": "Parabéns! Você passou.",
+        "failed": "Continue praticando!",
+        "scoreLabel": "{{score}} de {{maxScore}} pontos",
+        "reviewTitle": "Revisão das questões",
+        "policyNever": "O professor optou por não liberar o gabarito desta atividade.",
+        "policyAfterDate": "O gabarito será liberado em {{date}}.",
+        "policyDateFallback": "data a definir",
+        "questionN": "Questão {{n}}",
+        "correct": "Correta",
+        "incorrect": "Incorreta",
+        "questionScore": "+{{earned}}/{{weight}} pts",
+        "explanationLabel": "Explicação:",
+        "questionImageAlt": "Imagem da questão",
+        "retry": "Tentar novamente",
+        "goToDashboard": "Ir ao Dashboard"
+      },
+      "challenge": {
+        "alreadyApproved": "Você já foi aprovado neste desafio.",
+        "loadError": "Erro ao carregar o desafio."
+      },
+      "toast": {
+        "submitSuccess": "Atividade concluída!",
+        "submitError": "Erro ao enviar respostas. Tente novamente.",
+        "incomplete": "Responda todas as questões antes de enviar."
+      }
+    },
+    "course": {
+      "notFound": "Curso não encontrado.",
+      "backToCourses": "Voltar aos cursos",
+      "progressPercent": "{{percent}}% concluído",
+      "moduleProgress": "{{completed}}/{{total}} aulas",
+      "lessonsCompleted": "{{completed}}/{{total}} aulas concluídas",
+      "continueButton": "Continuar",
+      "reviewButton": "Revisar"
+    },
+    "weeklyGoal": {
+      "modal": {
+        "title": "Configurar meta semanal",
+        "question": "Quantas atividades você quer completar por semana?",
+        "customLabel": "Ou defina um valor personalizado",
+        "rangeHint": "Entre 1 e 20",
+        "saveButton": "Salvar meta",
+        "toast": {
+          "success": "Meta atualizada: {{weeklyTarget}} atividades/semana",
+          "error": "Erro ao atualizar meta."
+        }
+      }
+    },
+    "labSummary": {
+      "title": "Laboratório de Prática",
+      "viewHistory": "Ver histórico completo",
+      "empty": {
+        "title": "Ainda sem sessões no laboratório",
+        "subtitle": "Pratique no simulador e acompanhe sua evolução aqui.",
+        "button": "Praticar"
+      },
+      "stats": {
+        "totalSessions": "Sessões totais",
+        "completed": "Completadas",
+        "avgPnl": "PnL médio",
+        "bestPnl": "Melhor PnL",
+        "avgDrawdown": "Drawdown médio",
+        "lastSession": "Última sessão",
+        "avgWinRate": "Taxa de acerto média"
+      }
+    }
+  },
+  "error": {
+    "wrongTenant": {
+      "title": "Acesso negado",
+      "message": "Você está autenticado na escola {{correctSlug}} e não tem permissão para acessar esta escola.",
+      "goToMySchool": "Ir para minha escola"
+    }
+  },
+  "learning": {
+    "lock": {
+      "expired": {
+        "badge": "Prazo encerrado",
+        "tooltip": "O prazo deste curso foi encerrado."
+      },
+      "notYet": {
+        "badge": "Disponível em {{date}}",
+        "badgeFallback": "Ainda não disponível"
+      },
+      "prereq": {
+        "badge": "Complete \"{{title}}\"",
+        "badgeFallback": "Pré-requisito pendente",
+        "tooltip": "Complete \"{{title}}\" primeiro",
+        "tooltipFallback": "Complete o pré-requisito primeiro"
+      }
+    },
+    "timeline": {
+      "ariaLabel": "Etapas da aula",
+      "stepTypes": {
+        "text": "Texto",
+        "video": "Vídeo",
+        "image": "Imagem",
+        "activity": "Atividade"
+      },
+      "minutes": "{{n}} min",
+      "optional": "Opcional"
+    },
+    "stepPlayer": {
+      "videoTitle": "Video player",
+      "activityDescription": "Clique para iniciar esta atividade interativa",
+      "activityButton": "Iniciar atividade"
+    },
+    "multipleSelect": {
+      "instruction": "Selecione todas que se aplicam"
+    },
+    "textInput": {
+      "placeholder": "Escreva sua resposta aqui..."
+    },
+    "ordering": {
+      "dragAriaLabel": "Arrastar para reordenar",
+      "instruction": "Arraste para ordenar (ou use teclado: Espaço + Setas)"
+    },
+    "chartMarkup": {
+      "imageAlt": "Gráfico",
+      "imageUnavailable": "Imagem não disponível",
+      "drawing": "Desenhando...",
+      "drawButton": "Desenhar zona",
+      "clearButton": "Limpar",
+      "overlapSuffix": "% de sobreposição",
+      "labels": {
+        "correct": "✅ Correto",
+        "partial": "⚠️ Quase",
+        "wrong": "❌ Fora"
+      }
+    },
+    "riskCalc": {
+      "noData": "Dados do cenário não disponíveis",
+      "scenario": {
+        "balance": "Saldo",
+        "risk": "Risco",
+        "entry": "Entrada",
+        "stop": "Stop",
+        "contractValue": "Valor por contrato"
+      },
+      "stepByStep": {
+        "title": "Passo a passo",
+        "riskAmount": "Risco em $:",
+        "stopDistance": "Distância do stop:",
+        "contractValueStep": "Valor por contrato:",
+        "positionSize": "Tamanho da posição:",
+        "yourAnswer": "Sua resposta",
+        "expected": "Esperado",
+        "difference": "Diferença"
+      },
+      "input": {
+        "label": "Qual o tamanho da posição?",
+        "placeholder": "Ex: 2.50"
+      },
+      "feedback": {
+        "accuracySuffix": "% de acerto",
+        "labels": {
+          "correct": "✅ Correto",
+          "partial": "⚠️ Quase",
+          "wrong": "❌ Incorreto"
+        }
+      }
+    },
+    "courseInteractive": {
+      "lessonsCount": "{{completedLessons}}/{{totalLessons}} aulas concluídas",
+      "review": "Revisar",
+      "continue": "Continuar"
+    },
+    "courseOutline": {
+      "aria": "Estrutura do curso",
+      "moduleProgress": "{{completed}}/{{total}}"
+    },
+    "lessonLock": {
+      "courseExpired": "O prazo deste curso foi encerrado.",
+      "courseExpiredBadge": "Prazo encerrado",
+      "notAvailableYet": "Ainda não disponível",
+      "availableFrom": "Disponível em {{date}}",
+      "previousIncomplete": "Complete a aula anterior para continuar.",
+      "previousIncompleteBadge": "Complete a aula anterior",
+      "prerequisiteNotMet": "Complete \"{{lessonTitle}}\" primeiro",
+      "prerequisiteBadge": "Pré-requisito pendente"
+    }
+  },
+  "super": {
+    "layout": {
+      "brand": "Super Admin",
+      "roleBadge": "Super Admin",
+      "nav": {
+        "overview": "Visão Geral",
+        "schools": "Escolas",
+        "users": "Usuários"
+      },
+      "aria": {
+        "expand": "Expandir sidebar",
+        "collapse": "Colapsar sidebar",
+        "menu": "Menu",
+        "logout": "Sair"
+      }
+    },
+    "dashboard": {
+      "title": "Visão Geral da Plataforma",
+      "subtitle": "Painel de controle do Super Admin — todas as escolas e usuários.",
+      "stats": {
+        "totalTenants": "Total de Escolas",
+        "activeTenants": "Escolas Ativas",
+        "users": "Usuários",
+        "courses": "Cursos"
+      }
+    },
+    "tenants": {
+      "title": "Escolas",
+      "subtitle": "Gerencie todos os tenants da plataforma.",
+      "newButton": "Nova Escola",
+      "searchPlaceholder": "Buscar por nome ou slug...",
+      "filter": {
+        "all": "Todas",
+        "active": "Ativas",
+        "disabled": "Desativadas"
+      },
+      "table": {
+        "school": "Escola",
+        "users": "Usuários",
+        "courses": "Cursos",
+        "status": "Status",
+        "actions": "Ações"
+      },
+      "status": {
+        "active": "Ativa",
+        "disabled": "Desativada",
+        "clickToDisable": "Clique para desativar",
+        "clickToEnable": "Clique para ativar"
+      },
+      "editButton": "Editar",
+      "empty": "Nenhuma escola encontrada.",
+      "pagination": "{{total}} escola(s) • Página {{page}} de {{totalPages}}",
+      "modal": {
+        "title": "Nova Escola",
+        "nameLabel": "Nome",
+        "bioLabel": "Bio (opcional)",
+        "bioPlaceholder": "Descrição breve da escola",
+        "enabledLabel": "Habilitada",
+        "ownerHint": "Owner (opcional) — se preenchido, cria o owner junto.",
+        "ownerNameLabel": "Nome do Owner",
+        "ownerEmailLabel": "Email do Owner",
+        "ownerPasswordLabel": "Senha do Owner",
+        "creating": "Criando...",
+        "createButton": "Criar Escola"
+      },
+      "toast": {
+        "statusUpdated": "Status atualizado",
+        "created": "Escola criada com sucesso!",
+        "createError": "Erro ao criar escola"
+      }
+    },
+    "tenantEdit": {
+      "title": "Editar Escola",
+      "form": {
+        "nameLabel": "Nome",
+        "bioLabel": "Bio",
+        "logoLabel": "Logo URL",
+        "enabledLabel": "Escola habilitada"
+      },
+      "saveButton": "Salvar",
+      "accessButton": "Acessar Escola",
+      "notFound": "Tenant não encontrado.",
+      "statsTitle": "Estatísticas",
+      "stats": {
+        "users": "Usuários",
+        "courses": "Cursos",
+        "createdAt": "Criado em"
+      },
+      "ownersTitle": "Owners / Super Admins",
+      "toast": {
+        "updated": "Escola atualizada com sucesso!",
+        "updateError": "Erro ao atualizar"
+      }
+    },
+    "users": {
+      "title": "Usuários da Plataforma",
+      "subtitle": "Visualize e gerencie todos os usuários de todas as escolas.",
+      "searchPlaceholder": "Buscar por nome ou email...",
+      "filter": {
+        "allRoles": "Todos os roles"
+      },
+      "table": {
+        "name": "Nome",
+        "email": "Email",
+        "school": "Escola",
+        "role": "Role",
+        "actions": "Ações"
+      },
+      "changeRoleButton": "Alterar Role",
+      "empty": "Nenhum usuário encontrado.",
+      "pagination": "{{total}} usuário(s) • Página {{page}} de {{totalPages}}",
+      "modal": {
+        "title": "Alterar Role",
+        "schoolBadge": "Escola: {{slug}}",
+        "confirmButton": "Confirmar"
+      },
+      "toast": {
+        "roleUpdated": "Role atualizado com sucesso!",
+        "updateError": "Erro ao atualizar role"
+      }
+    }
+  },
+  "workspace": {
+    "layout": {
+      "badge": "Workspace",
+      "nav": {
+        "panel": "Painel",
+        "school": "Escola"
+      }
+    },
+    "tenantPublic": {
+      "nav": {
+        "courses": "Cursos",
+        "dashboard": "Dashboard",
+        "login": "Entrar"
+      },
+      "footer": "Todos os direitos reservados."
+    },
+    "page": {
+      "welcome": "Bem-vindo, {{name}}",
+      "subtitle": "Gerencie sua escola a partir do painel administrativo.",
+      "manageButton": "Gerenciar escola",
+      "viewAsStudent": "Ver como aluno",
+      "toast": {
+        "loadError": "Erro ao carregar dados."
+      }
+    }
+  },
+  "sim": {
+    "briefing": {
+      "badge": "Simulação de Trading",
+      "helpButton": "Ajuda",
+      "alreadyPassed": {
+        "title": "Desafio Concluído!",
+        "description": "Você já foi aprovado neste desafio com {{score}}/100 pontos em {{count}} tentativa(s).",
+        "viewResultButton": "Ver Resultado"
+      },
+      "prevAttempt": {
+        "label": "Tentativa anterior:",
+        "value": "{{score}}/100 pontos — {{attempt}}ª tentativa"
+      },
+      "objectives": {
+        "title": "Seus Objetivos",
+        "profitTarget": "Meta de Lucro",
+        "profitDesc": "Lucro mínimo sobre o saldo inicial",
+        "maxDrawdown": "Drawdown Máximo",
+        "drawdownDesc": "Queda máxima permitida no patrimônio",
+        "minTrades": "Trades Mínimos",
+        "minTradesDesc": "Operações mínimas para validar"
+      },
+      "rules": {
+        "title": "Regras do Desafio",
+        "initialBalance": "Saldo Inicial",
+        "maxEvents": "Eventos Máximos",
+        "maxLeverage": "Alavancagem Máx.",
+        "feeBps": "Taxa por operação",
+        "shortSelling": "Venda a descoberto",
+        "allowed": "Permitida"
+      },
+      "howItWorks": {
+        "title": "Como Funciona",
+        "step1": "Você receberá um gráfico de velas (candles) gerado aleatoriamente.",
+        "step2": "Use os controles de playback para avançar as velas uma a uma ou automaticamente.",
+        "step3": "Abra ordens de compra (BUY) ou venda (SELL) usando o painel de ordens.",
+        "step4": "Acompanhe seu PnL, posição aberta e drawdown em tempo real.",
+        "step5": "Ao chegar na última vela, clique \"Enviar Resultado\" para submeter.",
+        "step6": "O servidor valida sua simulação e calcula sua pontuação."
+      },
+      "loadingScenario": "Carregando cenário...",
+      "startButton": "Iniciar Simulação"
+    },
+    "result": {
+      "practice": {
+        "title": "Sessão Concluída!",
+        "newSessionButton": "Nova Sessão"
+      },
+      "challenge": {
+        "approvedTitle": "Desafio Aprovado!",
+        "failedTitle": "Desafio Não Aprovado",
+        "approvedSubtitle": "Parabéns! Você atingiu os critérios de aprovação.",
+        "failedSubtitle": "Continue praticando e tente novamente."
+      },
+      "scoreUnit": "pontos",
+      "metrics": {
+        "finalBalance": "Saldo Final",
+        "trades": "Trades",
+        "maxDrawdown": "Max Drawdown"
+      },
+      "tamperWarning": "Divergência detectada — resultado calculado pelo servidor",
+      "retryButton": "Tentar Novamente"
+    },
+    "orderTicket": {
+      "title": "Nova Ordem",
+      "quantityLabel": "Quantidade",
+      "priceLabel": "Preço",
+      "buyButton": "Comprar",
+      "sellButton": "Vender",
+      "validation": {
+        "quantity": "Quantidade deve ser positiva",
+        "price": "Preço obrigatório para LIMIT/STOP"
+      }
+    },
+    "help": {
+      "title": "Central de Ajuda",
+      "quickTipsTitle": "Dicas Rápidas",
+      "glossaryTitle": "Glossário",
+      "restartTutorialButton": "Reiniciar Tutorial",
+      "categories": {
+        "orders": "Tipos de Ordem",
+        "concepts": "Conceitos",
+        "indicators": "Indicadores"
+      },
+      "quickTips": {
+        "tip1": "Use Play/Pause para controlar o avanço das velas",
+        "tip2": "O gráfico mostra candles — cada vela = 1 período",
+        "tip3": "Comece com ordens MARKET pequenas para entender o fluxo",
+        "tip4": "Sempre defina Stop-Loss para limitar perdas",
+        "tip5": "Acompanhe seu Equity e Drawdown em tempo real",
+        "tip6": "Clique 'Enviar Resultado' quando as velas acabarem"
+      },
+      "glossary": {
+        "buy": { "term": "BUY (Compra)", "description": "Ordem de compra. Você lucra quando o preço sobe após a compra. Abre uma posição LONG." },
+        "sell": { "term": "SELL (Venda)", "description": "Ordem de venda. Permite \"vender a descoberto\" (short) — você lucra quando o preço cai. Abre uma posição SHORT." },
+        "market": { "term": "MARKET (A Mercado)", "description": "Executa imediatamente ao preço atual do mercado. Mais rápida, mas pode ter slippage." },
+        "limit": { "term": "LIMIT (Limitada)", "description": "Executa somente se o preço atingir o valor definido. BUY LIMIT: executa abaixo do preço definido. SELL LIMIT: acima." },
+        "stop": { "term": "STOP", "description": "Executa quando o preço atinge o trigger. BUY STOP: compra acima do atual (rompimento). SELL STOP: vende abaixo." },
+        "sl": { "term": "Stop-Loss (SL)", "description": "Nível de preço que fecha sua posição automaticamente para limitar perdas. Fundamental para gestão de risco." },
+        "tp": { "term": "Take-Profit (TP)", "description": "Nível de preço que fecha sua posição automaticamente para garantir lucro. Ajuda a realizar ganhos." },
+        "pnl": { "term": "PnL (Profit & Loss)", "description": "Lucro ou prejuízo da sua operação. PnL positivo = lucro. Negativo = prejuízo. Mostrado em $ e %." },
+        "equity": { "term": "Equity (Patrimônio)", "description": "Seu saldo + PnL das posições abertas. Reflete o valor real da sua conta em tempo real." },
+        "position": { "term": "Posição", "description": "Quando você tem uma operação aberta. LONG = comprado (aposta na alta). SHORT = vendido (aposta na queda). FLAT = sem posição." },
+        "fee": { "term": "Fee / Taxa", "description": "Custo por operação cobrado em cada execução (fill). Medido em bps (basis points). 1 bps = 0.01%." },
+        "slippage": { "term": "Slippage", "description": "Diferença entre o preço esperado e o preço real de execução. Simulado automaticamente pelo engine." },
+        "spread": { "term": "Spread", "description": "Diferença entre o preço de compra (ask) e venda (bid). Custo implícito de operar." },
+        "drawdown": { "term": "Drawdown", "description": "Queda do patrimônio em relação ao pico máximo. Mede o pior momento da sua operação. Menor = melhor gestão de risco." },
+        "winrate": { "term": "Win Rate", "description": "Percentual de trades vencedores. 60%+ é considerado bom. Porém, depende também da relação risco/retorno." },
+        "sharpe": { "term": "Sharpe Ratio", "description": "Mede o retorno ajustado ao risco. >1 = bom, >2 = excelente. Penaliza oscilações grandes nos resultados." },
+        "profitfactor": { "term": "Profit Factor", "description": "Soma dos ganhos ÷ soma das perdas. >1 = lucrativo. >2 = estratégia consistente." }
+      }
+    },
+    "accountSummary": {
+      "balance": "Saldo",
+      "maxDD": "DD Máx"
+    },
+    "metrics": {
+      "empty": "Métricas disponíveis ao finalizar",
+      "wins": "Ganhos",
+      "losses": "Perdas",
+      "maxDD": "Max DD",
+      "feesTotal": "Fees Total",
+      "events": "Eventos"
+    },
+    "tutorial": {
+      "stepOf": "Passo {{current}} de {{total}}",
+      "closeTitle": "Fechar tutorial",
+      "skipButton": "Pular",
+      "finishButton": "Concluir",
+      "steps": {
+        "chart": {
+          "title": "Entenda o Gráfico",
+          "description": "Este é o gráfico de velas (candlestick). Cada vela representa um período de tempo. Vela verde = preço subiu. Vela vermelha = preço caiu. O corpo mostra abertura/fechamento e os pavios mostram máxima/mínima."
+        },
+        "playback": {
+          "title": "Controles de Playback",
+          "description": "Use os botões de Play/Pause para avançar as velas automaticamente. O botão \"→\" avança uma vela por vez. Ajuste a velocidade (0.5× a 4×). Observe o mercado antes de operar!"
+        },
+        "order": {
+          "title": "Abra sua Primeira Ordem",
+          "description": "No painel \"Nova Ordem\", escolha BUY (compra) ou SELL (venda). Selecione o tipo: MARKET (imediata), LIMIT (preço específico) ou STOP (gatilho). Defina a quantidade e, opcionalmente, Stop-Loss (SL) e Take-Profit (TP)."
+        },
+        "position": {
+          "title": "Acompanhe sua Posição",
+          "description": "Após uma ordem ser executada (fill), sua posição aparece no painel lateral. Acompanhe o PnL em tempo real. Use o botão \"Fechar\" para encerrar a posição a qualquer momento."
+        },
+        "tabs": {
+          "title": "Ordens, Fills e Métricas",
+          "description": "Na parte inferior: \"Ordens\" mostra ordens pendentes (LIMIT/STOP). \"Preenchimentos\" mostra todas as execuções realizadas. \"Métricas\" mostra estatísticas da sua performance (Win Rate, Sharpe, etc.)."
+        },
+        "submit": {
+          "title": "Finalize e Envie",
+          "description": "Quando todas as velas forem exibidas, o botão \"Enviar Resultado\" aparece. Clique para submeter sua simulação ao servidor. Ele recalcula tudo e gera sua pontuação final. Boa sorte!"
+        }
+      }
+    }
+  }
+}
