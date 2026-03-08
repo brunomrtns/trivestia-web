@@ -12,6 +12,7 @@ import {
   HelpCircle,
   ArrowLeft
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import type { ChallengeBriefingData } from '@/types/api';
 
@@ -37,6 +38,7 @@ export function ChallengeBriefingScreen({
   onOpenHelp
 }: ChallengeBriefingScreenProps) {
   const { objectives, rules, alreadyPassed, lastAttempt } = briefing;
+  const { t } = useTranslation();
 
   // ─── Já aprovado ────────────────────────────────────────────────────────────
 
@@ -48,18 +50,13 @@ export function ChallengeBriefingScreen({
         </div>
         <div>
           <h1 className="text-2xl font-bold text-emerald-400">
-            Desafio Concluído!
+            {t('sim.briefing.alreadyPassed.title')}
           </h1>
           <p className="mt-2 max-w-md text-sm text-muted-foreground">
-            Você já foi aprovado neste desafio com{' '}
-            <span className="font-semibold text-foreground">
-              {lastAttempt?.score ?? 0}/100
-            </span>{' '}
-            pontos em{' '}
-            <span className="font-semibold text-foreground">
-              {lastAttempt?.attemptCount ?? 1}
-            </span>{' '}
-            tentativa(s).
+            {t('sim.briefing.alreadyPassed.description', {
+              score: lastAttempt?.score ?? 0,
+              count: lastAttempt?.attemptCount ?? 1
+            })}
           </p>
         </div>
         <div className="flex gap-3">
@@ -69,7 +66,7 @@ export function ChallengeBriefingScreen({
               className="flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
             >
               <Trophy className="h-4 w-4" />
-              Ver Resultado
+              {t('sim.briefing.alreadyPassed.viewResultButton')}
             </button>
           )}
           {onGoBack && (
@@ -78,7 +75,7 @@ export function ChallengeBriefingScreen({
               className="flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-medium transition hover:bg-accent"
             >
               <ArrowLeft className="h-4 w-4" />
-              Voltar
+              {t('common.actions.back')}
             </button>
           )}
         </div>
@@ -98,7 +95,7 @@ export function ChallengeBriefingScreen({
               <BarChart3 className="h-4 w-4 text-primary" />
             </div>
             <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-              Simulação de Trading
+              {t('sim.briefing.badge')}
             </span>
           </div>
           <h1 className="text-2xl font-bold leading-tight">{briefing.title}</h1>
@@ -114,7 +111,7 @@ export function ChallengeBriefingScreen({
             className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-foreground"
           >
             <HelpCircle className="h-3.5 w-3.5" />
-            Ajuda
+            {t('sim.briefing.helpButton')}
           </button>
         )}
       </div>
@@ -125,11 +122,13 @@ export function ChallengeBriefingScreen({
           <RotateCcw className="h-4 w-4 shrink-0 text-yellow-500" />
           <div className="text-sm">
             <span className="font-medium text-yellow-400">
-              Tentativa anterior:
+              {t('sim.briefing.prevAttempt.label')}
             </span>{' '}
             <span className="text-muted-foreground">
-              {lastAttempt.score}/100 pontos — {lastAttempt.attemptCount}ª
-              tentativa
+              {t('sim.briefing.prevAttempt.value', {
+                score: lastAttempt.score,
+                attempt: lastAttempt.attemptCount
+              })}
             </span>
           </div>
         </div>
@@ -141,29 +140,29 @@ export function ChallengeBriefingScreen({
           <div className="mb-4 flex items-center gap-2">
             <Target className="h-4 w-4 text-primary" />
             <h2 className="text-sm font-semibold uppercase tracking-widest">
-              Seus Objetivos
+              {t('sim.briefing.objectives.title')}
             </h2>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             <ObjectiveCard
               icon={<TrendingUp className="h-5 w-5 text-emerald-400" />}
-              label="Meta de Lucro"
+              label={t('sim.briefing.objectives.profitTarget')}
               value={`+${objectives.minPnlPercent}% PnL`}
-              description="Lucro mínimo sobre o saldo inicial"
+              description={t('sim.briefing.objectives.profitDesc')}
               variant="success"
             />
             <ObjectiveCard
               icon={<AlertTriangle className="h-5 w-5 text-red-400" />}
-              label="Drawdown Máximo"
+              label={t('sim.briefing.objectives.maxDrawdown')}
               value={`${objectives.maxDrawdownPercent}%`}
-              description="Queda máxima permitida no patrimônio"
+              description={t('sim.briefing.objectives.drawdownDesc')}
               variant="danger"
             />
             <ObjectiveCard
               icon={<BarChart3 className="h-5 w-5 text-blue-400" />}
-              label="Trades Mínimos"
+              label={t('sim.briefing.objectives.minTrades')}
               value={`${objectives.minTradeCount} trades`}
-              description="Operações mínimas para validar"
+              description={t('sim.briefing.objectives.minTradesDesc')}
               variant="info"
             />
           </div>
@@ -181,29 +180,29 @@ export function ChallengeBriefingScreen({
         <div className="grid gap-2 text-sm sm:grid-cols-2">
           <RuleItem
             icon={<DollarSign className="h-3.5 w-3.5" />}
-            label="Saldo Inicial"
+            label={t('sim.briefing.rules.initialBalance')}
             value={`$${rules.initialBalance.toLocaleString('pt-BR')}`}
           />
           <RuleItem
             icon={<BarChart3 className="h-3.5 w-3.5" />}
-            label="Eventos Máximos"
+            label={t('sim.briefing.rules.maxEvents')}
             value={`${rules.maxEvents} ordens`}
           />
           <RuleItem
             icon={<TrendingUp className="h-3.5 w-3.5" />}
-            label="Alavancagem Máx."
+            label={t('sim.briefing.rules.maxLeverage')}
             value={`${rules.maxLeverage}×`}
           />
           <RuleItem
             icon={<AlertTriangle className="h-3.5 w-3.5" />}
-            label="Taxa por operação"
+            label={t('sim.briefing.rules.feeBps')}
             value={`${rules.feeBps} bps`}
           />
           {rules.allowShort && (
             <RuleItem
               icon={<ShieldCheck className="h-3.5 w-3.5" />}
-              label="Venda a descoberto"
-              value="Permitida"
+              label={t('sim.briefing.rules.shortSelling')}
+              value={t('sim.briefing.rules.allowed')}
             />
           )}
         </div>
@@ -219,12 +218,12 @@ export function ChallengeBriefingScreen({
         </div>
         <ol className="space-y-2 text-sm text-muted-foreground">
           {[
-            'Você receberá um gráfico de velas (candles) gerado aleatoriamente.',
-            'Use os controles de playback para avançar as velas uma a uma ou automaticamente.',
-            'Abra ordens de compra (BUY) ou venda (SELL) usando o painel de ordens.',
-            'Acompanhe seu PnL, posição aberta e drawdown em tempo real.',
-            'Ao chegar na última vela, clique "Enviar Resultado" para submeter.',
-            'O servidor valida sua simulação e calcula sua pontuação.'
+            t('sim.briefing.howItWorks.step1'),
+            t('sim.briefing.howItWorks.step2'),
+            t('sim.briefing.howItWorks.step3'),
+            t('sim.briefing.howItWorks.step4'),
+            t('sim.briefing.howItWorks.step5'),
+            t('sim.briefing.howItWorks.step6')
           ].map((step, i) => (
             <li key={i} className="flex gap-3">
               <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-bold text-primary">
@@ -244,7 +243,7 @@ export function ChallengeBriefingScreen({
             className="flex items-center gap-2 rounded-xl border px-5 py-3 text-sm font-medium transition hover:bg-accent"
           >
             <ArrowLeft className="h-4 w-4" />
-            Voltar
+            {t('common.actions.back')}
           </button>
         )}
 
@@ -256,11 +255,11 @@ export function ChallengeBriefingScreen({
           {isLoadingScenario ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              Carregando cenário...
+              {t('sim.briefing.loadingScenario')}
             </>
           ) : (
             <>
-              Iniciar Simulação
+              {t('sim.briefing.startButton')}
               <ChevronRight className="h-4 w-4" />
             </>
           )}

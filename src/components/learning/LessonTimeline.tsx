@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { FileText, Video, Image, Zap, Check, Circle, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { LessonStepDTO, StepType } from '@/types/api';
@@ -13,13 +14,6 @@ const STEP_ICONS: Record<
   ACTIVITY: Zap
 };
 
-const STEP_LABELS: Record<StepType, string> = {
-  CONTENT_TEXT: 'Texto',
-  CONTENT_VIDEO: 'Vídeo',
-  CONTENT_IMAGE: 'Imagem',
-  ACTIVITY: 'Atividade'
-};
-
 interface LessonTimelineProps {
   steps: LessonStepDTO[];
   currentIndex: number;
@@ -31,8 +25,17 @@ export function LessonTimeline({
   currentIndex,
   onSelect
 }: LessonTimelineProps) {
+  const { t } = useTranslation();
+
+  const STEP_LABELS: Record<StepType, string> = {
+    CONTENT_TEXT: t('learning.timeline.stepTypes.text'),
+    CONTENT_VIDEO: t('learning.timeline.stepTypes.video'),
+    CONTENT_IMAGE: t('learning.timeline.stepTypes.image'),
+    ACTIVITY: t('learning.timeline.stepTypes.activity')
+  };
+
   return (
-    <nav className="space-y-1" aria-label="Etapas da aula">
+    <nav className="space-y-1" aria-label={t('learning.timeline.ariaLabel')}>
       {steps.map((step, i) => {
         const Icon = STEP_ICONS[step.type] ?? Circle;
         const isCurrent = i === currentIndex;
@@ -77,8 +80,9 @@ export function LessonTimeline({
               <p className="truncate">{step.title}</p>
               <p className="text-xs text-muted-foreground">
                 {STEP_LABELS[step.type]}
-                {step.estimatedMinutes && ` · ${step.estimatedMinutes} min`}
-                {step.isOptional && ' · Opcional'}
+                {step.estimatedMinutes &&
+                  ` · ${t('learning.timeline.minutes', { n: step.estimatedMinutes })}`}
+                {step.isOptional && ` · ${t('learning.timeline.optional')}`}
               </p>
             </div>
 

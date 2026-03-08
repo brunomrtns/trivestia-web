@@ -3,6 +3,7 @@ import { BookOpen, Trophy, ArrowRight, Layers } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { tenantPath } from '@/lib/tenant';
 import type { DashboardContinueDTO } from '@/types/api';
+import { useTranslation } from 'react-i18next';
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
@@ -22,7 +23,12 @@ interface ContinueCardProps {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function ContinueCard({ data, slug, hasAnyCompleted }: ContinueCardProps) {
+export function ContinueCard({
+  data,
+  slug,
+  hasAnyCompleted
+}: ContinueCardProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { hasContinuation, course, module, lesson, next } = data;
 
@@ -38,7 +44,10 @@ export function ContinueCard({ data, slug, hasAnyCompleted }: ContinueCardProps)
         );
       } else if (next.kind === 'ACTIVITY' && next.activityId) {
         navigate(
-          tenantPath(slug, `/app/lessons/${lesson.id}/activities/${next.activityId}`)
+          tenantPath(
+            slug,
+            `/app/lessons/${lesson.id}/activities/${next.activityId}`
+          )
         );
       }
     };
@@ -56,7 +65,7 @@ export function ContinueCard({ data, slug, hasAnyCompleted }: ContinueCardProps)
             </div>
             <div className="min-w-0">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-0.5">
-                Continue de onde parou
+                {t('app.dashboard.continueCard.label')}
               </p>
               <p className="font-bold text-lg leading-snug truncate">
                 {lesson.title}
@@ -82,7 +91,7 @@ export function ContinueCard({ data, slug, hasAnyCompleted }: ContinueCardProps)
             onClick={handleContinue}
             className="shrink-0 flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 active:scale-95 transition-all"
           >
-            Continuar <ArrowRight className="h-4 w-4" />
+            {t('common.actions.continue')} <ArrowRight className="h-4 w-4" />
           </button>
         </div>
       </motion.div>
@@ -101,9 +110,11 @@ export function ContinueCard({ data, slug, hasAnyCompleted }: ContinueCardProps)
           <Trophy className="h-6 w-6 text-yellow-500" />
         </div>
         <div>
-          <p className="font-semibold">Parabéns! Você completou tudo.</p>
+          <p className="font-semibold">
+            {t('app.dashboard.continueCard.allDone')}
+          </p>
           <p className="text-sm text-muted-foreground">
-            Continue explorando os cursos disponíveis.
+            {t('app.dashboard.continueCard.allDoneSubtitle')}
           </p>
         </div>
       </motion.div>
@@ -122,9 +133,11 @@ export function ContinueCard({ data, slug, hasAnyCompleted }: ContinueCardProps)
           <BookOpen className="h-6 w-6 text-primary" />
         </div>
         <div>
-          <p className="font-semibold">Comece seu primeiro curso</p>
+          <p className="font-semibold">
+            {t('app.dashboard.continueCard.startFirst')}
+          </p>
           <p className="text-sm text-muted-foreground">
-            Explore os cursos disponíveis e dê o primeiro passo.
+            {t('app.dashboard.continueCard.startFirstSubtitle')}
           </p>
         </div>
       </div>
@@ -132,7 +145,8 @@ export function ContinueCard({ data, slug, hasAnyCompleted }: ContinueCardProps)
         to={tenantPath(slug, '/app/courses')}
         className="shrink-0 flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 active:scale-95 transition-all"
       >
-        Ver cursos <ArrowRight className="h-4 w-4" />
+        {t('app.dashboard.continueCard.viewCourses')}{' '}
+        <ArrowRight className="h-4 w-4" />
       </Link>
     </motion.div>
   );

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -8,30 +9,37 @@ import { BookOpen, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { platformEndpoints } from '@/services/endpoints/platform.endpoints';
 import { usePlatformAuthStore } from '@/features/platform/platform.store';
 
-// ─── Schema ───────────────────────────────────────────────────────────────────
+// ─── Schema (definido dentro do componente para usar t()) ──────────────────────────────────
 
-const schema = z
-  .object({
-    name: z.string().min(2, 'Nome deve ter no minimo 2 caracteres'),
-    email: z.string().email('E-mail invalido'),
-    password: z
-      .string()
-      .min(8, 'Minimo de 8 caracteres')
-      .regex(/[A-Z]/, 'Precisa de pelo menos uma letra maiuscula')
-      .regex(/[0-9]/, 'Precisa de pelo menos um numero'),
-    confirmPassword: z.string()
-  })
-  .refine((d) => d.password === d.confirmPassword, {
-    path: ['confirmPassword'],
-    message: 'As senhas nao conferem'
-  });
-
-type FormData = z.infer<typeof schema>;
+type FormData = {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
 
 // ─── Componente ───────────────────────────────────────────────────────────────
 
 export default function ProfessorRegisterPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const schema = z
+    .object({
+      name: z.string().min(2, t('common.validation.nameMinLength')),
+      email: z.string().email(t('common.validation.emailInvalid')),
+      password: z
+        .string()
+        .min(8, t('common.validation.passwordMinLength'))
+        .regex(/[A-Z]/, t('common.validation.passwordUppercase'))
+        .regex(/[0-9]/, t('common.validation.passwordNumber')),
+      confirmPassword: z.string()
+    })
+    .refine((d) => d.password === d.confirmPassword, {
+      path: ['confirmPassword'],
+      message: t('common.validation.passwordMatch')
+    });
+
   const setAuth = usePlatformAuthStore((s) => s.setAuth);
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -51,12 +59,12 @@ export default function ProfessorRegisterPage() {
         password: data.password
       });
       setAuth(res.user, res.token, res.refreshToken);
-      toast.success('Conta criada com sucesso!');
+      toast.success(t('platform.professorRegister.toast.success'));
       navigate('/workspace', { replace: true });
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })
         ?.response?.data?.message;
-      toast.error(msg ?? 'Erro ao criar conta. Tente novamente.');
+      toast.error(msg ?? t('platform.professorRegister.toast.error'));
     } finally {
       setLoading(false);
     }
@@ -71,11 +79,10 @@ export default function ProfessorRegisterPage() {
         </Link>
 
         <h1 className="mb-2 text-3xl font-extrabold">
-          Criar conta de professor
+          {t('platform.professorRegister.title')}
         </h1>
         <p className="mb-8 text-muted-foreground">
-          Crie sua conta para comecar a publicar cursos. Voce podera criar sua
-          escola no passo seguinte.
+          {t('platform.professorRegister.subtitle')}
         </p>
 
         <form
@@ -85,14 +92,14 @@ export default function ProfessorRegisterPage() {
         >
           <div>
             <label className="mb-1.5 block text-sm font-medium" htmlFor="name">
-              Nome completo
+              {t('common.fields.fullName')}
             </label>
             <input
               id="name"
               type="text"
               autoComplete="name"
               autoFocus
-              placeholder="Seu nome"
+              placeholder={t('common.placeholders.name')}
               className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm outline-none ring-offset-background transition focus:ring-2 focus:ring-ring focus:ring-offset-2"
               {...register('name')}
             />
@@ -105,13 +112,13 @@ export default function ProfessorRegisterPage() {
 
           <div>
             <label className="mb-1.5 block text-sm font-medium" htmlFor="email">
-              E-mail
+              {t('common.fields.email')}
             </label>
             <input
               id="email"
               type="email"
               autoComplete="email"
-              placeholder="voce@email.com"
+              placeholder={t('common.placeholders.email')}
               className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm outline-none ring-offset-background transition focus:ring-2 focus:ring-ring focus:ring-offset-2"
               {...register('email')}
             />
@@ -127,14 +134,14 @@ export default function ProfessorRegisterPage() {
               className="mb-1.5 block text-sm font-medium"
               htmlFor="password"
             >
-              Senha
+              {t('common.fields.password')}
             </label>
             <div className="relative">
               <input
                 id="password"
                 type={showPwd ? 'text' : 'password'}
                 autoComplete="new-password"
-                placeholder="Minimo 8 caracteres"
+                placeholder={t('common.placeholders.passwordMin')}
                 className="w-full rounded-lg border bg-background px-4 py-2.5 pr-10 text-sm outline-none ring-offset-background transition focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 {...register('password')}
               />
@@ -162,13 +169,13 @@ export default function ProfessorRegisterPage() {
               className="mb-1.5 block text-sm font-medium"
               htmlFor="confirmPassword"
             >
-              Confirmar senha
+              {t('common.fields.confirmPassword')}
             </label>
             <input
               id="confirmPassword"
               type={showPwd ? 'text' : 'password'}
               autoComplete="new-password"
-              placeholder="Repita a senha"
+              placeholder={t('common.placeholders.repeatPassword')}
               className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm outline-none ring-offset-background transition focus:ring-2 focus:ring-ring focus:ring-offset-2"
               {...register('confirmPassword')}
             />
@@ -185,17 +192,17 @@ export default function ProfessorRegisterPage() {
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow transition hover:opacity-90 disabled:opacity-60"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-            Criar conta
+            {t('platform.professorRegister.submitButton')}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          Ja tem conta?{' '}
+          {t('platform.professorRegister.hasAccount')}{' '}
           <Link
             to="/login"
             className="font-medium text-primary hover:underline"
           >
-            Entrar
+            {t('common.actions.login')}
           </Link>
         </p>
       </div>

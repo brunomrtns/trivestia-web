@@ -28,28 +28,4 @@ export function getProgressColor(status: string): string {
   }
 }
 
-export function getProgressLabel(status: string): string {
-  switch (status) {
-    case 'COMPLETED':
-      return 'Concluído';
-    case 'IN_PROGRESS':
-      return 'Em andamento';
-    default:
-      return 'Não iniciado';
-  }
-}
 
-export function getActivityTypeLabel(type: string): string {
-  const labels: Record<string, string> = {
-    MULTIPLE_CHOICE: 'Múltipla Escolha',
-    MULTIPLE_SELECT: 'Múltipla Seleção',
-    TRUE_FALSE: 'Verdadeiro ou Falso',
-    ORDERING: 'Ordenação',
-    TEXT_INPUT: 'Resposta Aberta',
-    SCENARIO: 'Cenário',
-    CHART_MARKUP: 'Marcação de Gráfico',
-    RISK_CALCULATOR: 'Calculadora de Risco',
-    SIM_TRADING_CHALLENGE: 'Simulação de Trading'
-  };
-  return labels[type] ?? type;
-}

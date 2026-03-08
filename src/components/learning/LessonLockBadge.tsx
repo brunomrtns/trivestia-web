@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Clock, Lock, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import type { LessonUnlockDTO } from '@/types/api';
 
@@ -17,6 +18,7 @@ function formatDate(iso: string) {
 }
 
 export function LessonLockBadge({ unlock, className = '' }: Props) {
+  const { t } = useTranslation();
   if (unlock.unlocked) return null;
 
   switch (unlock.reason) {
@@ -24,10 +26,10 @@ export function LessonLockBadge({ unlock, className = '' }: Props) {
       return (
         <span
           className={`inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive ${className}`}
-          title="O prazo deste curso foi encerrado."
+          title={t('learning.lessonLock.courseExpired')}
         >
           <AlertTriangle className="h-3 w-3" />
-          Prazo encerrado
+          {t('learning.lessonLock.courseExpiredBadge')}
         </span>
       );
 
@@ -36,25 +38,45 @@ export function LessonLockBadge({ unlock, className = '' }: Props) {
       return (
         <span
           className={`inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400 ${className}`}
-          title={availableFrom ? `Disponível em ${formatDate(availableFrom)}` : 'Ainda não disponível'}
+          title={
+            availableFrom
+              ? t('learning.lessonLock.availableFrom', {
+                  date: formatDate(availableFrom)
+                })
+              : t('learning.lessonLock.notAvailableYet')
+          }
         >
           <Clock className="h-3 w-3" />
           {availableFrom
-            ? `Disponível em ${formatDate(availableFrom)}`
-            : 'Ainda não disponível'}
+            ? t('learning.lessonLock.availableFrom', {
+                date: formatDate(availableFrom)
+              })
+            : t('learning.lessonLock.notAvailableYet')}
         </span>
       );
     }
 
     case 'PREREQUISITE_NOT_MET': {
-      const title = unlock.detail?.prerequisiteLessonTitle as string | undefined;
+      const title = unlock.detail?.prerequisiteLessonTitle as
+        | string
+        | undefined;
       return (
         <span
           className={`inline-flex items-center gap-1 rounded-full bg-orange-500/10 px-2 py-0.5 text-xs font-medium text-orange-600 dark:text-orange-400 ${className}`}
-          title={title ? `Complete "${title}" primeiro` : 'Complete o pré-requisito primeiro'}
+          title={
+            title
+              ? t('learning.lessonLock.prerequisiteNotMet', {
+                  lessonTitle: title
+                })
+              : t('learning.lessonLock.prerequisiteBadge')
+          }
         >
           <CheckCircle2 className="h-3 w-3" />
-          {title ? `Complete "${title}"` : 'Pré-requisito pendente'}
+          {title
+            ? t('learning.lessonLock.prerequisiteNotMet', {
+                lessonTitle: title
+              })
+            : t('learning.lessonLock.prerequisiteBadge')}
         </span>
       );
     }
@@ -63,10 +85,10 @@ export function LessonLockBadge({ unlock, className = '' }: Props) {
       return (
         <span
           className={`inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground ${className}`}
-          title="Complete a aula anterior para continuar."
+          title={t('learning.lessonLock.previousIncomplete')}
         >
           <Lock className="h-3 w-3" />
-          Complete a aula anterior
+          {t('learning.lessonLock.previousIncompleteBadge')}
         </span>
       );
 

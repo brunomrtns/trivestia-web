@@ -1,10 +1,12 @@
 import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { BookOpen, LayoutDashboard, LogOut, School } from 'lucide-react';
 import { usePlatformAuthStore } from '@/features/platform/platform.store';
 
 export function WorkspaceLayout() {
   const { user, logout } = usePlatformAuthStore();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleLogout = () => {
     logout();
@@ -32,14 +34,14 @@ export function WorkspaceLayout() {
               className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               <LayoutDashboard className="h-4 w-4" />
-              Painel
+              {t('workspace.layout.nav.panel')}
             </Link>
             <Link
               to="/workspace/school"
               className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               <School className="h-4 w-4" />
-              Escola
+              {t('workspace.layout.nav.school')}
             </Link>
 
             <div className="ml-2 flex items-center gap-3 border-l pl-4">
@@ -49,8 +51,8 @@ export function WorkspaceLayout() {
               <button
                 onClick={handleLogout}
                 className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                aria-label="Sair"
-                title="Sair"
+                aria-label={t('common.aria.logout')}
+                title={t('common.aria.logout')}
               >
                 <LogOut className="h-4 w-4" />
               </button>

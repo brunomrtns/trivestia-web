@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Save, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { superadminEndpoints } from '@/services/endpoints/superadmin.endpoints';
 import type { UpdateTenantSuperData } from '@/types/api';
 
@@ -10,6 +11,7 @@ export default function SuperTenantEditPage() {
   const { tenantId } = useParams<{ tenantId: string }>();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const { t } = useTranslation();
 
   const { data: tenant, isLoading } = useQuery({
     queryKey: ['super', 'tenants', tenantId],
@@ -34,12 +36,14 @@ export default function SuperTenantEditPage() {
   const updateMut = useMutation({
     mutationFn: () => superadminEndpoints.updateTenant(tenantId!, form),
     onSuccess: () => {
-      toast.success('Escola atualizada com sucesso!');
+      toast.success(t('super.tenantEdit.toast.updated'));
       qc.invalidateQueries({ queryKey: ['super', 'tenants'] });
       qc.invalidateQueries({ queryKey: ['super', 'stats'] });
     },
     onError: (err: any) => {
-      toast.error(err?.response?.data?.message || 'Erro ao atualizar');
+      toast.error(
+        err?.response?.data?.message || t('super.tenantEdit.toast.updateError')
+      );
     }
   });
 
@@ -53,7 +57,9 @@ export default function SuperTenantEditPage() {
   }
 
   if (!tenant) {
-    return <p className="text-muted-foreground">Tenant não encontrado.</p>;
+    return (
+      <p className="text-muted-foreground">{t('super.tenantEdit.notFound')}</p>
+    );
   }
 
   return (
@@ -66,7 +72,9 @@ export default function SuperTenantEditPage() {
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Editar Escola</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {t('super.tenantEdit.title')}
+          </h1>
           <p className="text-muted-foreground">
             {tenant.name} —{' '}
             <span className="font-mono text-xs">{tenant.slug}</span>
@@ -78,7 +86,9 @@ export default function SuperTenantEditPage() {
         {/* Form */}
         <div className="lg:col-span-2 space-y-4 rounded-lg border bg-card p-6">
           <div>
-            <label className="mb-1 block text-sm font-medium">Nome</label>
+            <label className="mb-1 block text-sm font-medium">
+              {t('super.tenantEdit.form.nameLabel')}
+            </label>
             <input
               className="w-full rounded-md border px-3 py-2 text-sm"
               value={form.name ?? ''}
@@ -94,7 +104,9 @@ export default function SuperTenantEditPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Bio</label>
+            <label className="mb-1 block text-sm font-medium">
+              {t('super.tenantEdit.form.bioLabel')}
+            </label>
             <textarea
               className="w-full rounded-md border px-3 py-2 text-sm"
               value={form.bio ?? ''}
@@ -105,7 +117,9 @@ export default function SuperTenantEditPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Logo URL</label>
+            <label className="mb-1 block text-sm font-medium">
+              {t('super.tenantEdit.form.logoLabel')}
+            </label>
             <input
               className="w-full rounded-md border px-3 py-2 text-sm"
               value={form.logoUrl ?? ''}
@@ -125,7 +139,7 @@ export default function SuperTenantEditPage() {
               }
             />
             <label htmlFor="enabled" className="text-sm font-medium">
-              Escola habilitada
+              {t('super.tenantEdit.form.enabledLabel')}
             </label>
           </div>
 
@@ -136,7 +150,9 @@ export default function SuperTenantEditPage() {
               className="flex items-center gap-2 rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700 disabled:opacity-50"
             >
               <Save className="h-4 w-4" />
-              {updateMut.isPending ? 'Salvando...' : 'Salvar'}
+              {updateMut.isPending
+                ? t('common.actions.saving')
+                : t('super.tenantEdit.saveButton')}
             </button>
             <a
               href={`/t/${tenant.slug}`}
@@ -144,7 +160,8 @@ export default function SuperTenantEditPage() {
               rel="noopener noreferrer"
               className="flex items-center gap-2 rounded-md border px-4 py-2 text-sm transition-colors hover:bg-accent"
             >
-              <ExternalLink className="h-4 w-4" /> Acessar Escola
+              <ExternalLink className="h-4 w-4" />{' '}
+              {t('super.tenantEdit.accessButton')}
             </a>
           </div>
         </div>
@@ -152,18 +169,26 @@ export default function SuperTenantEditPage() {
         {/* Info panel */}
         <div className="space-y-4">
           <div className="rounded-lg border bg-card p-4">
-            <h3 className="mb-3 font-medium">Estatísticas</h3>
+            <h3 className="mb-3 font-medium">
+              {t('super.tenantEdit.statsTitle')}
+            </h3>
             <dl className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <dt className="text-muted-foreground">Usuários</dt>
+                <dt className="text-muted-foreground">
+                  {t('super.tenantEdit.stats.users')}
+                </dt>
                 <dd className="font-medium">{tenant._count.users}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-muted-foreground">Cursos</dt>
+                <dt className="text-muted-foreground">
+                  {t('super.tenantEdit.stats.courses')}
+                </dt>
                 <dd className="font-medium">{tenant._count.courses}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-muted-foreground">Criado em</dt>
+                <dt className="text-muted-foreground">
+                  {t('super.tenantEdit.stats.createdAt')}
+                </dt>
                 <dd className="font-medium">
                   {new Date(tenant.createdAt).toLocaleDateString('pt-BR')}
                 </dd>
@@ -173,7 +198,9 @@ export default function SuperTenantEditPage() {
 
           {tenant.users.length > 0 && (
             <div className="rounded-lg border bg-card p-4">
-              <h3 className="mb-3 font-medium">Owners / Super Admins</h3>
+              <h3 className="mb-3 font-medium">
+                {t('super.tenantEdit.ownersTitle')}
+              </h3>
               <ul className="space-y-2">
                 {tenant.users.map((u) => (
                   <li

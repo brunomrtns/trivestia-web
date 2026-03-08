@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   createChart,
   ColorType,
@@ -21,6 +22,7 @@ interface CandlesChartProps {
 }
 
 export function CandlesChart({ candles, visibleCount }: CandlesChartProps) {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
@@ -170,8 +172,8 @@ export function CandlesChart({ candles, visibleCount }: CandlesChartProps) {
                 onClick={resetAutoFollow}
                 aria-label={
                   autoFollowEnabled
-                    ? 'Acompanhamento automático ativo'
-                    : 'Reativar acompanhamento automático'
+                    ? t('sim.candles.autoFollow.active')
+                    : t('sim.candles.autoFollow.reactivate')
                 }
                 className={cn(
                   'flex h-7 w-7 items-center justify-center rounded-md border transition-colors',
@@ -197,8 +199,8 @@ export function CandlesChart({ candles, visibleCount }: CandlesChartProps) {
                 )}
               >
                 {autoFollowEnabled
-                  ? 'Acompanhamento automático ativo'
-                  : 'Reativar acompanhamento automático'}
+                  ? t('sim.candles.autoFollow.active')
+                  : t('sim.candles.autoFollow.reactivate')}
                 <TooltipPrimitive.Arrow className="fill-popover" />
               </TooltipPrimitive.Content>
             </TooltipPrimitive.Portal>

@@ -10,8 +10,10 @@ import {
 } from 'lucide-react';
 import { simulationEndpoints } from '@/services/endpoints/simulation.endpoints';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 export default function PracticeHistoryPage() {
+  const { t } = useTranslation();
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const slug = tenantSlug ?? '';
   const [page, setPage] = useState(1);
@@ -30,9 +32,9 @@ export default function PracticeHistoryPage() {
           className="flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition hover:bg-accent"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
-          Laboratório
+          {t('app.practiceHistory.backToLab')}
         </Link>
-        <h1 className="text-xl font-bold">Histórico de Prática</h1>
+        <h1 className="text-xl font-bold">{t('app.practiceHistory.title')}</h1>
       </div>
 
       {/* Table */}
@@ -42,12 +44,12 @@ export default function PracticeHistoryPage() {
         </div>
       ) : !data || data.sessions.length === 0 ? (
         <div className="rounded-xl border bg-card p-8 text-center text-sm text-muted-foreground">
-          Nenhuma sessão de prática ainda.{' '}
+          {t('app.practiceHistory.empty')}{' '}
           <Link
             to={`/t/${slug}/app/lab`}
             className="text-primary hover:underline"
           >
-            Começar agora
+            {t('common.actions.startNow')}
           </Link>
         </div>
       ) : (
@@ -116,7 +118,7 @@ export default function PracticeHistoryPage() {
                       </div>
                     ) : (
                       <span className="text-xs text-muted-foreground">
-                        Sessão sem resultado
+                        {t('app.practiceHistory.noResult')}
                       </span>
                     )}
                     <div className="text-xs text-muted-foreground mt-0.5">
@@ -143,7 +145,7 @@ export default function PracticeHistoryPage() {
                 className="flex items-center gap-1 rounded-lg border px-3 py-1.5 font-medium transition hover:bg-accent disabled:opacity-40"
               >
                 <ChevronLeft className="h-4 w-4" />
-                Anterior
+                {t('common.pagination.previous')}
               </button>
               <span className="text-muted-foreground">
                 {page} / {data.pagination.pages}
@@ -155,7 +157,7 @@ export default function PracticeHistoryPage() {
                 disabled={page === data.pagination.pages}
                 className="flex items-center gap-1 rounded-lg border px-3 py-1.5 font-medium transition hover:bg-accent disabled:opacity-40"
               >
-                Próximo
+                {t('common.pagination.next')}
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>

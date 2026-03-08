@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Portal } from '@/components/ui/Portal';
 import {
   X,
@@ -26,8 +27,7 @@ interface HelpDrawerProps {
 // ─── Glossary ─────────────────────────────────────────────────────────────────
 
 interface GlossaryEntry {
-  term: string;
-  description: string;
+  key: string;
   icon?: React.ReactNode;
   category: 'ordens' | 'conceitos' | 'indicadores';
 }
@@ -35,138 +35,98 @@ interface GlossaryEntry {
 const GLOSSARY: GlossaryEntry[] = [
   // Ordens
   {
-    term: 'BUY (Compra)',
-    description:
-      'Ordem de compra. Você lucra quando o preço sobe após a compra. Abre uma posição LONG.',
+    key: 'buy',
     icon: <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />,
     category: 'ordens'
   },
   {
-    term: 'SELL (Venda)',
-    description:
-      'Ordem de venda. Permite "vender a descoberto" (short) — você lucra quando o preço cai. Abre uma posição SHORT.',
+    key: 'sell',
     icon: <TrendingDown className="h-3.5 w-3.5 text-red-400" />,
     category: 'ordens'
   },
   {
-    term: 'MARKET (A Mercado)',
-    description:
-      'Executa imediatamente ao preço atual do mercado. Mais rápida, mas pode ter slippage.',
+    key: 'market',
     icon: <DollarSign className="h-3.5 w-3.5 text-primary" />,
     category: 'ordens'
   },
   {
-    term: 'LIMIT (Limitada)',
-    description:
-      'Executa somente se o preço atingir o valor definido. BUY LIMIT: executa abaixo do preço definido. SELL LIMIT: acima.',
+    key: 'limit',
     icon: <ShieldCheck className="h-3.5 w-3.5 text-blue-400" />,
     category: 'ordens'
   },
   {
-    term: 'STOP',
-    description:
-      'Executa quando o preço atinge o trigger. BUY STOP: compra acima do atual (rompimento). SELL STOP: vende abaixo.',
+    key: 'stop',
     icon: <AlertTriangle className="h-3.5 w-3.5 text-yellow-400" />,
     category: 'ordens'
   },
   {
-    term: 'Stop-Loss (SL)',
-    description:
-      'Nível de preço que fecha sua posição automaticamente para limitar perdas. Fundamental para gestão de risco.',
+    key: 'sl',
     icon: <ShieldCheck className="h-3.5 w-3.5 text-red-400" />,
     category: 'ordens'
   },
   {
-    term: 'Take-Profit (TP)',
-    description:
-      'Nível de preço que fecha sua posição automaticamente para garantir lucro. Ajuda a realizar ganhos.',
+    key: 'tp',
     icon: <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />,
     category: 'ordens'
   },
-
   // Conceitos
   {
-    term: 'PnL (Profit & Loss)',
-    description:
-      'Lucro ou prejuízo da sua operação. PnL positivo = lucro. Negativo = prejuízo. Mostrado em $ e %.',
+    key: 'pnl',
     icon: <DollarSign className="h-3.5 w-3.5 text-foreground" />,
     category: 'conceitos'
   },
   {
-    term: 'Equity (Patrimônio)',
-    description:
-      'Seu saldo + PnL das posições abertas. Reflete o valor real da sua conta em tempo real.',
+    key: 'equity',
     icon: <BarChart3 className="h-3.5 w-3.5 text-primary" />,
     category: 'conceitos'
   },
   {
-    term: 'Posição',
-    description:
-      'Quando você tem uma operação aberta. LONG = comprado (aposta na alta). SHORT = vendido (aposta na queda). FLAT = sem posição.',
+    key: 'position',
     icon: <BarChart3 className="h-3.5 w-3.5 text-foreground" />,
     category: 'conceitos'
   },
   {
-    term: 'Fee / Taxa',
-    description:
-      'Custo por operação cobrado em cada execução (fill). Medido em bps (basis points). 1 bps = 0.01%.',
+    key: 'fee',
     icon: <DollarSign className="h-3.5 w-3.5 text-orange-400" />,
     category: 'conceitos'
   },
   {
-    term: 'Slippage',
-    description:
-      'Diferença entre o preço esperado e o preço real de execução. Simulado automaticamente pelo engine.',
+    key: 'slippage',
     icon: <AlertTriangle className="h-3.5 w-3.5 text-yellow-400" />,
     category: 'conceitos'
   },
   {
-    term: 'Spread',
-    description:
-      'Diferença entre o preço de compra (ask) e venda (bid). Custo implícito de operar.',
+    key: 'spread',
     icon: <BarChart3 className="h-3.5 w-3.5 text-muted-foreground" />,
     category: 'conceitos'
   },
-
   // Indicadores
   {
-    term: 'Drawdown',
-    description:
-      'Queda do patrimônio em relação ao pico máximo. Mede o pior momento da sua operação. Menor = melhor gestão de risco.',
+    key: 'drawdown',
     icon: <AlertTriangle className="h-3.5 w-3.5 text-red-400" />,
     category: 'indicadores'
   },
   {
-    term: 'Win Rate',
-    description:
-      'Percentual de trades vencedores. 60%+ é considerado bom. Porém, depende também da relação risco/retorno.',
+    key: 'winrate',
     icon: <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />,
     category: 'indicadores'
   },
   {
-    term: 'Sharpe Ratio',
-    description:
-      'Mede o retorno ajustado ao risco. >1 = bom, >2 = excelente. Penaliza oscilações grandes nos resultados.',
+    key: 'sharpe',
     icon: <BarChart3 className="h-3.5 w-3.5 text-blue-400" />,
     category: 'indicadores'
   },
   {
-    term: 'Profit Factor',
-    description:
-      'Soma dos ganhos ÷ soma das perdas. >1 = lucrativo. >2 = estratégia consistente.',
+    key: 'profitfactor',
     icon: <DollarSign className="h-3.5 w-3.5 text-emerald-400" />,
     category: 'indicadores'
   }
 ];
 
 const CATEGORIES = [
-  { key: 'ordens' as const, label: 'Tipos de Ordem', icon: BookOpen },
-  { key: 'conceitos' as const, label: 'Conceitos', icon: HelpCircle },
-  {
-    key: 'indicadores' as const,
-    label: 'Indicadores',
-    icon: BarChart3
-  }
+  { key: 'ordens' as const, i18nKey: 'orders', icon: BookOpen },
+  { key: 'conceitos' as const, i18nKey: 'concepts', icon: HelpCircle },
+  { key: 'indicadores' as const, i18nKey: 'indicators', icon: BarChart3 }
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -176,6 +136,7 @@ export function HelpDrawer({
   onClose,
   onRestartTutorial
 }: HelpDrawerProps) {
+  const { t } = useTranslation();
   const [expandedCategory, setExpandedCategory] = useState<string | null>(
     'ordens'
   );
@@ -196,7 +157,7 @@ export function HelpDrawer({
         <div className="flex items-center justify-between border-b px-4 py-3">
           <div className="flex items-center gap-2">
             <HelpCircle className="h-5 w-5 text-primary" />
-            <h2 className="text-base font-bold">Central de Ajuda</h2>
+            <h2 className="text-base font-bold">{t('sim.help.title')}</h2>
           </div>
           <button
             onClick={onClose}
@@ -211,40 +172,22 @@ export function HelpDrawer({
           {/* Quick tips */}
           <div className="border-b px-4 py-4">
             <h3 className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Dicas Rápidas
+              {t('sim.help.quickTipsTitle')}
             </h3>
             <div className="space-y-2 text-sm">
-              <QuickTip
-                emoji=""
-                text="Use Play/Pause para controlar o avanço das velas"
-              />
-              <QuickTip
-                emoji=""
-                text="O gráfico mostra candles — cada vela = 1 período"
-              />
-              <QuickTip
-                emoji=""
-                text="Comece com ordens MARKET pequenas para entender o fluxo"
-              />
-              <QuickTip
-                emoji=""
-                text="Sempre defina Stop-Loss para limitar perdas"
-              />
-              <QuickTip
-                emoji=""
-                text="Acompanhe seu Equity e Drawdown em tempo real"
-              />
-              <QuickTip
-                emoji=""
-                text="Clique 'Enviar Resultado' quando as velas acabarem"
-              />
+              <QuickTip emoji="" text={t('sim.help.quickTips.tip1')} />
+              <QuickTip emoji="" text={t('sim.help.quickTips.tip2')} />
+              <QuickTip emoji="" text={t('sim.help.quickTips.tip3')} />
+              <QuickTip emoji="" text={t('sim.help.quickTips.tip4')} />
+              <QuickTip emoji="" text={t('sim.help.quickTips.tip5')} />
+              <QuickTip emoji="" text={t('sim.help.quickTips.tip6')} />
             </div>
           </div>
 
           {/* Glossary accordion */}
           <div className="px-4 py-4">
             <h3 className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Glossário
+              {t('sim.help.glossaryTitle')}
             </h3>
 
             {CATEGORIES.map((cat) => {
@@ -260,7 +203,9 @@ export function HelpDrawer({
                     className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition hover:bg-accent"
                   >
                     <cat.icon className="h-4 w-4 text-muted-foreground" />
-                    <span className="flex-1 text-left">{cat.label}</span>
+                    <span className="flex-1 text-left">
+                      {t(`sim.help.categories.${cat.i18nKey}`)}
+                    </span>
                     <span className="text-xs text-muted-foreground">
                       {items.length}
                     </span>
@@ -276,17 +221,17 @@ export function HelpDrawer({
                     <div className="mt-1 space-y-1.5 pl-2">
                       {items.map((entry) => (
                         <div
-                          key={entry.term}
+                          key={entry.key}
                           className="rounded-lg border bg-card p-3"
                         >
                           <div className="flex items-center gap-2">
                             {entry.icon}
                             <span className="text-sm font-semibold">
-                              {entry.term}
+                              {t(`sim.help.glossary.${entry.key}.term`)}
                             </span>
                           </div>
                           <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
-                            {entry.description}
+                            {t(`sim.help.glossary.${entry.key}.description`)}
                           </p>
                         </div>
                       ))}
@@ -309,7 +254,7 @@ export function HelpDrawer({
               className="flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition hover:bg-accent"
             >
               <RotateCcw className="h-3.5 w-3.5" />
-              Reiniciar Tutorial
+              {t('sim.help.restartTutorialButton')}
             </button>
           )}
         </div>

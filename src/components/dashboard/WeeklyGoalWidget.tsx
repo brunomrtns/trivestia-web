@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Settings, Flame, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 import { GoalConfigModal } from './GoalConfigModal';
 import type { DashboardGoalsDTO } from '@/types/api';
 
@@ -62,6 +63,7 @@ const DAY_LABELS = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'];
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function WeeklyGoalWidget({ data, slug }: WeeklyGoalWidgetProps) {
+  const { t } = useTranslation();
   const {
     weeklyTarget,
     weeklyCompleted,
@@ -81,16 +83,19 @@ export function WeeklyGoalWidget({ data, slug }: WeeklyGoalWidgetProps) {
         <div className="flex items-start justify-between mb-4">
           <div>
             <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Meta semanal
+              {t('app.dashboard.weeklyGoal.title')}
             </h2>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              {weeklyCompleted} de {weeklyTarget} atividades
+              {t('app.dashboard.weeklyGoal.progress', {
+                weeklyCompleted,
+                weeklyTarget
+              })}
             </p>
           </div>
           <button
             onClick={() => setModalOpen(true)}
             className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            aria-label="Configurar meta"
+            aria-label={t('app.dashboard.weeklyGoal.aria.configure')}
           >
             <Settings className="h-4 w-4" />
           </button>
@@ -111,7 +116,7 @@ export function WeeklyGoalWidget({ data, slug }: WeeklyGoalWidgetProps) {
               </span>
               {goalReached && (
                 <span className="text-[10px] font-bold text-green-500 mt-0.5 uppercase tracking-wide">
-                  Meta!
+                  {t('app.dashboard.weeklyGoal.achieved')}
                 </span>
               )}
             </div>
@@ -134,7 +139,9 @@ export function WeeklyGoalWidget({ data, slug }: WeeklyGoalWidgetProps) {
                     {currentStreak}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {currentStreak === 1 ? 'dia seguido' : 'dias seguidos'}
+                    {t('app.dashboard.weeklyGoal.streakDay', {
+                      count: currentStreak
+                    })}
                   </p>
                 </div>
               </div>
@@ -146,7 +153,9 @@ export function WeeklyGoalWidget({ data, slug }: WeeklyGoalWidgetProps) {
                     <p className="text-sm font-bold leading-none">
                       {longestStreak}
                     </p>
-                    <p className="text-xs">recorde</p>
+                    <p className="text-xs">
+                      {t('app.dashboard.weeklyGoal.record')}
+                    </p>
                   </div>
                 </div>
               )}
@@ -165,7 +174,10 @@ export function WeeklyGoalWidget({ data, slug }: WeeklyGoalWidgetProps) {
                       {DAY_LABELS[i]}
                     </span>
                     <div
-                      title={`${day.date}: ${day.count} atividade(s)`}
+                      title={t('app.dashboard.weeklyGoal.activityTooltip', {
+                        date: day.date,
+                        count: day.count
+                      })}
                       className={cn(
                         'h-6 w-6 rounded-md transition-colors',
                         day.hit ? 'bg-primary' : 'bg-muted',

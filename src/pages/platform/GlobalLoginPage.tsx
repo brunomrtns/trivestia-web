@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -11,18 +12,10 @@ import { usePlatformAuthStore } from '@/features/platform/platform.store';
 import { useAuthStore } from '@/features/auth/auth.store';
 import type { ResolveEmailResponse } from '@/types/api';
 
-// ─── Schemas ─────────────────────────────────────────────────────────────────
+// ─── Schemas (definidos dentro do componente para usar t()) ─────────────────
 
-const emailSchema = z.object({
-  email: z.string().email('E-mail inválido')
-});
-
-const passwordSchema = z.object({
-  password: z.string().min(1, 'Senha obrigatória')
-});
-
-type EmailForm = z.infer<typeof emailSchema>;
-type PasswordForm = z.infer<typeof passwordSchema>;
+type EmailForm = { email: string };
+type PasswordForm = { password: string };
 
 // ─── Tipos internos ───────────────────────────────────────────────────────────
 
@@ -36,6 +29,16 @@ type LoginContext =
 
 export default function GlobalLoginPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const emailSchema = z.object({
+    email: z.string().email(t('common.validation.emailInvalid'))
+  });
+
+  const passwordSchema = z.object({
+    password: z.string().min(1, t('common.validation.passwordRequired'))
+  });
+
   const platformSetAuth = usePlatformAuthStore((s) => s.setAuth);
   const tenantSetAuth = useAuthStore((s) => s.setAuth);
 
@@ -96,7 +99,7 @@ export default function GlobalLoginPage() {
       // Múltiplas escolas — mostra CHOICE para escolher qual
       setPhase('CHOICE');
     } catch {
-      toast.error('Erro ao verificar e-mail. Tente novamente.');
+      toast.error(t('platform.login.toast.resolveError'));
     } finally {
       setResolving(false);
     }
@@ -121,7 +124,9 @@ export default function GlobalLoginPage() {
           password: data.password
         });
         platformSetAuth(res.user, res.token, res.refreshToken);
-        toast.success(`Bem-vindo, ${res.user.name}!`);
+        toast.success(
+          t('platform.login.toast.success', { name: res.user.name })
+        );
         navigate('/workspace', { replace: true });
       } else {
         const res = await authEndpoints.login(loginCtx.slug, {
@@ -129,14 +134,16 @@ export default function GlobalLoginPage() {
           password: data.password
         });
         tenantSetAuth(res.user, res.token, res.refreshToken, loginCtx.slug);
-        toast.success(`Bem-vindo, ${res.user.name}!`);
+        toast.success(
+          t('platform.login.toast.success', { name: res.user.name })
+        );
         navigate(`/t/${loginCtx.slug}/app/dashboard`, { replace: true });
       }
     } catch {
       toast.error(
         loginCtx.type === 'tenant'
-          ? 'Conta nao existe nesta escola ou senha incorreta.'
-          : 'Credenciais invalidas.'
+          ? t('platform.login.toast.tenantLoginError')
+          : t('platform.login.toast.platformLoginError')
       );
     } finally {
       setLogging(false);
@@ -172,8 +179,7 @@ export default function GlobalLoginPage() {
     resolveResult &&
     !resolveResult.platformAccount &&
     resolveResult.tenants.length === 0;
-  const isMultiTenantChoice =
-    resolveResult && resolveResult.tenants.length > 1;
+  const isMultiTenantChoice = resolveResult && resolveResult.tenants.length > 1;
 
   // ─── Render ────────────────────────────────────────────────────────────────
 
@@ -188,9 +194,11 @@ export default function GlobalLoginPage() {
         {/* ── Phase EMAIL ── */}
         {phase === 'EMAIL' && (
           <>
-            <h1 className="mb-2 text-3xl font-extrabold">Entrar</h1>
+            <h1 className="mb-2 text-3xl font-extrabold">
+              {t('platform.login.email.title')}
+            </h1>
             <p className="mb-8 text-muted-foreground">
-              Informe seu e-mail para continuar.
+              {t('platform.login.email.subtitle')}
             </p>
 
             <form
@@ -203,14 +211,14 @@ export default function GlobalLoginPage() {
                   className="mb-1.5 block text-sm font-medium"
                   htmlFor="email"
                 >
-                  E-mail
+                  {t('common.fields.email')}
                 </label>
                 <input
                   id="email"
                   type="email"
                   autoComplete="email"
                   autoFocus
-                  placeholder="voce@email.com"
+                  placeholder={t('common.placeholders.email')}
                   className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm outline-none ring-offset-background transition focus:ring-2 focus:ring-ring focus:ring-offset-2"
                   {...regEmail('email')}
                 />
@@ -227,7 +235,7 @@ export default function GlobalLoginPage() {
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow transition hover:opacity-90 disabled:opacity-60"
               >
                 {resolving && <Loader2 className="h-4 w-4 animate-spin" />}
-                Continuar
+                {t('platform.login.email.continueButton')}
               </button>
             </form>
           </>
@@ -241,7 +249,7 @@ export default function GlobalLoginPage() {
               className="mb-6 flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               <ArrowLeft className="h-4 w-4" />
-              Trocar e-mail
+              {t('platform.login.choice.changeEmail')}
             </button>
 
             <p className="mb-6 rounded-lg border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
@@ -252,29 +260,32 @@ export default function GlobalLoginPage() {
             {isNotFound && (
               <>
                 <h1 className="mb-2 text-2xl font-extrabold">
-                  Nenhuma conta encontrada
+                  {t('platform.login.choice.notFound.title')}
                 </h1>
                 <p className="mb-6 text-sm text-muted-foreground">
-                  Este e-mail nao esta associado a nenhuma conta existente.
+                  {t('platform.login.choice.notFound.subtitle')}
                 </p>
 
                 <Link
                   to="/register"
                   className="mb-3 flex w-full items-center justify-center rounded-lg border-2 border-primary bg-primary/5 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
                 >
-                  Criar conta de professor
+                  {t('platform.login.choice.notFound.createProfessor')}
                 </Link>
 
                 <div className="relative my-5 flex items-center gap-3">
                   <div className="h-px flex-1 bg-border" />
-                  <span className="text-xs text-muted-foreground">ou</span>
+                  <span className="text-xs text-muted-foreground">
+                    {t('common.misc.or')}
+                  </span>
                   <div className="h-px flex-1 bg-border" />
                 </div>
 
-                <p className="mb-2 text-sm font-medium">Tenho uma escola</p>
+                <p className="mb-2 text-sm font-medium">
+                  {t('platform.login.choice.notFound.hasSchool')}
+                </p>
                 <p className="mb-3 text-xs text-muted-foreground">
-                  Informe o identificador da escola para criar uma conta como
-                  aluno.
+                  {t('platform.login.choice.notFound.hasSchoolSubtitle')}
                 </p>
                 <div className="flex gap-2">
                   <div className="flex flex-1 items-center gap-1 rounded-lg border bg-background px-3 text-sm">
@@ -289,7 +300,9 @@ export default function GlobalLoginPage() {
                             .replace(/[^a-z0-9-]/g, '')
                         )
                       }
-                      placeholder="slug-da-escola"
+                      placeholder={t(
+                        'platform.login.choice.notFound.slugPlaceholder'
+                      )}
                       className="flex-1 bg-transparent py-2 outline-none"
                     />
                   </div>
@@ -299,7 +312,7 @@ export default function GlobalLoginPage() {
                     onClick={() => navigate(`/t/${schoolSlug}/register`)}
                     className="rounded-lg border px-4 py-2 text-sm font-semibold transition-colors hover:bg-accent disabled:opacity-40"
                   >
-                    Acessar
+                    {t('platform.login.choice.notFound.accessButton')}
                   </button>
                 </div>
               </>
@@ -309,27 +322,26 @@ export default function GlobalLoginPage() {
             {isMultiTenantChoice && (
               <>
                 <h1 className="mb-2 text-2xl font-extrabold">
-                  Selecionar escola
+                  {t('platform.login.choice.multiTenant.title')}
                 </h1>
                 <p className="mb-6 text-sm text-muted-foreground">
-                  Este e-mail está associado a mais de uma escola. Escolha em
-                  qual deseja entrar.
+                  {t('platform.login.choice.multiTenant.subtitle')}
                 </p>
 
                 <div className="space-y-2">
-                  {resolveResult!.tenants.map((t) => (
+                  {resolveResult!.tenants.map((tenant) => (
                     <button
-                      key={t.slug}
+                      key={tenant.slug}
                       onClick={() =>
                         navigate(
-                          `/t/${t.slug}/login?email=${encodeURIComponent(email)}&school=${encodeURIComponent(t.name)}`
+                          `/t/${tenant.slug}/login?email=${encodeURIComponent(email)}&school=${encodeURIComponent(tenant.name)}`
                         )
                       }
                       className="flex w-full items-center justify-between rounded-xl border bg-card px-4 py-3.5 text-sm font-medium transition-colors hover:bg-accent"
                     >
-                      {t.name}
+                      {tenant.name}
                       <span className="text-xs text-muted-foreground">
-                        /t/{t.slug}
+                        /t/{tenant.slug}
                       </span>
                     </button>
                   ))}
@@ -347,22 +359,26 @@ export default function GlobalLoginPage() {
               className="mb-6 flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               <ArrowLeft className="h-4 w-4" />
-              Voltar
+              {t('common.actions.back')}
             </button>
 
             <h1 className="mb-1 text-3xl font-extrabold">
-              {loginCtx.type === 'platform' ? 'Acesso professor' : 'Entrar'}
+              {loginCtx.type === 'platform'
+                ? t('platform.login.password.platformTitle')
+                : t('platform.login.email.title')}
             </h1>
             <p className="mb-3 text-sm text-muted-foreground">{email}</p>
 
             {loginCtx.type === 'tenant' && (
               <p className="mb-6 inline-flex items-center gap-1.5 rounded-full border bg-muted px-3 py-1 text-xs font-medium">
-                Escola: {loginCtx.name}
+                {t('platform.login.password.schoolBadge', {
+                  name: loginCtx.name
+                })}
               </p>
             )}
             {loginCtx.type === 'platform' && (
               <p className="mb-6 inline-flex items-center gap-1.5 rounded-full border bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                Conta da plataforma
+                {t('platform.login.password.platformBadge')}
               </p>
             )}
 
@@ -376,7 +392,7 @@ export default function GlobalLoginPage() {
                   className="mb-1.5 block text-sm font-medium"
                   htmlFor="password"
                 >
-                  Senha
+                  {t('common.fields.password')}
                 </label>
                 <div className="relative">
                   <input
@@ -413,7 +429,7 @@ export default function GlobalLoginPage() {
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow transition hover:opacity-90 disabled:opacity-60"
               >
                 {logging && <Loader2 className="h-4 w-4 animate-spin" />}
-                Entrar
+                {t('common.actions.login')}
               </button>
             </form>
           </>

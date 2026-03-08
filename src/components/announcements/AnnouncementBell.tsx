@@ -3,6 +3,7 @@ import { Bell, ArrowRight } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { announcementsEndpoints } from '@/services/endpoints/announcements.endpoints';
 import { tenantPath } from '@/lib/tenant';
 import { cn } from '@/lib/utils';
@@ -16,27 +17,29 @@ const priorityColors: Record<AnnouncementPriority, string> = {
   CRITICAL: 'text-red-500 bg-red-500/10'
 };
 
-const priorityLabel: Record<AnnouncementPriority, string> = {
-  INFO: 'Info',
-  WARNING: 'Atenção',
-  CRITICAL: 'Urgente'
-};
-
-function relativeTime(iso: string) {
-  const diff = Date.now() - new Date(iso).getTime();
-  const m = Math.floor(diff / 60_000);
-  if (m < 1) return 'agora';
-  if (m < 60) return `${m}min`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h`;
-  return `${Math.floor(h / 24)}d`;
-}
-
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function AnnouncementBell() {
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const slug = tenantSlug ?? '';
+  const { t } = useTranslation();
+
+  const priorityLabel: Record<AnnouncementPriority, string> = {
+    INFO: t('app.announcements.priority.info'),
+    WARNING: t('common.priority.warning'),
+    CRITICAL: t('common.priority.critical')
+  };
+
+  function relativeTime(iso: string) {
+    const diff = Date.now() - new Date(iso).getTime();
+    const m = Math.floor(diff / 60_000);
+    if (m < 1) return t('app.announcements.time.now');
+    if (m < 60) return t('app.announcements.time.minutes', { n: m });
+    const h = Math.floor(m / 60);
+    if (h < 24) return t('app.announcements.time.hours', { n: h });
+    return t('app.announcements.time.days', { n: Math.floor(h / 24) });
+  }
+
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
@@ -61,7 +64,9 @@ export function AnnouncementBell() {
       // Zera o cache do count imediatamente
       queryClient.setQueryData(['announcements-unread', slug], { count: 0 });
       // Invalida preview para refletir isRead=true
-      queryClient.invalidateQueries({ queryKey: ['announcements-preview', slug] });
+      queryClient.invalidateQueries({
+        queryKey: ['announcements-preview', slug]
+      });
     }
   });
 
@@ -78,7 +83,9 @@ export function AnnouncementBell() {
     setOpen((prev) => {
       if (!prev) {
         refetchCount();
-        queryClient.invalidateQueries({ queryKey: ['announcements-preview', slug] });
+        queryClient.invalidateQueries({
+          queryKey: ['announcements-preview', slug]
+        });
         // Marca todos como lidos se houver não-lidos
         if ((unreadData?.count ?? 0) > 0) {
           markAllMutation.mutate();
@@ -104,7 +111,7 @@ export function AnnouncementBell() {
       <button
         onClick={handleOpen}
         className="relative rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-        aria-label="Avisos"
+        aria-label={t('app.announcements.title')}
       >
         <Bell className="h-5 w-5" />
         {count > 0 && (
@@ -125,10 +132,12 @@ export function AnnouncementBell() {
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b px-4 py-3">
-              <span className="font-semibold text-sm">Avisos</span>
+              <span className="font-semibold text-sm">
+                {t('app.announcements.title')}
+              </span>
               {count > 0 && (
                 <span className="rounded-full bg-red-500/10 px-2 py-0.5 text-xs font-bold text-red-500">
-                  {count} não {count === 1 ? 'lido' : 'lidos'}
+                  {t('app.announcements.unreadCount', { count })}
                 </span>
               )}
             </div>
@@ -138,12 +147,15 @@ export function AnnouncementBell() {
               {!previewData ? (
                 <div className="p-4 space-y-3">
                   {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="animate-pulse h-10 rounded bg-muted" />
+                    <div
+                      key={i}
+                      className="animate-pulse h-10 rounded bg-muted"
+                    />
                   ))}
                 </div>
               ) : previewData.data.length === 0 ? (
                 <p className="p-6 text-center text-sm text-muted-foreground">
-                  Nenhum aviso no momento.
+                  {t('app.announcements.bell.empty')}
                 </p>
               ) : (
                 previewData.data.map((ann) => (
@@ -187,7 +199,8 @@ export function AnnouncementBell() {
                 onClick={() => setOpen(false)}
                 className="flex items-center justify-center gap-1 text-sm font-medium text-primary hover:underline"
               >
-                Ver todos os avisos <ArrowRight className="h-4 w-4" />
+                {t('app.announcements.bell.viewAll')}{' '}
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           </motion.div>

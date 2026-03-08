@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -8,7 +9,7 @@ import { toast } from 'sonner';
 import { Plus, Trash2, Loader2, ChevronLeft, ImagePlus, X } from 'lucide-react';
 import { adminEndpoints } from '@/services/endpoints/admin.endpoints';
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
-import { getActivityTypeLabel } from '@/lib/utils';
+
 import { ChartMarkupQuestionForm } from '@/components/admin/ChartMarkupQuestionForm';
 import { RiskCalculatorQuestionForm } from '@/components/admin/RiskCalculatorQuestionForm';
 import { SimTradingQuestionForm } from '@/components/admin/SimTradingQuestionForm';
@@ -18,6 +19,7 @@ import type { ActivityType } from '@/types/api';
 // ─── SimConfigSummary ────────────────────────────────────────────────────────
 
 function SimConfigSummary({ cfg }: { cfg: Record<string, unknown> }) {
+  const { t } = useTranslation();
   const cc = cfg.candleConfig as Record<string, unknown> | undefined;
   const ec = cfg.executionConfig as Record<string, unknown> | undefined;
   const sc = cfg.scoringConfig as Record<string, unknown> | undefined;
@@ -28,14 +30,38 @@ function SimConfigSummary({ cfg }: { cfg: Record<string, unknown> }) {
       })()
     : '—';
   const items = [
-    { label: 'Candles', value: `${cc?.numCandles ?? '—'} × ${tfs}` },
-    { label: 'Preço inicial', value: `$${cc?.startPrice ?? '—'}` },
-    { label: 'Volatilidade', value: String(cc?.volatility ?? '—') },
-    { label: 'Saldo inicial', value: `$${ec?.initialBalance ?? '—'}` },
-    { label: 'Taxa', value: `${ec?.feeBps ?? '—'} bps` },
-    { label: 'PnL mín.', value: `${sc?.passingPnlPercent ?? '—'}%` },
-    { label: 'DD máx.', value: `${sc?.maxDrawdownPercent ?? '—'}%` },
-    { label: 'Trades mín.', value: String(sc?.minTradeCount ?? '—') }
+    {
+      label: t('admin.questions.simConfig.candles'),
+      value: `${cc?.numCandles ?? '—'} × ${tfs}`
+    },
+    {
+      label: t('admin.questions.simConfig.startPrice'),
+      value: `$${cc?.startPrice ?? '—'}`
+    },
+    {
+      label: t('admin.questions.simConfig.volatility'),
+      value: String(cc?.volatility ?? '—')
+    },
+    {
+      label: t('admin.questions.simConfig.initialBalance'),
+      value: `$${ec?.initialBalance ?? '—'}`
+    },
+    {
+      label: t('admin.questions.simConfig.fee'),
+      value: `${ec?.feeBps ?? '—'} bps`
+    },
+    {
+      label: t('admin.questions.simConfig.minPnL'),
+      value: `${sc?.passingPnlPercent ?? '—'}%`
+    },
+    {
+      label: t('admin.questions.simConfig.maxDD'),
+      value: `${sc?.maxDrawdownPercent ?? '—'}%`
+    },
+    {
+      label: t('admin.questions.simConfig.minTrades'),
+      value: String(sc?.minTradeCount ?? '—')
+    }
   ];
   return (
     <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 rounded-lg bg-muted/40 px-4 py-3 text-xs">
@@ -49,26 +75,18 @@ function SimConfigSummary({ cfg }: { cfg: Record<string, unknown> }) {
   );
 }
 
-// Schema para criação de questão com opções dinâmicas
-const optionSchema = z.object({
-  text: z.string().min(1, 'Obrigatório'),
-  isCorrect: z.boolean(),
-  order: z.number()
-});
+// ─── Schema (definido dentro de QuestionForm para usar t()) ──────────────────────
 
-const questionSchema = z.object({
-  statement: z.string().min(5, 'Mínimo 5 caracteres'),
-  imageUrl: z.string().url().optional().nullable(),
-  explanation: z.string().optional(),
-  difficulty: z.number().min(1).max(5).default(3),
-  weight: z.number().min(1).default(1),
-  options: z.array(optionSchema),
-  // Indice da opcao correta (single-select). Transformado em isCorrect no submit.
-  correctIndex: z.coerce.number().optional(),
-  metadata: z.object({ jsonData: z.record(z.unknown()) }).optional()
-});
-
-type QuestionFormData = z.infer<typeof questionSchema>;
+type QuestionFormData = {
+  statement: string;
+  imageUrl?: string | null;
+  explanation?: string;
+  difficulty: number;
+  weight: number;
+  options: { text: string; isCorrect: boolean; order: number }[];
+  correctIndex?: number;
+  metadata?: { jsonData: Record<string, unknown> };
+};
 
 function QuestionForm({
   activityType,
@@ -85,6 +103,24 @@ function QuestionForm({
 }) {
   const showOptions = activityType !== 'TEXT_INPUT';
   const isTrueFalse = activityType === 'TRUE_FALSE';
+  const { t } = useTranslation();
+
+  const optionSchema = z.object({
+    text: z.string().min(1, t('common.validation.required')),
+    isCorrect: z.boolean(),
+    order: z.number()
+  });
+
+  const questionSchema = z.object({
+    statement: z.string().min(5, t('admin.questions.validation.statement')),
+    imageUrl: z.string().url().optional().nullable(),
+    explanation: z.string().optional(),
+    difficulty: z.number().min(1).max(5).default(3),
+    weight: z.number().min(1).default(1),
+    options: z.array(optionSchema),
+    correctIndex: z.coerce.number().optional(),
+    metadata: z.object({ jsonData: z.record(z.unknown()) }).optional()
+  });
 
   // Estado do upload de imagem
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -106,8 +142,16 @@ function QuestionForm({
       correctIndex: undefined,
       options: isTrueFalse
         ? [
-            { text: 'Verdadeiro', isCorrect: false, order: 0 },
-            { text: 'Falso', isCorrect: false, order: 1 }
+            {
+              text: t('admin.questions.options.true'),
+              isCorrect: false,
+              order: 0
+            },
+            {
+              text: t('admin.questions.options.false'),
+              isCorrect: false,
+              order: 1
+            }
           ]
         : showOptions
           ? [
@@ -154,7 +198,7 @@ function QuestionForm({
         setUploading(true);
         imageUrl = await adminEndpoints.uploadQuestionImage(slug, imageFile);
       } catch {
-        toast.error('Erro ao fazer upload da imagem.');
+        toast.error(t('admin.questions.form.uploadError'));
         setUploading(false);
         return;
       } finally {
@@ -181,7 +225,9 @@ function QuestionForm({
       className="space-y-5 rounded-2xl border bg-card p-6 shadow-sm"
     >
       <div>
-        <label className="mb-1 block text-sm font-medium">Enunciado</label>
+        <label className="mb-1 block text-sm font-medium">
+          {t('admin.chartMarkupForm.statementLabel')}
+        </label>
         <textarea
           rows={3}
           className="w-full resize-none rounded-lg border bg-background px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
@@ -197,14 +243,16 @@ function QuestionForm({
       {/* Upload de imagem opcional para o enunciado */}
       <div>
         <label className="mb-1 block text-sm font-medium">
-          Imagem do enunciado{' '}
-          <span className="font-normal text-muted-foreground">(opcional)</span>
+          {t('admin.questions.form.imageLabel')}{' '}
+          <span className="font-normal text-muted-foreground">
+            {t('common.misc.optional')}
+          </span>
         </label>
         {imagePreview ? (
           <div className="relative overflow-hidden rounded-xl border">
             <img
               src={imagePreview}
-              alt="Preview"
+              alt={t('admin.questions.form.previewAlt')}
               className="max-h-48 w-full object-contain bg-muted/30"
             />
             <button
@@ -222,7 +270,7 @@ function QuestionForm({
             className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-muted-foreground/30 py-6 text-sm text-muted-foreground transition hover:border-primary/50 hover:text-foreground"
           >
             <ImagePlus className="h-5 w-5" />
-            Clique para adicionar imagem (JPG, PNG, WebP — máx. 5 MB)
+            {t('admin.questions.form.imagePlaceholder')}
           </button>
         )}
         <input
@@ -236,7 +284,7 @@ function QuestionForm({
 
       <div>
         <label className="mb-1 block text-sm font-medium">
-          Explicação (pós-resposta)
+          {t('admin.chartMarkupForm.explanationLabel')}
         </label>
         <textarea
           rows={2}
@@ -248,7 +296,7 @@ function QuestionForm({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="mb-1 block text-sm font-medium">
-            Dificuldade (1-5)
+            {t('admin.chartMarkupForm.difficultyLabel')}
           </label>
           <input
             type="number"
@@ -259,7 +307,9 @@ function QuestionForm({
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium">Peso</label>
+          <label className="mb-1 block text-sm font-medium">
+            {t('admin.chartMarkupForm.weightLabel')}
+          </label>
           <input
             type="number"
             min={1}
@@ -274,12 +324,12 @@ function QuestionForm({
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <label className="text-sm font-medium">
-              Opções{' '}
+              {t('admin.questions.form.optionsLabel')}{' '}
               <span className="text-xs text-muted-foreground">
                 (
                 {isSingleSelect
-                  ? 'marque a correta'
-                  : 'marque todas as corretas'}
+                  ? t('admin.questions.form.singleCorrect')
+                  : t('admin.questions.form.multiCorrect')}
                 )
               </span>
             </label>
@@ -293,7 +343,7 @@ function QuestionForm({
                 className="flex items-center gap-1 rounded-lg border px-3 py-1 text-xs font-medium hover:bg-accent"
               >
                 <Plus className="h-3 w-3" />
-                Adicionar
+                {t('admin.questions.form.addOptionButton')}
               </button>
             )}
           </div>
@@ -318,7 +368,9 @@ function QuestionForm({
                 />
               )}
               <input
-                placeholder={`Opção ${index + 1}`}
+                placeholder={t('admin.questions.form.optionPlaceholder', {
+                  n: index + 1
+                })}
                 // TRUE_FALSE: texto fixo, nao editavel
                 readOnly={isTrueFalse}
                 className={`flex-1 rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring ${
@@ -347,15 +399,19 @@ function QuestionForm({
           disabled={loading || uploading}
           className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
         >
-          {(loading || uploading) && <Loader2 className="h-4 w-4 animate-spin" />}
-          {uploading ? 'Enviando imagem...' : 'Salvar questão'}
+          {(loading || uploading) && (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          )}
+          {uploading
+            ? t('admin.stepForm.uploadingImage')
+            : t('admin.chartMarkupForm.saveButton')}
         </button>
         <button
           type="button"
           onClick={onCancel}
           className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-accent"
         >
-          Cancelar
+          {t('common.actions.cancel')}
         </button>
       </div>
     </form>
@@ -363,6 +419,7 @@ function QuestionForm({
 }
 
 export default function AdminQuestionsPage() {
+  const { t } = useTranslation();
   const { lessonId, activityId, tenantSlug } = useParams<{
     lessonId: string;
     activityId: string;
@@ -393,11 +450,13 @@ export default function AdminQuestionsPage() {
       adminEndpoints.createQuestion(slug, activityId!, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-questions', slug, activityId] });
-      qc.invalidateQueries({ queryKey: ['activity', slug, lessonId, activityId] });
+      qc.invalidateQueries({
+        queryKey: ['activity', slug, lessonId, activityId]
+      });
       setAdding(false);
-      toast.success('Questão criada!');
+      toast.success(t('admin.questions.toast.created'));
     },
-    onError: () => toast.error('Erro ao criar questão.')
+    onError: () => toast.error(t('admin.questions.toast.createError'))
   });
 
   const deleteMut = useMutation({
@@ -405,10 +464,12 @@ export default function AdminQuestionsPage() {
       adminEndpoints.deleteQuestion(slug, activityId!, id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-questions', slug, activityId] });
-      qc.invalidateQueries({ queryKey: ['activity', slug, lessonId, activityId] });
-      toast.success('Questão excluída.');
+      qc.invalidateQueries({
+        queryKey: ['activity', slug, lessonId, activityId]
+      });
+      toast.success(t('admin.questions.toast.deleted'));
     },
-    onError: () => toast.error('Erro ao excluir questão.')
+    onError: () => toast.error(t('admin.questions.toast.deleteError'))
   });
 
   const activityType: ActivityType = activity?.type ?? 'MULTIPLE_CHOICE';
@@ -421,7 +482,7 @@ export default function AdminQuestionsPage() {
           className="mb-3 flex items-center gap-1.5 text-sm text-muted-foreground transition hover:text-foreground"
         >
           <ChevronLeft className="h-4 w-4" />
-          Voltar
+          {t('common.actions.back')}
         </button>
         <div className="flex items-center justify-between">
           <div>
@@ -429,13 +490,13 @@ export default function AdminQuestionsPage() {
               {loadingActivity ? (
                 <span className="inline-block h-8 w-48 animate-pulse rounded bg-muted" />
               ) : (
-                (activity?.title ?? 'Questões')
+                (activity?.title ?? t('admin.questions.page.fallbackTitle'))
               )}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Tipo:{' '}
+              {t('admin.questions.page.typeLabel')}{' '}
               <strong className="text-foreground">
-                {loadingActivity ? '...' : getActivityTypeLabel(activityType)}
+                {loadingActivity ? '...' : t(`common.activityTypes.${activityType}`, { defaultValue: activityType })}
               </strong>
             </p>
           </div>
@@ -451,8 +512,8 @@ export default function AdminQuestionsPage() {
             >
               <Plus className="h-4 w-4" />
               {activityType === 'SIM_TRADING_CHALLENGE'
-                ? 'Configurar Cenário'
-                : 'Nova questão'}
+                ? t('admin.questions.page.configureButton')
+                : t('admin.questions.page.newButton')}
             </button>
           )}
         </div>
@@ -512,12 +573,12 @@ export default function AdminQuestionsPage() {
                 <p className="font-medium">
                   <span className="mr-2 text-muted-foreground">#{i + 1}</span>
                   {activityType === 'SIM_TRADING_CHALLENGE'
-                    ? 'Configuração do Cenário de Trading'
+                    ? t('admin.simForm.sectionTitle')
                     : q.statement}
                 </p>
                 <button
                   onClick={() => {
-                    if (confirm('Excluir esta questão?'))
+                    if (confirm(t('admin.questions.page.confirmDelete')))
                       deleteMut.mutate(q.id);
                   }}
                   className="shrink-0 rounded-lg p-1.5 text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
@@ -539,7 +600,7 @@ export default function AdminQuestionsPage() {
 
           {Array.isArray(questions) && questions.length === 0 && (
             <div className="py-16 text-center text-muted-foreground">
-              Nenhuma questão ainda.
+              {t('admin.questions.page.empty')}
             </div>
           )}
         </div>

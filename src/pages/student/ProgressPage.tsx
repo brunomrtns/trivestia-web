@@ -9,8 +9,9 @@ import {
   XCircle
 } from 'lucide-react';
 import { progressEndpoints } from '@/services/endpoints/progress.endpoints';
-import { getProgressColor, getProgressLabel, formatDate } from '@/lib/utils';
+import { getProgressColor, formatDate } from '@/lib/utils';
 import type { ProgressStatus } from '@/types/api';
+import { useTranslation } from 'react-i18next';
 
 function StatusIcon({ status }: { status: ProgressStatus }) {
   if (status === 'COMPLETED')
@@ -21,6 +22,7 @@ function StatusIcon({ status }: { status: ProgressStatus }) {
 }
 
 export default function ProgressPage() {
+  const { t } = useTranslation();
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const slug = tenantSlug ?? '';
 
@@ -41,9 +43,9 @@ export default function ProgressPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-extrabold">Meu progresso</h1>
+        <h1 className="text-3xl font-extrabold">{t('app.progress.title')}</h1>
         <p className="mt-1 text-muted-foreground">
-          Acompanhe sua evolução em todas as aulas.
+          {t('app.progress.subtitle')}
         </p>
       </div>
 
@@ -52,21 +54,21 @@ export default function ProgressPage() {
         <div className="rounded-2xl border bg-card p-5 shadow-sm">
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
             <CheckCircle2 className="h-4 w-4 text-green-500" />
-            Concluídas
+            {t('app.progress.stats.completed')}
           </div>
           <p className="mt-2 text-3xl font-extrabold">{completed.length}</p>
         </div>
         <div className="rounded-2xl border bg-card p-5 shadow-sm">
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
             <BarChart3 className="h-4 w-4 text-primary" />
-            Média de pontuação
+            {t('app.progress.stats.avgScore')}
           </div>
           <p className="mt-2 text-3xl font-extrabold">{avgScore}%</p>
         </div>
         <div className="rounded-2xl border bg-card p-5 shadow-sm">
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
             <TrendingUp className="h-4 w-4 text-blue-500" />
-            Total de aulas
+            {t('app.progress.stats.totalLessons')}
           </div>
           <p className="mt-2 text-3xl font-extrabold">
             {progress?.length ?? 0}
@@ -84,7 +86,7 @@ export default function ProgressPage() {
       ) : progress?.length === 0 ? (
         <div className="py-20 text-center text-muted-foreground">
           <BarChart3 className="mx-auto mb-4 h-12 w-12 opacity-30" />
-          <p>Nenhuma aula iniciada ainda.</p>
+          <p>{t('app.progress.empty')}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -99,10 +101,10 @@ export default function ProgressPage() {
               <StatusIcon status={p.status} />
               <div className="flex-1 min-w-0">
                 <p className="truncate font-medium">
-                  {p.lesson?.title ?? 'Aula'}
+                  {p.lesson?.title ?? t('app.lesson.fallbackTitle')}
                 </p>
                 <p className={`text-xs ${getProgressColor(p.status)}`}>
-                  {getProgressLabel(p.status)}
+                  {t(`common.progressStatus.${p.status}`, { defaultValue: p.status })}
                   {p.completedAt && ` · ${formatDate(p.completedAt)}`}
                 </p>
               </div>

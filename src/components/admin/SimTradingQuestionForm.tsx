@@ -1,4 +1,5 @@
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Loader2 } from 'lucide-react';
@@ -6,40 +7,27 @@ import type { CreateQuestionDTO } from '@/types/api';
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
-const simSchema = z.object({
-  // CandleConfig
-  numCandles: z.coerce.number().int().min(50).max(500).default(200),
-  timeframeMinutes: z.coerce
-    .number()
-    .refine((v) => [1, 5, 15, 60, 240].includes(v), {
-      message: 'Use 1, 5, 15, 60 ou 240 min'
-    })
-    .default(5),
-  startPrice: z.coerce.number().min(0.01).default(100),
-  volatility: z.coerce.number().min(0.0001).max(0.15).default(0.015),
-  trend: z.coerce.number().min(-1).max(1).default(0),
-  spreadBps: z.coerce.number().int().min(1).max(200).default(10),
-
-  // ExecutionConfig
-  initialBalance: z.coerce.number().min(100).max(1_000_000).default(10_000),
-  feeBps: z.coerce.number().min(0).max(100).default(5),
-  maxLeverage: z.coerce.number().min(1).max(100).default(1),
-  maxPositionSize: z.coerce.number().min(1).max(100).default(100),
-  allowShort: z.boolean().default(true),
-
-  // ScoringConfig
-  passingPnlPercent: z.coerce.number().min(0).default(2),
-  maxAllowedDrawdownPercent: z.coerce.number().min(1).max(100).default(20),
-  minTradeCount: z.coerce.number().int().min(1).default(3),
-
-  // Weights
-  weightPnl: z.coerce.number().min(0).max(100).default(40),
-  weightDrawdown: z.coerce.number().min(0).max(100).default(20),
-  weightSharpe: z.coerce.number().min(0).max(100).default(20),
-  weightWinRate: z.coerce.number().min(0).max(100).default(20)
-});
-
-type SimForm = z.infer<typeof simSchema>;
+// SimForm type — schema is defined inside the component to allow t()
+type SimForm = {
+  numCandles: number;
+  timeframeMinutes: number;
+  startPrice: number;
+  volatility: number;
+  trend: number;
+  spreadBps: number;
+  initialBalance: number;
+  feeBps: number;
+  maxLeverage: number;
+  maxPositionSize: number;
+  allowShort: boolean;
+  passingPnlPercent: number;
+  maxAllowedDrawdownPercent: number;
+  minTradeCount: number;
+  weightPnl: number;
+  weightDrawdown: number;
+  weightSharpe: number;
+  weightWinRate: number;
+};
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -60,6 +48,41 @@ export function SimTradingQuestionForm({
   onCancel,
   loading
 }: Props) {
+  const { t } = useTranslation();
+
+  const simSchema = z.object({
+    // CandleConfig
+    numCandles: z.coerce.number().int().min(50).max(500).default(200),
+    timeframeMinutes: z.coerce
+      .number()
+      .refine((v) => [1, 5, 15, 60, 240].includes(v), {
+        message: t('admin.simForm.validation.timeframe')
+      })
+      .default(5),
+    startPrice: z.coerce.number().min(0.01).default(100),
+    volatility: z.coerce.number().min(0.0001).max(0.15).default(0.015),
+    trend: z.coerce.number().min(-1).max(1).default(0),
+    spreadBps: z.coerce.number().int().min(1).max(200).default(10),
+
+    // ExecutionConfig
+    initialBalance: z.coerce.number().min(100).max(1_000_000).default(10_000),
+    feeBps: z.coerce.number().min(0).max(100).default(5),
+    maxLeverage: z.coerce.number().min(1).max(100).default(1),
+    maxPositionSize: z.coerce.number().min(1).max(100).default(100),
+    allowShort: z.boolean().default(true),
+
+    // ScoringConfig
+    passingPnlPercent: z.coerce.number().min(0).default(2),
+    maxAllowedDrawdownPercent: z.coerce.number().min(1).max(100).default(20),
+    minTradeCount: z.coerce.number().int().min(1).default(3),
+
+    // Weights
+    weightPnl: z.coerce.number().min(0).max(100).default(40),
+    weightDrawdown: z.coerce.number().min(0).max(100).default(20),
+    weightSharpe: z.coerce.number().min(0).max(100).default(20),
+    weightWinRate: z.coerce.number().min(0).max(100).default(20)
+  });
+
   const cfg = initialData as Record<string, unknown> | undefined;
   const cc = cfg?.candleConfig as Record<string, unknown> | undefined;
   const ec = cfg?.executionConfig as Record<string, unknown> | undefined;
@@ -138,7 +161,7 @@ export function SimTradingQuestionForm({
     };
 
     await onSave({
-      statement: 'Configuração do cenário de simulação',
+      statement: t('admin.simForm.scenarioStatement'),
       difficulty: 3,
       weight: 1,
       options: [],
@@ -175,9 +198,9 @@ export function SimTradingQuestionForm({
           </svg>
         </div>
         <div>
-          <h3 className="font-semibold">Configuração do Cenário de Trading</h3>
+          <h3 className="font-semibold">{t('admin.simForm.sectionTitle')}</h3>
           <p className="text-xs text-muted-foreground">
-            Define os parâmetros de candles, execução e pontuação
+            {t('admin.simForm.sectionSubtitle')}
           </p>
         </div>
       </div>
@@ -185,11 +208,13 @@ export function SimTradingQuestionForm({
       {/* ── Candles ── */}
       <section className="space-y-3">
         <h4 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          Candles
+          {t('admin.simForm.sections.candles')}
         </h4>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <div>
-            <label className={LABEL}>Qtd. Candles</label>
+            <label className={LABEL}>
+              {t('admin.simForm.fields.numCandles')}
+            </label>
             <input
               type="number"
               className={FIELD}
@@ -198,17 +223,31 @@ export function SimTradingQuestionForm({
             {err('numCandles')}
           </div>
           <div>
-            <label className={LABEL}>Timeframe</label>
+            <label className={LABEL}>
+              {t('admin.simForm.fields.timeframe')}
+            </label>
             <select className={FIELD} {...register('timeframeMinutes')}>
-              <option value={1}>1 min</option>
-              <option value={5}>5 min</option>
-              <option value={15}>15 min</option>
-              <option value={60}>1 hora</option>
-              <option value={240}>4 horas</option>
+              <option value={1}>
+                {t('admin.simForm.timeframeOptions.1min')}
+              </option>
+              <option value={5}>
+                {t('admin.simForm.timeframeOptions.5min')}
+              </option>
+              <option value={15}>
+                {t('admin.simForm.timeframeOptions.15min')}
+              </option>
+              <option value={60}>
+                {t('admin.simForm.timeframeOptions.1h')}
+              </option>
+              <option value={240}>
+                {t('admin.simForm.timeframeOptions.4h')}
+              </option>
             </select>
           </div>
           <div>
-            <label className={LABEL}>Preço Inicial</label>
+            <label className={LABEL}>
+              {t('admin.simForm.fields.startPrice')}
+            </label>
             <input
               type="number"
               step="0.01"
@@ -218,7 +257,9 @@ export function SimTradingQuestionForm({
             {err('startPrice')}
           </div>
           <div>
-            <label className={LABEL}>Volatilidade (ex: 0.015)</label>
+            <label className={LABEL}>
+              {t('admin.simForm.fields.volatility')}
+            </label>
             <input
               type="number"
               step="0.001"
@@ -228,7 +269,7 @@ export function SimTradingQuestionForm({
             {err('volatility')}
           </div>
           <div>
-            <label className={LABEL}>Tendência (-1 a 1)</label>
+            <label className={LABEL}>{t('admin.simForm.fields.trend')}</label>
             <input
               type="number"
               step="0.05"
@@ -238,7 +279,9 @@ export function SimTradingQuestionForm({
             {err('trend')}
           </div>
           <div>
-            <label className={LABEL}>Spread (bps)</label>
+            <label className={LABEL}>
+              {t('admin.simForm.fields.spreadBps')}
+            </label>
             <input type="number" className={FIELD} {...register('spreadBps')} />
             {err('spreadBps')}
           </div>
@@ -248,11 +291,13 @@ export function SimTradingQuestionForm({
       {/* ── Execução ── */}
       <section className="space-y-3">
         <h4 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          Execução
+          {t('admin.simForm.sections.execution')}
         </h4>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <div>
-            <label className={LABEL}>Saldo Inicial ($)</label>
+            <label className={LABEL}>
+              {t('admin.simForm.fields.initialBalance')}
+            </label>
             <input
               type="number"
               className={FIELD}
@@ -261,12 +306,14 @@ export function SimTradingQuestionForm({
             {err('initialBalance')}
           </div>
           <div>
-            <label className={LABEL}>Taxa (bps)</label>
+            <label className={LABEL}>{t('admin.simForm.fields.feeBps')}</label>
             <input type="number" className={FIELD} {...register('feeBps')} />
             {err('feeBps')}
           </div>
           <div>
-            <label className={LABEL}>Alavancagem máx.</label>
+            <label className={LABEL}>
+              {t('admin.simForm.fields.maxLeverage')}
+            </label>
             <input
               type="number"
               className={FIELD}
@@ -275,7 +322,9 @@ export function SimTradingQuestionForm({
             {err('maxLeverage')}
           </div>
           <div>
-            <label className={LABEL}>Tamanho máx. posição (%)</label>
+            <label className={LABEL}>
+              {t('admin.simForm.fields.maxPositionSize')}
+            </label>
             <input
               type="number"
               className={FIELD}
@@ -291,7 +340,7 @@ export function SimTradingQuestionForm({
               {...register('allowShort')}
             />
             <label htmlFor="allowShort" className="text-sm">
-              Permitir short
+              {t('admin.simForm.fields.allowShort')}
             </label>
           </div>
         </div>
@@ -300,11 +349,13 @@ export function SimTradingQuestionForm({
       {/* ── Pontuação ── */}
       <section className="space-y-3">
         <h4 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          Critérios de Aprovação
+          {t('admin.simForm.sections.scoring')}
         </h4>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <div>
-            <label className={LABEL}>PnL mínimo para aprovação (%)</label>
+            <label className={LABEL}>
+              {t('admin.simForm.fields.passingPnl')}
+            </label>
             <input
               type="number"
               step="0.1"
@@ -314,7 +365,9 @@ export function SimTradingQuestionForm({
             {err('passingPnlPercent')}
           </div>
           <div>
-            <label className={LABEL}>Drawdown máx. permitido (%)</label>
+            <label className={LABEL}>
+              {t('admin.simForm.fields.maxDrawdown')}
+            </label>
             <input
               type="number"
               step="0.5"
@@ -324,7 +377,9 @@ export function SimTradingQuestionForm({
             {err('maxAllowedDrawdownPercent')}
           </div>
           <div>
-            <label className={LABEL}>Trades mínimos</label>
+            <label className={LABEL}>
+              {t('admin.simForm.fields.minTradeCount')}
+            </label>
             <input
               type="number"
               className={FIELD}
@@ -338,17 +393,29 @@ export function SimTradingQuestionForm({
       {/* ── Pesos ── */}
       <section className="space-y-3">
         <h4 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          Pesos da Pontuação{' '}
+          {t('admin.simForm.sections.weights')}{' '}
           <span className="normal-case font-normal">
-            (serão normalizados automaticamente)
+            ({t('admin.simForm.weightsNormalized')})
           </span>
         </h4>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
-            { label: 'Peso PnL', field: 'weightPnl' as const },
-            { label: 'Peso Drawdown', field: 'weightDrawdown' as const },
-            { label: 'Peso Sharpe', field: 'weightSharpe' as const },
-            { label: 'Peso Win Rate', field: 'weightWinRate' as const }
+            {
+              label: t('admin.simForm.fields.weightPnl'),
+              field: 'weightPnl' as const
+            },
+            {
+              label: t('admin.simForm.fields.weightDrawdown'),
+              field: 'weightDrawdown' as const
+            },
+            {
+              label: t('admin.simForm.fields.weightSharpe'),
+              field: 'weightSharpe' as const
+            },
+            {
+              label: t('admin.simForm.fields.weightWinRate'),
+              field: 'weightWinRate' as const
+            }
           ].map(({ label, field }) => (
             <div key={field}>
               <label className={LABEL}>{label}</label>
@@ -371,14 +438,14 @@ export function SimTradingQuestionForm({
           className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
         >
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-          Salvar configuração
+          {t('admin.simForm.saveButton')}
         </button>
         <button
           type="button"
           onClick={onCancel}
           className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-accent"
         >
-          Cancelar
+          {t('common.actions.cancel')}
         </button>
       </div>
     </form>

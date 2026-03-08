@@ -2,25 +2,19 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useTranslation } from 'react-i18next';
 import { TrendingUp, TrendingDown, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { OrderSide, OrderType } from '@/types/api';
 
-const schema = z
-  .object({
-    side: z.enum(['BUY', 'SELL']),
-    type: z.enum(['MARKET', 'LIMIT', 'STOP']),
-    quantity: z.coerce.number().positive('Quantidade deve ser positiva'),
-    price: z.coerce.number().optional(),
-    sl: z.coerce.number().optional(),
-    tp: z.coerce.number().optional()
-  })
-  .refine(
-    (d) => d.type === 'MARKET' || (d.price !== undefined && d.price > 0),
-    { message: 'Preço obrigatório para LIMIT/STOP', path: ['price'] }
-  );
-
-type OrderFormValues = z.infer<typeof schema>;
+type OrderFormValues = {
+  side: 'BUY' | 'SELL';
+  type: 'MARKET' | 'LIMIT' | 'STOP';
+  quantity: number;
+  price?: number;
+  sl?: number;
+  tp?: number;
+};
 
 interface OrderTicketProps {
   onPlaceOrder: (order: {
@@ -41,8 +35,25 @@ export function OrderTicket({
   disabled,
   currentPrice
 }: OrderTicketProps) {
+  const { t } = useTranslation();
   const [useSl, setUseSl] = useState(false);
   const [useTp, setUseTp] = useState(false);
+
+  const schema = z
+    .object({
+      side: z.enum(['BUY', 'SELL']),
+      type: z.enum(['MARKET', 'LIMIT', 'STOP']),
+      quantity: z.coerce
+        .number()
+        .positive(t('sim.orderTicket.validation.quantity')),
+      price: z.coerce.number().optional(),
+      sl: z.coerce.number().optional(),
+      tp: z.coerce.number().optional()
+    })
+    .refine(
+      (d) => d.type === 'MARKET' || (d.price !== undefined && d.price > 0),
+      { message: t('sim.orderTicket.validation.price'), path: ['price'] }
+    );
 
   const {
     register,
@@ -77,7 +88,7 @@ export function OrderTicket({
       className="flex flex-col gap-2 rounded-lg border bg-card p-3 text-sm"
     >
       <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-        Nova Ordem
+        {t('sim.orderTicket.title')}
         {currentPrice !== undefined && (
           <span className="ml-2 font-mono text-foreground">
             @ {currentPrice.toFixed(2)}
@@ -140,7 +151,9 @@ export function OrderTicket({
 
       {/* Quantity */}
       <div>
-        <label className="text-xs text-muted-foreground">Quantidade</label>
+        <label className="text-xs text-muted-foreground">
+          {t('sim.orderTicket.quantityLabel')}
+        </label>
         <input
           type="number"
           step="0.01"
@@ -157,7 +170,9 @@ export function OrderTicket({
       {/* Price (LIMIT/STOP only) */}
       {type !== 'MARKET' && (
         <div>
-          <label className="text-xs text-muted-foreground">Preço</label>
+          <label className="text-xs text-muted-foreground">
+            {t('sim.orderTicket.priceLabel')}
+          </label>
           <input
             type="number"
             step="0.01"
@@ -181,7 +196,7 @@ export function OrderTicket({
             onChange={(e) => setUseSl(e.target.checked)}
             className="h-3 w-3"
           />
-          Stop-Loss
+          {t('sim.orderTicket.slLabel')}
         </label>
         <label className="flex cursor-pointer items-center gap-1 text-xs">
           <input
@@ -190,13 +205,15 @@ export function OrderTicket({
             onChange={(e) => setUseTp(e.target.checked)}
             className="h-3 w-3"
           />
-          Take-Profit
+          {t('sim.orderTicket.tpLabel')}
         </label>
       </div>
 
       {useSl && (
         <div>
-          <label className="text-xs text-muted-foreground">SL</label>
+          <label className="text-xs text-muted-foreground">
+            {t('sim.orderTicket.slShortLabel')}
+          </label>
           <input
             type="number"
             step="0.01"
@@ -208,7 +225,9 @@ export function OrderTicket({
 
       {useTp && (
         <div>
-          <label className="text-xs text-muted-foreground">TP</label>
+          <label className="text-xs text-muted-foreground">
+            {t('sim.orderTicket.tpShortLabel')}
+          </label>
           <input
             type="number"
             step="0.01"
@@ -235,7 +254,9 @@ export function OrderTicket({
         ) : (
           <TrendingDown className="h-3.5 w-3.5" />
         )}
-        {side === 'BUY' ? 'Comprar' : 'Vender'}
+        {side === 'BUY'
+          ? t('sim.orderTicket.buyButton')
+          : t('sim.orderTicket.sellButton')}
       </button>
     </form>
   );

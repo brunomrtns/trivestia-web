@@ -1,11 +1,13 @@
 import { Link, Outlet, useParams } from 'react-router-dom';
 import { BookOpen } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useTenant } from '@/hooks/useTenant';
 
 /**
  * Layout de autenticação com branding do tenant (/t/:tenantSlug/login, /register)
  */
 export function TenantAuthLayout() {
+  const { t } = useTranslation();
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const { tenant } = useTenant();
 
@@ -22,7 +24,7 @@ export function TenantAuthLayout() {
             <BookOpen className="h-10 w-10" />
           )}
           <span className="text-3xl font-bold">
-            {tenant?.name ?? 'Trivestia'}
+            {tenant?.name ?? t('common.brandName')}
           </span>
         </Link>
         {tenant?.bio ? (
@@ -31,9 +33,9 @@ export function TenantAuthLayout() {
           </p>
         ) : (
           <blockquote className="max-w-sm text-center text-xl font-light leading-relaxed opacity-90">
-            "O investimento em conhecimento sempre paga os melhores dividendos."
+            {t('auth.layout.quote')}
             <footer className="mt-4 text-sm opacity-70">
-              — Benjamin Franklin
+              {t('auth.layout.quoteAuthor')}
             </footer>
           </blockquote>
         )}
@@ -48,7 +50,7 @@ export function TenantAuthLayout() {
             <BookOpen className="h-7 w-7 text-primary" />
           )}
           <span className="text-2xl font-bold">
-            {tenant?.name ?? 'Trivestia'}
+            {tenant?.name ?? t('common.brandName')}
           </span>
         </Link>
         <Outlet />

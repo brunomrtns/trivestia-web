@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import type { SimulationResult } from '@/types/api';
 
@@ -6,25 +7,26 @@ interface MetricsPanelProps {
 }
 
 export function MetricsPanel({ result }: MetricsPanelProps) {
+  const { t } = useTranslation();
   if (!result) {
     return (
       <div className="text-xs text-muted-foreground py-2 px-1">
-        Métricas disponíveis ao finalizar
+        {t('sim.metrics.empty')}
       </div>
     );
   }
 
   const rows = [
-    { label: 'Trades', value: result.tradeCount },
-    { label: 'Ganhos', value: result.winCount },
-    { label: 'Perdas', value: result.lossCount },
+    { label: t('sim.metrics.trades'), value: result.tradeCount },
+    { label: t('sim.metrics.wins'), value: result.winCount },
+    { label: t('sim.metrics.losses'), value: result.lossCount },
     {
-      label: 'Win Rate',
+      label: t('sim.metrics.winRate'),
       value: `${result.winRate.toFixed(1)}%`,
       color: result.winRate >= 50 ? 'text-emerald-400' : 'text-red-400'
     },
     {
-      label: 'Sharpe',
+      label: t('sim.metrics.sharpe'),
       value: result.sharpeRatio.toFixed(2),
       color:
         result.sharpeRatio >= 1
@@ -34,13 +36,16 @@ export function MetricsPanel({ result }: MetricsPanelProps) {
             : 'text-red-400'
     },
     {
-      label: 'Max DD',
+      label: t('sim.metrics.maxDD'),
       value: `${result.maxDrawdownPercent.toFixed(2)}%`,
       color:
         result.maxDrawdownPercent < 10 ? 'text-emerald-400' : 'text-red-400'
     },
-    { label: 'Fees Total', value: `$${result.totalFees.toFixed(2)}` },
-    { label: 'Eventos', value: result.eventCount }
+    {
+      label: t('sim.metrics.feesTotal'),
+      value: `$${result.totalFees.toFixed(2)}`
+    },
+    { label: t('sim.metrics.events'), value: result.eventCount }
   ];
 
   return (

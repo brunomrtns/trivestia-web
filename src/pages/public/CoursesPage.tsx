@@ -1,4 +1,5 @@
 import { Link, useLocation, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { BookOpen, ChevronRight, Layers } from 'lucide-react';
@@ -16,6 +17,7 @@ function CourseCardSkeleton() {
 }
 
 export default function CoursesPage() {
+  const { t } = useTranslation();
   const location = useLocation();
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const slug = tenantSlug ?? '';
@@ -38,15 +40,15 @@ export default function CoursesPage() {
   return (
     <div className="container py-16">
       <div className="mb-12">
-        <h1 className="text-4xl font-extrabold">Cursos disponíveis</h1>
+        <h1 className="text-4xl font-extrabold">{t('public.courses.title')}</h1>
         <p className="mt-2 text-lg text-muted-foreground">
-          Explore nossa grade e encontre o curso ideal para você.
+          {t('public.courses.subtitle')}
         </p>
       </div>
 
       {isError && (
         <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-6 text-destructive">
-          Não foi possível carregar os cursos. Tente novamente.
+          {t('public.courses.error')}
         </div>
       )}
 
@@ -78,10 +80,12 @@ export default function CoursesPage() {
                   <div className="mt-4 flex items-center justify-between text-sm">
                     <span className="flex items-center gap-1 text-muted-foreground">
                       <Layers className="h-4 w-4" />
-                      {course.modules?.length ?? 0} módulos
+                      {t('public.courses.card.modules', {
+                        n: course.modules?.length ?? 0
+                      })}
                     </span>
                     <span className="flex items-center gap-1 font-medium text-primary">
-                      Ver curso
+                      {t('public.courses.card.viewCourse')}
                       <ChevronRight className="h-4 w-4" />
                     </span>
                   </div>
@@ -91,7 +95,7 @@ export default function CoursesPage() {
 
         {!isLoading && !isError && courses?.length === 0 && (
           <div className="col-span-full py-20 text-center text-muted-foreground">
-            Nenhum curso disponível ainda.
+            {t('public.courses.empty')}
           </div>
         )}
       </div>

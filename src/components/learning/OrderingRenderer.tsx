@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   DndContext,
   closestCenter,
@@ -24,6 +25,7 @@ interface Props {
 }
 
 function SortableItem({ option }: { option: QuestionOption }) {
+  const { t } = useTranslation();
   const {
     attributes,
     listeners,
@@ -43,7 +45,7 @@ function SortableItem({ option }: { option: QuestionOption }) {
         {...attributes}
         {...listeners}
         className="cursor-grab touch-none text-muted-foreground active:cursor-grabbing"
-        aria-label="Arrastar para reordenar"
+        aria-label={t('learning.ordering.dragAriaLabel')}
       >
         <GripVertical className="h-5 w-5" />
       </button>
@@ -53,6 +55,7 @@ function SortableItem({ option }: { option: QuestionOption }) {
 }
 
 export function OrderingRenderer({ question, value, onChange }: Props) {
+  const { t } = useTranslation();
   const initialOrder = question.options.map((o) => o.id);
   const currentOrder = value?.orderedOptionIds ?? initialOrder;
 
@@ -76,7 +79,7 @@ export function OrderingRenderer({ question, value, onChange }: Props) {
   return (
     <div className="space-y-2">
       <p className="text-xs text-muted-foreground">
-        Arraste para ordenar (ou use teclado: Espaço + Setas)
+        {t('learning.ordering.instruction')}
       </p>
       <DndContext
         sensors={sensors}

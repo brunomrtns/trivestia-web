@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -23,11 +24,18 @@ function isActivePeriod(period: PeriodDTO) {
 }
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+  return new Date(iso).toLocaleString('pt-BR', {
+    dateStyle: 'short',
+    timeStyle: 'short'
+  });
 }
 
 export default function AdminPeriodsPage() {
-  const { tenantSlug, courseId } = useParams<{ tenantSlug: string; courseId: string }>();
+  const { t } = useTranslation();
+  const { tenantSlug, courseId } = useParams<{
+    tenantSlug: string;
+    courseId: string;
+  }>();
   const slug = tenantSlug ?? '';
   const cId = courseId ?? '';
   const qc = useQueryClient();
@@ -44,9 +52,9 @@ export default function AdminPeriodsPage() {
     mutationFn: (id: string) => adminEndpoints.deletePeriod(slug, cId, id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['periods', slug, cId] });
-      toast.success('Período excluído.');
+      toast.success(t('admin.periods.toast.deleted'));
     },
-    onError: () => toast.error('Erro ao excluir período.')
+    onError: () => toast.error(t('admin.periods.toast.deleteError'))
   });
 
   return (
@@ -59,19 +67,19 @@ export default function AdminPeriodsPage() {
             className="mb-2 flex items-center gap-1.5 text-sm text-muted-foreground transition hover:text-foreground"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            Voltar aos cursos
+            {t('admin.periods.backButton')}
           </Link>
-          <h1 className="text-3xl font-extrabold">Períodos Avaliativos</h1>
-          <p className="text-muted-foreground">
-            Defina janelas de tempo para grupos de módulos.
-          </p>
+          <h1 className="text-3xl font-extrabold">
+            {t('admin.periods.title')}
+          </h1>
+          <p className="text-muted-foreground">{t('admin.periods.subtitle')}</p>
         </div>
         <button
           onClick={() => setShowCreate(true)}
           className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
         >
           <Plus className="h-4 w-4" />
-          Novo período
+          {t('admin.periods.newButton')}
         </button>
       </div>
 
@@ -94,23 +102,27 @@ export default function AdminPeriodsPage() {
                 transition={{ delay: i * 0.04 }}
                 className="flex items-start gap-4 rounded-2xl border bg-card p-5 shadow-sm"
               >
-                <div className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${active ? 'bg-emerald-500/15' : 'bg-muted'}`}>
-                  {active
-                    ? <CheckCircle2 className="h-4.5 w-4.5 text-emerald-600 dark:text-emerald-400" />
-                    : <Clock className="h-4.5 w-4.5 text-muted-foreground" />
-                  }
+                <div
+                  className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${active ? 'bg-emerald-500/15' : 'bg-muted'}`}
+                >
+                  {active ? (
+                    <CheckCircle2 className="h-4.5 w-4.5 text-emerald-600 dark:text-emerald-400" />
+                  ) : (
+                    <Clock className="h-4.5 w-4.5 text-muted-foreground" />
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="font-semibold">{period.title}</p>
                     {active && (
                       <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                        Ativo
+                        {t('admin.periods.status.active')}
                       </span>
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {formatDate(period.startDate)} — {formatDate(period.endDate)}
+                    {formatDate(period.startDate)} —{' '}
+                    {formatDate(period.endDate)}
                   </p>
                   <div className="mt-1.5 flex flex-wrap gap-1.5">
                     {period.modules.map((pm) => (
@@ -127,7 +139,7 @@ export default function AdminPeriodsPage() {
                   <button
                     onClick={() => setEditing(period)}
                     className="rounded-lg p-2 text-muted-foreground transition hover:bg-accent hover:text-foreground"
-                    aria-label="Editar período"
+                    aria-label={t('admin.periods.aria.edit')}
                   >
                     <Pencil className="h-4 w-4" />
                   </button>
@@ -137,12 +149,13 @@ export default function AdminPeriodsPage() {
                         deleteMut.mutate(period.id);
                     }}
                     className="rounded-lg p-2 text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
-                    aria-label="Excluir período"
+                    aria-label={t('admin.periods.aria.delete')}
                   >
-                    {deleteMut.isPending
-                      ? <Loader2 className="h-4 w-4 animate-spin" />
-                      : <Trash2 className="h-4 w-4" />
-                    }
+                    {deleteMut.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
               </motion.div>
@@ -152,7 +165,7 @@ export default function AdminPeriodsPage() {
           {periods?.length === 0 && (
             <div className="py-20 text-center text-muted-foreground">
               <CalendarRange className="mx-auto mb-4 h-12 w-12 opacity-30" />
-              <p>Nenhum período criado.</p>
+              <p>{t('admin.periods.empty')}</p>
             </div>
           )}
         </div>

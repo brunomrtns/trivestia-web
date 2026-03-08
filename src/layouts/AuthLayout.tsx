@@ -1,7 +1,9 @@
+import { useTranslation } from 'react-i18next';
 import { Link, Outlet } from 'react-router-dom';
 import { BookOpen } from 'lucide-react';
 
 export function AuthLayout() {
+  const { t } = useTranslation();
   return (
     <div className="flex min-h-screen">
       {/* Painel esquerdo — branding */}
@@ -11,9 +13,9 @@ export function AuthLayout() {
           <span className="text-3xl font-bold">Trivestia</span>
         </Link>
         <blockquote className="max-w-sm text-center text-xl font-light leading-relaxed opacity-90">
-          "O investimento em conhecimento sempre paga os melhores dividendos."
+          {t('auth.layout.quote')}
           <footer className="mt-4 text-sm opacity-70">
-            — Benjamin Franklin
+            {t('auth.layout.quoteAuthor')}
           </footer>
         </blockquote>
       </div>

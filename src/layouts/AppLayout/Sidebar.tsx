@@ -1,4 +1,5 @@
 import type React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import {
   BookOpen,
@@ -14,7 +15,8 @@ import {
   TrendingUp,
   Zap,
   Globe,
-  Megaphone
+  Megaphone,
+  SlidersHorizontal
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/features/auth/auth.store';
@@ -32,29 +34,34 @@ interface SidebarProps {
   onCollapse: () => void;
 }
 
-function buildLinks(slug: string) {
+function buildLinks(slug: string, t: (key: string) => string) {
   const studentLinks: NavLink[] = [
     {
       to: tenantPath(slug, '/app/dashboard'),
       icon: LayoutDashboard,
-      label: 'Dashboard'
+      label: t('common.nav.dashboard')
     },
     {
       to: tenantPath(slug, '/app/courses'),
       icon: GraduationCap,
-      label: 'Cursos',
+      label: t('common.nav.courses'),
       alsoMatch: [tenantPath(slug, '/app/lessons')]
     },
     {
       to: tenantPath(slug, '/app/lab'),
       icon: TrendingUp,
-      label: 'Laboratório',
+      label: t('common.nav.lab'),
       alsoMatch: [tenantPath(slug, '/app/activity')]
     },
     {
       to: tenantPath(slug, '/app/progress'),
       icon: BarChart3,
-      label: 'Progresso'
+      label: t('common.nav.progress')
+    },
+    {
+      to: tenantPath(slug, '/app/settings'),
+      icon: SlidersHorizontal,
+      label: t('common.nav.settings')
     }
   ];
 
@@ -62,13 +69,17 @@ function buildLinks(slug: string) {
     {
       to: tenantPath(slug, '/admin/courses'),
       icon: Settings,
-      label: 'Gerenciar Cursos'
+      label: t('admin.nav.manageCourses')
     },
-    { to: tenantPath(slug, '/admin/users'), icon: Users, label: 'Usuários' },
+    {
+      to: tenantPath(slug, '/admin/users'),
+      icon: Users,
+      label: t('admin.nav.users')
+    },
     {
       to: tenantPath(slug, '/admin/announcements'),
       icon: Megaphone,
-      label: 'Avisos'
+      label: t('common.nav.announcements')
     }
   ];
 
@@ -76,12 +87,13 @@ function buildLinks(slug: string) {
 }
 
 export function Sidebar({ collapsed, onCollapse }: SidebarProps) {
+  const { t } = useTranslation();
   const location = useLocation();
   const user = useAuthStore((s) => s.user);
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const slug = tenantSlug ?? '';
 
-  const { studentLinks, adminLinks } = buildLinks(slug);
+  const { studentLinks, adminLinks } = buildLinks(slug, t);
 
   const isAdmin =
     user?.role === 'ADMIN' ||
@@ -145,10 +157,10 @@ export function Sidebar({ collapsed, onCollapse }: SidebarProps) {
                 'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                 'text-purple-600 hover:bg-purple-50'
               )}
-              title={collapsed ? 'Plataforma' : undefined}
+              title={collapsed ? t('admin.nav.platform') : undefined}
             >
               <Globe className="h-5 w-5 shrink-0" />
-              {!collapsed && <span>Plataforma</span>}
+              {!collapsed && <span>{t('admin.nav.platform')}</span>}
             </Link>
           </>
         )}
@@ -159,20 +171,24 @@ export function Sidebar({ collapsed, onCollapse }: SidebarProps) {
         <div className="m-2 flex items-center gap-2 rounded-lg bg-purple-500/10 p-3">
           <Zap className="h-4 w-4 text-purple-600" />
           <span className="text-xs font-medium text-purple-600">
-            Super Admin
+            {t('common.roles.superAdmin')}
           </span>
         </div>
       )}
       {!collapsed && user?.role === 'OWNER' && (
         <div className="m-2 flex items-center gap-2 rounded-lg bg-amber-500/10 p-3">
           <Crown className="h-4 w-4 text-amber-600" />
-          <span className="text-xs font-medium text-amber-600">Owner</span>
+          <span className="text-xs font-medium text-amber-600">
+            {t('common.roles.owner')}
+          </span>
         </div>
       )}
       {!collapsed && user?.role === 'ADMIN' && (
         <div className="m-2 flex items-center gap-2 rounded-lg bg-primary/10 p-3">
           <Shield className="h-4 w-4 text-primary" />
-          <span className="text-xs font-medium text-primary">Admin</span>
+          <span className="text-xs font-medium text-primary">
+            {t('common.roles.admin')}
+          </span>
         </div>
       )}
 
@@ -180,7 +196,11 @@ export function Sidebar({ collapsed, onCollapse }: SidebarProps) {
       <button
         onClick={onCollapse}
         className="flex h-12 items-center justify-center border-t text-muted-foreground transition-colors hover:text-foreground"
-        aria-label={collapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
+        aria-label={
+          collapsed
+            ? t('common.aria.expandSidebar')
+            : t('common.aria.collapseSidebar')
+        }
       >
         {collapsed ? (
           <ChevronRight className="h-5 w-5" />

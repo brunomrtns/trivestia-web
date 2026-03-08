@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Portal } from '@/components/ui/Portal';
 import { useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -62,52 +63,57 @@ function ConfirmRoleDialog({
   onCancel,
   isLoading
 }: ConfirmRoleDialogProps) {
+  const { t } = useTranslation();
   const isPromotion = newRole === 'ADMIN';
   return (
     <Portal>
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        className="w-full max-w-md rounded-2xl border bg-card p-6 shadow-xl"
-      >
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-orange-100">
-          <AlertTriangle className="h-6 w-6 text-orange-600" />
-        </div>
-        <h2 className="mb-2 text-lg font-semibold">
-          {isPromotion ? 'Promover a Administrador?' : 'Revogar Acesso Admin?'}
-        </h2>
-        <p className="mb-6 text-sm text-muted-foreground">
-          {isPromotion
-            ? `"${user.name}" terá acesso total ao painel administrativo, incluindo gerenciamento de conteúdo e usuários.`
-            : `"${user.name}" perderá o acesso administrativo e voltará a ser um estudante comum.`}
-        </p>
-        <div className="flex gap-3">
-          <button
-            onClick={onConfirm}
-            disabled={isLoading}
-            className={cn(
-              'flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition',
-              isPromotion
-                ? 'bg-primary hover:bg-primary/90'
-                : 'bg-destructive hover:bg-destructive/90',
-              'disabled:opacity-60'
-            )}
-          >
-            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-            {isPromotion ? 'Sim, promover' : 'Sim, revogar'}
-          </button>
-          <button
-            onClick={onCancel}
-            disabled={isLoading}
-            className="flex-1 rounded-lg border px-4 py-2 text-sm font-medium transition hover:bg-accent"
-          >
-            Cancelar
-          </button>
-        </div>
-      </motion.div>
-    </div>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          className="w-full max-w-md rounded-2xl border bg-card p-6 shadow-xl"
+        >
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-orange-100">
+            <AlertTriangle className="h-6 w-6 text-orange-600" />
+          </div>
+          <h2 className="mb-2 text-lg font-semibold">
+            {isPromotion
+              ? t('admin.users.role.promoteTitle')
+              : t('admin.users.role.revokeTitle')}
+          </h2>
+          <p className="mb-6 text-sm text-muted-foreground">
+            {isPromotion
+              ? t('admin.users.role.promoteMessage', { name: user.name })
+              : t('admin.users.role.revokeMessage', { name: user.name })}
+          </p>
+          <div className="flex gap-3">
+            <button
+              onClick={onConfirm}
+              disabled={isLoading}
+              className={cn(
+                'flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition',
+                isPromotion
+                  ? 'bg-primary hover:bg-primary/90'
+                  : 'bg-destructive hover:bg-destructive/90',
+                'disabled:opacity-60'
+              )}
+            >
+              {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+              {isPromotion
+                ? t('admin.users.role.promoteConfirm')
+                : t('admin.users.role.revokeConfirm')}
+            </button>
+            <button
+              onClick={onCancel}
+              disabled={isLoading}
+              className="flex-1 rounded-lg border px-4 py-2 text-sm font-medium transition hover:bg-accent"
+            >
+              {t('common.actions.cancel')}
+            </button>
+          </div>
+        </motion.div>
+      </div>
     </Portal>
   );
 }
@@ -123,6 +129,7 @@ function UserDetailModal({
   userId: string;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const { data, isLoading } = useQuery({
     queryKey: ['admin-user-detail', slug, userId],
     queryFn: () => adminUsersEndpoints.getUser(slug, userId)
@@ -130,116 +137,125 @@ function UserDetailModal({
 
   return (
     <Portal>
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 20 }}
-        className="w-full max-w-lg rounded-2xl border bg-card shadow-xl"
-      >
-        <div className="flex items-center justify-between border-b px-6 py-4">
-          <h2 className="text-lg font-semibold">Detalhes do Usuário</h2>
-          <button onClick={onClose} className="rounded-lg p-1 hover:bg-accent">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        {isLoading ? (
-          <div className="flex h-48 items-center justify-center">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          className="w-full max-w-lg rounded-2xl border bg-card shadow-xl"
+        >
+          <div className="flex items-center justify-between border-b px-6 py-4">
+            <h2 className="text-lg font-semibold">
+              {t('admin.users.detail.title')}
+            </h2>
+            <button
+              onClick={onClose}
+              className="rounded-lg p-1 hover:bg-accent"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
-        ) : data ? (
-          <div className="space-y-5 p-6">
-            {/* Header */}
-            <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-                <UserIcon className="h-7 w-7 text-primary" />
-              </div>
-              <div>
-                <p className="text-base font-semibold">{data.name}</p>
-                <p className="text-sm text-muted-foreground">{data.email}</p>
-                <div className="mt-1">
-                  <RoleBadge role={data.role} />
-                </div>
-              </div>
-            </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl border bg-muted/30 p-3">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Trophy className="h-4 w-4" />
-                  <span className="text-xs">Submissões</span>
-                </div>
-                <p className="mt-1 text-2xl font-bold">
-                  {data._count.submissions}
-                </p>
-              </div>
-              <div className="rounded-xl border bg-muted/30 p-3">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <BookOpen className="h-4 w-4" />
-                  <span className="text-xs">Aulas com progresso</span>
-                </div>
-                <p className="mt-1 text-2xl font-bold">
-                  {data._count.progress}
-                </p>
-              </div>
+          {isLoading ? (
+            <div className="flex h-48 items-center justify-center">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
+          ) : data ? (
+            <div className="space-y-5 p-6">
+              {/* Header */}
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                  <UserIcon className="h-7 w-7 text-primary" />
+                </div>
+                <div>
+                  <p className="text-base font-semibold">{data.name}</p>
+                  <p className="text-sm text-muted-foreground">{data.email}</p>
+                  <div className="mt-1">
+                    <RoleBadge role={data.role} />
+                  </div>
+                </div>
+              </div>
 
-            {/* Last activities */}
-            {data.progress.length > 0 && (
-              <div>
-                <p className="mb-2 text-sm font-medium text-muted-foreground">
-                  Atividade recente
-                </p>
-                <div className="space-y-2">
-                  {data.progress.map((p, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between rounded-lg border px-3 py-2 text-sm"
-                    >
-                      <span className="truncate text-foreground">
-                        {p.lesson.title}
-                      </span>
-                      <span
-                        className={cn(
-                          'ml-2 shrink-0 text-xs font-medium',
-                          p.status === 'COMPLETED'
-                            ? 'text-green-600'
-                            : p.status === 'IN_PROGRESS'
-                              ? 'text-yellow-600'
-                              : 'text-muted-foreground'
-                        )}
+              {/* Stats */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl border bg-muted/30 p-3">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Trophy className="h-4 w-4" />
+                    <span className="text-xs">
+                      {t('admin.users.detail.submissions')}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-2xl font-bold">
+                    {data._count.submissions}
+                  </p>
+                </div>
+                <div className="rounded-xl border bg-muted/30 p-3">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <BookOpen className="h-4 w-4" />
+                    <span className="text-xs">
+                      {t('admin.users.detail.lessonsProgress')}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-2xl font-bold">
+                    {data._count.progress}
+                  </p>
+                </div>
+              </div>
+
+              {/* Last activities */}
+              {data.progress.length > 0 && (
+                <div>
+                  <p className="mb-2 text-sm font-medium text-muted-foreground">
+                    {t('app.dashboard.recentActivity')}
+                  </p>
+                  <div className="space-y-2">
+                    {data.progress.map((p, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between rounded-lg border px-3 py-2 text-sm"
                       >
-                        {p.score.toFixed(0)}%
-                      </span>
-                    </div>
-                  ))}
+                        <span className="truncate text-foreground">
+                          {p.lesson.title}
+                        </span>
+                        <span
+                          className={cn(
+                            'ml-2 shrink-0 text-xs font-medium',
+                            p.status === 'COMPLETED'
+                              ? 'text-green-600'
+                              : p.status === 'IN_PROGRESS'
+                                ? 'text-yellow-600'
+                                : 'text-muted-foreground'
+                          )}
+                        >
+                          {p.score.toFixed(0)}%
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Metadata */}
-            <div className="space-y-1 border-t pt-4 text-xs text-muted-foreground">
-              <p>
-                Cadastrado em:{' '}
-                <span className="text-foreground">
-                  {formatDate(data.createdAt)}
-                </span>
-              </p>
-              {data.lastLoginAt && (
+              {/* Metadata */}
+              <div className="space-y-1 border-t pt-4 text-xs text-muted-foreground">
                 <p>
-                  Último login:{' '}
+                  {t('admin.users.detail.registeredAt')}{' '}
                   <span className="text-foreground">
-                    {formatDate(data.lastLoginAt)}
+                    {formatDate(data.createdAt)}
                   </span>
                 </p>
-              )}
+                {data.lastLoginAt && (
+                  <p>
+                    {t('admin.users.detail.lastLogin')}{' '}
+                    <span className="text-foreground">
+                      {formatDate(data.lastLoginAt)}
+                    </span>
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-        ) : null}
-      </motion.div>
-    </div>
+          ) : null}
+        </motion.div>
+      </div>
     </Portal>
   );
 }
@@ -247,6 +263,7 @@ function UserDetailModal({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function AdminUsersPage() {
+  const { t } = useTranslation();
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const slug = tenantSlug ?? '';
   const currentUser = useAuthStore((s) => s.user);
@@ -296,16 +313,16 @@ export default function AdminUsersPage() {
       setConfirmAction(null);
     },
     onError: (err: { response?: { data?: { message?: string } } }) => {
-      toast.error(err.response?.data?.message ?? 'Erro ao atualizar role.');
+      toast.error(
+        err.response?.data?.message ?? t('super.users.toast.updateError')
+      );
       setConfirmAction(null);
     }
   });
 
   function handleRoleClick(user: AdminUser) {
     if (user.id === currentUser?.id) {
-      toast.warning(
-        'Você não pode alterar o próprio role. Peça a outro administrador.'
-      );
+      toast.warning(t('admin.users.toast.ownRoleWarning'));
       return;
     }
     const newRole: Role = user.role === 'ADMIN' ? 'STUDENT' : 'ADMIN';
@@ -318,9 +335,9 @@ export default function AdminUsersPage() {
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-2xl font-bold">Gerenciar Usuários</h1>
+        <h1 className="text-2xl font-bold">{t('admin.users.page.title')}</h1>
         <p className="text-sm text-muted-foreground">
-          Gerencie roles e permissões dos usuários da plataforma.
+          {t('admin.users.page.subtitle')}
         </p>
       </div>
 
@@ -330,7 +347,7 @@ export default function AdminUsersPage() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Buscar por nome ou e-mail..."
+            placeholder={t('admin.users.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && applySearch()}
@@ -344,15 +361,15 @@ export default function AdminUsersPage() {
           }}
           className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
         >
-          <option value="">Todos os roles</option>
+          <option value="">{t('super.users.filter.allRoles')}</option>
           <option value="ADMIN">Admin</option>
-          <option value="STUDENT">Estudante</option>
+          <option value="STUDENT">{t('common.roles.student')}</option>
         </select>
         <button
           onClick={applySearch}
           className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
         >
-          Buscar
+          {t('admin.users.searchButton')}
         </button>
       </div>
 
@@ -361,24 +378,30 @@ export default function AdminUsersPage() {
         {isLoading ? (
           <div className="flex h-48 items-center justify-center gap-2 text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin" />
-            <span className="text-sm">Carregando usuários...</span>
+            <span className="text-sm">{t('admin.users.loading')}</span>
           </div>
         ) : users.length === 0 ? (
           <div className="flex h-48 flex-col items-center justify-center gap-2 text-muted-foreground">
             <UserIcon className="h-8 w-8 opacity-40" />
-            <p className="text-sm">Nenhum usuário encontrado.</p>
+            <p className="text-sm">{t('super.users.empty')}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/30 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  <th className="px-4 py-3">Nome</th>
-                  <th className="px-4 py-3">E-mail</th>
-                  <th className="px-4 py-3">Role</th>
-                  <th className="px-4 py-3">Último login</th>
-                  <th className="px-4 py-3">Cadastro</th>
-                  <th className="px-4 py-3 text-right">Ações</th>
+                  <th className="px-4 py-3">{t('super.users.table.name')}</th>
+                  <th className="px-4 py-3">{t('common.fields.email')}</th>
+                  <th className="px-4 py-3">{t('super.users.table.role')}</th>
+                  <th className="px-4 py-3">
+                    {t('admin.users.table.lastLogin')}
+                  </th>
+                  <th className="px-4 py-3">
+                    {t('admin.users.table.registeredAt')}
+                  </th>
+                  <th className="px-4 py-3 text-right">
+                    {t('super.users.table.actions')}
+                  </th>
                 </tr>
               </thead>
               <tbody
@@ -413,14 +436,14 @@ export default function AdminUsersPage() {
                           onClick={() => setDetailUserId(user.id)}
                           className="rounded-lg border px-3 py-1.5 text-xs font-medium transition hover:bg-accent"
                         >
-                          Detalhes
+                          {t('admin.users.detailsButton')}
                         </button>
                         <button
                           onClick={() => handleRoleClick(user)}
                           disabled={user.id === currentUser?.id}
                           title={
                             user.id === currentUser?.id
-                              ? 'Você não pode alterar o próprio role'
+                              ? t('admin.users.disabledTitle')
                               : undefined
                           }
                           className={cn(
@@ -432,12 +455,13 @@ export default function AdminUsersPage() {
                         >
                           {user.role === 'ADMIN' ? (
                             <>
-                              <ShieldOff className="h-3.5 w-3.5" /> Revogar
-                              Admin
+                              <ShieldOff className="h-3.5 w-3.5" />{' '}
+                              {t('admin.users.revokeButton')}
                             </>
                           ) : (
                             <>
-                              <Shield className="h-3.5 w-3.5" /> Tornar Admin
+                              <Shield className="h-3.5 w-3.5" />{' '}
+                              {t('admin.users.promoteButton')}
                             </>
                           )}
                         </button>
@@ -459,7 +483,7 @@ export default function AdminUsersPage() {
                 pagination.page * pagination.pageSize,
                 pagination.total
               )}{' '}
-              de {pagination.total} usuários
+              de {pagination.total} {t('admin.users.paginationUsers')}
             </span>
             <div className="flex items-center gap-2">
               <button

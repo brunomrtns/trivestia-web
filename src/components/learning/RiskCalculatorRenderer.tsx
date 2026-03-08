@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Calculator,
   TrendingDown,
@@ -25,21 +26,26 @@ interface Props {
 // ─── Scenario Card ───────────────────────────────────
 
 function ScenarioCard({ meta }: { meta: RiskCalculatorMetadata['riskCalc'] }) {
+  const { t } = useTranslation();
   const items = [
     {
       icon: DollarSign,
-      label: 'Saldo',
+      label: t('learning.riskCalc.scenario.balance'),
       value: `$ ${meta.balance.toLocaleString('pt-BR')}`
     },
-    { icon: Percent, label: 'Risco', value: `${meta.riskPercent}%` },
+    {
+      icon: Percent,
+      label: t('learning.riskCalc.scenario.risk'),
+      value: `${meta.riskPercent}%`
+    },
     {
       icon: TrendingUp,
-      label: 'Entrada',
+      label: t('learning.riskCalc.scenario.entry'),
       value: `$ ${meta.entryPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
     },
     {
       icon: TrendingDown,
-      label: 'Stop',
+      label: t('learning.riskCalc.scenario.stop'),
       value: `$ ${meta.stopPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
     }
   ];
@@ -47,7 +53,7 @@ function ScenarioCard({ meta }: { meta: RiskCalculatorMetadata['riskCalc'] }) {
   if (meta.contractValue && meta.contractValue !== 1) {
     items.push({
       icon: Info,
-      label: 'Valor por contrato',
+      label: t('learning.riskCalc.scenario.contractValue'),
       value: `$ ${meta.contractValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
     });
   }
@@ -78,16 +84,21 @@ function StepByStep({
   meta: RiskCalculatorMetadata['riskCalc'];
   feedback: RiskCalculatorFeedback;
 }) {
+  const { t } = useTranslation();
   const riskValue = meta.balance * (meta.riskPercent / 100);
   const stopDist = Math.abs(meta.entryPrice - meta.stopPrice);
   const contract = meta.contractValue ?? 1;
 
   return (
     <div className="space-y-2 rounded-xl border bg-muted/40 p-4 text-sm">
-      <p className="font-semibold text-foreground">Passo a passo</p>
+      <p className="font-semibold text-foreground">
+        {t('learning.riskCalc.stepByStep.title')}
+      </p>
       <ol className="list-inside list-decimal space-y-1.5 text-muted-foreground">
         <li>
-          <span className="font-medium text-foreground">Risco em $:</span>{' '}
+          <span className="font-medium text-foreground">
+            {t('learning.riskCalc.stepByStep.riskAmount')}
+          </span>{' '}
           {meta.balance.toLocaleString('pt-BR')} × {meta.riskPercent}% ={' '}
           <span className="font-semibold text-primary">
             $ {riskValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -95,7 +106,7 @@ function StepByStep({
         </li>
         <li>
           <span className="font-medium text-foreground">
-            Distância do stop:
+            {t('learning.riskCalc.stepByStep.stopDistance')}
           </span>{' '}
           |{meta.entryPrice} − {meta.stopPrice}| ={' '}
           <span className="font-semibold text-primary">
@@ -105,7 +116,7 @@ function StepByStep({
         {contract !== 1 && (
           <li>
             <span className="font-medium text-foreground">
-              Valor por contrato:
+              {t('learning.riskCalc.stepByStep.contractValueStep')}
             </span>{' '}
             <span className="font-semibold text-primary">
               {contract.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -114,7 +125,7 @@ function StepByStep({
         )}
         <li>
           <span className="font-medium text-foreground">
-            Tamanho da posição:
+            {t('learning.riskCalc.stepByStep.positionSize')}
           </span>{' '}
           {riskValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} ÷ (
           {stopDist.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -131,19 +142,25 @@ function StepByStep({
 
       <div className="mt-3 flex items-center gap-3 rounded-lg bg-background p-3">
         <div>
-          <p className="text-xs text-muted-foreground">Sua resposta</p>
+          <p className="text-xs text-muted-foreground">
+            {t('learning.riskCalc.stepByStep.yourAnswer')}
+          </p>
           <p className="text-lg font-bold">{feedback.userPositionSize}</p>
         </div>
         <div className="h-8 w-px bg-border" />
         <div>
-          <p className="text-xs text-muted-foreground">Esperado</p>
+          <p className="text-xs text-muted-foreground">
+            {t('learning.riskCalc.stepByStep.expected')}
+          </p>
           <p className="text-lg font-bold text-primary">
             {feedback.expectedPositionSize}
           </p>
         </div>
         <div className="h-8 w-px bg-border" />
         <div>
-          <p className="text-xs text-muted-foreground">Diferença</p>
+          <p className="text-xs text-muted-foreground">
+            {t('learning.riskCalc.stepByStep.difference')}
+          </p>
           <p
             className={cn(
               'text-lg font-bold',
@@ -164,27 +181,29 @@ function StepByStep({
 
 // ─── Main Component ──────────────────────────────────
 
-const LABEL_CONFIG: Record<string, { className: string; text: string }> = {
-  CORRECT: {
-    className: 'bg-green-500/10 text-green-600 border-green-500/30',
-    text: '✅ Correto'
-  },
-  PARTIAL: {
-    className: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/30',
-    text: '⚠️ Quase'
-  },
-  WRONG: {
-    className: 'bg-red-500/10 text-red-600 border-red-500/30',
-    text: '❌ Incorreto'
-  }
-};
-
 export function RiskCalculatorRenderer({
   question,
   value,
   onChange,
   feedback
 }: Props) {
+  const { t } = useTranslation();
+
+  const LABEL_CONFIG: Record<string, { className: string; text: string }> = {
+    CORRECT: {
+      className: 'bg-green-500/10 text-green-600 border-green-500/30',
+      text: t('learning.riskCalc.feedback.labels.correct')
+    },
+    PARTIAL: {
+      className: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/30',
+      text: t('learning.riskCalc.feedback.labels.partial')
+    },
+    WRONG: {
+      className: 'bg-red-500/10 text-red-600 border-red-500/30',
+      text: t('learning.riskCalc.feedback.labels.wrong')
+    }
+  };
+
   const raw = question.metadata?.jsonData as
     | Record<string, unknown>
     | undefined;
@@ -212,7 +231,7 @@ export function RiskCalculatorRenderer({
   if (!meta) {
     return (
       <div className="rounded-xl border bg-muted/50 p-6 text-center text-sm text-muted-foreground">
-        Dados do cenário não disponíveis
+        {t('learning.riskCalc.noData')}
       </div>
     );
   }
@@ -226,7 +245,7 @@ export function RiskCalculatorRenderer({
       <div className="space-y-2">
         <label className="flex items-center gap-2 text-sm font-medium">
           <Calculator className="h-4 w-4 text-muted-foreground" />
-          Qual o tamanho da posição?
+          {t('learning.riskCalc.input.label')}
         </label>
 
         <div className="relative">
@@ -236,7 +255,7 @@ export function RiskCalculatorRenderer({
             value={inputValue}
             onChange={(e) => handleChange(e.target.value)}
             disabled={hasFeedback}
-            placeholder="Ex: 2.50"
+            placeholder={t('learning.riskCalc.input.placeholder')}
             className={cn(
               'w-full rounded-lg border bg-background px-4 py-3 text-lg font-medium',
               'transition-colors placeholder:text-muted-foreground/50',
@@ -260,7 +279,8 @@ export function RiskCalculatorRenderer({
             >
               {LABEL_CONFIG[feedback.label]?.text}
               <span className="font-normal opacity-75">
-                ({Math.round((feedback.scoreRatio ?? 0) * 100)}% de acerto)
+                ({Math.round((feedback.scoreRatio ?? 0) * 100)}
+                {t('learning.riskCalc.feedback.accuracySuffix')})
               </span>
             </div>
             {/* Barra proporcional */}

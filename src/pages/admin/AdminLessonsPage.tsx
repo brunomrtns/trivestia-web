@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -43,7 +44,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { adminEndpoints } from '@/services/endpoints/admin.endpoints';
 import { StepFormModal } from '@/components/admin/StepFormModal';
-import { cn, getActivityTypeLabel } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import type {
   Module,
   Lesson,
@@ -53,61 +54,25 @@ import type {
   StepType
 } from '@/types/api';
 
-// ─── Schemas ─────────────────────────────────────────────────────────────────
+// ─── Types ───────────────────────────────────────────────────────────────────
 
-const moduleSchema = z.object({
-  title: z.string().min(2, 'Mínimo 2 caracteres'),
-  order: z.coerce.number().min(1, 'Mínimo 1')
-});
-type ModuleForm = z.infer<typeof moduleSchema>;
+type ModuleForm = { title: string; order: number };
 
-const lessonSchema = z.object({
-  title: z.string().min(2, 'Mínimo 2 caracteres'),
-  order: z.coerce.number().min(1, 'Mínimo 1'),
-  availableFrom: z.string().optional(),
-  prerequisiteLessonId: z.string().optional(),
-  prerequisiteMinScore: z.coerce.number().min(0).max(100).optional()
-});
-type LessonForm = z.infer<typeof lessonSchema>;
+type LessonForm = {
+  title: string;
+  order: number;
+  availableFrom?: string;
+  prerequisiteLessonId?: string;
+  prerequisiteMinScore?: number;
+};
 
-const activitySchema = z.object({
-  title: z.string().min(2, 'Mínimo 2 caracteres'),
-  order: z.coerce.number().min(1, 'Mínimo 1'),
-  type: z.enum([
-    'MULTIPLE_CHOICE',
-    'MULTIPLE_SELECT',
-    'TRUE_FALSE',
-    'ORDERING',
-    'TEXT_INPUT',
-    'SCENARIO',
-    'CHART_MARKUP',
-    'RISK_CALCULATOR',
-    'SIM_TRADING_CHALLENGE'
-  ] as const),
-  reviewPolicy: z
-    .enum(['IMMEDIATE', 'AFTER_DATE', 'NEVER'] as const)
-    .default('IMMEDIATE'),
-  reviewAfterDate: z.string().optional().nullable()
-});
-type ActivityForm = z.infer<typeof activitySchema>;
-
-const REVIEW_POLICIES: { value: ActivityReviewPolicy; label: string; description: string }[] = [
-  { value: 'IMMEDIATE', label: 'Imediata', description: 'Aluno vê gabarito logo após responder' },
-  { value: 'AFTER_DATE', label: 'Após data', description: 'Gabarito liberado após data específica' },
-  { value: 'NEVER', label: 'Nunca', description: 'Gabarito nunca é exibido' }
-];
-
-const ACTIVITY_TYPES: { value: ActivityType; label: string }[] = [
-  { value: 'MULTIPLE_CHOICE', label: 'Múltipla Escolha' },
-  { value: 'MULTIPLE_SELECT', label: 'Múltipla Seleção' },
-  { value: 'TRUE_FALSE', label: 'Verdadeiro/Falso' },
-  { value: 'ORDERING', label: 'Ordenação' },
-  { value: 'TEXT_INPUT', label: 'Resposta Aberta' },
-  { value: 'SCENARIO', label: 'Cenário' },
-  { value: 'CHART_MARKUP', label: 'Marcação de Gráfico' },
-  { value: 'RISK_CALCULATOR', label: 'Calculadora de Risco' },
-  { value: 'SIM_TRADING_CHALLENGE', label: 'Simulação de Trading' }
-];
+type ActivityForm = {
+  title: string;
+  order: number;
+  type: ActivityType;
+  reviewPolicy: ActivityReviewPolicy;
+  reviewAfterDate?: string | null;
+};
 
 const TYPE_COLORS: Record<ActivityType, string> = {
   MULTIPLE_CHOICE: 'bg-blue-500/10 text-blue-600 border-blue-200',
@@ -126,13 +91,6 @@ const STEP_ICON: Record<StepType, React.ReactNode> = {
   CONTENT_TEXT: <FileText className="h-4 w-4 shrink-0 text-blue-500" />,
   CONTENT_VIDEO: <Video className="h-4 w-4 shrink-0 text-purple-500" />,
   CONTENT_IMAGE: <Image className="h-4 w-4 shrink-0 text-green-500" />
-};
-
-const STEP_LABEL: Record<StepType, string> = {
-  ACTIVITY: 'Atividade',
-  CONTENT_TEXT: 'Texto',
-  CONTENT_VIDEO: 'Vídeo',
-  CONTENT_IMAGE: 'Imagem'
 };
 
 const STEP_BADGE_COLOR: Record<StepType, string> = {
@@ -159,6 +117,13 @@ function SortableStepRow({
   onDelete: () => void;
   isDeleting: boolean;
 }) {
+  const { t } = useTranslation();
+  const STEP_LABEL: Record<StepType, string> = {
+    ACTIVITY: t('admin.lessons.stepType.activity'),
+    CONTENT_TEXT: t('admin.lessons.stepType.text'),
+    CONTENT_VIDEO: t('admin.lessons.stepType.video'),
+    CONTENT_IMAGE: t('admin.lessons.stepType.image')
+  };
   const {
     attributes,
     listeners,
@@ -181,9 +146,10 @@ function SortableStepRow({
       : undefined;
 
   // For ACTIVITY steps, extract the activity type from content if available
-  const activityType = step.type === 'ACTIVITY'
-    ? (step.content as { activityType?: ActivityType }).activityType
-    : undefined;
+  const activityType =
+    step.type === 'ACTIVITY'
+      ? (step.content as { activityType?: ActivityType }).activityType
+      : undefined;
 
   return (
     <div
@@ -201,7 +167,7 @@ function SortableStepRow({
             ? 'cursor-default opacity-30'
             : 'cursor-grab touch-none hover:text-muted-foreground active:cursor-grabbing'
         )}
-        aria-label="Arrastar"
+        aria-label={t('admin.lessons.aria.drag')}
       >
         <GripVertical className="h-4 w-4" />
       </button>
@@ -218,7 +184,7 @@ function SortableStepRow({
             TYPE_COLORS[activityType] ?? 'bg-muted text-muted-foreground'
           )}
         >
-          {getActivityTypeLabel(activityType)}
+          {t(`common.activityTypes.${activityType}`, { defaultValue: activityType })}
         </span>
       )}
 
@@ -239,7 +205,7 @@ function SortableStepRow({
           className="flex shrink-0 items-center gap-1 rounded-lg border px-3 py-1 text-xs font-medium transition hover:bg-accent"
         >
           <HelpCircle className="h-3 w-3" />
-          Questões
+          {t('admin.lessons.questionsLink')}
         </Link>
       )}
 
@@ -248,7 +214,7 @@ function SortableStepRow({
         <button
           onClick={onEdit}
           className="shrink-0 rounded-lg p-1.5 text-muted-foreground transition hover:bg-accent hover:text-foreground"
-          aria-label="Editar etapa"
+          aria-label={t('admin.lessonSteps.aria.edit')}
         >
           <Pencil className="h-3.5 w-3.5" />
         </button>
@@ -258,7 +224,7 @@ function SortableStepRow({
         onClick={onDelete}
         disabled={isDeleting}
         className="shrink-0 rounded-lg p-1.5 text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive disabled:opacity-40"
-        aria-label="Excluir etapa"
+        aria-label={t('admin.lessonSteps.aria.delete')}
       >
         {isDeleting ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -288,6 +254,64 @@ function LessonSection({
   isDeletingLesson: boolean;
 }) {
   const qc = useQueryClient();
+  const { t } = useTranslation();
+  const lessonSchema = z.object({
+    title: z.string().min(2, t('admin.lessons.validation.title')),
+    order: z.coerce.number().min(1, t('admin.lessons.validation.order')),
+    availableFrom: z.string().optional(),
+    prerequisiteLessonId: z.string().optional(),
+    prerequisiteMinScore: z.coerce.number().min(0).max(100).optional()
+  });
+  const activitySchema = z.object({
+    title: z.string().min(2, t('admin.lessons.validation.title')),
+    order: z.coerce.number().min(1, t('admin.lessons.validation.order')),
+    type: z.enum([
+      'MULTIPLE_CHOICE',
+      'MULTIPLE_SELECT',
+      'TRUE_FALSE',
+      'ORDERING',
+      'TEXT_INPUT',
+      'SCENARIO',
+      'CHART_MARKUP',
+      'RISK_CALCULATOR',
+      'SIM_TRADING_CHALLENGE'
+    ] as const),
+    reviewPolicy: z
+      .enum(['IMMEDIATE', 'AFTER_DATE', 'NEVER'] as const)
+      .default('IMMEDIATE'),
+    reviewAfterDate: z.string().optional().nullable()
+  });
+  const ACTIVITY_TYPES: { value: ActivityType; label: string }[] = [
+    {
+      value: 'MULTIPLE_CHOICE',
+      label: t('admin.lessons.activityType.multipleChoice')
+    },
+    {
+      value: 'MULTIPLE_SELECT',
+      label: t('admin.lessons.activityType.multipleSelect')
+    },
+    { value: 'TRUE_FALSE', label: t('admin.lessons.activityType.trueFalse') },
+    { value: 'ORDERING', label: t('admin.lessons.activityType.ordering') },
+    { value: 'TEXT_INPUT', label: t('admin.lessons.activityType.textInput') },
+    { value: 'SCENARIO', label: t('admin.lessons.activityType.scenario') },
+    {
+      value: 'CHART_MARKUP',
+      label: t('admin.lessons.activityType.chartMarkup')
+    },
+    {
+      value: 'RISK_CALCULATOR',
+      label: t('admin.lessons.activityType.riskCalculator')
+    },
+    {
+      value: 'SIM_TRADING_CHALLENGE',
+      label: t('admin.lessons.activityType.simTrading')
+    }
+  ];
+  const REVIEW_POLICIES: { value: ActivityReviewPolicy; label: string }[] = [
+    { value: 'IMMEDIATE', label: t('admin.lessons.reviewPolicy.immediate') },
+    { value: 'AFTER_DATE', label: t('admin.lessons.reviewPolicy.afterDate') },
+    { value: 'NEVER', label: t('admin.lessons.reviewPolicy.never') }
+  ];
   const [expanded, setExpanded] = useState(false);
   const [editingLesson, setEditingLesson] = useState(false);
   const [showAccessRules, setShowAccessRules] = useState(false);
@@ -334,7 +358,7 @@ function LessonSection({
     mutationFn: (orders: { stepId: string; order: number }[]) =>
       adminEndpoints.reorderSteps(slug, lesson.id, orders),
     onError: () => {
-      toast.error('Erro ao reordenar etapas.');
+      toast.error(t('admin.lessonSteps.toast.reorderError'));
       if (timeline?.steps) setLocalSteps(timeline.steps);
     }
   });
@@ -349,7 +373,7 @@ function LessonSection({
     setLocalSteps(reordered);
 
     if (reordered.some((s) => s.isVirtual)) {
-      toast.info('Aguardando materialização das etapas...');
+      toast.info(t('admin.lessonSteps.toast.materializationPending'));
       return;
     }
 
@@ -370,14 +394,16 @@ function LessonSection({
     }) => {
       await adminEndpoints.deleteStep(slug, lesson.id, stepId);
       if (type === 'ACTIVITY' && activityId) {
-        await adminEndpoints.deleteActivity(slug, lesson.id, activityId).catch(() => {});
+        await adminEndpoints
+          .deleteActivity(slug, lesson.id, activityId)
+          .catch(() => {});
       }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-timeline', slug, lesson.id] });
-      toast.success('Etapa excluída.');
+      toast.success(t('admin.lessonSteps.toast.deleted'));
     },
-    onError: () => toast.error('Erro ao excluir etapa.')
+    onError: () => toast.error(t('admin.lessonSteps.toast.deleteError'))
   });
 
   // ─── Activity form ──────────────────────────────────────────────────────────
@@ -394,7 +420,11 @@ function LessonSection({
 
   const createActivityStepMut = useMutation({
     mutationFn: async (data: ActivityForm) => {
-      const activity = await adminEndpoints.createActivity(slug, lesson.id, data);
+      const activity = await adminEndpoints.createActivity(
+        slug,
+        lesson.id,
+        data
+      );
       await adminEndpoints.createStep(slug, lesson.id, {
         type: 'ACTIVITY',
         title: activity.title,
@@ -412,9 +442,9 @@ function LessonSection({
         reviewPolicy: 'IMMEDIATE',
         reviewAfterDate: null
       });
-      toast.success('Atividade adicionada!');
+      toast.success(t('admin.lessons.toast.activityAdded'));
     },
-    onError: () => toast.error('Erro ao criar atividade.')
+    onError: () => toast.error(t('admin.lessons.toast.activityAddError'))
   });
 
   const createContentStepMut = useMutation({
@@ -428,9 +458,9 @@ function LessonSection({
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-timeline', slug, lesson.id] });
       setAddingStep(false);
-      toast.success('Etapa criada!');
+      toast.success(t('admin.stepForm.toast.created'));
     },
-    onError: () => toast.error('Erro ao criar etapa.')
+    onError: () => toast.error(t('admin.stepForm.toast.createError'))
   });
 
   // ─── Lesson edit form ───────────────────────────────────────────────────────
@@ -454,9 +484,10 @@ function LessonSection({
     enabled: editingLesson
   });
 
-  const allCourseLessons = courseData?.modules?.flatMap(
-    (m) => (m.lessons ?? []).map((l) => ({ ...l, moduleTitle: m.title }))
-  ) ?? [];
+  const allCourseLessons =
+    courseData?.modules?.flatMap((m) =>
+      (m.lessons ?? []).map((l) => ({ ...l, moduleTitle: m.title }))
+    ) ?? [];
 
   const updateLessonMut = useMutation({
     mutationFn: (data: LessonForm) =>
@@ -468,15 +499,19 @@ function LessonSection({
           : null,
         prerequisiteLessonId: data.prerequisiteLessonId || null,
         prerequisiteMinScore:
-          data.prerequisiteMinScore != null ? Number(data.prerequisiteMinScore) : null
+          data.prerequisiteMinScore != null
+            ? Number(data.prerequisiteMinScore)
+            : null
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-lessons', slug, moduleId] });
       setEditingLesson(false);
-      toast.success('Aula atualizada!');
+      toast.success(t('admin.lessons.toast.lessonUpdated'));
     },
     onError: (e: { response?: { data?: { message?: string } } }) =>
-      toast.error(e?.response?.data?.message ?? 'Erro ao atualizar aula.')
+      toast.error(
+        e?.response?.data?.message ?? t('admin.lessons.toast.lessonUpdateError')
+      )
   });
 
   const hasVirtualSteps = localSteps.some((s) => s.isVirtual);
@@ -511,14 +546,14 @@ function LessonSection({
               {updateLessonMut.isPending && (
                 <Loader2 className="h-3 w-3 animate-spin" />
               )}
-              Salvar
+              {t('admin.stepForm.saveButton')}
             </button>
             <button
               type="button"
               onClick={() => setEditingLesson(false)}
               className="rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-accent"
             >
-              Cancelar
+              {t('common.actions.cancel')}
             </button>
           </div>
 
@@ -529,19 +564,20 @@ function LessonSection({
               onClick={() => setShowAccessRules(!showAccessRules)}
               className="flex w-full items-center gap-2 px-3 py-2 text-xs font-semibold text-muted-foreground hover:text-foreground"
             >
-              {showAccessRules
-                ? <ChevronDown className="h-3.5 w-3.5" />
-                : <ChevronRight className="h-3.5 w-3.5" />
-              }
+              {showAccessRules ? (
+                <ChevronDown className="h-3.5 w-3.5" />
+              ) : (
+                <ChevronRight className="h-3.5 w-3.5" />
+              )}
               <ShieldCheck className="h-3.5 w-3.5" />
-              Regras de acesso
+              {t('admin.lessons.accessRules.title')}
             </button>
             {showAccessRules && (
               <div className="border-t px-3 pb-3 pt-2.5 space-y-3">
                 {/* availableFrom */}
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                    Disponível a partir de (opcional)
+                    {t('admin.lessons.accessRules.availableFrom')}
                   </label>
                   <input
                     type="datetime-local"
@@ -554,13 +590,13 @@ function LessonSection({
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground flex items-center gap-1">
                     <Lock className="h-3 w-3" />
-                    Aula pré-requisito (opcional)
+                    {t('admin.lessons.accessRules.prerequisiteLesson')}
                   </label>
                   <select
                     className="w-full rounded-lg border bg-background px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-ring"
                     {...lessonEditForm.register('prerequisiteLessonId')}
                   >
-                    <option value="">— Nenhum —</option>
+                    <option value="">{t('admin.lessons.accessRules.noPrerequisite')}</option>
                     {allCourseLessons
                       .filter((l) => l.id !== lesson.id)
                       .map((l) => (
@@ -574,7 +610,7 @@ function LessonSection({
                 {/* prerequisiteMinScore */}
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                    Nota mínima no pré-requisito (0 = só completar)
+                    {t('admin.lessons.accessRules.minScore')}
                   </label>
                   <input
                     type="number"
@@ -614,18 +650,24 @@ function LessonSection({
               setExpanded(true);
             }}
             className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-accent hover:text-foreground"
-            aria-label="Editar aula"
+            aria-label={t('admin.lessons.aria.editLesson')}
           >
             <Pencil className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={() => {
-              if (confirm(`Excluir aula "${lesson.title}"?`))
+              if (
+                confirm(
+                  t('admin.lessons.confirmDeleteLesson', {
+                    title: lesson.title
+                  })
+                )
+              )
                 onDeleteLesson(lesson.id);
             }}
             disabled={isDeletingLesson}
             className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive disabled:opacity-40"
-            aria-label="Excluir aula"
+            aria-label={t('admin.lessons.aria.deleteLesson')}
           >
             {isDeletingLesson ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -642,7 +684,7 @@ function LessonSection({
           {loadingSteps ? (
             <div className="flex items-center justify-center gap-2 py-4 text-xs text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
-              Carregando…
+              {t('admin.lessons.loadingSteps')}
             </div>
           ) : (
             <>
@@ -663,7 +705,14 @@ function LessonSection({
                       step={step}
                       onEdit={() => setEditingStep(step)}
                       onDelete={() => {
-                        if (!confirm(`Excluir "${step.title}"?`)) return;
+                        if (
+                          !confirm(
+                            t('admin.lessons.confirmDeleteStep', {
+                              title: step.title
+                            })
+                          )
+                        )
+                          return;
                         const activityId =
                           step.type === 'ACTIVITY'
                             ? (step.content as { activityId?: string })
@@ -687,7 +736,7 @@ function LessonSection({
 
               {localSteps.length === 0 && (
                 <p className="py-2 text-center text-xs text-muted-foreground">
-                  Nenhuma etapa nesta aula.
+                  {t('admin.lessonSteps.empty.title')}
                 </p>
               )}
 
@@ -716,7 +765,7 @@ function LessonSection({
                   )}
                 >
                   <Zap className="h-3.5 w-3.5" />
-                  Atividade
+                  {t('admin.lessons.stepType.activity')}
                 </button>
                 <button
                   type="button"
@@ -729,7 +778,7 @@ function LessonSection({
                   )}
                 >
                   <FileText className="h-3.5 w-3.5" />
-                  Conteúdo
+                  {t('admin.stepForm.contentLabel')}
                 </button>
               </div>
 
@@ -743,7 +792,7 @@ function LessonSection({
                 >
                   <div className="flex-1 min-w-[140px]">
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                      Título
+                      {t('admin.stepForm.titleLabel')}
                     </label>
                     <input
                       className="w-full rounded-lg border bg-background px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-ring"
@@ -757,7 +806,7 @@ function LessonSection({
                   </div>
                   <div className="flex-1 min-w-[160px]">
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                      Tipo
+                      {t('admin.stepForm.typeLabel')}
                     </label>
                     <select
                       className="w-full rounded-lg border bg-background px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-ring"
@@ -778,7 +827,7 @@ function LessonSection({
                   </div>
                   <div className="flex-1 min-w-[160px]">
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                      Revisão
+                      {t('admin.lessons.activityForm.reviewLabel')}
                     </label>
                     <select
                       className="w-full rounded-lg border bg-background px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-ring"
@@ -794,7 +843,7 @@ function LessonSection({
                   {actForm.watch('reviewPolicy') === 'AFTER_DATE' && (
                     <div className="flex-1 min-w-[160px]">
                       <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                        Liberar revisão em
+                        {t('admin.lessons.activityForm.releaseReviewAt')}
                       </label>
                       <input
                         type="datetime-local"
@@ -812,7 +861,7 @@ function LessonSection({
                       {createActivityStepMut.isPending && (
                         <Loader2 className="h-3 w-3 animate-spin" />
                       )}
-                      Salvar
+                      {t('admin.stepForm.saveButton')}
                     </button>
                     <button
                       type="button"
@@ -822,7 +871,7 @@ function LessonSection({
                       }}
                       className="rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-accent"
                     >
-                      Cancelar
+                      {t('common.actions.cancel')}
                     </button>
                   </div>
                 </form>
@@ -832,7 +881,7 @@ function LessonSection({
               {stepKind === 'CONTENT' && (
                 <div className="flex flex-col gap-3">
                   <p className="text-xs text-muted-foreground">
-                    Clique em "Adicionar" para abrir o editor completo de conteúdo.
+                    {t('admin.lessons.contentStepHint')}
                   </p>
                   <div className="flex gap-2">
                     <button
@@ -844,14 +893,14 @@ function LessonSection({
                       className="flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
                     >
                       <Plus className="h-3 w-3" />
-                      Adicionar conteúdo
+                      {t('admin.lessons.addContentButton')}
                     </button>
                     <button
                       type="button"
                       onClick={() => setAddingStep(false)}
                       className="rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-accent"
                     >
-                      Cancelar
+                      {t('common.actions.cancel')}
                     </button>
                   </div>
                 </div>
@@ -863,7 +912,7 @@ function LessonSection({
               className="mt-1 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed py-2 text-xs font-medium text-muted-foreground transition hover:border-primary hover:text-primary"
             >
               <Plus className="h-3.5 w-3.5" />
-              Adicionar etapa
+              {t('admin.lessons.addStepButton')}
             </button>
           )}
         </div>
@@ -911,6 +960,18 @@ function ModuleSection({
   isDeletingModule: boolean;
 }) {
   const qc = useQueryClient();
+  const { t } = useTranslation();
+  const lessonSchema = z.object({
+    title: z.string().min(2, t('admin.lessons.validation.title')),
+    order: z.coerce.number().min(1, t('admin.lessons.validation.order')),
+    availableFrom: z.string().optional(),
+    prerequisiteLessonId: z.string().optional(),
+    prerequisiteMinScore: z.coerce.number().min(0).max(100).optional()
+  });
+  const moduleSchema = z.object({
+    title: z.string().min(2, t('admin.lessons.validation.title')),
+    order: z.coerce.number().min(1, t('admin.lessons.validation.order'))
+  });
   const [expanded, setExpanded] = useState(false);
   const [addingLesson, setAddingLesson] = useState(false);
   const [editingModule, setEditingModule] = useState(false);
@@ -938,9 +999,9 @@ function ModuleSection({
       qc.invalidateQueries({ queryKey: ['admin-lessons', slug, module.id] });
       setAddingLesson(false);
       lessonForm.reset({ title: '', order: 1 });
-      toast.success('Aula criada!');
+      toast.success(t('admin.lessons.toast.lessonCreated'));
     },
-    onError: () => toast.error('Erro ao criar aula.')
+    onError: () => toast.error(t('admin.lessons.toast.lessonCreateError'))
   });
 
   const deleteLessonMut = useMutation({
@@ -948,9 +1009,9 @@ function ModuleSection({
       adminEndpoints.deleteLesson(slug, module.id, id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-lessons', slug, module.id] });
-      toast.success('Aula excluída.');
+      toast.success(t('admin.lessons.toast.lessonDeleted'));
     },
-    onError: () => toast.error('Erro ao excluir aula.')
+    onError: () => toast.error(t('admin.lessons.toast.lessonDeleteError'))
   });
 
   const updateModuleMut = useMutation({
@@ -959,9 +1020,9 @@ function ModuleSection({
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-modules', slug, courseId] });
       setEditingModule(false);
-      toast.success('Módulo atualizado!');
+      toast.success(t('admin.lessons.toast.moduleUpdated'));
     },
-    onError: () => toast.error('Erro ao atualizar módulo.')
+    onError: () => toast.error(t('admin.lessons.toast.moduleUpdateError'))
   });
 
   return (
@@ -992,14 +1053,14 @@ function ModuleSection({
             {updateModuleMut.isPending && (
               <Loader2 className="h-4 w-4 animate-spin" />
             )}
-            Salvar
+            {t('admin.stepForm.saveButton')}
           </button>
           <button
             type="button"
             onClick={() => setEditingModule(false)}
             className="rounded-lg border px-3 py-2 text-sm font-medium hover:bg-accent"
           >
-            Cancelar
+            {t('common.actions.cancel')}
           </button>
         </form>
       ) : (
@@ -1019,7 +1080,7 @@ function ModuleSection({
             <div className="min-w-0">
               <p className="truncate font-semibold">{module.title}</p>
               <p className="text-xs text-muted-foreground">
-                Módulo {module.order}
+                {t('admin.lessons.moduleLabel', { order: module.order })}
               </p>
             </div>
           </button>
@@ -1029,7 +1090,7 @@ function ModuleSection({
               setExpanded(true);
             }}
             className="rounded-lg p-2 text-muted-foreground transition hover:bg-accent hover:text-foreground"
-            aria-label="Editar módulo"
+            aria-label={t('admin.lessons.aria.editModule')}
           >
             <Pencil className="h-4 w-4" />
           </button>
@@ -1037,14 +1098,16 @@ function ModuleSection({
             onClick={() => {
               if (
                 confirm(
-                  `Excluir módulo "${module.title}"? Todas as aulas serão removidas.`
+                  t('admin.lessons.confirmDeleteModule', {
+                    title: module.title
+                  })
                 )
               )
                 onDeleteModule(module.id);
             }}
             disabled={isDeletingModule}
             className="rounded-lg p-2 text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive disabled:opacity-40"
-            aria-label="Excluir módulo"
+            aria-label={t('admin.lessons.aria.deleteModule')}
           >
             {isDeletingModule ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -1080,7 +1143,7 @@ function ModuleSection({
               ))}
               {lessons?.length === 0 && (
                 <p className="py-2 text-center text-sm text-muted-foreground">
-                  Nenhuma aula neste módulo.
+                  {t('admin.lessons.emptyModule')}
                 </p>
               )}
             </>
@@ -1096,7 +1159,7 @@ function ModuleSection({
             >
               <div className="flex-1 min-w-[160px]">
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                  Título da Aula
+                  {t('admin.lessons.lessonTitle')}
                 </label>
                 <input
                   className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
@@ -1110,7 +1173,7 @@ function ModuleSection({
               </div>
               <div className="w-20">
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                  Ordem
+                  {t('admin.lessons.moduleOrder')}
                 </label>
                 <input
                   type="number"
@@ -1128,7 +1191,7 @@ function ModuleSection({
                   {createLessonMut.isPending && (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   )}
-                  Salvar
+                  {t('admin.stepForm.saveButton')}
                 </button>
                 <button
                   type="button"
@@ -1138,7 +1201,7 @@ function ModuleSection({
                   }}
                   className="rounded-lg border px-3 py-2 text-sm font-medium hover:bg-accent"
                 >
-                  Cancelar
+                  {t('common.actions.cancel')}
                 </button>
               </div>
             </form>
@@ -1148,7 +1211,7 @@ function ModuleSection({
               className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed py-2.5 text-sm font-medium text-muted-foreground transition hover:border-primary hover:text-primary"
             >
               <Plus className="h-4 w-4" />
-              Adicionar aula
+              {t('admin.lessons.addLessonButton')}
             </button>
           )}
         </div>
@@ -1167,6 +1230,11 @@ export default function AdminLessonsPage() {
   const slug = tenantSlug ?? '';
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const { t } = useTranslation();
+  const moduleSchema = z.object({
+    title: z.string().min(2, t('admin.lessons.validation.title')),
+    order: z.coerce.number().min(1, t('admin.lessons.validation.order'))
+  });
   const [addingModule, setAddingModule] = useState(false);
 
   const { data: course, isLoading: loadingCourse } = useQuery({
@@ -1193,9 +1261,9 @@ export default function AdminLessonsPage() {
       qc.invalidateQueries({ queryKey: ['admin-modules', slug, courseId] });
       setAddingModule(false);
       moduleForm.reset({ title: '', order: 1 });
-      toast.success('Módulo criado!');
+      toast.success(t('admin.lessons.toast.moduleCreated'));
     },
-    onError: () => toast.error('Erro ao criar módulo.')
+    onError: () => toast.error(t('admin.lessons.toast.moduleCreateError'))
   });
 
   const deleteModuleMut = useMutation({
@@ -1203,9 +1271,9 @@ export default function AdminLessonsPage() {
       adminEndpoints.deleteModule(slug, courseId!, id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-modules', slug, courseId] });
-      toast.success('Módulo excluído.');
+      toast.success(t('admin.lessons.toast.moduleDeleted'));
     },
-    onError: () => toast.error('Erro ao excluir módulo.')
+    onError: () => toast.error(t('admin.lessons.toast.moduleDeleteError'))
   });
 
   return (
@@ -1217,7 +1285,7 @@ export default function AdminLessonsPage() {
           className="mb-3 flex items-center gap-1.5 text-sm text-muted-foreground transition hover:text-foreground"
         >
           <ChevronLeft className="h-4 w-4" />
-          Voltar aos cursos
+          {t('app.course.backToCourses')}
         </button>
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -1229,7 +1297,7 @@ export default function AdminLessonsPage() {
               )}
             </h1>
             <p className="mt-1 text-muted-foreground">
-              Gerencie os módulos, aulas e atividades deste curso.
+              {t('admin.lessons.courseSubtitle')}
             </p>
           </div>
           {!addingModule && (
@@ -1238,7 +1306,7 @@ export default function AdminLessonsPage() {
               className="flex shrink-0 items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
             >
               <Plus className="h-4 w-4" />
-              Novo módulo
+              {t('admin.lessons.newModuleButton')}
             </button>
           )}
         </div>
@@ -1252,10 +1320,10 @@ export default function AdminLessonsPage() {
         >
           <div className="flex-1 min-w-[200px]">
             <label className="mb-1 block text-sm font-medium">
-              Título do Módulo
+              {t('admin.lessons.moduleTitle')}
             </label>
             <input
-              placeholder="Ex: Fundamentos de Análise"
+              placeholder={t('admin.lessons.moduleTitlePlaceholder')}
               className="w-full rounded-lg border bg-background px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
               {...moduleForm.register('title')}
             />
@@ -1266,7 +1334,9 @@ export default function AdminLessonsPage() {
             )}
           </div>
           <div className="w-24">
-            <label className="mb-1 block text-sm font-medium">Ordem</label>
+            <label className="mb-1 block text-sm font-medium">
+              {t('admin.lessons.moduleOrder')}
+            </label>
             <input
               type="number"
               min={1}
@@ -1283,7 +1353,7 @@ export default function AdminLessonsPage() {
               {createModuleMut.isPending && (
                 <Loader2 className="h-4 w-4 animate-spin" />
               )}
-              Salvar
+              {t('admin.stepForm.saveButton')}
             </button>
             <button
               type="button"
@@ -1293,7 +1363,7 @@ export default function AdminLessonsPage() {
               }}
               className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-accent"
             >
-              Cancelar
+              {t('common.actions.cancel')}
             </button>
           </div>
         </form>
@@ -1324,12 +1394,12 @@ export default function AdminLessonsPage() {
           {modules?.length === 0 && !addingModule && (
             <div className="py-16 text-center text-muted-foreground">
               <BookOpen className="mx-auto mb-4 h-12 w-12 opacity-30" />
-              <p>Nenhum módulo criado ainda.</p>
+              <p>{t('admin.lessons.noModules')}</p>
               <button
                 onClick={() => setAddingModule(true)}
                 className="mt-3 text-sm font-medium text-primary hover:underline"
               >
-                Criar primeiro módulo
+                {t('admin.lessons.createFirstModule')}
               </button>
             </div>
           )}

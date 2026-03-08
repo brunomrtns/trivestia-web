@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,33 +11,31 @@ import { platformStorage } from '@/features/platform/platformStorage';
 import { platformEndpoints } from '@/services/endpoints/platform.endpoints';
 import { useDebouncedCallback } from '@/hooks/useDebouncedCallback';
 
-// ─── Schema ───────────────────────────────────────────────────────────────────
+// ─── Types ───────────────────────────────────────────────────────────────────
 
-const schema = z.object({
-  name: z.string().min(2, 'Nome deve ter no minimo 2 caracteres'),
-  slug: z
-    .string()
-    .min(3, 'Minimo de 3 caracteres')
-    .max(40, 'Maximo de 40 caracteres')
-    .regex(
-      /^[a-z0-9]+(-[a-z0-9]+)*$/,
-      'Apenas letras minusculas, numeros e hifens'
-    ),
-  bio: z.string().max(300, 'Maximo de 300 caracteres').optional()
-});
-
-type FormData = z.infer<typeof schema>;
+type FormData = { name: string; slug: string; bio?: string };
 
 // ─── Componente ───────────────────────────────────────────────────────────────
 
 export default function CreateSchoolPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user, token, isAuthenticated, isLoading, setAuth } =
     usePlatformAuthStore();
   const [creating, setCreating] = useState(false);
   const [slugStatus, setSlugStatus] = useState<
     'idle' | 'checking' | 'available' | 'taken'
   >('idle');
+
+  const schema = z.object({
+    name: z.string().min(2, t('common.validation.nameMinLength')),
+    slug: z
+      .string()
+      .min(3, t('common.validation.slugMinLength'))
+      .max(40, t('common.validation.slugMaxLength'))
+      .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, t('common.validation.slugPattern')),
+    bio: z.string().max(300, t('common.validation.bioMaxLength')).optional()
+  });
 
   const {
     register,
@@ -85,7 +84,9 @@ export default function CreateSchoolPage() {
     setCreating(true);
     try {
       const res = await platformEndpoints.createTenant(data);
-      toast.success(`Escola "${res.tenant.name}" criada com sucesso!`);
+      toast.success(
+        t('workspace.createSchool.toast.success', { name: res.tenant.name })
+      );
 
       // Atualiza o store com o tenantId recebido
       if (user && token) {
@@ -97,7 +98,7 @@ export default function CreateSchoolPage() {
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })
         ?.response?.data?.message;
-      toast.error(msg ?? 'Erro ao criar escola.');
+      toast.error(msg ?? t('workspace.createSchool.toast.error'));
     } finally {
       setCreating(false);
     }
@@ -113,21 +114,23 @@ export default function CreateSchoolPage() {
 
   return (
     <div className="container max-w-lg py-16">
-      <h1 className="mb-2 text-3xl font-extrabold">Criar sua escola</h1>
+      <h1 className="mb-2 text-3xl font-extrabold">
+        {t('workspace.createSchool.title')}
+      </h1>
       <p className="mb-8 text-muted-foreground">
-        Configure o nome e a URL da sua escola para comecar a publicar cursos.
+        {t('workspace.createSchool.subtitle')}
       </p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
         <div>
           <label className="mb-1.5 block text-sm font-medium" htmlFor="name">
-            Nome da escola
+            {t('workspace.createSchool.form.nameLabel')}
           </label>
           <input
             id="name"
             type="text"
             autoFocus
-            placeholder="Ex: Escola de Trading"
+            placeholder={t('workspace.createSchool.form.namePlaceholder')}
             className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm outline-none ring-offset-background transition focus:ring-2 focus:ring-ring focus:ring-offset-2"
             {...register('name', {
               onChange: (e) => {
@@ -145,7 +148,7 @@ export default function CreateSchoolPage() {
 
         <div>
           <label className="mb-1.5 block text-sm font-medium" htmlFor="slug">
-            URL da escola
+            {t('workspace.createSchool.form.slugLabel')}
           </label>
           <div className="flex items-center gap-1">
             <span className="shrink-0 text-sm text-muted-foreground">/t/</span>
@@ -153,7 +156,7 @@ export default function CreateSchoolPage() {
               <input
                 id="slug"
                 type="text"
-                placeholder="minha-escola"
+                placeholder={t('workspace.createSchool.form.slugPlaceholder')}
                 className="w-full rounded-lg border bg-background px-4 py-2.5 pr-10 text-sm outline-none ring-offset-background transition focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 {...register('slug', {
                   onChange: (e) => checkSlug(e.target.value as string)
@@ -181,12 +184,17 @@ export default function CreateSchoolPage() {
 
         <div>
           <label className="mb-1.5 block text-sm font-medium" htmlFor="bio">
-            Descricao <span className="text-muted-foreground">(opcional)</span>
+            {t('workspace.createSchool.form.descriptionLabel')}{' '}
+            <span className="text-muted-foreground">
+              {t('common.misc.optional')}
+            </span>
           </label>
           <textarea
             id="bio"
             rows={2}
-            placeholder="Uma breve descricao da sua escola..."
+            placeholder={t(
+              'workspace.createSchool.form.descriptionPlaceholder'
+            )}
             className="w-full resize-none rounded-lg border bg-background px-4 py-2.5 text-sm outline-none ring-offset-background transition focus:ring-2 focus:ring-ring focus:ring-offset-2"
             {...register('bio')}
           />
@@ -203,7 +211,7 @@ export default function CreateSchoolPage() {
           className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow transition hover:opacity-90 disabled:opacity-60"
         >
           {creating && <Loader2 className="h-4 w-4 animate-spin" />}
-          Criar escola
+          {t('workspace.createSchool.form.submitButton')}
         </button>
       </form>
     </div>

@@ -1,5 +1,6 @@
 import type React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Building2,
   Users,
@@ -17,11 +18,7 @@ interface NavLink {
   label: string;
 }
 
-const superLinks: NavLink[] = [
-  { to: '/super/dashboard', icon: BarChart3, label: 'Visão Geral' },
-  { to: '/super/tenants', icon: Building2, label: 'Escolas' },
-  { to: '/super/users', icon: Users, label: 'Usuários' }
-];
+// (superLinks moved inside component to allow useTranslation)
 
 interface SuperSidebarProps {
   collapsed: boolean;
@@ -30,6 +27,20 @@ interface SuperSidebarProps {
 
 export function SuperSidebar({ collapsed, onCollapse }: SuperSidebarProps) {
   const location = useLocation();
+  const { t } = useTranslation();
+  const superLinks: NavLink[] = [
+    {
+      to: '/super/dashboard',
+      icon: BarChart3,
+      label: t('super.layout.nav.overview')
+    },
+    {
+      to: '/super/tenants',
+      icon: Building2,
+      label: t('super.layout.nav.schools')
+    },
+    { to: '/super/users', icon: Users, label: t('super.layout.nav.users') }
+  ];
 
   return (
     <aside
@@ -45,7 +56,9 @@ export function SuperSidebar({ collapsed, onCollapse }: SuperSidebarProps) {
           className="flex items-center gap-2 overflow-hidden"
         >
           <Globe className="h-6 w-6 shrink-0 text-purple-600" />
-          {!collapsed && <span className="font-bold text-lg">Super Admin</span>}
+          {!collapsed && (
+            <span className="font-bold text-lg">{t('super.layout.brand')}</span>
+          )}
         </Link>
       </div>
 
@@ -77,7 +90,7 @@ export function SuperSidebar({ collapsed, onCollapse }: SuperSidebarProps) {
         <div className="m-2 flex items-center gap-2 rounded-lg bg-purple-500/10 p-3">
           <Zap className="h-4 w-4 text-purple-600" />
           <span className="text-xs font-medium text-purple-600">
-            Super Admin
+            {t('super.layout.roleBadge')}
           </span>
         </div>
       )}
@@ -86,7 +99,11 @@ export function SuperSidebar({ collapsed, onCollapse }: SuperSidebarProps) {
       <button
         onClick={onCollapse}
         className="flex h-12 items-center justify-center border-t text-muted-foreground transition-colors hover:text-foreground"
-        aria-label={collapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
+        aria-label={
+          collapsed
+            ? t('super.layout.aria.expand')
+            : t('super.layout.aria.collapse')
+        }
       >
         {collapsed ? (
           <ChevronRight className="h-5 w-5" />

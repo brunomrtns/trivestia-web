@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   generateCandleSeries,
   SimulationEngine,
@@ -141,6 +142,7 @@ export function useSimEngine({
   practiceScenario,
   onComplete
 }: UseSimEngineOptions) {
+  const { t } = useTranslation();
   const [state, dispatch] = useReducer(reducer, INITIAL);
   const engineRef = useRef<SimulationEngine | null>(null);
 
@@ -168,7 +170,7 @@ export function useSimEngine({
           const msg =
             err?.response?.status === 409
               ? 'ALREADY_PASSED'
-              : (err?.response?.data?.error ?? 'Erro ao carregar cenário');
+              : (err?.response?.data?.error ?? t('sim.engine.loadError'));
           dispatch({ type: 'ERROR', message: msg });
         });
     }
@@ -339,7 +341,7 @@ export function useSimEngine({
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { error?: string } } })?.response?.data
-          ?.error ?? 'Erro ao enviar resultado';
+          ?.error ?? t('sim.engine.submitError');
       dispatch({ type: 'ERROR', message: msg });
     }
   }, [state, mode, onComplete]);

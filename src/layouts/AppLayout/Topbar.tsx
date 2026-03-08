@@ -1,4 +1,5 @@
 import { Menu, LogOut, User as UserIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { AnnouncementBell } from '@/components/announcements/AnnouncementBell';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/auth.store';
@@ -9,6 +10,7 @@ interface TopbarProps {
 }
 
 export function Topbar({ onMenuClick }: TopbarProps) {
+  const { t } = useTranslation();
   const { user, logout } = useAuthStore();
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const { tenant } = useTenant(); // usa cache do React Query — sem chamada extra
@@ -32,7 +34,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
       <button
         onClick={onMenuClick}
         className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-        aria-label="Menu"
+        aria-label={t('common.aria.menu')}
       >
         <Menu className="h-5 w-5" />
       </button>
@@ -46,7 +48,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         <button
           onClick={handleLogout}
           className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-          aria-label="Sair"
+          aria-label={t('common.aria.logout')}
         >
           <LogOut className="h-5 w-5" />
         </button>

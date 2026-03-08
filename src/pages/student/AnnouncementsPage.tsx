@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { announcementsEndpoints } from '@/services/endpoints/announcements.endpoints';
 import { cn } from '@/lib/utils';
 import type { AnnouncementPriority } from '@/types/api';
+import { useTranslation } from 'react-i18next';
 
 // ─── Priority helpers ─────────────────────────────────────────────────────────
 
@@ -19,12 +20,6 @@ const priorityColors: Record<
     border: 'border-l-yellow-500'
   },
   CRITICAL: { badge: 'bg-red-500/10 text-red-600', border: 'border-l-red-500' }
-};
-
-const priorityLabel: Record<AnnouncementPriority, string> = {
-  INFO: 'Informação',
-  WARNING: 'Atenção',
-  CRITICAL: 'Urgente'
 };
 
 function formatDate(iso: string) {
@@ -42,6 +37,7 @@ function formatDate(iso: string) {
 const PAGE_SIZE = 10;
 
 export default function AnnouncementsPage() {
+  const { t } = useTranslation();
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const slug = tenantSlug ?? '';
   const queryClient = useQueryClient();
@@ -55,7 +51,9 @@ export default function AnnouncementsPage() {
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ['announcements-unread', slug] });
     queryClient.invalidateQueries({ queryKey: ['announcements', slug, page] });
-    queryClient.invalidateQueries({ queryKey: ['announcements-preview', slug] });
+    queryClient.invalidateQueries({
+      queryKey: ['announcements-preview', slug]
+    });
   };
 
   const markReadMutation = useMutation({
@@ -68,7 +66,9 @@ export default function AnnouncementsPage() {
     mutationFn: () => announcementsEndpoints.markAllRead(slug),
     onSuccess: (res) => {
       invalidate();
-      toast.success(`${res.marked} aviso(s) marcado(s) como lido(s).`);
+      toast.success(
+        t('app.announcements.toast.markAllSuccess', { count: res.marked })
+      );
     }
   });
 
@@ -80,10 +80,10 @@ export default function AnnouncementsPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Megaphone className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold">Avisos</h1>
+          <h1 className="text-2xl font-bold">{t('app.announcements.title')}</h1>
           {(data?.unreadCount ?? 0) > 0 && (
             <span className="rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">
-              {data!.unreadCount} não {data!.unreadCount === 1 ? 'lido' : 'lidos'}
+              {t('app.announcements.unreadCount', { count: data!.unreadCount })}
             </span>
           )}
         </div>
@@ -94,7 +94,7 @@ export default function AnnouncementsPage() {
             className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors hover:bg-accent disabled:opacity-60"
           >
             <CheckCheck className="h-4 w-4" />
-            Marcar todos como lidos
+            {t('app.announcements.markAllRead')}
           </button>
         )}
       </div>
@@ -103,13 +103,16 @@ export default function AnnouncementsPage() {
       {isLoading ? (
         <div className="space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="animate-pulse h-24 rounded-xl border bg-muted" />
+            <div
+              key={i}
+              className="animate-pulse h-24 rounded-xl border bg-muted"
+            />
           ))}
         </div>
       ) : !data || data.data.length === 0 ? (
         <div className="rounded-xl border bg-muted/40 p-12 text-center text-muted-foreground">
           <Megaphone className="mx-auto mb-3 h-10 w-10 opacity-40" />
-          <p>Nenhum aviso disponível no momento.</p>
+          <p>{t('app.announcements.empty')}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -133,7 +136,7 @@ export default function AnnouncementsPage() {
                           colors.badge
                         )}
                       >
-                        {priorityLabel[ann.priority]}
+                        {t(`common.priority.${ann.priority.toLowerCase()}`)}
                       </span>
                       {!ann.isRead && (
                         <span className="h-2 w-2 rounded-full bg-primary shrink-0" />
@@ -146,7 +149,11 @@ export default function AnnouncementsPage() {
                     <p className="mt-2 text-xs text-muted-foreground">
                       {ann.author.name} · {formatDate(ann.publishedAt)}
                       {ann.expiresAt && (
-                        <span> · expira em {formatDate(ann.expiresAt)}</span>
+                        <span>
+                          {t('app.announcements.expiresAt', {
+                            date: formatDate(ann.expiresAt)
+                          })}
+                        </span>
                       )}
                     </p>
                   </div>
@@ -155,7 +162,7 @@ export default function AnnouncementsPage() {
                     <button
                       onClick={() => markReadMutation.mutate(ann.id)}
                       disabled={markReadMutation.isPending}
-                      title="Marcar como lido"
+                      title={t('app.announcements.markAsRead')}
                       className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-primary disabled:opacity-50"
                     >
                       <Check className="h-4 w-4" />
@@ -176,7 +183,7 @@ export default function AnnouncementsPage() {
             disabled={page === 1}
             className="rounded-md px-3 py-1.5 text-sm border transition-colors hover:bg-accent disabled:opacity-40"
           >
-            Anterior
+            {t('common.pagination.previous')}
           </button>
           <span className="text-sm text-muted-foreground">
             {page} / {totalPages}
@@ -186,7 +193,7 @@ export default function AnnouncementsPage() {
             disabled={page === totalPages}
             className="rounded-md px-3 py-1.5 text-sm border transition-colors hover:bg-accent disabled:opacity-40"
           >
-            Próximo
+            {t('common.pagination.next')}
           </button>
         </div>
       )}

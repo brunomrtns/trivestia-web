@@ -8,6 +8,7 @@ import { BarChart2, History, TrendingUp } from 'lucide-react';
 import { SimTradingTerminal } from '@/components/sim-trading/SimTradingTerminal';
 import { simulationEndpoints } from '@/services/endpoints/simulation.endpoints';
 import type { Candle, ScenarioPayload } from '@/types/api';
+import { useTranslation } from 'react-i18next';
 
 // ─── Config Form ──────────────────────────────────────────────────────────────
 
@@ -33,6 +34,7 @@ const TIMEFRAMES = [
 type Phase = 'hub' | 'terminal';
 
 export default function PracticeLabPage() {
+  const { t } = useTranslation();
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const slug = tenantSlug ?? '';
   const [phase, setPhase] = useState<Phase>('hub');
@@ -76,7 +78,7 @@ export default function PracticeLabPage() {
       setPracticeScenario(scenario);
       setPhase('terminal');
     } catch {
-      toast.error('Erro ao criar sessão de prática');
+      toast.error(t('app.lab.toast.error'));
     } finally {
       setLoading(false);
     }
@@ -102,10 +104,10 @@ export default function PracticeLabPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <BarChart2 className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold">Laboratório de Trading</h1>
+            <h1 className="text-2xl font-bold">{t('app.lab.title')}</h1>
           </div>
           <p className="text-sm text-muted-foreground">
-            Pratique sem pressão. Configure o cenário e treine sua estratégia.
+            {t('app.lab.subtitle')}
           </p>
         </div>
         <Link
@@ -113,7 +115,7 @@ export default function PracticeLabPage() {
           className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition hover:bg-accent"
         >
           <History className="h-3.5 w-3.5" />
-          Histórico
+          {t('app.lab.historyLink')}
         </Link>
       </div>
 
@@ -123,14 +125,14 @@ export default function PracticeLabPage() {
         className="space-y-5 rounded-xl border bg-card p-6"
       >
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Configuração do Cenário
+          {t('app.lab.form.title')}
         </h2>
 
         {/* Candles + Timeframe */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1">
-              Candles (50–500)
+              {t('app.lab.form.candles')}
             </label>
             <input
               type="number"
@@ -145,7 +147,7 @@ export default function PracticeLabPage() {
           </div>
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1">
-              Timeframe
+              {t('app.lab.form.timeframe')}
             </label>
             <select
               className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
@@ -164,7 +166,7 @@ export default function PracticeLabPage() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1">
-              Volatilidade (0.0001–0.1)
+              {t('app.lab.form.volatility')}
             </label>
             <input
               type="number"
@@ -175,7 +177,7 @@ export default function PracticeLabPage() {
           </div>
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1">
-              Tendência (–1 a +1)
+              {t('app.lab.form.trend')}
             </label>
             <input
               type="number"
@@ -192,7 +194,7 @@ export default function PracticeLabPage() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1">
-              Spread (bps)
+              {t('app.lab.form.spread')}
             </label>
             <input
               type="number"
@@ -202,7 +204,7 @@ export default function PracticeLabPage() {
           </div>
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1">
-              Saldo Inicial ($)
+              {t('app.lab.form.balance')}
             </label>
             <input
               type="number"
@@ -218,7 +220,7 @@ export default function PracticeLabPage() {
           className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
         >
           <TrendingUp className="h-4 w-4" />
-          {loading ? 'Criando cenário...' : 'Iniciar Simulação'}
+          {loading ? t('app.lab.form.submitLoading') : t('app.lab.form.submit')}
         </button>
       </form>
     </div>

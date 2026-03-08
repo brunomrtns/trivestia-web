@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import {
   ChevronDown,
@@ -55,6 +56,7 @@ export function CourseOutlineSidebar({
   activeLessonId,
   onSelectLesson
 }: CourseOutlineSidebarProps) {
+  const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>(
     getPersistedCollapsed
   );
@@ -83,7 +85,7 @@ export function CourseOutlineSidebar({
   }, []);
 
   return (
-    <nav className="space-y-1" aria-label="Estrutura do curso">
+    <nav className="space-y-1" aria-label={t('learning.courseOutline.aria')}>
       {modules.map((mod, mi) => {
         const isCollapsed = !!collapsed[mod.id];
 
@@ -107,7 +109,10 @@ export function CourseOutlineSidebar({
               <BookOpen className="h-4 w-4 shrink-0 text-muted-foreground" />
               <span className="flex-1 truncate">{mod.title}</span>
               <span className="shrink-0 text-xs text-muted-foreground">
-                {mod.progress.completedLessons}/{mod.progress.totalLessons}
+                {t('learning.courseOutline.moduleProgress', {
+                  completed: mod.progress.completedLessons,
+                  total: mod.progress.totalLessons
+                })}
               </span>
             </button>
 
@@ -166,8 +171,8 @@ function LessonRow({
         isActive
           ? 'bg-primary/10 text-primary font-semibold'
           : isLocked
-          ? 'opacity-60 cursor-pointer hover:bg-accent/30'
-          : 'text-foreground hover:bg-accent/50'
+            ? 'opacity-60 cursor-pointer hover:bg-accent/30'
+            : 'text-foreground hover:bg-accent/50'
       )}
     >
       <div className="flex w-full items-center gap-2.5">
@@ -197,4 +202,3 @@ function LessonRow({
     </button>
   );
 }
-

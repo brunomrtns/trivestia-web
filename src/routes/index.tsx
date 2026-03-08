@@ -71,12 +71,11 @@ const AdminLessonStepsPage = lazy(
 const AnnouncementsPage = lazy(
   () => import('@/pages/student/AnnouncementsPage')
 );
+const SettingsPage = lazy(() => import('@/pages/student/SettingsPage'));
 const AdminAnnouncementsPage = lazy(
   () => import('@/pages/admin/AdminAnnouncementsPage')
 );
-const AdminPeriodsPage = lazy(
-  () => import('@/pages/admin/AdminPeriodsPage')
-);
+const AdminPeriodsPage = lazy(() => import('@/pages/admin/AdminPeriodsPage'));
 
 // Super Admin
 const SuperDashboardPage = lazy(
@@ -152,7 +151,8 @@ const tenantAppRoutes = [
   { path: 'lab', element: <PracticeLabPage /> },
   { path: 'lab/history', element: <PracticeHistoryPage /> },
   { path: 'progress', element: <ProgressPage /> },
-  { path: 'announcements', element: <AnnouncementsPage /> }
+  { path: 'announcements', element: <AnnouncementsPage /> },
+  { path: 'settings', element: <SettingsPage /> }
 ];
 
 const tenantAdminRoutes = [

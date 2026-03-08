@@ -1,4 +1,5 @@
 import { useParams, Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
@@ -12,6 +13,7 @@ import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { useAuthStore } from '@/features/auth/auth.store';
 
 export default function CourseDetailPage() {
+  const { t } = useTranslation();
   const { courseId, tenantSlug } = useParams<{
     courseId: string;
     tenantSlug: string;
@@ -56,9 +58,8 @@ export default function CourseDetailPage() {
       {/* Breadcrumb */}
       <nav className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
         <Link to={`${base}/courses`} className="hover:text-foreground">
-          Cursos
+          {t('common.nav.courses')}
         </Link>
-        <ChevronRight className="h-4 w-4" />
         <span className="text-foreground font-medium">{course?.title}</span>
       </nav>
 
@@ -77,7 +78,7 @@ export default function CourseDetailPage() {
             className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:opacity-90"
           >
             <PlayCircle className="h-5 w-5" />
-            Começar curso
+            {t('public.courseDetail.startCourse')}
           </Link>
         )}
         {isAuthenticated && (
@@ -86,14 +87,14 @@ export default function CourseDetailPage() {
             className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:opacity-90"
           >
             <PlayCircle className="h-5 w-5" />
-            Continuar curso
+            {t('public.courseDetail.continueCourse')}
           </Link>
         )}
       </div>
 
       {/* Módulos */}
       <div className="space-y-4">
-        <h2 className="text-xl font-bold">Conteúdo do curso</h2>
+        <h2 className="text-xl font-bold">{t('public.courseDetail.contentTitle')}</h2>
         {modules?.map((mod, i) => (
           <ModuleAccordion
             key={mod.id}
@@ -126,6 +127,7 @@ function ModuleAccordion({
   slug: string;
 }) {
   // GET /modules/:moduleId/lessons — público
+  const { t } = useTranslation();
   const { data: lessons, isLoading } = useQuery({
     queryKey: ['lessons', slug, moduleId],
     queryFn: () => learningEndpoints.getLessons(slug, moduleId)
@@ -144,7 +146,7 @@ function ModuleAccordion({
         </span>
         <h3 className="font-semibold">{title}</h3>
         <span className="ml-auto text-sm text-muted-foreground">
-          {isLoading ? '...' : `${lessons?.length ?? 0} aulas`}
+          {isLoading ? '...' : t('public.courseDetail.lessonCount', { n: lessons?.length ?? 0 })}
         </span>
       </div>
 

@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Loader2, HelpCircle, Play } from 'lucide-react';
 import { useSimEngine } from './useSimEngine';
 import { usePlayback } from './usePlayback';
@@ -50,6 +51,7 @@ export function SimTradingTerminal({
   showOnboarding = true
 }: SimTradingTerminalProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [bottomTab, setBottomTab] = useState<BottomTab>('orders');
   const [helpOpen, setHelpOpen] = useState(false);
   const tutorial = useTutorialProgress();
@@ -150,10 +152,10 @@ export function SimTradingTerminal({
         <button
           onClick={handleOpenHelp}
           className="flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-foreground"
-          title="Abrir ajuda"
+          title={t('sim.terminal.helpTitle')}
         >
           <HelpCircle className="h-3.5 w-3.5" />
-          Ajuda
+          {t('sim.terminal.helpButton')}
         </button>
       </div>
 
@@ -175,12 +177,12 @@ export function SimTradingTerminal({
                 </div>
                 <div className="text-left">
                   <div className="text-base font-bold">
-                    {isPausedAtStart ? 'Iniciar Simulação' : 'Continuar'}
+                    {isPausedAtStart ? t('sim.terminal.overlay.startTitle') : t('sim.terminal.overlay.continueTitle')}
                   </div>
                   <div className="text-xs text-muted-foreground">
                     {isPausedAtStart
-                      ? 'Clique para começar a avançar as velas'
-                      : `Candle ${visibleCount}/${candles.length} — pausado`}
+                      ? t('sim.terminal.overlay.startHint')
+                      : t('sim.terminal.overlay.pausedHint', { visible: visibleCount, total: candles.length })}
                   </div>
                 </div>
               </button>
@@ -226,11 +228,11 @@ export function SimTradingTerminal({
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              {tab === 'orders'
-                ? 'Ordens'
+            tab === 'orders'
+                ? t('sim.terminal.tabs.orders')
                 : tab === 'fills'
-                  ? 'Preenchimentos'
-                  : 'Métricas'}
+                  ? t('sim.terminal.tabs.fills')
+                  : t('sim.terminal.tabs.metrics')
             </button>
           ))}
         </div>
@@ -273,11 +275,11 @@ export function SimTradingTerminal({
           className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
         >
           {engine.phase === 'FINISHED' ? (
-            'Enviar Resultado'
+            t('sim.terminal.submitButton')
           ) : (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              Enviando...
+              {t('sim.terminal.submitting')}
             </>
           )}
         </button>
@@ -285,7 +287,7 @@ export function SimTradingTerminal({
       {engine.phase === 'SUBMITTING' && (
         <div className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary/50 py-2.5 text-sm font-semibold text-primary-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
-          Enviando...
+          {t('sim.terminal.submitting')}
         </div>
       )}
 

@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/features/auth/auth.store';
 import { WrongTenantGate } from '@/components/WrongTenantGate';
 
@@ -7,6 +8,7 @@ export function AdminGuard() {
   const { isAuthenticated, isLoading, user, tenantSlug: storeSlug } = useAuthStore();
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const location = useLocation();
+  const { t } = useTranslation();
 
   if (isLoading) return null;
 
@@ -30,7 +32,7 @@ export function AdminGuard() {
     user?.role !== 'OWNER' &&
     user?.role !== 'SUPER_ADMIN'
   ) {
-    toast.error('Acesso restrito a administradores.');
+    toast.error(t('common.guards.adminOnly'));
     return <Navigate to={dashboardPath} replace />;
   }
 

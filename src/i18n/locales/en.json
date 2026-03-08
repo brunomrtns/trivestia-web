@@ -1,0 +1,1546 @@
+{
+  "common": {
+    "actions": {
+      "back": "To go back",
+      "login": "To enter",
+      "register": "Create account",
+      "viewAll": "See all",
+      "seeAll": "See all",
+      "continue": "Continue",
+      "startNow": "Get started now",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "saveChanges": "Save changes",
+      "access": "Access"
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "courses": "Courses",
+      "lab": "Laboratory",
+      "progress": "Progress",
+      "announcements": "Warnings",
+      "settings": "Settings"
+    },
+    "fields": {
+      "email": "E-mail",
+      "password": "Password",
+      "fullName": "Full name",
+      "confirmPassword": "Confirm password"
+    },
+    "placeholders": {
+      "email": "voce@email.com",
+      "name": "Your name",
+      "passwordMin": "Min 8 characters",
+      "repeatPassword": "Repeat password"
+    },
+    "roles": {
+      "superAdmin": "Super Admin",
+      "owner": "Owner",
+      "admin": "Admin",
+      "student": "Student"
+    },
+    "aria": {
+      "expandSidebar": "Expand sidebar",
+      "collapseSidebar": "Collapse sidebar",
+      "menu": "Menu",
+      "logout": "To go out"
+    },
+    "validation": {
+      "required": "Mandatory",
+      "emailInvalid": "Invalid email",
+      "passwordRequired": "Password required",
+      "nameMinLength": "Name must have at least 2 characters",
+      "passwordMinLength": "Minimum 8 characters",
+      "passwordUppercase": "Requires at least one capital letter",
+      "passwordNumber": "Need at least one number",
+      "passwordMatch": "Passwords don't match",
+      "slugMinLength": "Minimum 3 characters",
+      "slugMaxLength": "Maximum 40 characters",
+      "slugPattern": "Only lowercase letters, numbers and hyphens",
+      "bioMaxLength": "Maximum 300 characters"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "priority": {
+      "info": "Information",
+      "warning": "Attention",
+      "critical": "Urgent"
+    },
+    "timeframe": {
+      "1min": "1 min",
+      "5min": "5 min",
+      "15min": "15 min",
+      "1h": "1 hour"
+    },
+    "misc": {
+      "optional": "(optional)",
+      "or": "or"
+    },
+    "brandName": "Trivestia",
+    "activityTypes": {
+      "MULTIPLE_CHOICE": "Multiple choice",
+      "MULTIPLE_SELECT": "Multiple Selection",
+      "TRUE_FALSE": "True or False",
+      "ORDERING": "Ordering",
+      "TEXT_INPUT": "Open Response",
+      "SCENARIO": "Scenario",
+      "CHART_MARKUP": "Chart Markup",
+      "RISK_CALCULATOR": "Risk Calculator",
+      "SIM_TRADING_CHALLENGE": "Trading Simulation"
+    },
+    "progressStatus": {
+      "COMPLETED": "Completed",
+      "IN_PROGRESS": "In progress",
+      "NOT_STARTED": "Not started"
+    },
+    "guards": {
+      "adminOnly": "Access restricted to administrators.",
+      "superAdminOnly": "Access restricted to the platform's Super Admin."
+    }
+  },
+  "admin": {
+    "nav": {
+      "manageCourses": "Manage Courses",
+      "users": "Users",
+      "platform": "Platform"
+    },
+    "questions": {
+      "validation": {
+        "statement": "Minimum 5 characters",
+        "title": "Minimum 3 characters",
+        "weight": "Minimum 1"
+      },
+      "simConfig": {
+        "candles": "Candles",
+        "startPrice": "Starting price",
+        "volatility": "Volatility",
+        "initialBalance": "Opening balance",
+        "fee": "Rate",
+        "minPnL": "Min PnL",
+        "maxDD": "Max DD",
+        "minTrades": "Min Trades"
+      },
+      "options": {
+        "true": "TRUE",
+        "false": "False"
+      },
+      "toast": {
+        "created": "Question created!",
+        "createError": "Error creating question.",
+        "deleted": "Question deleted.",
+        "deleteError": "Error deleting question."
+      },
+      "page": {
+        "empty": "No questions yet.",
+        "newButton": "New question",
+        "configureButton": "Configure Scenario",
+        "fallbackTitle": "Questions",
+        "typeLabel": "Type:",
+        "confirmDelete": "Delete this question?"
+      },
+      "form": {
+        "imageLabel": "Image of the statement",
+        "imagePlaceholder": "Click to add image (JPG, PNG, WebP — max. 5 MB)",
+        "optionsLabel": "Options",
+        "singleCorrect": "mark the correct one",
+        "multiCorrect": "mark all the correct ones",
+        "addOptionButton": "To add",
+        "optionPlaceholder": "Option {{n}}",
+        "uploadError": "Error uploading image.",
+        "previewAlt": "Image preview"
+      }
+    },
+    "courses": {
+      "aria": {
+        "manage": "Manage modules and classes",
+        "periods": "Evaluation periods",
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "confirm": {
+        "delete": "Delete \"{{title}}\"?"
+      },
+      "validation": {
+        "title": "Minimum 3 characters",
+        "description": "Minimum 10 characters"
+      },
+      "form": {
+        "title": "Title",
+        "description": "Description",
+        "deadline": "Deadline (optional)",
+        "deadlineHint": "After this date, students will not be able to submit responses.",
+        "titlePlaceholder": "Ex: Fundamental Analysis",
+        "descriptionPlaceholder": "Describe the course content..."
+      },
+      "toast": {
+        "created": "Course created!",
+        "error": "Error creating course.",
+        "updated": "Updated course!",
+        "updateError": "Error updating course.",
+        "deleted": "Course excluded.",
+        "deleteError": "Error deleting course."
+      },
+      "page": {
+        "subtitle": "Create, edit and organize the platform’s courses.",
+        "newButton": "New course",
+        "empty": "No courses created yet.",
+        "manageButton": "Manage",
+        "periodsButton": "Periods",
+        "deadlinePrefix": "Term:",
+        "saveButton": "Save"
+      }
+    },
+    "lessons": {
+      "validation": {
+        "title": "Minimum 2 characters",
+        "order": "Minimum 1"
+      },
+      "stepType": {
+        "activity": "Activity",
+        "text": "Text",
+        "video": "Video",
+        "image": "Image"
+      },
+      "activityType": {
+        "multipleChoice": "Multiple choice",
+        "multipleSelect": "Multiple Selection",
+        "trueFalse": "True/False",
+        "ordering": "Ordering",
+        "textInput": "Open Response",
+        "scenario": "Scenario",
+        "chartMarkup": "Chart Markup",
+        "riskCalculator": "Risk Calculator",
+        "simTrading": "Trading Simulation"
+      },
+      "reviewPolicy": {
+        "immediate": "Immediate",
+        "immediateDesc": "Student sees answer sheet right after answering",
+        "afterDate": "After date",
+        "afterDateDesc": "Template released after specific date",
+        "never": "Never",
+        "neverDesc": "Template is never displayed"
+      },
+      "toast": {
+        "activityAdded": "Activity added!",
+        "activityAddError": "Error creating activity.",
+        "lessonCreated": "Class created!",
+        "lessonCreateError": "Error creating class.",
+        "lessonUpdated": "Updated class!",
+        "lessonUpdateError": "Error updating class.",
+        "lessonDeleted": "Class excluded.",
+        "lessonDeleteError": "Error deleting class.",
+        "moduleCreated": "Module created!",
+        "moduleCreateError": "Error creating module.",
+        "moduleUpdated": "Updated module!",
+        "moduleUpdateError": "Error updating module.",
+        "moduleDeleted": "Module deleted.",
+        "moduleDeleteError": "Error deleting module."
+      },
+      "aria": {
+        "editLesson": "Edit class",
+        "deleteLesson": "Delete class",
+        "editModule": "Edit module",
+        "deleteModule": "Delete module",
+        "drag": "Drag"
+      },
+      "loadingSteps": "Loading…",
+      "addContentButton": "Add content",
+      "contentStepHint": "Click \"Add\" to open the full content editor.",
+      "moduleLabel": "Module {{order}}",
+      "noModules": "No modules created yet.",
+      "createFirstModule": "Create first module",
+      "moduleTitle": "Module Title",
+      "moduleTitlePlaceholder": "Ex: Fundamentals of Analysis",
+      "moduleOrder": "Order",
+      "confirmDeleteLesson": "Delete class \"{{title}}\"?",
+      "confirmDeleteModule": "Delete module \"{{title}}\"? All classes will be removed.",
+      "confirmDeleteStep": "Delete \"{{title}}\"?",
+      "courseSubtitle": "Manage the modules, classes and activities of this course.",
+      "newModuleButton": "New module",
+      "addStepButton": "Add step",
+      "addLessonButton": "Add class",
+      "emptyModule": "No classes in this module.",
+      "lessonTitle": "Class Title",
+      "questionsLink": "Questions",
+      "accessRules": {
+        "title": "Access rules",
+        "availableFrom": "Available from (optional)",
+        "prerequisiteLesson": "Prerequisite class (optional)",
+        "noPrerequisite": "- None -",
+        "minScore": "Minimum grade in the prerequisite (0 = just complete)"
+      },
+      "activityForm": {
+        "reviewLabel": "Revision",
+        "releaseReviewAt": "Release review on"
+      }
+    },
+    "users": {
+      "page": {
+        "title": "Manage Users",
+        "subtitle": "Manage roles and permissions for platform users."
+      },
+      "searchPlaceholder": "Search by name or email...",
+      "searchButton": "Search",
+      "loading": "Loading users...",
+      "detailsButton": "Details",
+      "revokeButton": "Revoke Admin",
+      "promoteButton": "Make Admin",
+      "disabledTitle": "You cannot change the role itself",
+      "paginationUsers": "users",
+      "table": {
+        "lastLogin": "Last login",
+        "registeredAt": "Register"
+      },
+      "detail": {
+        "title": "User Details",
+        "submissions": "Submissions",
+        "lessonsProgress": "Progressive classes",
+        "registeredAt": "Registered at:",
+        "lastLogin": "Last login:"
+      },
+      "toast": {
+        "promoted": "{{name}} has been promoted to Administrator.",
+        "reverted": "{{name}}'s role has been reverted to Student.",
+        "ownRoleWarning": "You cannot change the role itself. Ask another administrator."
+      },
+      "role": {
+        "promoteTitle": "Promote to Administrator?",
+        "promoteMessage": "\"{{name}}\" will have full access to the admin panel, including content and user management.",
+        "revokeTitle": "Revoke Admin Access?",
+        "revokeMessage": "\"{{name}}\" will lose administrative access and return to being a regular student.",
+        "promoteConfirm": "Yes, promote",
+        "revokeConfirm": "Yes, revoke"
+      }
+    },
+    "announcements": {
+      "page": {
+        "title": "Manage Notices",
+        "newButton": "New Notice",
+        "empty": "No notice posted yet.",
+        "createFirstButton": "Create first notice"
+      },
+      "table": {
+        "title": "Title",
+        "priority": "Priority",
+        "author": "Author",
+        "published": "Published",
+        "expires": "Expires",
+        "reads": "Readings",
+        "actions": "Actions"
+      },
+      "badge": {
+        "expired": "expired"
+      },
+      "aria": {
+        "edit": "Edit",
+        "delete": "Remove",
+        "confirm": "Confirm"
+      },
+      "priority": {
+        "info": "Info",
+        "warning": "Attention",
+        "critical": "Urgent"
+      },
+      "toast": {
+        "created": "Notice published successfully!",
+        "createError": "Error publishing notice.",
+        "updated": "Updated notice!",
+        "updateError": "Error updating warning.",
+        "deleted": "Notice removed.",
+        "deleteError": "Error removing warning."
+      },
+      "form": {
+        "editTitle": "Edit Notice",
+        "newTitle": "New Notice",
+        "titleLabel": "Title *",
+        "titlePlaceholder": "Notice title...",
+        "priorityLabel": "Priority *",
+        "bodyLabel": "Message *",
+        "bodyPlaceholder": "Warning text (supports line breaks)...",
+        "expiresLabel": "Expires in",
+        "publishButton": "Post notice",
+        "validation": {
+          "titleMin": "Minimum 3 characters",
+          "titleMax": "Maximum 200 characters",
+          "bodyMax": "Maximum 5000 characters"
+        }
+      }
+    },
+    "periods": {
+      "title": "Evaluation Periods",
+      "subtitle": "Define time windows for groups of modules.",
+      "newButton": "New period",
+      "backButton": "Back to courses",
+      "status": {
+        "active": "Active"
+      },
+      "toast": {
+        "deleted": "Period excluded.",
+        "deleteError": "Error deleting period."
+      },
+      "empty": "No period created.",
+      "aria": {
+        "edit": "Edit period",
+        "delete": "Delete period"
+      }
+    },
+    "periodForm": {
+      "editTitle": "Edit Period",
+      "createTitle": "New Period",
+      "title": "Title",
+      "startDate": "Start",
+      "endDate": "End",
+      "validation": {
+        "dateRange": "End date must be later than the start date",
+        "title": "Minimum 3 characters",
+        "date": "Mandatory",
+        "modules": "Select at least one module"
+      },
+      "modulesLabel": "Modules",
+      "loadingModules": "Loading modules...",
+      "noModules": "No modules found.",
+      "titlePlaceholder": "Ex: Semester 1 - 2025",
+      "toast": {
+        "created": "Period created!",
+        "createError": "Error creating period.",
+        "createPeriod": "Create period",
+        "updated": "Period updated!",
+        "updateError": "Error updating period."
+      }
+    },
+    "lessonSteps": {
+      "backToLessons": "Back to school",
+      "title": "Class steps",
+      "generateButton": "Generate from activities",
+      "newButton": "New stage",
+      "virtualBanner": {
+        "title": "Virtual steps:",
+        "body": "This class does not yet have persisted steps. The steps below are automatically generated from the activities. Click \"Generate from activities\" to persist."
+      },
+      "empty": {
+        "title": "No steps in this class.",
+        "subtitle": "Create steps manually or generate from activities."
+      },
+      "confirmDelete": "Delete step \"{{title}}\"?",
+      "loadingTitle": "Loading...",
+      "aria": {
+        "edit": "Edit step",
+        "delete": "Delete step"
+      },
+      "toast": {
+        "deleted": "Step deleted.",
+        "deleteError": "Error deleting step.",
+        "reordered": "Order updated!",
+        "reorderError": "Error reordering.",
+        "generated": "Steps generated from the activities!",
+        "generateError": "Error generating steps.",
+        "materializationPending": "Waiting for the steps to materialize..."
+      }
+    },
+    "stepForm": {
+      "editTitle": "Edit step",
+      "createTitle": "New content stage",
+      "typeLabel": "Type",
+      "titleLabel": "Title",
+      "titlePlaceholder": "Example: Introduction to the topic",
+      "contentLabel": "Content",
+      "contentPlaceholder": "Write here or paste HTML...",
+      "htmlHint": "Accepts plain HTML: <p>, <b>, <ul>, <li>, etc.",
+      "videoUrlLabel": "Video URL",
+      "videoHint": "YouTube, Vimeo or any video URL.",
+      "imageLabel": "Image",
+      "imageUploadButton": "Click to select an image",
+      "imageUrlLabel": "Or paste an image URL",
+      "altLabel": "Alternative text",
+      "altPlaceholder": "Image description (for accessibility)",
+      "captionLabel": "Caption",
+      "captionPlaceholder": "Caption displayed below the image",
+      "durationLabel": "Estimated duration",
+      "uploadingImage": "Sending image…",
+      "saveButton": "Save",
+      "createButton": "To create",
+      "validation": {
+        "titleMin": "Minimum 2 characters"
+      },
+      "toast": {
+        "created": "Step created!",
+        "createError": "Error creating step.",
+        "updated": "Step updated!",
+        "updateError": "Error updating step.",
+        "uploadError": "Error sending image."
+      }
+    },
+    "questionPreview": {
+      "noImage": "No image",
+      "chartAlt": "Feedback chart",
+      "zones": "Zones:",
+      "threshold": "Threshold IoU:",
+      "tolerance": "Tolerance",
+      "contract": "Contract",
+      "expectedAnswer": "Expected answer:",
+      "contracts": "contracts"
+    },
+    "chartMarkupForm": {
+      "statementLabel": "Statement",
+      "statementPlaceholder": "Ex: Mark the main support zone on this chart",
+      "explanationLabel": "Explanation (post-response)",
+      "difficultyLabel": "Difficulty (1-5)",
+      "weightLabel": "Weight",
+      "imageUrlLabel": "Chart image URL",
+      "imageUrlPlaceholder": "https://example.com/chart.png",
+      "zoneTypeLabel": "Zone type",
+      "zoneTypes": {
+        "support": "Support",
+        "resistance": "Resistance",
+        "supply": "Offer Zone",
+        "demand": "Demand Zone"
+      },
+      "thresholdLabel": "Threshold IoU (0.1 – 1.0)",
+      "answerZoneLabel": "Template — draw the expected zone",
+      "imagePrompt": "Paste the URL above to load the image",
+      "drawButton": "Draw template",
+      "drawing": "Drawing...",
+      "clearButton": "To clean",
+      "zoneError": "Draw the expected zone on the graph",
+      "saveButton": "Save question",
+      "validation": {
+        "statement": "Minimum 5 characters",
+        "imageUrl": "Invalid URL"
+      }
+    },
+    "riskCalcForm": {
+      "statementLabel": "Statement",
+      "statementPlaceholder": "Ex: Calculate position size for this scenario",
+      "explanationLabel": "Explanation (post-response)",
+      "difficultyLabel": "Difficulty (1-5)",
+      "weightLabel": "Weight",
+      "scenarioTitle": "Scenario data",
+      "balanceLabel": "Account balance",
+      "riskPercentLabel": "Risk (%)",
+      "entryPriceLabel": "Entry price",
+      "stopPriceLabel": "Stop price",
+      "contractValueLabel": "Value/contract",
+      "roundingLabel": "Decimal places",
+      "toleranceLabel": "Tolerance (%)",
+      "previewTitle": "Preview — expected response",
+      "previewContracts": "contracts/lots",
+      "saveButton": "Save question",
+      "validation": {
+        "statement": "Minimum 5 characters",
+        "positive": "It must be positive",
+        "maxRisk": "Maximum 100%"
+      }
+    },
+    "simForm": {
+      "sectionTitle": "Trading Scenario Setup",
+      "sectionSubtitle": "Defines candle, execution and scoring parameters",
+      "scenarioStatement": "Simulation scenario configuration",
+      "candlesSection": "Candles",
+      "executionSection": "Execution",
+      "scoringSection": "Approval Criteria",
+      "weightsSection": "Score Weights",
+      "weightsNormalized": "(will be automatically normalized)",
+      "sections": {
+        "candles": "Candles",
+        "execution": "Execution",
+        "scoring": "Score",
+        "weights": "Weights"
+      },
+      "fields": {
+        "numCandles": "Qty. Candles",
+        "startPrice": "Starting Price",
+        "volatility": "Volatility (ex: 0.015)",
+        "trend": "Trend (-1 to 1)",
+        "spreadBps": "Spread (bps)",
+        "initialBalance": "Opening Balance ($)",
+        "feeBps": "Rate (bps)",
+        "maxLeverage": "Max leverage",
+        "maxPositionSize": "Max size position (%)",
+        "allowShort": "Allow short",
+        "passingPnl": "Minimum PnL for approval (%)",
+        "maxDrawdown": "Max drawdown allowed (%)",
+        "minTrades": "Minimum trades",
+        "timeframe": "Timeframe",
+        "minTradeCount": "Minimum trades",
+        "weightPnl": "PnL weight",
+        "weightDrawdown": "Weight Drawdown",
+        "weightSharpe": "Sharpe Weight",
+        "weightWinRate": "Peso Win Rate"
+      },
+      "timeframeOptions": {
+        "1min": "1 min",
+        "5min": "5 min",
+        "15min": "15 min",
+        "1h": "1 hour",
+        "4h": "4 hours"
+      },
+      "saveButton": "Save configuration",
+      "validation": {
+        "timeframe": "Use 1, 5, 15, 60 or 240 min"
+      }
+    }
+  },
+  "auth": {
+    "layout": {
+      "quote": "\"Investment in knowledge always pays the best dividends.\"",
+      "quoteAuthor": "—Benjamin Franklin"
+    },
+    "login": {
+      "title": "To enter",
+      "newHere": "New here?",
+      "changeEmail": "To replace",
+      "toast": {
+        "success": "Welcome, {{name}}!",
+        "error": "Invalid email or password."
+      }
+    },
+    "register": {
+      "title": "Create account",
+      "hasAccount": "Already have an account?",
+      "toast": {
+        "success": "Account created successfully!",
+        "error": "Unable to create account. Try another email."
+      }
+    }
+  },
+  "platform": {
+    "login": {
+      "email": {
+        "title": "To enter",
+        "subtitle": "Enter your email to continue.",
+        "continueButton": "Continue"
+      },
+      "choice": {
+        "changeEmail": "Exchange email",
+        "notFound": {
+          "title": "No accounts found",
+          "subtitle": "This email is not associated with any existing account.",
+          "createProfessor": "Create teacher account",
+          "hasSchool": "I have a school",
+          "hasSchoolSubtitle": "Enter your school identifier to create an account as a student.",
+          "slugPlaceholder": "school-slug",
+          "accessButton": "Access"
+        },
+        "multiTenant": {
+          "title": "Select school",
+          "subtitle": "This email is associated with more than one school. Choose which one you want to enter."
+        }
+      },
+      "password": {
+        "platformTitle": "Teacher access",
+        "schoolBadge": "School: {{name}}",
+        "platformBadge": "Platform account"
+      },
+      "toast": {
+        "success": "Welcome, {{name}}!",
+        "resolveError": "Error checking email. Please try again.",
+        "tenantLoginError": "Account does not exist at this school or password is incorrect.",
+        "platformLoginError": "Invalid credentials."
+      }
+    },
+    "professorRegister": {
+      "title": "Create teacher account",
+      "subtitle": "Create your account to start publishing courses. You can create your school in the next step.",
+      "submitButton": "Create account",
+      "hasAccount": "Already have an account?",
+      "toast": {
+        "success": "Account created successfully!",
+        "error": "Error creating account. Please try again."
+      }
+    }
+  },
+  "public": {
+    "footer": {
+      "copyright": "© {{year}} Trivestia. All rights reserved."
+    },
+    "courses": {
+      "title": "Available courses",
+      "subtitle": "Explore our grid and find the ideal course for you.",
+      "error": "Unable to load courses. Please try again.",
+      "empty": "No courses available yet.",
+      "card": {
+        "modules": "{{n}} modules",
+        "viewCourse": "View course"
+      }
+    },
+    "courseDetail": {
+      "startCourse": "Start course",
+      "continueCourse": "Continue course",
+      "contentTitle": "Course content",
+      "lessonCount": "{{n}} classes"
+    },
+    "landing": {
+      "badge": "Financial education platform",
+      "title": "Invest in your knowledge",
+      "subtitle": "Learn investment analysis, risk management and personal finance with practical, interactive content at your own pace.",
+      "createSchool": "Create school",
+      "featuresSection": {
+        "title": "Everything you need to learn",
+        "subtitle": "A complete platform designed for those who want to go further"
+      },
+      "features": {
+        "structured": {
+          "title": "Structured content",
+          "description": "Courses organized into modules and progressive classes for efficient learning."
+        },
+        "activities": {
+          "title": "6 types of activity",
+          "description": "Multiple choice, T/F, ordering, free text and scenarios to consolidate knowledge."
+        },
+        "progress": {
+          "title": "Detailed progress",
+          "description": "Track your progress with clear performance metrics in each class."
+        },
+        "trading": {
+          "title": "Learn investing",
+          "description": "Master fundamental, technical analysis and risk management with premium teaching."
+        }
+      },
+      "stats": {
+        "activeStudents": "Active students",
+        "contentHours": "Hours of content",
+        "completionRate": "Completion rate",
+        "avgScore": "Average grade"
+      },
+      "cta": {
+        "title": "Start your journey today",
+        "subtitle": "Access for free and discover how to invest intelligently.",
+        "button": "Create free account"
+      }
+    },
+    "createSchool": {
+      "title": "Create your school",
+      "subtitle": "Create your teaching space and start sharing knowledge.",
+      "hasSchool": "Already have a school?",
+      "form": {
+        "schoolName": "School name",
+        "schoolNamePlaceholder": "Ex: Trading School",
+        "schoolUrl": "School URL",
+        "slugPlaceholder": "my-school",
+        "slugTaken": "This slug is already in use.",
+        "description": "Description",
+        "bioPlaceholder": "A brief description of your school...",
+        "ownerSection": "Owner data (OWNER)",
+        "ownerName": "Your name",
+        "ownerNamePlaceholder": "Your full name",
+        "submit": "Create school"
+      },
+      "toast": {
+        "slugTaken": "This slug is already in use. Choose another.",
+        "success": "School \"{{name}}\" successfully created!",
+        "error": "It was not possible to create the school. Please try again."
+      }
+    }
+  },
+  "app": {
+    "dashboard": {
+      "greeting": "Hello, {{firstName}}",
+      "subtitle": "Continue where you left off.",
+      "availableCourses": "Available courses",
+      "recentActivity": "Recent activity",
+      "stats": {
+        "completedLessons": "Completed classes",
+        "inProgress": "In progress",
+        "totalLessons": "Total classes",
+        "avgScore": "Average score"
+      },
+      "continueCard": {
+        "label": "Continue where you left off",
+        "viewCourses": "View courses",
+        "allDone": "Congratulations! You have completed everything.",
+        "allDoneSubtitle": "Continue exploring the available courses.",
+        "startFirst": "Start your first course",
+        "startFirstSubtitle": "Explore the available courses and take the first step."
+      },
+      "weeklyGoal": {
+        "title": "Weekly goal",
+        "progress": "{{weeklyCompleted}} of {{weeklyTarget}} activities",
+        "achieved": "Goal!",
+        "streakDay_one": "day in a row",
+        "streakDay_other": "days in a row",
+        "record": "record",
+        "activityTooltip": "{{date}}: {{count}} activity(ies)",
+        "days": {
+          "0": "S",
+          "1": "T",
+          "2": "Q",
+          "3": "Q",
+          "4": "S",
+          "5": "S",
+          "6": "D"
+        },
+        "aria": {
+          "configure": "Configure goal"
+        }
+      }
+    },
+    "announcements": {
+      "title": "Warnings",
+      "unreadCount_one": "{{count}} unread",
+      "unreadCount_other": "{{count}} unread",
+      "markAllRead": "Mark all as read",
+      "empty": "No notice available at this time.",
+      "expiresAt": "· expires in {{date}}",
+      "markAsRead": "Mark as read",
+      "toast": {
+        "markAllSuccess": "{{count}} notice(s) marked as read."
+      },
+      "priority": {
+        "info": "Info"
+      },
+      "bell": {
+        "viewAll": "See all notices",
+        "empty": "No warning at this time."
+      },
+      "time": {
+        "now": "now",
+        "minutes": "{{n}}min",
+        "hours": "{{n}}h",
+        "days": "{{n}}d"
+      }
+    },
+    "progress": {
+      "title": "My progress",
+      "subtitle": "Track your progress in every class.",
+      "empty": "No classes started yet.",
+      "stats": {
+        "completed": "Completed",
+        "avgScore": "Average score",
+        "totalLessons": "Total classes"
+      }
+    },
+    "lab": {
+      "title": "Trading Laboratory",
+      "subtitle": "Practice without pressure. Set the stage and practice your strategy.",
+      "historyLink": "History",
+      "form": {
+        "title": "Scenario Configuration",
+        "candles": "Candles (50–500)",
+        "timeframe": "Timeframe",
+        "volatility": "Volatility (0.0001–0.1)",
+        "trend": "Trend (–1 to +1)",
+        "spread": "Spread (bps)",
+        "balance": "Opening Balance ($)",
+        "submit": "Start Simulation",
+        "submitLoading": "Creating scene..."
+      },
+      "toast": {
+        "error": "Error creating practice session"
+      }
+    },
+    "practiceHistory": {
+      "title": "Practice History",
+      "backToLab": "Laboratory",
+      "empty": "No practice sessions yet.",
+      "noResult": "Session without result"
+    },
+    "lesson": {
+      "backToCourse": "Return to course",
+      "fallbackTitle": "Classroom",
+      "defaultH1": "Class activities",
+      "stepProgress": "Step {{n}} of {{total}} · {{viewed}}/{{total}} completed",
+      "empty": "No activities available in this class yet.",
+      "nav": {
+        "next": "Next"
+      }
+    },
+    "lessonPlayer": {
+      "noContent": "This class does not yet have content.",
+      "stepOf": "Step {{n}} of {{total}}",
+      "completedSuffix": "· {{viewed}}/{{total}} completed",
+      "completeLesson": "Complete class"
+    },
+    "activity": {
+      "empty": {
+        "title": "No questions registered",
+        "subtitle": "This activity does not yet have questions. Ask your administrator to add them."
+      },
+      "expiredBanner": "The term for this course has ended. New submissions are not permitted.",
+      "nav": {
+        "submit": "Submit activity"
+      },
+      "result": {
+        "passed": "Congratulations! You passed.",
+        "failed": "Keep practicing!",
+        "scoreLabel": "{{score}} of {{maxScore}} points",
+        "reviewTitle": "Review of questions",
+        "policyNever": "The teacher chose not to release the answer sheet for this activity.",
+        "policyAfterDate": "The template will be released in {{date}}.",
+        "policyDateFallback": "date to be defined",
+        "questionN": "Question {{n}}",
+        "correct": "Correct",
+        "incorrect": "Incorrect",
+        "questionScore": "+{{earned}}/{{weight}} pts",
+        "explanationLabel": "Explanation:",
+        "questionImageAlt": "Image of the question",
+        "retry": "Try again",
+        "goToDashboard": "Go to Dashboard"
+      },
+      "challenge": {
+        "alreadyApproved": "You have already passed this challenge.",
+        "loadError": "Error loading the challenge."
+      },
+      "toast": {
+        "submitSuccess": "Activity completed!",
+        "submitError": "Error sending responses. Please try again.",
+        "incomplete": "Answer all questions before submitting."
+      }
+    },
+    "course": {
+      "notFound": "Course not found.",
+      "backToCourses": "Back to courses",
+      "progressPercent": "{{percent}}% complete",
+      "moduleProgress": "{{completed}}/{{total}} classes",
+      "lessonsCompleted": "{{completed}}/{{total}} classes completed",
+      "continueButton": "Continue",
+      "reviewButton": "Review"
+    },
+    "weeklyGoal": {
+      "modal": {
+        "title": "Set up weekly goal",
+        "question": "How many activities do you want to complete per week?",
+        "customLabel": "Or set a custom value",
+        "rangeHint": "Between 1 and 20",
+        "saveButton": "Save goal",
+        "toast": {
+          "success": "Updated goal: {{weeklyTarget}} activities/week",
+          "error": "Error updating meta."
+        }
+      }
+    },
+    "labSummary": {
+      "title": "Practice Laboratory",
+      "viewHistory": "See full history",
+      "empty": {
+        "title": "No lab sessions yet",
+        "subtitle": "Practice on the simulator and follow your progress here.",
+        "button": "To practice"
+      },
+      "stats": {
+        "totalSessions": "Total sessions",
+        "completed": "Completed",
+        "avgPnl": "Average PnL",
+        "bestPnl": "Better PnL",
+        "avgDrawdown": "Average drawdown",
+        "lastSession": "Last session",
+        "avgWinRate": "Average hit rate"
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "subtitle": "Manage your personal preferences",
+      "unsavedChanges": "Unsaved changes",
+      "general": {
+        "title": "General",
+        "language": "Language",
+        "languageHint": "Language used in the platform interface"
+      },
+      "audio": {
+        "title": "Audio and Devices",
+        "description": "Configure audio devices for future voice and live communication capabilities.",
+        "microphone": "Microphone",
+        "speaker": "Speaker",
+        "defaultDevice": "System default device",
+        "permissionRequired": "To list available devices, you must allow access to the microphone.",
+        "grantPermission": "Allow access",
+        "requesting": "Requesting permission...",
+        "permissionDenied": "Permission denied",
+        "permissionDeniedHint": "To change this, go to your browser settings and enable microphone access for this site.",
+        "speakerNotSupported": "Speaker selection may not be supported by your browser.",
+        "refreshDevices": "Update device list"
+      },
+      "toast": {
+        "saved": "Settings saved successfully!",
+        "error": "Error saving settings. Please try again."
+      }
+    }
+  },
+  "error": {
+    "wrongTenant": {
+      "title": "Access denied",
+      "message": "You are logged in to school {{correctSlug}} and do not have permission to access this school.",
+      "goToMySchool": "Go to my school"
+    }
+  },
+  "learning": {
+    "lock": {
+      "expired": {
+        "badge": "Deadline closed",
+        "tooltip": "The term for this course has ended."
+      },
+      "notYet": {
+        "badge": "Available at {{date}}",
+        "badgeFallback": "Not yet available"
+      },
+      "prereq": {
+        "badge": "Complete \"{{title}}\"",
+        "badgeFallback": "Pending prerequisite",
+        "tooltip": "Complete \"{{title}}\" first",
+        "tooltipFallback": "Complete the prerequisite first"
+      }
+    },
+    "timeline": {
+      "ariaLabel": "Class steps",
+      "stepTypes": {
+        "text": "Text",
+        "video": "Video",
+        "image": "Image",
+        "activity": "Activity"
+      },
+      "minutes": "{{n}} min",
+      "optional": "Optional"
+    },
+    "stepPlayer": {
+      "videoTitle": "video player",
+      "activityDescription": "Click to start this interactive activity",
+      "activityButton": "Start activity"
+    },
+    "multipleSelect": {
+      "instruction": "Select all that apply"
+    },
+    "textInput": {
+      "placeholder": "Write your answer here..."
+    },
+    "ordering": {
+      "dragAriaLabel": "Drag to reorder",
+      "instruction": "Drag to sort (or use keyboard: Space + Arrows)"
+    },
+    "chartMarkup": {
+      "imageAlt": "Graphic",
+      "imageUnavailable": "Image not available",
+      "drawing": "Drawing...",
+      "drawButton": "Draw zone",
+      "clearButton": "To clean",
+      "overlapSuffix": "% overlap",
+      "labels": {
+        "correct": "Correct",
+        "partial": "Almost",
+        "wrong": "Outside"
+      }
+    },
+    "riskCalc": {
+      "noData": "Scenario data not available",
+      "scenario": {
+        "balance": "Balance",
+        "risk": "Risk",
+        "entry": "Prohibited",
+        "stop": "Stop",
+        "contractValue": "Value per contract"
+      },
+      "stepByStep": {
+        "title": "Step by step",
+        "riskAmount": "Risk in $:",
+        "stopDistance": "Stop distance:",
+        "contractValueStep": "Value per contract:",
+        "positionSize": "Position Size:",
+        "yourAnswer": "Your answer",
+        "expected": "Expected",
+        "difference": "Difference"
+      },
+      "input": {
+        "label": "How big is the position?",
+        "placeholder": "Ex: 2.50"
+      },
+      "feedback": {
+        "accuracySuffix": "% hit",
+        "labels": {
+          "correct": "Correct",
+          "partial": "Almost",
+          "wrong": "Incorrect"
+        }
+      }
+    },
+    "questionRenderer": {
+      "imageAlt": "Image of the question",
+      "imageAltZoomed": "Question image — enlarged",
+      "zoomTitle": "Enlarge image",
+      "unsupportedType": "Unsupported question type: {{type}}"
+    },
+    "courseInteractive": {
+      "lessonsCount": "{{completedLessons}}/{{totalLessons}} classes completed",
+      "review": "Review",
+      "continue": "Continue"
+    },
+    "courseOutline": {
+      "aria": "Course structure",
+      "moduleProgress": "{{completed}}/{{total}}"
+    },
+    "lessonLock": {
+      "courseExpired": "The term for this course has ended.",
+      "courseExpiredBadge": "Deadline closed",
+      "notAvailableYet": "Not yet available",
+      "availableFrom": "Available at {{date}}",
+      "previousIncomplete": "Complete the previous lesson to continue.",
+      "previousIncompleteBadge": "Complete the previous lesson",
+      "prerequisiteNotMet": "Complete \"{{lessonTitle}}\" first",
+      "prerequisiteBadge": "Pending prerequisite"
+    },
+    "activityPlayer": {
+      "noQuestions": "No questions registered",
+      "noQuestionsHint": "This activity does not yet have questions. Ask your administrator to add them.",
+      "questionLabel": "Question {{n}}",
+      "reviewTitle": "Review of questions",
+      "passed": "Congratulations! You passed.",
+      "failed": "Keep practicing!",
+      "retryButton": "Try again",
+      "prevButton": "Previous",
+      "nextButton": "Next",
+      "submitButton": "Submit activity",
+      "answerAllWarning": "Answer all questions before submitting.",
+      "toast": {
+        "success": "Activity completed!",
+        "error": "Error sending responses. Please try again."
+      }
+    }
+  },
+  "super": {
+    "layout": {
+      "brand": "Super Admin",
+      "roleBadge": "Super Admin",
+      "nav": {
+        "overview": "Overview",
+        "schools": "Schools",
+        "users": "Users"
+      },
+      "aria": {
+        "expand": "Expand sidebar",
+        "collapse": "Collapse sidebar",
+        "menu": "Menu",
+        "logout": "To go out"
+      }
+    },
+    "dashboard": {
+      "title": "Platform Overview",
+      "subtitle": "Super Admin control panel — all schools and users.",
+      "stats": {
+        "totalTenants": "Total Schools",
+        "activeTenants": "Active Schools",
+        "users": "Users",
+        "courses": "Courses"
+      }
+    },
+    "tenants": {
+      "title": "Schools",
+      "subtitle": "Manage all platform tenants.",
+      "newButton": "New School",
+      "searchPlaceholder": "Search by name or slug...",
+      "filter": {
+        "all": "All",
+        "active": "Active",
+        "disabled": "Disabled"
+      },
+      "table": {
+        "school": "School",
+        "slug": "Slug",
+        "users": "Users",
+        "courses": "Courses",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "linkTitle": "Open school",
+      "status": {
+        "active": "Active",
+        "disabled": "Disabled",
+        "clickToDisable": "Click to deactivate",
+        "clickToEnable": "Click to activate"
+      },
+      "editButton": "Edit",
+      "empty": "No schools found.",
+      "pagination": "{{total}} school(s) • Page {{page}} of {{totalPages}}",
+      "modal": {
+        "title": "New School",
+        "nameLabel": "Name",
+        "bioLabel": "Bio (optional)",
+        "bioPlaceholder": "Brief description of the school",
+        "enabledLabel": "Enabled",
+        "ownerHint": "Owner (optional) — if completed, creates the owner together.",
+        "ownerNameLabel": "Owner Name",
+        "ownerEmailLabel": "Owner's Email",
+        "ownerPasswordLabel": "Owner Password",
+        "slugLabel": "Slug",
+        "creating": "Creating...",
+        "createButton": "Create School"
+      },
+      "toast": {
+        "statusUpdated": "Updated status",
+        "created": "School created successfully!",
+        "createError": "Error creating school"
+      }
+    },
+    "tenantEdit": {
+      "title": "Edit School",
+      "form": {
+        "nameLabel": "Name",
+        "bioLabel": "Bio",
+        "logoLabel": "Logo URL",
+        "enabledLabel": "Qualified school"
+      },
+      "saveButton": "Save",
+      "accessButton": "Access School",
+      "notFound": "Tenant not found.",
+      "statsTitle": "Statistics",
+      "stats": {
+        "users": "Users",
+        "courses": "Courses",
+        "createdAt": "Created in"
+      },
+      "ownersTitle": "Owners/Super Admins",
+      "toast": {
+        "updated": "School updated successfully!",
+        "updateError": "Error when updating"
+      }
+    },
+    "users": {
+      "title": "Platform Users",
+      "subtitle": "View and manage all users across all schools.",
+      "searchPlaceholder": "Search by name or email...",
+      "filter": {
+        "allRoles": "All roles"
+      },
+      "table": {
+        "name": "Name",
+        "email": "E-mail",
+        "school": "School",
+        "role": "Roll",
+        "actions": "Actions"
+      },
+      "changeRoleButton": "Change Role",
+      "empty": "No users found.",
+      "pagination": "{{total}} user(s) • Page {{page}} of {{totalPages}}",
+      "modal": {
+        "title": "Change Role",
+        "schoolBadge": "School: {{slug}}",
+        "confirmButton": "Confirm"
+      },
+      "toast": {
+        "roleUpdated": "Scroll updated successfully!",
+        "updateError": "Error updating role"
+      }
+    }
+  },
+  "workspace": {
+    "layout": {
+      "badge": "Workspace",
+      "nav": {
+        "panel": "Panel",
+        "school": "School"
+      }
+    },
+    "tenantPublic": {
+      "nav": {
+        "courses": "Courses",
+        "dashboard": "Dashboard",
+        "login": "To enter"
+      },
+      "footer": "All rights reserved."
+    },
+    "page": {
+      "welcome": "Welcome, {{name}}",
+      "subtitle": "Manage your school from the admin panel.",
+      "manageButton": "Manage school",
+      "viewAsStudent": "See as a student",
+      "toast": {
+        "loadError": "Error loading data."
+      }
+    },
+    "createSchool": {
+      "title": "Create your school",
+      "subtitle": "Set up your school name and URL to start publishing courses.",
+      "form": {
+        "nameLabel": "School name",
+        "namePlaceholder": "Ex: Trading School",
+        "slugLabel": "School URL",
+        "slugPlaceholder": "my-school",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "A brief description of your school...",
+        "submitButton": "Create school"
+      },
+      "toast": {
+        "success": "School \"{{name}}\" successfully created!",
+        "error": "Error creating school."
+      }
+    }
+  },
+  "sim": {
+    "briefing": {
+      "badge": "Trading Simulation",
+      "helpButton": "Help",
+      "alreadyPassed": {
+        "title": "Challenge Complete!",
+        "description": "You have already passed this challenge with {{score}}/100 points in {{count}} attempt(s).",
+        "viewResultButton": "See Result"
+      },
+      "prevAttempt": {
+        "label": "Previous attempt:",
+        "value": "{{score}}/100 points — {{attempt}}th attempt"
+      },
+      "objectives": {
+        "title": "Your Goals",
+        "profitTarget": "Profit Target",
+        "profitDesc": "Minimum profit on the opening balance",
+        "maxDrawdown": "Maximum Drawdown",
+        "drawdownDesc": "Maximum allowable drop in equity",
+        "minTrades": "Minimum Trades",
+        "minTradesDesc": "Minimum operations to validate"
+      },
+      "rules": {
+        "title": "Challenge Rules",
+        "initialBalance": "Opening Balance",
+        "maxEvents": "Maximum Events",
+        "maxLeverage": "Max Leverage",
+        "feeBps": "Fee per operation",
+        "shortSelling": "Short selling",
+        "allowed": "Allowed"
+      },
+      "howItWorks": {
+        "title": "How It Works",
+        "step1": "You will receive a randomly generated candle chart.",
+        "step2": "Use the playback controls to advance the sails one by one or automatically.",
+        "step3": "Open buy (BUY) or sell (SELL) orders using the order panel.",
+        "step4": "Track your PnL, open position and drawdown in real time.",
+        "step5": "When you reach the last candle, click \"Send Result\" to submit.",
+        "step6": "The server validates your simulation and calculates your score."
+      },
+      "loadingScenario": "Loading scenario...",
+      "startButton": "Start Simulation"
+    },
+    "result": {
+      "practice": {
+        "title": "Session Completed!",
+        "newSessionButton": "New Session"
+      },
+      "challenge": {
+        "approvedTitle": "Challenge Approved!",
+        "failedTitle": "Challenge Not Approved",
+        "approvedSubtitle": "Congratulations! You have met the approval criteria.",
+        "failedSubtitle": "Keep practicing and try again."
+      },
+      "scoreUnit": "points",
+      "metrics": {
+        "finalBalance": "Final Balance",
+        "trades": "Trades",
+        "maxDrawdown": "Max Drawdown",
+        "pnl": "PnL",
+        "sharpe": "Sharpe",
+        "fees": "Fees"
+      },
+      "tamperWarning": "Divergence detected — result calculated by the server",
+      "retryButton": "Try Again"
+    },
+    "orderTicket": {
+      "title": "New Order",
+      "quantityLabel": "Amount",
+      "priceLabel": "Price",
+      "buyButton": "Buy",
+      "sellButton": "Sell",
+      "slLabel": "Stop-Loss",
+      "tpLabel": "Take-Profit",
+      "slShortLabel": "SL",
+      "tpShortLabel": "TP",
+      "validation": {
+        "quantity": "Quantity must be positive",
+        "price": "Mandatory price for LIMIT/STOP"
+      }
+    },
+    "help": {
+      "title": "Help Center",
+      "quickTipsTitle": "Quick Tips",
+      "glossaryTitle": "Glossary",
+      "restartTutorialButton": "Restart Tutorial",
+      "categories": {
+        "orders": "Order Types",
+        "concepts": "Concepts",
+        "indicators": "Indicators"
+      },
+      "quickTips": {
+        "tip1": "Use Play/Pause to control the advance of the candles",
+        "tip2": "The chart shows candles — each candle = 1 period",
+        "tip3": "Start with small MARKET orders to understand the flow",
+        "tip4": "Always set Stop-Loss to limit losses",
+        "tip5": "Track your Equity and Drawdown in real time",
+        "tip6": "Click 'Send Result' when the candles run out"
+      },
+      "glossary": {
+        "buy": {
+          "term": "BUY",
+          "description": "Purchase order. You profit when the price rises after the purchase. Open a LONG position."
+        },
+        "sell": {
+          "term": "SELL",
+          "description": "Sales order. Allows you to \"sell short\" (short) — you profit when the price drops. Open a SHORT position."
+        },
+        "market": {
+          "term": "MARKET",
+          "description": "Executes immediately at the current market price. Faster, but may have slippage."
+        },
+        "limit": {
+          "term": "LIMIT (Limited)",
+          "description": "Executes only if the price reaches the defined value. BUY LIMIT: executes below the defined price. SELL LIMIT: above."
+        },
+        "stop": {
+          "term": "STOP",
+          "description": "Executes when the price reaches the trigger. BUY STOP: purchase above the current level (breakout). SELL STOP: sell below."
+        },
+        "sl": {
+          "term": "Stop-Loss (SL)",
+          "description": "Price level that closes your position automatically to limit losses. Fundamental for risk management."
+        },
+        "tp": {
+          "term": "Take-Profit (TP)",
+          "description": "Price level that closes your position automatically to guarantee profit. Helps to realize gains."
+        },
+        "pnl": {
+          "term": "PnL (Profit & Loss)",
+          "description": "Profit or loss from your operation. Positive PnL = profit. Negative = loss. Shown in $ and %."
+        },
+        "equity": {
+          "term": "Equity",
+          "description": "Your balance + PnL of open positions. Reflects the real value of your account in real time."
+        },
+        "position": {
+          "term": "Position",
+          "description": "When you have an open operation. LONG = long (bet on the rise). SHORT = sold (bet on the fall). FLAT = no position."
+        },
+        "fee": {
+          "term": "Fee",
+          "description": "Cost per operation charged for each execution (fill). Measured in bps (basis points). 1 bps = 0.01%."
+        },
+        "slippage": {
+          "term": "Slippage",
+          "description": "Difference between expected price and actual execution price. Automatically simulated by the engine."
+        },
+        "spread": {
+          "term": "Spread",
+          "description": "Difference between the purchase (ask) and sale (bid) price. Implicit cost of operating."
+        },
+        "drawdown": {
+          "term": "Drawdown",
+          "description": "Decrease in equity in relation to the maximum peak. Measures the worst moment of your operation. Lower = better risk management."
+        },
+        "winrate": {
+          "term": "Winrate",
+          "description": "Percentage of winning trades. 60%+ is considered good. However, it also depends on the risk/return relationship."
+        },
+        "sharpe": {
+          "term": "Sharpe Ratio",
+          "description": "Measures risk-adjusted return. >1 = good, >2 = excellent. Penalizes large fluctuations in results."
+        },
+        "profitfactor": {
+          "term": "Profit Factor",
+          "description": "Sum of gains ÷ sum of losses. >1 = profitable. >2 = consistent strategy."
+        }
+      }
+    },
+    "accountSummary": {
+      "balance": "Balance",
+      "equity": "Equity",
+      "pnl": "PnL",
+      "fees": "Fees",
+      "maxDD": "DD Max"
+    },
+    "metrics": {
+      "empty": "Metrics available upon completion",
+      "trades": "Trades",
+      "wins": "Earnings",
+      "losses": "Losses",
+      "winRate": "Winrate",
+      "sharpe": "Sharpe",
+      "maxDD": "Max DD",
+      "feesTotal": "Total Fees",
+      "events": "Events"
+    },
+    "tutorial": {
+      "stepOf": "Step {{current}} of {{total}}",
+      "closeTitle": "Close tutorial",
+      "skipButton": "To jump",
+      "finishButton": "Finish",
+      "steps": {
+        "chart": {
+          "title": "Understand the Chart",
+          "description": "This is the candlestick chart. Each candle represents a period of time. Green candle = price has risen. Red candle = price has fallen. The body shows opening/closing and the wicks show high/low."
+        },
+        "playback": {
+          "title": "Playback Controls",
+          "description": "Use the Play/Pause buttons to advance the sails automatically. The \"→\" button advances one candle at a time. Adjust the speed (0.5× to 4×). Observe the market before trading!"
+        },
+        "order": {
+          "title": "Abra sua Primeira Ordem",
+          "description": "In the \"New Order\" panel, choose BUY or SELL. Select the type: MARKET (immediate), LIMIT (specific price) or STOP (trigger). Set the quantity and optionally Stop-Loss (SL) and Take-Profit (TP)."
+        },
+        "position": {
+          "title": "Acompanhe sua Posição",
+          "description": "After an order is filled, its position appears on the side panel. Track PnL in real time. Use the \"Close\" button to close the position at any time."
+        },
+        "tabs": {
+          "title": "Orders, Fills and Metrics",
+          "description": "At the bottom: \"Orders\" shows pending orders (LIMIT/STOP). \"Fills\" shows all runs performed. \"Metrics\" shows statistics of your performance (Win Rate, Sharpe, etc.)."
+        },
+        "submit": {
+          "title": "Finalize and Send",
+          "description": "When all candles are displayed, the \"Submit Result\" button appears. Click to submit your simulation to the server. It recalculates everything and generates your final score. Good luck!"
+        }
+      }
+    },
+    "candles": {
+      "autoFollow": {
+        "active": "Active auto-tracking",
+        "reactivate": "Reactivate Auto Accompaniment"
+      }
+    },
+    "playback": {
+      "pauseTitle": "Pause",
+      "playTitle": "Start simulation",
+      "pausedAtStartHint": "▶ Press Play to start",
+      "pausedLabel": "Paused",
+      "stepForwardTitle": "Advance 1 candle",
+      "skipToEndTitle": "Skip to end",
+      "speedLabel": "Speed:",
+      "finished": "✓ End",
+      "progress": "Candle {{visible}}/{{total}}"
+    },
+    "position": {
+      "flat": "No open position",
+      "closeTitle": "Close position",
+      "qty": "Qty",
+      "entry": "Entry",
+      "unrealizedPnl": "PnL not performed",
+      "realizedPnl": "PnL performed"
+    },
+    "fills": {
+      "empty": "No fill yet",
+      "feePrefix": "fee"
+    },
+    "orders": {
+      "empty": "No pending orders"
+    },
+    "scenarioLoader": {
+      "alreadyPassedTitle": "Challenge already completed",
+      "alreadyPassedDescription": "You have already passed this challenge. See the results in your submissions.",
+      "errorTitle": "Error loading scenario",
+      "retryButton": "Try Again"
+    },
+    "terminal": {
+      "helpTitle": "Open help",
+      "helpButton": "Help",
+      "submitButton": "Send Result",
+      "submitting": "Sending...",
+      "overlay": {
+        "startTitle": "Start Simulation",
+        "continueTitle": "Continue",
+        "startHint": "Click to start advancing the sails",
+        "pausedHint": "Candle {{visible}}/{{total}} — paused"
+      },
+      "tabs": {
+        "orders": "Orders",
+        "fills": "Fillers",
+        "metrics": "Metrics"
+      }
+    },
+    "engine": {
+      "loadError": "Error loading scenario",
+      "submitError": "Error sending result"
+    }
+  }
+}

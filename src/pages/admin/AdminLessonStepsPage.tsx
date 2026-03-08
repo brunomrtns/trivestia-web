@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -34,30 +35,9 @@ import {
 import { stepsEndpoints } from '@/services/endpoints/steps.endpoints';
 import { StepFormModal } from '@/components/admin/StepFormModal';
 import { cn } from '@/lib/utils';
-import type {
-  LessonStepDTO,
-  StepType
-} from '@/types/api';
+import type { LessonStepDTO, StepType } from '@/types/api';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-
-const STEP_TYPES: {
-  value: StepType;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-}[] = [
-  { value: 'CONTENT_TEXT', label: 'Texto', icon: FileText },
-  { value: 'CONTENT_VIDEO', label: 'Vídeo', icon: Video },
-  { value: 'CONTENT_IMAGE', label: 'Imagem', icon: Image },
-  { value: 'ACTIVITY', label: 'Atividade', icon: Zap }
-];
-
-const STEP_LABELS: Record<StepType, string> = {
-  CONTENT_TEXT: 'Texto',
-  CONTENT_VIDEO: 'Vídeo',
-  CONTENT_IMAGE: 'Imagem',
-  ACTIVITY: 'Atividade'
-};
 
 const STEP_ICONS: Record<
   StepType,
@@ -68,8 +48,6 @@ const STEP_ICONS: Record<
   CONTENT_IMAGE: Image,
   ACTIVITY: Zap
 };
-
-
 
 // ─── SortableStepRow ──────────────────────────────────────────────────────────
 
@@ -94,6 +72,13 @@ function SortableStepRow({
   } = useSortable({ id: step.id });
 
   const Icon = STEP_ICONS[step.type];
+  const { t } = useTranslation();
+  const STEP_LABELS: Record<StepType, string> = {
+    CONTENT_TEXT: t('learning.timeline.stepTypes.text'),
+    CONTENT_VIDEO: t('learning.timeline.stepTypes.video'),
+    CONTENT_IMAGE: t('learning.timeline.stepTypes.image'),
+    ACTIVITY: t('learning.timeline.stepTypes.activity')
+  };
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -124,7 +109,7 @@ function SortableStepRow({
         <p className="text-xs text-muted-foreground">
           {STEP_LABELS[step.type]}
           {step.estimatedMinutes ? ` · ${step.estimatedMinutes} min` : ''}
-          {step.isOptional ? ' · Opcional' : ''}
+          {step.isOptional ? ` · ${t('learning.timeline.optional')}` : ''}
         </p>
       </div>
 
@@ -135,7 +120,7 @@ function SortableStepRow({
       <button
         onClick={onEdit}
         className="shrink-0 rounded-lg p-1.5 text-muted-foreground transition hover:bg-accent hover:text-foreground"
-        aria-label="Editar etapa"
+        aria-label={t('admin.lessonSteps.aria.edit')}
       >
         <Pencil className="h-3.5 w-3.5" />
       </button>
@@ -144,7 +129,7 @@ function SortableStepRow({
         onClick={onDelete}
         disabled={isDeleting}
         className="shrink-0 rounded-lg p-1.5 text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive disabled:opacity-40"
-        aria-label="Excluir etapa"
+        aria-label={t('admin.lessonSteps.aria.delete')}
       >
         {isDeleting ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -166,6 +151,13 @@ export default function AdminLessonStepsPage() {
   }>();
   const slug = tenantSlug ?? '';
   const qc = useQueryClient();
+  const { t } = useTranslation();
+  const STEP_LABELS: Record<StepType, string> = {
+    CONTENT_TEXT: t('learning.timeline.stepTypes.text'),
+    CONTENT_VIDEO: t('learning.timeline.stepTypes.video'),
+    CONTENT_IMAGE: t('learning.timeline.stepTypes.image'),
+    ACTIVITY: t('learning.timeline.stepTypes.activity')
+  };
 
   const [showForm, setShowForm] = useState(false);
   const [editingStep, setEditingStep] = useState<LessonStepDTO | undefined>();
@@ -188,9 +180,9 @@ export default function AdminLessonStepsPage() {
       stepsEndpoints.deleteStep(slug, lessonId!, stepId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-steps', slug, lessonId] });
-      toast.success('Etapa excluída.');
+      toast.success(t('admin.lessonSteps.toast.deleted'));
     },
-    onError: () => toast.error('Erro ao excluir etapa.')
+    onError: () => toast.error(t('admin.lessonSteps.toast.deleteError'))
   });
 
   const reorderMut = useMutation({
@@ -198,18 +190,18 @@ export default function AdminLessonStepsPage() {
       stepsEndpoints.reorderSteps(slug, lessonId!, { orders }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-steps', slug, lessonId] });
-      toast.success('Ordem atualizada!');
+      toast.success(t('admin.lessonSteps.toast.reordered'));
     },
-    onError: () => toast.error('Erro ao reordenar.')
+    onError: () => toast.error(t('admin.lessonSteps.toast.reorderError'))
   });
 
   const generateMut = useMutation({
     mutationFn: () => stepsEndpoints.generateSteps(slug, lessonId!),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-steps', slug, lessonId] });
-      toast.success('Etapas geradas a partir das atividades!');
+      toast.success(t('admin.lessonSteps.toast.generated'));
     },
-    onError: () => toast.error('Erro ao gerar etapas.')
+    onError: () => toast.error(t('admin.lessonSteps.toast.generateError'))
   });
 
   // ── Drag & Drop ─────────────────────────────────────────────────────────
@@ -244,7 +236,7 @@ export default function AdminLessonStepsPage() {
             className="flex items-center gap-1 hover:text-foreground transition-colors"
           >
             <ChevronLeft className="h-4 w-4" />
-            Voltar às aulas
+            {t('admin.lessonSteps.backToLessons')}
           </Link>
         ) : (
           <Link
@@ -252,7 +244,7 @@ export default function AdminLessonStepsPage() {
             className="flex items-center gap-1 hover:text-foreground transition-colors"
           >
             <ChevronLeft className="h-4 w-4" />
-            Cursos
+            {t('common.nav.courses')}
           </Link>
         )}
       </nav>
@@ -260,9 +252,11 @@ export default function AdminLessonStepsPage() {
       {/* Header */}
       <div className="mb-8 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold">Etapas da aula</h1>
+          <h1 className="text-2xl font-extrabold">
+            {t('admin.lessonSteps.title')}
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {timeline?.lesson.title ?? 'Carregando...'}
+            {timeline?.lesson.title ?? t('admin.lessonSteps.loadingTitle')}
           </p>
         </div>
 
@@ -278,7 +272,7 @@ export default function AdminLessonStepsPage() {
               ) : (
                 <Sparkles className="h-4 w-4" />
               )}
-              Gerar das atividades
+              {t('admin.lessonSteps.generateButton')}
             </button>
           )}
           <button
@@ -289,7 +283,7 @@ export default function AdminLessonStepsPage() {
             className="flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:opacity-90"
           >
             <Plus className="h-4 w-4" />
-            Nova etapa
+            {t('admin.lessonSteps.newButton')}
           </button>
         </div>
       </div>
@@ -297,9 +291,8 @@ export default function AdminLessonStepsPage() {
       {/* Virtual banner */}
       {isVirtual && (
         <div className="mb-6 rounded-xl border border-yellow-300/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-700 dark:text-yellow-400">
-          <strong>Etapas virtuais:</strong> Esta aula ainda não possui etapas
-          persistidas. As etapas abaixo são geradas automaticamente a partir das
-          atividades. Clique em "Gerar das atividades" para persistir.
+          <strong>{t('admin.lessonSteps.virtualBanner.title')}</strong>{' '}
+          {t('admin.lessonSteps.virtualBanner.body')}
         </div>
       )}
 
@@ -331,7 +324,7 @@ export default function AdminLessonStepsPage() {
                     setShowForm(true);
                   }}
                   onDelete={() => {
-                    if (confirm(`Excluir etapa "${step.title}"?`))
+                    if (confirm(t('admin.lessonSteps.confirmDelete', { title: step.title })))
                       deleteMut.mutate(step.id);
                   }}
                   isDeleting={
@@ -376,9 +369,9 @@ export default function AdminLessonStepsPage() {
       {!isLoading && steps.length === 0 && (
         <div className="py-20 text-center text-muted-foreground">
           <FileText className="mx-auto mb-4 h-12 w-12 opacity-30" />
-          <p>Nenhuma etapa nesta aula.</p>
+          <p>{t('admin.lessonSteps.empty.title')}</p>
           <p className="mt-1 text-xs">
-            Crie etapas manualmente ou gere a partir das atividades.
+            {t('admin.lessonSteps.empty.subtitle')}
           </p>
         </div>
       )}

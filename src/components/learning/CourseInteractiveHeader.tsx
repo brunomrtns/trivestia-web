@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { Play, RotateCcw } from 'lucide-react';
 import type { CourseInteractiveDTO, CourseInteractiveNext } from '@/types/api';
 
@@ -15,6 +16,7 @@ export function CourseInteractiveHeader({
   next,
   onContinue
 }: CourseInteractiveHeaderProps) {
+  const { t } = useTranslation();
   const isComplete = progress.percent === 100;
 
   return (
@@ -38,12 +40,12 @@ export function CourseInteractiveHeader({
           {isComplete ? (
             <>
               <RotateCcw className="h-4 w-4" />
-              Revisar
+              {t('learning.courseInteractive.review')}
             </>
           ) : (
             <>
               <Play className="h-4 w-4" />
-              Continuar
+              {t('learning.courseInteractive.continue')}
             </>
           )}
         </button>
@@ -53,7 +55,10 @@ export function CourseInteractiveHeader({
       <div className="mt-5">
         <div className="mb-1.5 flex items-center justify-between text-xs text-muted-foreground">
           <span>
-            {progress.completedLessons}/{progress.totalLessons} aulas concluídas
+            {t('learning.courseInteractive.lessonsCount', {
+              completedLessons: progress.completedLessons,
+              totalLessons: progress.totalLessons
+            })}
           </span>
           <span className="font-semibold text-foreground">
             {progress.percent}%
