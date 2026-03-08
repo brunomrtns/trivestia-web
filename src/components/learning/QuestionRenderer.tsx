@@ -88,6 +88,7 @@ export function QuestionRenderer({
   onChange,
   feedback
 }: Props) {
+  const { t } = useTranslation();
   const questionImage =
     question.imageUrl && activityType !== 'CHART_MARKUP' ? (
       <QuestionImage url={question.imageUrl} />

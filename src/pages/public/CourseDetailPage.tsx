@@ -59,6 +59,7 @@ export default function CourseDetailPage() {
       <nav className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
         <Link to={`${base}/courses`} className="hover:text-foreground">
           {t('common.nav.courses')}
+        </Link>
         <span className="text-foreground font-medium">{course?.title}</span>
       </nav>
 

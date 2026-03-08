@@ -55,6 +55,7 @@ function SortableItem({ option }: { option: QuestionOption }) {
 }
 
 export function OrderingRenderer({ question, value, onChange }: Props) {
+  const { t } = useTranslation();
   const initialOrder = question.options.map((o) => o.id);
   const currentOrder = value?.orderedOptionIds ?? initialOrder;
 

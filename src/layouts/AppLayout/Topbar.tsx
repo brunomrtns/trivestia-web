@@ -48,7 +48,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         <button
           onClick={handleLogout}
           className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-          aria-label={t('common.aria.logout')})
+          aria-label={t('common.aria.logout')}
         >
           <LogOut className="h-5 w-5" />
         </button>

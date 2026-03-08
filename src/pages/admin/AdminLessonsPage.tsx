@@ -205,7 +205,7 @@ function SortableStepRow({
           className="flex shrink-0 items-center gap-1 rounded-lg border px-3 py-1 text-xs font-medium transition hover:bg-accent"
         >
           <HelpCircle className="h-3 w-3" />
-          Questões
+          {t('admin.lessons.questionsLink')}
         </Link>
       )}
 
@@ -570,14 +570,14 @@ function LessonSection({
                 <ChevronRight className="h-3.5 w-3.5" />
               )}
               <ShieldCheck className="h-3.5 w-3.5" />
-              Regras de acesso
+              {t('admin.lessons.accessRules.title')}
             </button>
             {showAccessRules && (
               <div className="border-t px-3 pb-3 pt-2.5 space-y-3">
                 {/* availableFrom */}
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                    Disponível a partir de (opcional)
+                    {t('admin.lessons.accessRules.availableFrom')}
                   </label>
                   <input
                     type="datetime-local"
@@ -590,13 +590,13 @@ function LessonSection({
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground flex items-center gap-1">
                     <Lock className="h-3 w-3" />
-                    Aula pré-requisito (opcional)
+                    {t('admin.lessons.accessRules.prerequisiteLesson')}
                   </label>
                   <select
                     className="w-full rounded-lg border bg-background px-3 py-1.5 text-xs outline-none focus:ring-2 focus:ring-ring"
                     {...lessonEditForm.register('prerequisiteLessonId')}
                   >
-                    <option value="">— Nenhum —</option>
+                    <option value="">{t('admin.lessons.accessRules.noPrerequisite')}</option>
                     {allCourseLessons
                       .filter((l) => l.id !== lesson.id)
                       .map((l) => (
@@ -610,7 +610,7 @@ function LessonSection({
                 {/* prerequisiteMinScore */}
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                    Nota mínima no pré-requisito (0 = só completar)
+                    {t('admin.lessons.accessRules.minScore')}
                   </label>
                   <input
                     type="number"
@@ -827,7 +827,7 @@ function LessonSection({
                   </div>
                   <div className="flex-1 min-w-[160px]">
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                      Revisão
+                      {t('admin.lessons.activityForm.reviewLabel')}
                     </label>
                     <select
                       className="w-full rounded-lg border bg-background px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-ring"
@@ -843,7 +843,7 @@ function LessonSection({
                   {actForm.watch('reviewPolicy') === 'AFTER_DATE' && (
                     <div className="flex-1 min-w-[160px]">
                       <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                        Liberar revisão em
+                        {t('admin.lessons.activityForm.releaseReviewAt')}
                       </label>
                       <input
                         type="datetime-local"
@@ -1143,7 +1143,7 @@ function ModuleSection({
               ))}
               {lessons?.length === 0 && (
                 <p className="py-2 text-center text-sm text-muted-foreground">
-                  Nenhuma aula neste módulo.
+                  {t('admin.lessons.emptyModule')}
                 </p>
               )}
             </>
@@ -1159,7 +1159,7 @@ function ModuleSection({
             >
               <div className="flex-1 min-w-[160px]">
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                  Título da Aula
+                  {t('admin.lessons.lessonTitle')}
                 </label>
                 <input
                   className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
@@ -1173,7 +1173,7 @@ function ModuleSection({
               </div>
               <div className="w-20">
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                  Ordem
+                  {t('admin.lessons.moduleOrder')}
                 </label>
                 <input
                   type="number"
@@ -1211,7 +1211,7 @@ function ModuleSection({
               className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed py-2.5 text-sm font-medium text-muted-foreground transition hover:border-primary hover:text-primary"
             >
               <Plus className="h-4 w-4" />
-              Adicionar aula
+              {t('admin.lessons.addLessonButton')}
             </button>
           )}
         </div>

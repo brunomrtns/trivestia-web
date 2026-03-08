@@ -152,7 +152,7 @@ export default function CourseInteractivePage() {
           </span>
 
           <span className="shrink-0 text-xs text-muted-foreground">
-            {data.progress.percent}% concluído
+            {t('app.course.progressPercent', { percent: data.progress.percent })}
           </span>
         </div>
       </div>

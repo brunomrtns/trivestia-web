@@ -165,7 +165,7 @@ export default function AdminPeriodsPage() {
           {periods?.length === 0 && (
             <div className="py-20 text-center text-muted-foreground">
               <CalendarRange className="mx-auto mb-4 h-12 w-12 opacity-30" />
-              <p>Nenhum período criado.</p>
+              <p>{t('admin.periods.empty')}</p>
             </div>
           )}
         </div>

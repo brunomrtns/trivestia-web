@@ -19,7 +19,7 @@
 
 ## 🔄 Status da Migração (Fase 2 — alterações de código)
 
-> Atualizado em: **08/03/2026** — Varredura final concluída. **Zero strings PT-BR hardcoded** restantes no codebase.
+> Atualizado em: **08/03/2026** — Varredura 2 concluída. **Zero strings PT-BR hardcoded** restantes no codebase.
 
 | Lote             | Arquivos alterados                                                                                                                                                                                                                                 | Status       |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
@@ -35,6 +35,7 @@
 | **Lote 10**      | WorkspaceLayout.tsx · TenantPublicLayout.tsx · WorkspacePage.tsx · workspace/CreateSchoolPage.tsx · ChallengeBriefingScreen.tsx · ResultScreen.tsx · OrderTicket.tsx · HelpDrawer.tsx · AccountSummary.tsx · MetricsPanel.tsx · OnboardingTour.tsx | ✅ Concluído |
 | **Lote 11**      | CandlesChart.tsx · PlaybackControls.tsx · PositionPanel.tsx · SimTradingTerminal.tsx · QuestionRenderer.tsx · SimTradingQuestionForm.tsx · AdminLessonStepsPage.tsx · SuperTenantsPage.tsx · AdminCoursesPage.tsx · AdminLessonsPage.tsx · TenantAuthLayout.tsx | ✅ Concluído |
 | **Limpeza Final** | TenantAuthLayout.tsx · TenantPublicLayout.tsx · ChartMarkupQuestionForm.tsx · AdminQuestionsPage.tsx · AdminGuard.tsx · SuperAdminGuard.tsx · ActivityPlayerContent.tsx · StepPlayer.tsx · useSimEngine.ts · AdminLessonsPage.tsx · ActivityPlayerPage.tsx · ProgressPage.tsx · DashboardPage.tsx · lib/utils.ts | ✅ Concluído |
+| **Varredura 2**  | AdminLessonsPage.tsx · AdminPeriodsPage.tsx · CourseInteractivePage.tsx · ScenarioLoader.tsx                                                                                                                                                       | ✅ Concluído |
 
 ---
 
@@ -1220,9 +1221,59 @@
 | 9               | #813–#847     | 35           | sim-trading (terminais, controles, painéis)          |
 | 10              | #848–#866     | 5            | Guards, workspace/CreateSchoolPage                   |
 | Limpeza Final   | #867–#891     | 30           | Varredura completa — zero strings hardcoded restantes |
-| **Total**       | **891**       | **886**      | —                                                    |
+| Varredura 2     | #892–#909     | 12           | AdminLessonsPage, AdminPeriodsPage, CourseInteractivePage, ScenarioLoader |
+| **Total**       | **909**       | **898**      | —                                                    |
 
 ---
 
 <!-- MIGRAÇÃO CONCLUÍDA — Zero strings PT-BR hardcoded em src/ -->
+
+---
+
+## Varredura 2 ✅ MIGRADO
+
+**Arquivos cobertos:**
+
+- `src/pages/admin/AdminLessonsPage.tsx` — 12 strings em sub-componentes SortableStepRow, LessonSection, ModuleSection
+- `src/pages/admin/AdminPeriodsPage.tsx` — 1 empty state
+- `src/pages/student/CourseInteractivePage.tsx` — 1 inline `% concluído`
+- `src/components/sim-trading/ScenarioLoader.tsx` — 4 strings (componente sem `useTranslation`)
+
+| #   | Categoria | Arquivo                   | Texto PT-BR                                                                | Chave                                          | Notas                               |
+| --- | --------- | ------------------------- | -------------------------------------------------------------------------- | ---------------------------------------------- | ----------------------------------- |
+| 892 | ui        | AdminLessonsPage.tsx      | Questões                                                                   | `admin.lessons.questionsLink`                  | Link para perguntas da atividade    |
+| 893 | ui        | AdminLessonsPage.tsx      | Regras de acesso                                                           | `admin.lessons.accessRules.title`              | Accordion no form de edição de aula |
+| 894 | form      | AdminLessonsPage.tsx      | Disponível a partir de (opcional)                                          | `admin.lessons.accessRules.availableFrom`      | Label do campo availableFrom        |
+| 895 | form      | AdminLessonsPage.tsx      | Aula pré-requisito (opcional)                                              | `admin.lessons.accessRules.prerequisiteLesson` | Label com ícone Lock                |
+| 896 | form      | AdminLessonsPage.tsx      | — Nenhum —                                                                 | `admin.lessons.accessRules.noPrerequisite`     | Opção padrão do select              |
+| 897 | form      | AdminLessonsPage.tsx      | Nota mínima no pré-requisito (0 = só completar)                            | `admin.lessons.accessRules.minScore`           | Label do campo minScore             |
+| 898 | form      | AdminLessonsPage.tsx      | Revisão                                                                    | `admin.lessons.activityForm.reviewLabel`       | Label do select reviewPolicy        |
+| 899 | form      | AdminLessonsPage.tsx      | Liberar revisão em                                                         | `admin.lessons.activityForm.releaseReviewAt`   | Label do campo reviewAfterDate      |
+| 900 | empty     | AdminLessonsPage.tsx      | Nenhuma aula neste módulo.                                                 | `admin.lessons.emptyModule`                    | Módulo sem aulas criadas            |
+| 901 | form      | AdminLessonsPage.tsx      | Título da Aula                                                             | `admin.lessons.lessonTitle`                    | Label no form inline de add aula    |
+| 902 | form      | AdminLessonsPage.tsx      | Ordem                                                                      | `admin.lessons.moduleOrder`                    | Reutiliza chave existente           |
+| 903 | ui        | AdminLessonsPage.tsx      | Adicionar aula                                                             | `admin.lessons.addLessonButton`                | Botão dashed de add aula            |
+| 904 | empty     | AdminPeriodsPage.tsx      | Nenhum período criado.                                                     | `admin.periods.empty`                          | Estado vazio da lista               |
+| 905 | ui        | CourseInteractivePage.tsx | {{percent}}% concluído                                                     | `app.course.progressPercent`                   | Reutiliza chave existente           |
+| 906 | ui        | ScenarioLoader.tsx        | Desafio já concluído                                                       | `sim.scenarioLoader.alreadyPassedTitle`        | h2 — chave já existia no JSON       |
+| 907 | ui        | ScenarioLoader.tsx        | Você já foi aprovado neste desafio. Veja o resultado nas suas submissões. | `sim.scenarioLoader.alreadyPassedDescription`  | p — chave já existia no JSON        |
+| 908 | error     | ScenarioLoader.tsx        | Erro ao carregar cenário                                                   | `sim.scenarioLoader.errorTitle`                | h2 — chave já existia no JSON       |
+| 909 | ui        | ScenarioLoader.tsx        | Tentar Novamente                                                           | `sim.scenarioLoader.retryButton`               | Botão retry — chave já existia      |
+
+### Novas chaves adicionadas ao pt-BR.json (Varredura 2)
+
+- `admin.lessons.questionsLink` — `"Questões"`
+- `admin.lessons.emptyModule` — `"Nenhuma aula neste módulo."`
+- `admin.lessons.lessonTitle` — `"Título da Aula"`
+- `admin.lessons.addLessonButton` — `"Adicionar aula"`
+- `admin.lessons.accessRules.title` — `"Regras de acesso"`
+- `admin.lessons.accessRules.availableFrom` — `"Disponível a partir de (opcional)"`
+- `admin.lessons.accessRules.prerequisiteLesson` — `"Aula pré-requisito (opcional)"`
+- `admin.lessons.accessRules.noPrerequisite` — `"— Nenhum —"`
+- `admin.lessons.accessRules.minScore` — `"Nota mínima no pré-requisito (0 = só completar)"`
+- `admin.lessons.activityForm.reviewLabel` — `"Revisão"`
+- `admin.lessons.activityForm.releaseReviewAt` — `"Liberar revisão em"`
+- `admin.periods.empty` — `"Nenhum período criado."`
+- `ScenarioLoader.tsx` adicionado `useTranslation` — 4 strings já existiam no JSON em `sim.scenarioLoader.*`
+- **Total Varredura 2: 12 novas chaves** | 18 strings migradas | 4 arquivos
 

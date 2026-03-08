@@ -258,7 +258,22 @@
       "confirmDeleteStep": "Excluir \"{{title}}\"?",
       "courseSubtitle": "Gerencie os módulos, aulas e atividades deste curso.",
       "newModuleButton": "Novo módulo",
-      "addStepButton": "Adicionar etapa"
+      "addStepButton": "Adicionar etapa",
+      "addLessonButton": "Adicionar aula",
+      "emptyModule": "Nenhuma aula neste módulo.",
+      "lessonTitle": "Título da Aula",
+      "questionsLink": "Questões",
+      "accessRules": {
+        "title": "Regras de acesso",
+        "availableFrom": "Disponível a partir de (opcional)",
+        "prerequisiteLesson": "Aula pré-requisito (opcional)",
+        "noPrerequisite": "— Nenhum —",
+        "minScore": "Nota mínima no pré-requisito (0 = só completar)"
+      },
+      "activityForm": {
+        "reviewLabel": "Revisão",
+        "releaseReviewAt": "Liberar revisão em"
+      }
     },
     "users": {
       "page": {
@@ -364,6 +379,7 @@
         "deleted": "Período excluído.",
         "deleteError": "Erro ao excluir período."
       },
+      "empty": "Nenhum período criado.",
       "aria": {
         "edit": "Editar período",
         "delete": "Excluir período"

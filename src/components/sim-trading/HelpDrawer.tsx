@@ -221,7 +221,7 @@ export function HelpDrawer({
                     <div className="mt-1 space-y-1.5 pl-2">
                       {items.map((entry) => (
                         <div
-                          key={entry.term}
+                          key={entry.key}
                           className="rounded-lg border bg-card p-3"
                         >
                           <div className="flex items-center gap-2">

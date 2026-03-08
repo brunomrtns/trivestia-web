@@ -51,6 +51,7 @@ export function AnnouncementFormModal({
   });
 
   const {
+    register,
     handleSubmit,
     reset,
     formState: { errors }
