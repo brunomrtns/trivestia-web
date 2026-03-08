@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Crosshair, Eraser, Send } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type {
@@ -39,12 +40,6 @@ const LABEL_COLORS: Record<string, string> = {
   WRONG: 'bg-red-500/90 text-white'
 };
 
-const LABEL_TEXT: Record<string, string> = {
-  CORRECT: '✅ Correto',
-  PARTIAL: '⚠️ Quase',
-  WRONG: '❌ Fora'
-};
-
 // ─── Component ────────────────────────────────────────
 
 export function ChartMarkupRenderer({
@@ -53,6 +48,14 @@ export function ChartMarkupRenderer({
   onChange,
   feedback
 }: Props) {
+  const { t } = useTranslation();
+
+  const LABEL_TEXT: Record<string, string> = {
+    CORRECT: t('learning.chartMarkup.labels.correct'),
+    PARTIAL: t('learning.chartMarkup.labels.partial'),
+    WRONG: t('learning.chartMarkup.labels.wrong')
+  };
+
   const raw = question.metadata?.jsonData as
     | Record<string, unknown>
     | undefined;
@@ -182,13 +185,13 @@ export function ChartMarkupRenderer({
         {imageUrl ? (
           <img
             src={imageUrl}
-            alt="Gráfico"
+            alt={t('learning.chartMarkup.imageAlt')}
             className="block w-full h-auto pointer-events-none"
             draggable={false}
           />
         ) : (
           <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
-            Imagem não disponível
+            {t('learning.chartMarkup.imageUnavailable')}
           </div>
         )}
 
@@ -279,8 +282,8 @@ export function ChartMarkupRenderer({
               />
             </div>
             <span className="text-xs font-semibold text-white drop-shadow">
-              {Math.round((feedback.scoreRatio ?? feedback.iou) * 100)}% de
-              sobreposição
+              {Math.round((feedback.scoreRatio ?? feedback.iou) * 100)}
+              {t('learning.chartMarkup.overlapSuffix')}
             </span>
           </div>
         )}
@@ -307,7 +310,9 @@ export function ChartMarkupRenderer({
             )}
           >
             <Crosshair className="h-4 w-4" />
-            {drawMode ? 'Desenhando...' : 'Desenhar zona'}
+            {drawMode
+              ? t('learning.chartMarkup.drawing')
+              : t('learning.chartMarkup.drawButton')}
           </button>
 
           {drawnZone && (
@@ -317,7 +322,7 @@ export function ChartMarkupRenderer({
               className="flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             >
               <Eraser className="h-4 w-4" />
-              Limpar
+              {t('learning.chartMarkup.clearButton')}
             </button>
           )}
         </div>

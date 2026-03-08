@@ -77,6 +77,23 @@
       "optional": "(opcional)",
       "or": "ou"
     },
+    "brandName": "Trivestia",
+    "activityTypes": {
+      "MULTIPLE_CHOICE": "Múltipla Escolha",
+      "MULTIPLE_SELECT": "Múltipla Seleção",
+      "TRUE_FALSE": "Verdadeiro ou Falso",
+      "ORDERING": "Ordenação",
+      "TEXT_INPUT": "Resposta Aberta",
+      "SCENARIO": "Cenário",
+      "CHART_MARKUP": "Marcação de Gráfico",
+      "RISK_CALCULATOR": "Calculadora de Risco",
+      "SIM_TRADING_CHALLENGE": "Simulação de Trading"
+    },
+    "progressStatus": {
+      "COMPLETED": "Concluído",
+      "IN_PROGRESS": "Em andamento",
+      "NOT_STARTED": "Não iniciado"
+    },
     "guards": {
       "adminOnly": "Acesso restrito a administradores.",
       "superAdminOnly": "Acesso restrito ao Super Admin da plataforma."
@@ -107,9 +124,43 @@
       "options": {
         "true": "Verdadeiro",
         "false": "Falso"
+      },
+      "toast": {
+        "created": "Questão criada!",
+        "createError": "Erro ao criar questão.",
+        "deleted": "Questão excluída.",
+        "deleteError": "Erro ao excluir questão."
+      },
+      "page": {
+        "empty": "Nenhuma questão ainda.",
+        "newButton": "Nova questão",
+        "configureButton": "Configurar Cenário",
+        "fallbackTitle": "Questões",
+        "typeLabel": "Tipo:",
+        "confirmDelete": "Excluir esta questão?"
+      },
+      "form": {
+        "imageLabel": "Imagem do enunciado",
+        "imagePlaceholder": "Clique para adicionar imagem (JPG, PNG, WebP — máx. 5 MB)",
+        "optionsLabel": "Opções",
+        "singleCorrect": "marque a correta",
+        "multiCorrect": "marque todas as corretas",
+        "addOptionButton": "Adicionar",
+        "optionPlaceholder": "Opção {{n}}",
+        "uploadError": "Erro ao fazer upload da imagem.",
+        "previewAlt": "Prévia da imagem"
       }
     },
     "courses": {
+      "aria": {
+        "manage": "Gerenciar módulos e aulas",
+        "periods": "Períodos avaliativos",
+        "edit": "Editar",
+        "delete": "Excluir"
+      },
+      "confirm": {
+        "delete": "Excluir \"{{title}}\"?"
+      },
       "validation": {
         "title": "Mínimo 3 caracteres",
         "description": "Mínimo 10 caracteres"
@@ -124,7 +175,20 @@
       },
       "toast": {
         "created": "Curso criado!",
-        "error": "Erro ao criar curso."
+        "error": "Erro ao criar curso.",
+        "updated": "Curso atualizado!",
+        "updateError": "Erro ao atualizar curso.",
+        "deleted": "Curso excluído.",
+        "deleteError": "Erro ao excluir curso."
+      },
+      "page": {
+        "subtitle": "Crie, edite e organize os cursos da plataforma.",
+        "newButton": "Novo curso",
+        "empty": "Nenhum curso criado ainda.",
+        "manageButton": "Gerenciar",
+        "periodsButton": "Períodos",
+        "deadlinePrefix": "Prazo:",
+        "saveButton": "Salvar"
       }
     },
     "lessons": {
@@ -156,11 +220,74 @@
         "afterDateDesc": "Gabarito liberado após data específica",
         "never": "Nunca",
         "neverDesc": "Gabarito nunca é exibido"
-      }
+      },
+      "toast": {
+        "activityAdded": "Atividade adicionada!",
+        "activityAddError": "Erro ao criar atividade.",
+        "lessonCreated": "Aula criada!",
+        "lessonCreateError": "Erro ao criar aula.",
+        "lessonUpdated": "Aula atualizada!",
+        "lessonUpdateError": "Erro ao atualizar aula.",
+        "lessonDeleted": "Aula excluída.",
+        "lessonDeleteError": "Erro ao excluir aula.",
+        "moduleCreated": "Módulo criado!",
+        "moduleCreateError": "Erro ao criar módulo.",
+        "moduleUpdated": "Módulo atualizado!",
+        "moduleUpdateError": "Erro ao atualizar módulo.",
+        "moduleDeleted": "Módulo excluído.",
+        "moduleDeleteError": "Erro ao excluir módulo."
+      },
+      "aria": {
+        "editLesson": "Editar aula",
+        "deleteLesson": "Excluir aula",
+        "editModule": "Editar módulo",
+        "deleteModule": "Excluir módulo",
+        "drag": "Arrastar"
+      },
+      "loadingSteps": "Carregando…",
+      "addContentButton": "Adicionar conteúdo",
+      "contentStepHint": "Clique em \"Adicionar\" para abrir o editor completo de conteúdo.",
+      "moduleLabel": "Módulo {{order}}",
+      "noModules": "Nenhum módulo criado ainda.",
+      "createFirstModule": "Criar primeiro módulo",
+      "moduleTitle": "Título do Módulo",
+      "moduleTitlePlaceholder": "Ex: Fundamentos de Análise",
+      "moduleOrder": "Ordem",
+      "confirmDeleteLesson": "Excluir aula \"{{title}}\"?",
+      "confirmDeleteModule": "Excluir módulo \"{{title}}\"? Todas as aulas serão removidas.",
+      "confirmDeleteStep": "Excluir \"{{title}}\"?",
+      "courseSubtitle": "Gerencie os módulos, aulas e atividades deste curso.",
+      "newModuleButton": "Novo módulo",
+      "addStepButton": "Adicionar etapa"
     },
     "users": {
+      "page": {
+        "title": "Gerenciar Usuários",
+        "subtitle": "Gerencie roles e permissões dos usuários da plataforma."
+      },
+      "searchPlaceholder": "Buscar por nome ou e-mail...",
+      "searchButton": "Buscar",
+      "loading": "Carregando usuários...",
+      "detailsButton": "Detalhes",
+      "revokeButton": "Revogar Admin",
+      "promoteButton": "Tornar Admin",
+      "disabledTitle": "Você não pode alterar o próprio role",
+      "paginationUsers": "usuários",
+      "table": {
+        "lastLogin": "Último login",
+        "registeredAt": "Cadastro"
+      },
       "detail": {
-        "title": "Detalhes do Usuário"
+        "title": "Detalhes do Usuário",
+        "submissions": "Submissões",
+        "lessonsProgress": "Aulas com progresso",
+        "registeredAt": "Cadastrado em:",
+        "lastLogin": "Último login:"
+      },
+      "toast": {
+        "promoted": "{{name}} foi promovido a Administrador.",
+        "reverted": "Role de {{name}} foi revertido para Estudante.",
+        "ownRoleWarning": "Você não pode alterar o próprio role. Peça a outro administrador."
       },
       "role": {
         "promoteTitle": "Promover a Administrador?",
@@ -174,7 +301,26 @@
     "announcements": {
       "page": {
         "title": "Gerenciar Avisos",
-        "newButton": "Novo Aviso"
+        "newButton": "Novo Aviso",
+        "empty": "Nenhum aviso publicado ainda.",
+        "createFirstButton": "Criar primeiro aviso"
+      },
+      "table": {
+        "title": "Título",
+        "priority": "Prioridade",
+        "author": "Autor",
+        "published": "Publicado",
+        "expires": "Expira",
+        "reads": "Leituras",
+        "actions": "Ações"
+      },
+      "badge": {
+        "expired": "expirado"
+      },
+      "aria": {
+        "edit": "Editar",
+        "delete": "Remover",
+        "confirm": "Confirmar"
       },
       "priority": {
         "info": "Info",
@@ -235,10 +381,14 @@
         "date": "Obrigatório",
         "modules": "Selecione ao menos um módulo"
       },
+      "modulesLabel": "Módulos",
+      "loadingModules": "Carregando módulos...",
+      "noModules": "Nenhum módulo encontrado.",
       "titlePlaceholder": "Ex: Semestre 1 - 2025",
       "toast": {
         "created": "Período criado!",
         "createError": "Erro ao criar período.",
+        "createPeriod": "Criar período",
         "updated": "Período atualizado!",
         "updateError": "Erro ao atualizar período."
       }
@@ -256,6 +406,8 @@
         "title": "Nenhuma etapa nesta aula.",
         "subtitle": "Crie etapas manualmente ou gere a partir das atividades."
       },
+      "confirmDelete": "Excluir etapa \"{{title}}\"?",
+      "loadingTitle": "Carregando...",
       "aria": {
         "edit": "Editar etapa",
         "delete": "Excluir etapa"
@@ -266,7 +418,8 @@
         "reordered": "Ordem atualizada!",
         "reorderError": "Erro ao reordenar.",
         "generated": "Etapas geradas a partir das atividades!",
-        "generateError": "Erro ao gerar etapas."
+        "generateError": "Erro ao gerar etapas.",
+        "materializationPending": "Aguardando materialização das etapas..."
       }
     },
     "stepForm": {
@@ -366,11 +519,18 @@
     "simForm": {
       "sectionTitle": "Configuração do Cenário de Trading",
       "sectionSubtitle": "Define os parâmetros de candles, execução e pontuação",
+      "scenarioStatement": "Configuração do cenário de simulação",
       "candlesSection": "Candles",
       "executionSection": "Execução",
       "scoringSection": "Critérios de Aprovação",
       "weightsSection": "Pesos da Pontuação",
       "weightsNormalized": "(serão normalizados automaticamente)",
+      "sections": {
+        "candles": "Candles",
+        "execution": "Execução",
+        "scoring": "Pontuação",
+        "weights": "Pesos"
+      },
       "fields": {
         "numCandles": "Qtd. Candles",
         "startPrice": "Preço Inicial",
@@ -385,6 +545,8 @@
         "passingPnl": "PnL mínimo para aprovação (%)",
         "maxDrawdown": "Drawdown máx. permitido (%)",
         "minTrades": "Trades mínimos",
+        "timeframe": "Timeframe",
+        "minTradeCount": "Trades mínimos",
         "weightPnl": "Peso PnL",
         "weightDrawdown": "Peso Drawdown",
         "weightSharpe": "Peso Sharpe",
@@ -651,6 +813,8 @@
     },
     "lesson": {
       "backToCourse": "Voltar ao curso",
+      "fallbackTitle": "Aula",
+      "defaultH1": "Atividades da aula",
       "stepProgress": "Etapa {{n}} de {{total}} · {{viewed}}/{{total}} concluídas",
       "empty": "Nenhuma atividade disponível nesta aula ainda.",
       "nav": {
@@ -835,6 +999,12 @@
         }
       }
     },
+    "questionRenderer": {
+      "imageAlt": "Imagem da questão",
+      "imageAltZoomed": "Imagem da questão — ampliada",
+      "zoomTitle": "Ampliar imagem",
+      "unsupportedType": "Tipo de questão não suportado: {{type}}"
+    },
     "courseInteractive": {
       "lessonsCount": "{{completedLessons}}/{{totalLessons}} aulas concluídas",
       "review": "Revisar",
@@ -853,6 +1023,23 @@
       "previousIncompleteBadge": "Complete a aula anterior",
       "prerequisiteNotMet": "Complete \"{{lessonTitle}}\" primeiro",
       "prerequisiteBadge": "Pré-requisito pendente"
+    },
+    "activityPlayer": {
+      "noQuestions": "Nenhuma questão cadastrada",
+      "noQuestionsHint": "Esta atividade ainda não possui questões. Peça ao administrador para adicioná-las.",
+      "questionLabel": "Questão {{n}}",
+      "reviewTitle": "Revisão das questões",
+      "passed": "Parabéns! Você passou.",
+      "failed": "Continue praticando!",
+      "retryButton": "Tentar novamente",
+      "prevButton": "Anterior",
+      "nextButton": "Próxima",
+      "submitButton": "Enviar atividade",
+      "answerAllWarning": "Responda todas as questões antes de enviar.",
+      "toast": {
+        "success": "Atividade concluída!",
+        "error": "Erro ao enviar respostas. Tente novamente."
+      }
     }
   },
   "super": {
@@ -893,11 +1080,13 @@
       },
       "table": {
         "school": "Escola",
+        "slug": "Slug",
         "users": "Usuários",
         "courses": "Cursos",
         "status": "Status",
         "actions": "Ações"
       },
+      "linkTitle": "Abrir escola",
       "status": {
         "active": "Ativa",
         "disabled": "Desativada",
@@ -917,6 +1106,7 @@
         "ownerNameLabel": "Nome do Owner",
         "ownerEmailLabel": "Email do Owner",
         "ownerPasswordLabel": "Senha do Owner",
+        "slugLabel": "Slug",
         "creating": "Criando...",
         "createButton": "Criar Escola"
       },
@@ -1003,11 +1193,19 @@
       }
     },
     "createSchool": {
+      "title": "Criar sua escola",
       "subtitle": "Configure o nome e a URL da sua escola para começar a publicar cursos.",
       "form": {
-        "descriptionLabel": "Descrição"
+        "nameLabel": "Nome da escola",
+        "namePlaceholder": "Ex: Escola de Trading",
+        "slugLabel": "URL da escola",
+        "slugPlaceholder": "minha-escola",
+        "descriptionLabel": "Descrição",
+        "descriptionPlaceholder": "Uma breve descrição da sua escola...",
+        "submitButton": "Criar escola"
       },
       "toast": {
+        "success": "Escola \"{{name}}\" criada com sucesso!",
         "error": "Erro ao criar escola."
       }
     }
@@ -1070,7 +1268,10 @@
       "metrics": {
         "finalBalance": "Saldo Final",
         "trades": "Trades",
-        "maxDrawdown": "Max Drawdown"
+        "maxDrawdown": "Max Drawdown",
+        "pnl": "PnL",
+        "sharpe": "Sharpe",
+        "fees": "Fees"
       },
       "tamperWarning": "Divergência detectada — resultado calculado pelo servidor",
       "retryButton": "Tentar Novamente"
@@ -1081,6 +1282,10 @@
       "priceLabel": "Preço",
       "buyButton": "Comprar",
       "sellButton": "Vender",
+      "slLabel": "Stop-Loss",
+      "tpLabel": "Take-Profit",
+      "slShortLabel": "SL",
+      "tpShortLabel": "TP",
       "validation": {
         "quantity": "Quantidade deve ser positiva",
         "price": "Preço obrigatório para LIMIT/STOP"
@@ -1105,33 +1310,90 @@
         "tip6": "Clique 'Enviar Resultado' quando as velas acabarem"
       },
       "glossary": {
-        "buy": { "term": "BUY (Compra)", "description": "Ordem de compra. Você lucra quando o preço sobe após a compra. Abre uma posição LONG." },
-        "sell": { "term": "SELL (Venda)", "description": "Ordem de venda. Permite \"vender a descoberto\" (short) — você lucra quando o preço cai. Abre uma posição SHORT." },
-        "market": { "term": "MARKET (A Mercado)", "description": "Executa imediatamente ao preço atual do mercado. Mais rápida, mas pode ter slippage." },
-        "limit": { "term": "LIMIT (Limitada)", "description": "Executa somente se o preço atingir o valor definido. BUY LIMIT: executa abaixo do preço definido. SELL LIMIT: acima." },
-        "stop": { "term": "STOP", "description": "Executa quando o preço atinge o trigger. BUY STOP: compra acima do atual (rompimento). SELL STOP: vende abaixo." },
-        "sl": { "term": "Stop-Loss (SL)", "description": "Nível de preço que fecha sua posição automaticamente para limitar perdas. Fundamental para gestão de risco." },
-        "tp": { "term": "Take-Profit (TP)", "description": "Nível de preço que fecha sua posição automaticamente para garantir lucro. Ajuda a realizar ganhos." },
-        "pnl": { "term": "PnL (Profit & Loss)", "description": "Lucro ou prejuízo da sua operação. PnL positivo = lucro. Negativo = prejuízo. Mostrado em $ e %." },
-        "equity": { "term": "Equity (Patrimônio)", "description": "Seu saldo + PnL das posições abertas. Reflete o valor real da sua conta em tempo real." },
-        "position": { "term": "Posição", "description": "Quando você tem uma operação aberta. LONG = comprado (aposta na alta). SHORT = vendido (aposta na queda). FLAT = sem posição." },
-        "fee": { "term": "Fee / Taxa", "description": "Custo por operação cobrado em cada execução (fill). Medido em bps (basis points). 1 bps = 0.01%." },
-        "slippage": { "term": "Slippage", "description": "Diferença entre o preço esperado e o preço real de execução. Simulado automaticamente pelo engine." },
-        "spread": { "term": "Spread", "description": "Diferença entre o preço de compra (ask) e venda (bid). Custo implícito de operar." },
-        "drawdown": { "term": "Drawdown", "description": "Queda do patrimônio em relação ao pico máximo. Mede o pior momento da sua operação. Menor = melhor gestão de risco." },
-        "winrate": { "term": "Win Rate", "description": "Percentual de trades vencedores. 60%+ é considerado bom. Porém, depende também da relação risco/retorno." },
-        "sharpe": { "term": "Sharpe Ratio", "description": "Mede o retorno ajustado ao risco. >1 = bom, >2 = excelente. Penaliza oscilações grandes nos resultados." },
-        "profitfactor": { "term": "Profit Factor", "description": "Soma dos ganhos ÷ soma das perdas. >1 = lucrativo. >2 = estratégia consistente." }
+        "buy": {
+          "term": "BUY (Compra)",
+          "description": "Ordem de compra. Você lucra quando o preço sobe após a compra. Abre uma posição LONG."
+        },
+        "sell": {
+          "term": "SELL (Venda)",
+          "description": "Ordem de venda. Permite \"vender a descoberto\" (short) — você lucra quando o preço cai. Abre uma posição SHORT."
+        },
+        "market": {
+          "term": "MARKET (A Mercado)",
+          "description": "Executa imediatamente ao preço atual do mercado. Mais rápida, mas pode ter slippage."
+        },
+        "limit": {
+          "term": "LIMIT (Limitada)",
+          "description": "Executa somente se o preço atingir o valor definido. BUY LIMIT: executa abaixo do preço definido. SELL LIMIT: acima."
+        },
+        "stop": {
+          "term": "STOP",
+          "description": "Executa quando o preço atinge o trigger. BUY STOP: compra acima do atual (rompimento). SELL STOP: vende abaixo."
+        },
+        "sl": {
+          "term": "Stop-Loss (SL)",
+          "description": "Nível de preço que fecha sua posição automaticamente para limitar perdas. Fundamental para gestão de risco."
+        },
+        "tp": {
+          "term": "Take-Profit (TP)",
+          "description": "Nível de preço que fecha sua posição automaticamente para garantir lucro. Ajuda a realizar ganhos."
+        },
+        "pnl": {
+          "term": "PnL (Profit & Loss)",
+          "description": "Lucro ou prejuízo da sua operação. PnL positivo = lucro. Negativo = prejuízo. Mostrado em $ e %."
+        },
+        "equity": {
+          "term": "Equity (Patrimônio)",
+          "description": "Seu saldo + PnL das posições abertas. Reflete o valor real da sua conta em tempo real."
+        },
+        "position": {
+          "term": "Posição",
+          "description": "Quando você tem uma operação aberta. LONG = comprado (aposta na alta). SHORT = vendido (aposta na queda). FLAT = sem posição."
+        },
+        "fee": {
+          "term": "Fee / Taxa",
+          "description": "Custo por operação cobrado em cada execução (fill). Medido em bps (basis points). 1 bps = 0.01%."
+        },
+        "slippage": {
+          "term": "Slippage",
+          "description": "Diferença entre o preço esperado e o preço real de execução. Simulado automaticamente pelo engine."
+        },
+        "spread": {
+          "term": "Spread",
+          "description": "Diferença entre o preço de compra (ask) e venda (bid). Custo implícito de operar."
+        },
+        "drawdown": {
+          "term": "Drawdown",
+          "description": "Queda do patrimônio em relação ao pico máximo. Mede o pior momento da sua operação. Menor = melhor gestão de risco."
+        },
+        "winrate": {
+          "term": "Win Rate",
+          "description": "Percentual de trades vencedores. 60%+ é considerado bom. Porém, depende também da relação risco/retorno."
+        },
+        "sharpe": {
+          "term": "Sharpe Ratio",
+          "description": "Mede o retorno ajustado ao risco. >1 = bom, >2 = excelente. Penaliza oscilações grandes nos resultados."
+        },
+        "profitfactor": {
+          "term": "Profit Factor",
+          "description": "Soma dos ganhos ÷ soma das perdas. >1 = lucrativo. >2 = estratégia consistente."
+        }
       }
     },
     "accountSummary": {
       "balance": "Saldo",
+      "equity": "Equity",
+      "pnl": "PnL",
+      "fees": "Fees",
       "maxDD": "DD Máx"
     },
     "metrics": {
       "empty": "Métricas disponíveis ao finalizar",
+      "trades": "Trades",
       "wins": "Ganhos",
       "losses": "Perdas",
+      "winRate": "Win Rate",
+      "sharpe": "Sharpe",
       "maxDD": "Max DD",
       "feesTotal": "Fees Total",
       "events": "Eventos"
@@ -1177,12 +1439,12 @@
     "playback": {
       "pauseTitle": "Pausar",
       "playTitle": "Iniciar simulação",
-      "pausedAtStartHint": "Pressione Play para iniciar",
+      "pausedAtStartHint": "▶ Pressione Play para iniciar",
       "pausedLabel": "Pausado",
       "stepForwardTitle": "Avançar 1 candle",
       "skipToEndTitle": "Pular para o fim",
       "speedLabel": "Vel:",
-      "finished": "Fim",
+      "finished": "✓ Fim",
       "progress": "Candle {{visible}}/{{total}}"
     },
     "position": {
@@ -1213,6 +1475,7 @@
       "submitting": "Enviando...",
       "overlay": {
         "startTitle": "Iniciar Simulação",
+        "continueTitle": "Continuar",
         "startHint": "Clique para começar a avançar as velas",
         "pausedHint": "Candle {{visible}}/{{total}} — pausado"
       },
@@ -1221,6 +1484,10 @@
         "fills": "Preenchimentos",
         "metrics": "Métricas"
       }
+    },
+    "engine": {
+      "loadError": "Erro ao carregar cenário",
+      "submitError": "Erro ao enviar resultado"
     }
   }
 }

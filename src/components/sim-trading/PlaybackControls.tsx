@@ -1,4 +1,5 @@
 import { Play, Pause, SkipForward, ChevronRight, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import type { PlaybackSpeed } from './usePlayback';
 
@@ -36,6 +37,7 @@ export function PlaybackControls({
   onSkipToEnd,
   onSetSpeed
 }: PlaybackControlsProps) {
+  const { t } = useTranslation();
   const disabled = isFinished || isLoading;
   const isPausedAtStart =
     !playing && !isFinished && !isLoading && visibleCount === 1;
@@ -60,7 +62,7 @@ export function PlaybackControls({
             ? 'border-primary bg-primary text-primary-foreground hover:bg-primary/90'
             : 'hover:bg-accent disabled:opacity-40'
         )}
-        title={playing ? 'Pausar' : 'Iniciar simulação'}
+        title={playing ? t('sim.playback.pauseTitle') : t('sim.playback.playTitle')}
       >
         {isLoading ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -79,7 +81,7 @@ export function PlaybackControls({
             isPausedAtStart ? 'text-primary' : 'text-muted-foreground'
           )}
         >
-          {isPausedAtStart ? '▶ Pressione Play para iniciar' : 'Pausado'}
+          {isPausedAtStart ? t('sim.playback.pausedAtStartHint') : t('sim.playback.pausedLabel')}
         </span>
       )}
 
@@ -88,7 +90,7 @@ export function PlaybackControls({
         onClick={onStepForward}
         disabled={disabled}
         className="flex h-7 w-7 items-center justify-center rounded-md border transition hover:bg-accent disabled:opacity-40"
-        title="Avançar 1 candle"
+        title={t('sim.playback.stepForwardTitle')}
       >
         <ChevronRight className="h-3.5 w-3.5" />
       </button>
@@ -98,14 +100,14 @@ export function PlaybackControls({
         onClick={onSkipToEnd}
         disabled={disabled}
         className="flex h-7 w-7 items-center justify-center rounded-md border transition hover:bg-accent disabled:opacity-40"
-        title="Pular para o fim"
+        title={t('sim.playback.skipToEndTitle')}
       >
         <SkipForward className="h-3.5 w-3.5" />
       </button>
 
       {/* Speed selector */}
       <div className="flex items-center gap-1">
-        <span className="text-muted-foreground">Vel:</span>
+        <span className="text-muted-foreground">{t('sim.playback.speedLabel')}</span>
         {SPEEDS.map((s) => (
           <button
             key={s.value}
@@ -124,7 +126,7 @@ export function PlaybackControls({
 
       {/* Progress */}
       <div className="ml-auto font-mono text-muted-foreground">
-        {isFinished ? '✓ Fim' : `Candle ${visibleCount}/${totalCandles}`}
+        {isFinished ? t('sim.playback.finished') : t('sim.playback.progress', { visible: visibleCount, total: totalCandles })}
       </div>
     </div>
   );

@@ -96,7 +96,9 @@ export default function CreateSchoolPage() {
     try {
       const res = await tenantEndpoints.createPublic(data);
       setAuth(res.user, res.token, res.refreshToken, res.tenant.slug);
-      toast.success(t('public.createSchool.toast.success', { name: res.tenant.name }));
+      toast.success(
+        t('public.createSchool.toast.success', { name: res.tenant.name })
+      );
       navigate(`/t/${res.tenant.slug}/app/dashboard`, { replace: true });
     } catch {
       toast.error(t('public.createSchool.toast.error'));
@@ -113,7 +115,9 @@ export default function CreateSchoolPage() {
           <span className="text-2xl font-bold">Trivestia</span>
         </Link>
 
-        <h1 className="mb-2 text-3xl font-extrabold">{t('public.createSchool.title')}</h1>
+        <h1 className="mb-2 text-3xl font-extrabold">
+          {t('public.createSchool.title')}
+        </h1>
         <p className="mb-8 text-muted-foreground">
           {t('public.createSchool.subtitle')}
         </p>
@@ -193,7 +197,9 @@ export default function CreateSchoolPage() {
           <div>
             <label className="mb-1.5 block text-sm font-medium" htmlFor="bio">
               {t('public.createSchool.form.description')}{' '}
-              <span className="text-muted-foreground">{t('common.misc.optional')}</span>
+              <span className="text-muted-foreground">
+                {t('common.misc.optional')}
+              </span>
             </label>
             <textarea
               id="bio"
@@ -211,7 +217,7 @@ export default function CreateSchoolPage() {
 
           <hr className="my-2" />
           <p className="text-sm font-medium text-muted-foreground">
-          {t('public.createSchool.form.ownerSection')}
+            {t('public.createSchool.form.ownerSection')}
           </p>
 
           {/* Owner name */}

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import {
   ChevronLeft,
   ChevronRight,
@@ -12,7 +13,7 @@ import {
 } from 'lucide-react';
 import { progressEndpoints } from '@/services/endpoints/progress.endpoints';
 import { QuestionRenderer } from '@/components/learning/QuestionRenderer';
-import { getActivityTypeLabel, formatPercentage } from '@/lib/utils';
+import { formatPercentage } from '@/lib/utils';
 import type { Activity, Answer, SubmissionResult } from '@/types/api';
 
 interface ActivityPlayerContentProps {
@@ -34,6 +35,7 @@ export function ActivityPlayerContent({
   headerExtra
 }: ActivityPlayerContentProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const resolvedBackTo = backTo ?? `/t/${slug}/app/dashboard`;
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -47,10 +49,10 @@ export function ActivityPlayerContent({
     }) => progressEndpoints.submit(slug, data),
     onSuccess: (data) => {
       setResult(data);
-      toast.success('Atividade concluída!');
+      toast.success(t('learning.activityPlayer.toast.success'));
     },
     onError: () => {
-      toast.error('Erro ao enviar respostas. Tente novamente.');
+      toast.error(t('learning.activityPlayer.toast.error'));
     }
   });
 
@@ -61,10 +63,9 @@ export function ActivityPlayerContent({
   if (totalQuestions === 0) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
-        <p className="text-lg font-semibold">Nenhuma questão cadastrada</p>
+        <p className="text-lg font-semibold">{t('learning.activityPlayer.noQuestions')}</p>
         <p className="text-sm text-muted-foreground">
-          Esta atividade ainda não possui questões. Peça ao administrador para
-          adicioná-las.
+          {t('learning.activityPlayer.noQuestionsHint')}
         </p>
       </div>
     );
@@ -106,7 +107,7 @@ export function ActivityPlayerContent({
             {formatPercentage(pct)}
           </h1>
           <p className="mb-1 text-lg font-semibold">
-            {passed ? 'Parabéns! Você passou.' : 'Continue praticando!'}
+            {passed ? t('learning.activityPlayer.passed') : t('learning.activityPlayer.failed')}
           </p>
           <p className="mb-8 text-muted-foreground">
             {result.score} de {result.maxScore} pontos
@@ -115,14 +116,14 @@ export function ActivityPlayerContent({
 
         {Object.keys(feedbackMap).length > 0 && (
           <div className="space-y-4">
-            <h2 className="text-lg font-bold">Revisão das questões</h2>
+            <h2 className="text-lg font-bold">{t('learning.activityPlayer.reviewTitle')}</h2>
             {questions.map((q, idx) => (
               <div
                 key={q.id}
                 className="rounded-2xl border bg-card p-6 shadow-sm"
               >
                 <p className="mb-2 text-xs font-medium text-muted-foreground">
-                  Questão {idx + 1}
+                  {t('learning.activityPlayer.questionLabel', { n: idx + 1 })}
                 </p>
                 <p className="mb-4 text-base font-semibold leading-relaxed">
                   {q.statement}
@@ -149,7 +150,7 @@ export function ActivityPlayerContent({
             className="flex items-center gap-2 rounded-xl border px-5 py-2.5 text-sm font-semibold transition hover:bg-accent"
           >
             <RotateCcw className="h-4 w-4" />
-            Tentar novamente
+            {t('learning.activityPlayer.retryButton')}
           </button>
           <button
             onClick={() => navigate(resolvedBackTo)}
@@ -169,7 +170,7 @@ export function ActivityPlayerContent({
   const handleSubmit = () => {
     const allAnswered = questions.every((q) => answers[q.id] !== undefined);
     if (!allAnswered) {
-      toast.warning('Responda todas as questões antes de enviar.');
+      toast.warning(t('learning.activityPlayer.answerAllWarning'));
       return;
     }
     submitMutation.mutate({
@@ -188,7 +189,7 @@ export function ActivityPlayerContent({
       {/* Header */}
       <div>
         <div className="mb-2 flex items-center justify-between text-sm text-muted-foreground">
-          <span>{getActivityTypeLabel(activity.type)}</span>
+          <span>{t(`common.activityTypes.${activity.type}`, { defaultValue: activity.type })}</span>
           <span>
             {currentIndex + 1}/{totalQuestions}
           </span>
@@ -234,7 +235,7 @@ export function ActivityPlayerContent({
           className="flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition hover:bg-accent disabled:opacity-40"
         >
           <ChevronLeft className="h-4 w-4" />
-          Anterior
+          {t('learning.activityPlayer.prevButton')}
         </button>
 
         {currentIndex < totalQuestions - 1 ? (
@@ -243,7 +244,7 @@ export function ActivityPlayerContent({
             disabled={!answers[currentQuestion.id]}
             className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-40"
           >
-            Próxima
+            {t('learning.activityPlayer.nextButton')}
             <ChevronRight className="h-4 w-4" />
           </button>
         ) : (
@@ -255,7 +256,7 @@ export function ActivityPlayerContent({
             {submitMutation.isPending && (
               <Loader2 className="h-4 w-4 animate-spin" />
             )}
-            Enviar atividade
+            {t('learning.activityPlayer.submitButton')}
           </button>
         )}
       </div>

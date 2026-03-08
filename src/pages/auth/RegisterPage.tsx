@@ -58,7 +58,9 @@ export default function RegisterPage() {
 
   return (
     <div className="w-full max-w-sm">
-      <h1 className="mb-2 text-3xl font-extrabold">{t('auth.register.title')}</h1>
+      <h1 className="mb-2 text-3xl font-extrabold">
+        {t('auth.register.title')}
+      </h1>
       <p className="mb-8 text-muted-foreground">
         {t('auth.register.hasAccount')}{' '}
         <Link

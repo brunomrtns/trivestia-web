@@ -9,7 +9,7 @@ import {
   XCircle
 } from 'lucide-react';
 import { progressEndpoints } from '@/services/endpoints/progress.endpoints';
-import { getProgressColor, getProgressLabel, formatDate } from '@/lib/utils';
+import { getProgressColor, formatDate } from '@/lib/utils';
 import type { ProgressStatus } from '@/types/api';
 import { useTranslation } from 'react-i18next';
 
@@ -101,10 +101,10 @@ export default function ProgressPage() {
               <StatusIcon status={p.status} />
               <div className="flex-1 min-w-0">
                 <p className="truncate font-medium">
-                  {p.lesson?.title ?? 'Aula'}
+                  {p.lesson?.title ?? t('app.lesson.fallbackTitle')}
                 </p>
                 <p className={`text-xs ${getProgressColor(p.status)}`}>
-                  {getProgressLabel(p.status)}
+                  {t(`common.progressStatus.${p.status}`, { defaultValue: p.status })}
                   {p.completedAt && ` · ${formatDate(p.completedAt)}`}
                 </p>
               </div>

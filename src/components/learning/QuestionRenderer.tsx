@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Portal } from '@/components/ui/Portal';
 import { X, ZoomIn } from 'lucide-react';
 import type { ActivityType, Question, Answer } from '@/types/api';
@@ -30,6 +31,7 @@ interface Props {
 // ─── Lightbox simples para imagem da questão ─────────────────────────────────
 
 function QuestionImage({ url }: { url: string }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   return (
@@ -37,15 +39,14 @@ function QuestionImage({ url }: { url: string }) {
       <div className="relative my-3 overflow-hidden rounded-xl border bg-muted/30">
         <img
           src={url}
-          alt="Imagem da questão"
+          alt={t('learning.questionRenderer.imageAlt')}
           className="max-h-64 w-full cursor-zoom-in object-contain transition-opacity hover:opacity-90"
           onClick={() => setOpen(true)}
         />
         <button
           onClick={() => setOpen(true)}
           className="absolute right-2 top-2 rounded-lg bg-black/40 p-1.5 text-white backdrop-blur-sm hover:bg-black/60"
-          title="Ampliar imagem"
-        >
+          title={t('learning.questionRenderer.zoomTitle')}>
           <ZoomIn className="h-4 w-4" />
         </button>
       </div>
@@ -64,7 +65,7 @@ function QuestionImage({ url }: { url: string }) {
           </button>
           <img
             src={url}
-            alt="Imagem da questão — ampliada"
+            alt={t('learning.questionRenderer.imageAltZoomed')}
             className="max-h-[90vh] max-w-[90vw] rounded-xl object-contain shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           />
@@ -165,7 +166,7 @@ export function QuestionRenderer({
       default:
         return (
           <p className="text-sm text-muted-foreground">
-            Tipo de questão não suportado: {activityType}
+            {t('learning.questionRenderer.unsupportedType', { type: activityType })}
           </p>
         );
     }

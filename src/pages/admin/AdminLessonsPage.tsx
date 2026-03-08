@@ -44,7 +44,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { adminEndpoints } from '@/services/endpoints/admin.endpoints';
 import { StepFormModal } from '@/components/admin/StepFormModal';
-import { cn, getActivityTypeLabel } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import type {
   Module,
   Lesson,
@@ -146,9 +146,10 @@ function SortableStepRow({
       : undefined;
 
   // For ACTIVITY steps, extract the activity type from content if available
-  const activityType = step.type === 'ACTIVITY'
-    ? (step.content as { activityType?: ActivityType }).activityType
-    : undefined;
+  const activityType =
+    step.type === 'ACTIVITY'
+      ? (step.content as { activityType?: ActivityType }).activityType
+      : undefined;
 
   return (
     <div
@@ -166,7 +167,7 @@ function SortableStepRow({
             ? 'cursor-default opacity-30'
             : 'cursor-grab touch-none hover:text-muted-foreground active:cursor-grabbing'
         )}
-        aria-label="Arrastar"
+        aria-label={t('admin.lessons.aria.drag')}
       >
         <GripVertical className="h-4 w-4" />
       </button>
@@ -183,7 +184,7 @@ function SortableStepRow({
             TYPE_COLORS[activityType] ?? 'bg-muted text-muted-foreground'
           )}
         >
-          {getActivityTypeLabel(activityType)}
+          {t(`common.activityTypes.${activityType}`, { defaultValue: activityType })}
         </span>
       )}
 
@@ -265,22 +266,46 @@ function LessonSection({
     title: z.string().min(2, t('admin.lessons.validation.title')),
     order: z.coerce.number().min(1, t('admin.lessons.validation.order')),
     type: z.enum([
-      'MULTIPLE_CHOICE', 'MULTIPLE_SELECT', 'TRUE_FALSE', 'ORDERING',
-      'TEXT_INPUT', 'SCENARIO', 'CHART_MARKUP', 'RISK_CALCULATOR', 'SIM_TRADING_CHALLENGE'
+      'MULTIPLE_CHOICE',
+      'MULTIPLE_SELECT',
+      'TRUE_FALSE',
+      'ORDERING',
+      'TEXT_INPUT',
+      'SCENARIO',
+      'CHART_MARKUP',
+      'RISK_CALCULATOR',
+      'SIM_TRADING_CHALLENGE'
     ] as const),
-    reviewPolicy: z.enum(['IMMEDIATE', 'AFTER_DATE', 'NEVER'] as const).default('IMMEDIATE'),
+    reviewPolicy: z
+      .enum(['IMMEDIATE', 'AFTER_DATE', 'NEVER'] as const)
+      .default('IMMEDIATE'),
     reviewAfterDate: z.string().optional().nullable()
   });
   const ACTIVITY_TYPES: { value: ActivityType; label: string }[] = [
-    { value: 'MULTIPLE_CHOICE', label: t('admin.lessons.activityType.multipleChoice') },
-    { value: 'MULTIPLE_SELECT', label: t('admin.lessons.activityType.multipleSelect') },
+    {
+      value: 'MULTIPLE_CHOICE',
+      label: t('admin.lessons.activityType.multipleChoice')
+    },
+    {
+      value: 'MULTIPLE_SELECT',
+      label: t('admin.lessons.activityType.multipleSelect')
+    },
     { value: 'TRUE_FALSE', label: t('admin.lessons.activityType.trueFalse') },
     { value: 'ORDERING', label: t('admin.lessons.activityType.ordering') },
     { value: 'TEXT_INPUT', label: t('admin.lessons.activityType.textInput') },
     { value: 'SCENARIO', label: t('admin.lessons.activityType.scenario') },
-    { value: 'CHART_MARKUP', label: t('admin.lessons.activityType.chartMarkup') },
-    { value: 'RISK_CALCULATOR', label: t('admin.lessons.activityType.riskCalculator') },
-    { value: 'SIM_TRADING_CHALLENGE', label: t('admin.lessons.activityType.simTrading') }
+    {
+      value: 'CHART_MARKUP',
+      label: t('admin.lessons.activityType.chartMarkup')
+    },
+    {
+      value: 'RISK_CALCULATOR',
+      label: t('admin.lessons.activityType.riskCalculator')
+    },
+    {
+      value: 'SIM_TRADING_CHALLENGE',
+      label: t('admin.lessons.activityType.simTrading')
+    }
   ];
   const REVIEW_POLICIES: { value: ActivityReviewPolicy; label: string }[] = [
     { value: 'IMMEDIATE', label: t('admin.lessons.reviewPolicy.immediate') },
@@ -333,7 +358,7 @@ function LessonSection({
     mutationFn: (orders: { stepId: string; order: number }[]) =>
       adminEndpoints.reorderSteps(slug, lesson.id, orders),
     onError: () => {
-      toast.error('Erro ao reordenar etapas.');
+      toast.error(t('admin.lessonSteps.toast.reorderError'));
       if (timeline?.steps) setLocalSteps(timeline.steps);
     }
   });
@@ -348,7 +373,7 @@ function LessonSection({
     setLocalSteps(reordered);
 
     if (reordered.some((s) => s.isVirtual)) {
-      toast.info('Aguardando materialização das etapas...');
+      toast.info(t('admin.lessonSteps.toast.materializationPending'));
       return;
     }
 
@@ -369,7 +394,9 @@ function LessonSection({
     }) => {
       await adminEndpoints.deleteStep(slug, lesson.id, stepId);
       if (type === 'ACTIVITY' && activityId) {
-        await adminEndpoints.deleteActivity(slug, lesson.id, activityId).catch(() => {});
+        await adminEndpoints
+          .deleteActivity(slug, lesson.id, activityId)
+          .catch(() => {});
       }
     },
     onSuccess: () => {
@@ -393,7 +420,11 @@ function LessonSection({
 
   const createActivityStepMut = useMutation({
     mutationFn: async (data: ActivityForm) => {
-      const activity = await adminEndpoints.createActivity(slug, lesson.id, data);
+      const activity = await adminEndpoints.createActivity(
+        slug,
+        lesson.id,
+        data
+      );
       await adminEndpoints.createStep(slug, lesson.id, {
         type: 'ACTIVITY',
         title: activity.title,
@@ -411,9 +442,9 @@ function LessonSection({
         reviewPolicy: 'IMMEDIATE',
         reviewAfterDate: null
       });
-      toast.success('Atividade adicionada!');
+      toast.success(t('admin.lessons.toast.activityAdded'));
     },
-    onError: () => toast.error('Erro ao criar atividade.')
+    onError: () => toast.error(t('admin.lessons.toast.activityAddError'))
   });
 
   const createContentStepMut = useMutation({
@@ -453,9 +484,10 @@ function LessonSection({
     enabled: editingLesson
   });
 
-  const allCourseLessons = courseData?.modules?.flatMap(
-    (m) => (m.lessons ?? []).map((l) => ({ ...l, moduleTitle: m.title }))
-  ) ?? [];
+  const allCourseLessons =
+    courseData?.modules?.flatMap((m) =>
+      (m.lessons ?? []).map((l) => ({ ...l, moduleTitle: m.title }))
+    ) ?? [];
 
   const updateLessonMut = useMutation({
     mutationFn: (data: LessonForm) =>
@@ -467,15 +499,19 @@ function LessonSection({
           : null,
         prerequisiteLessonId: data.prerequisiteLessonId || null,
         prerequisiteMinScore:
-          data.prerequisiteMinScore != null ? Number(data.prerequisiteMinScore) : null
+          data.prerequisiteMinScore != null
+            ? Number(data.prerequisiteMinScore)
+            : null
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-lessons', slug, moduleId] });
       setEditingLesson(false);
-      toast.success('Aula atualizada!');
+      toast.success(t('admin.lessons.toast.lessonUpdated'));
     },
     onError: (e: { response?: { data?: { message?: string } } }) =>
-      toast.error(e?.response?.data?.message ?? 'Erro ao atualizar aula.')
+      toast.error(
+        e?.response?.data?.message ?? t('admin.lessons.toast.lessonUpdateError')
+      )
   });
 
   const hasVirtualSteps = localSteps.some((s) => s.isVirtual);
@@ -528,10 +564,11 @@ function LessonSection({
               onClick={() => setShowAccessRules(!showAccessRules)}
               className="flex w-full items-center gap-2 px-3 py-2 text-xs font-semibold text-muted-foreground hover:text-foreground"
             >
-              {showAccessRules
-                ? <ChevronDown className="h-3.5 w-3.5" />
-                : <ChevronRight className="h-3.5 w-3.5" />
-              }
+              {showAccessRules ? (
+                <ChevronDown className="h-3.5 w-3.5" />
+              ) : (
+                <ChevronRight className="h-3.5 w-3.5" />
+              )}
               <ShieldCheck className="h-3.5 w-3.5" />
               Regras de acesso
             </button>
@@ -613,18 +650,24 @@ function LessonSection({
               setExpanded(true);
             }}
             className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-accent hover:text-foreground"
-            aria-label="Editar aula"
+            aria-label={t('admin.lessons.aria.editLesson')}
           >
             <Pencil className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={() => {
-              if (confirm(`Excluir aula "${lesson.title}"?`))
+              if (
+                confirm(
+                  t('admin.lessons.confirmDeleteLesson', {
+                    title: lesson.title
+                  })
+                )
+              )
                 onDeleteLesson(lesson.id);
             }}
             disabled={isDeletingLesson}
             className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive disabled:opacity-40"
-            aria-label="Excluir aula"
+            aria-label={t('admin.lessons.aria.deleteLesson')}
           >
             {isDeletingLesson ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -641,7 +684,7 @@ function LessonSection({
           {loadingSteps ? (
             <div className="flex items-center justify-center gap-2 py-4 text-xs text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
-              Carregando…
+              {t('admin.lessons.loadingSteps')}
             </div>
           ) : (
             <>
@@ -662,7 +705,14 @@ function LessonSection({
                       step={step}
                       onEdit={() => setEditingStep(step)}
                       onDelete={() => {
-                        if (!confirm(`Excluir "${step.title}"?`)) return;
+                        if (
+                          !confirm(
+                            t('admin.lessons.confirmDeleteStep', {
+                              title: step.title
+                            })
+                          )
+                        )
+                          return;
                         const activityId =
                           step.type === 'ACTIVITY'
                             ? (step.content as { activityId?: string })
@@ -831,7 +881,7 @@ function LessonSection({
               {stepKind === 'CONTENT' && (
                 <div className="flex flex-col gap-3">
                   <p className="text-xs text-muted-foreground">
-                    Clique em "Adicionar" para abrir o editor completo de conteúdo.
+                    {t('admin.lessons.contentStepHint')}
                   </p>
                   <div className="flex gap-2">
                     <button
@@ -843,7 +893,7 @@ function LessonSection({
                       className="flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
                     >
                       <Plus className="h-3 w-3" />
-                      Adicionar conteúdo
+                      {t('admin.lessons.addContentButton')}
                     </button>
                     <button
                       type="button"
@@ -862,7 +912,7 @@ function LessonSection({
               className="mt-1 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed py-2 text-xs font-medium text-muted-foreground transition hover:border-primary hover:text-primary"
             >
               <Plus className="h-3.5 w-3.5" />
-              Adicionar etapa
+              {t('admin.lessons.addStepButton')}
             </button>
           )}
         </div>
@@ -949,9 +999,9 @@ function ModuleSection({
       qc.invalidateQueries({ queryKey: ['admin-lessons', slug, module.id] });
       setAddingLesson(false);
       lessonForm.reset({ title: '', order: 1 });
-      toast.success('Aula criada!');
+      toast.success(t('admin.lessons.toast.lessonCreated'));
     },
-    onError: () => toast.error('Erro ao criar aula.')
+    onError: () => toast.error(t('admin.lessons.toast.lessonCreateError'))
   });
 
   const deleteLessonMut = useMutation({
@@ -959,9 +1009,9 @@ function ModuleSection({
       adminEndpoints.deleteLesson(slug, module.id, id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-lessons', slug, module.id] });
-      toast.success('Aula excluída.');
+      toast.success(t('admin.lessons.toast.lessonDeleted'));
     },
-    onError: () => toast.error('Erro ao excluir aula.')
+    onError: () => toast.error(t('admin.lessons.toast.lessonDeleteError'))
   });
 
   const updateModuleMut = useMutation({
@@ -970,9 +1020,9 @@ function ModuleSection({
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-modules', slug, courseId] });
       setEditingModule(false);
-      toast.success('Módulo atualizado!');
+      toast.success(t('admin.lessons.toast.moduleUpdated'));
     },
-    onError: () => toast.error('Erro ao atualizar módulo.')
+    onError: () => toast.error(t('admin.lessons.toast.moduleUpdateError'))
   });
 
   return (
@@ -1030,7 +1080,7 @@ function ModuleSection({
             <div className="min-w-0">
               <p className="truncate font-semibold">{module.title}</p>
               <p className="text-xs text-muted-foreground">
-                Módulo {module.order}
+                {t('admin.lessons.moduleLabel', { order: module.order })}
               </p>
             </div>
           </button>
@@ -1040,7 +1090,7 @@ function ModuleSection({
               setExpanded(true);
             }}
             className="rounded-lg p-2 text-muted-foreground transition hover:bg-accent hover:text-foreground"
-            aria-label="Editar módulo"
+            aria-label={t('admin.lessons.aria.editModule')}
           >
             <Pencil className="h-4 w-4" />
           </button>
@@ -1048,14 +1098,16 @@ function ModuleSection({
             onClick={() => {
               if (
                 confirm(
-                  `Excluir módulo "${module.title}"? Todas as aulas serão removidas.`
+                  t('admin.lessons.confirmDeleteModule', {
+                    title: module.title
+                  })
                 )
               )
                 onDeleteModule(module.id);
             }}
             disabled={isDeletingModule}
             className="rounded-lg p-2 text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive disabled:opacity-40"
-            aria-label="Excluir módulo"
+            aria-label={t('admin.lessons.aria.deleteModule')}
           >
             {isDeletingModule ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -1209,9 +1261,9 @@ export default function AdminLessonsPage() {
       qc.invalidateQueries({ queryKey: ['admin-modules', slug, courseId] });
       setAddingModule(false);
       moduleForm.reset({ title: '', order: 1 });
-      toast.success('Módulo criado!');
+      toast.success(t('admin.lessons.toast.moduleCreated'));
     },
-    onError: () => toast.error('Erro ao criar módulo.')
+    onError: () => toast.error(t('admin.lessons.toast.moduleCreateError'))
   });
 
   const deleteModuleMut = useMutation({
@@ -1219,9 +1271,9 @@ export default function AdminLessonsPage() {
       adminEndpoints.deleteModule(slug, courseId!, id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-modules', slug, courseId] });
-      toast.success('Módulo excluído.');
+      toast.success(t('admin.lessons.toast.moduleDeleted'));
     },
-    onError: () => toast.error('Erro ao excluir módulo.')
+    onError: () => toast.error(t('admin.lessons.toast.moduleDeleteError'))
   });
 
   return (
@@ -1245,7 +1297,7 @@ export default function AdminLessonsPage() {
               )}
             </h1>
             <p className="mt-1 text-muted-foreground">
-              Gerencie os módulos, aulas e atividades deste curso.
+              {t('admin.lessons.courseSubtitle')}
             </p>
           </div>
           {!addingModule && (
@@ -1254,7 +1306,7 @@ export default function AdminLessonsPage() {
               className="flex shrink-0 items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
             >
               <Plus className="h-4 w-4" />
-              Novo módulo
+              {t('admin.lessons.newModuleButton')}
             </button>
           )}
         </div>
@@ -1268,10 +1320,10 @@ export default function AdminLessonsPage() {
         >
           <div className="flex-1 min-w-[200px]">
             <label className="mb-1 block text-sm font-medium">
-              Título do Módulo
+              {t('admin.lessons.moduleTitle')}
             </label>
             <input
-              placeholder="Ex: Fundamentos de Análise"
+              placeholder={t('admin.lessons.moduleTitlePlaceholder')}
               className="w-full rounded-lg border bg-background px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
               {...moduleForm.register('title')}
             />
@@ -1282,7 +1334,9 @@ export default function AdminLessonsPage() {
             )}
           </div>
           <div className="w-24">
-            <label className="mb-1 block text-sm font-medium">Ordem</label>
+            <label className="mb-1 block text-sm font-medium">
+              {t('admin.lessons.moduleOrder')}
+            </label>
             <input
               type="number"
               min={1}
@@ -1340,12 +1394,12 @@ export default function AdminLessonsPage() {
           {modules?.length === 0 && !addingModule && (
             <div className="py-16 text-center text-muted-foreground">
               <BookOpen className="mx-auto mb-4 h-12 w-12 opacity-30" />
-              <p>Nenhum módulo criado ainda.</p>
+              <p>{t('admin.lessons.noModules')}</p>
               <button
                 onClick={() => setAddingModule(true)}
                 className="mt-3 text-sm font-medium text-primary hover:underline"
               >
-                Criar primeiro módulo
+                {t('admin.lessons.createFirstModule')}
               </button>
             </div>
           )}

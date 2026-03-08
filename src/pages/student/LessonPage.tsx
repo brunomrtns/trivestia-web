@@ -90,10 +90,16 @@ export default function LessonPage() {
           <BookOpen className="h-7 w-7 text-primary" />
         </div>
         <h1 className="text-3xl font-extrabold">
-          {timeline?.lesson.title ?? lessonTitle ?? 'Atividades da aula'}
+          {timeline?.lesson.title ?? lessonTitle ?? t('app.lesson.defaultH1')}
         </h1>
         <p className="mt-2 text-muted-foreground">
-          {t('app.lessonPlayer.stepOf', { n: currentStep + 1, total: steps.length })}{timeline?.progress ? ` ${t('app.lessonPlayer.completedSuffix', { viewed: timeline.progress.viewed, total: timeline.progress.total })}` : ''}
+          {t('app.lessonPlayer.stepOf', {
+            n: currentStep + 1,
+            total: steps.length
+          })}
+          {timeline?.progress
+            ? ` ${t('app.lessonPlayer.completedSuffix', { viewed: timeline.progress.viewed, total: timeline.progress.total })}`
+            : ''}
         </p>
       </div>
 

@@ -1,10 +1,12 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/features/auth/auth.store';
 
 export function SuperAdminGuard() {
   const { isAuthenticated, isLoading, user } = useAuthStore();
   const location = useLocation();
+  const { t } = useTranslation();
 
   if (isLoading) return null;
 
@@ -20,7 +22,7 @@ export function SuperAdminGuard() {
   }
 
   if (user?.role !== 'SUPER_ADMIN') {
-    toast.error('Acesso restrito ao Super Admin da plataforma.');
+    toast.error(t('common.guards.superAdminOnly'));
     // Redireciona para o último tenant conhecido ou landing
     const slug = localStorage.getItem('@tm:lastTenantSlug');
     return <Navigate to={slug ? `/t/${slug}/app/dashboard` : '/'} replace />;

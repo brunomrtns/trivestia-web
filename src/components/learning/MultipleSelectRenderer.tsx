@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { Question, MultiSelectAnswer } from '@/types/api';
 import { cn } from '@/lib/utils';
 import { Check } from 'lucide-react';
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export function MultipleSelectRenderer({ question, value, onChange }: Props) {
+  const { t } = useTranslation();
   const selected = value?.selectedOptionIds ?? [];
 
   const toggle = (id: string) => {
@@ -21,7 +23,7 @@ export function MultipleSelectRenderer({ question, value, onChange }: Props) {
   return (
     <div className="space-y-3">
       <p className="text-xs text-muted-foreground">
-        Selecione todas que se aplicam
+        {t('learning.multipleSelect.instruction')}
       </p>
       {question.options.map((opt) => {
         const isSelected = selected.includes(opt.id);

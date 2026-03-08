@@ -124,7 +124,9 @@ export default function GlobalLoginPage() {
           password: data.password
         });
         platformSetAuth(res.user, res.token, res.refreshToken);
-        toast.success(t('platform.login.toast.success', { name: res.user.name }));
+        toast.success(
+          t('platform.login.toast.success', { name: res.user.name })
+        );
         navigate('/workspace', { replace: true });
       } else {
         const res = await authEndpoints.login(loginCtx.slug, {
@@ -132,7 +134,9 @@ export default function GlobalLoginPage() {
           password: data.password
         });
         tenantSetAuth(res.user, res.token, res.refreshToken, loginCtx.slug);
-        toast.success(t('platform.login.toast.success', { name: res.user.name }));
+        toast.success(
+          t('platform.login.toast.success', { name: res.user.name })
+        );
         navigate(`/t/${loginCtx.slug}/app/dashboard`, { replace: true });
       }
     } catch {
@@ -175,8 +179,7 @@ export default function GlobalLoginPage() {
     resolveResult &&
     !resolveResult.platformAccount &&
     resolveResult.tenants.length === 0;
-  const isMultiTenantChoice =
-    resolveResult && resolveResult.tenants.length > 1;
+  const isMultiTenantChoice = resolveResult && resolveResult.tenants.length > 1;
 
   // ─── Render ────────────────────────────────────────────────────────────────
 
@@ -191,7 +194,9 @@ export default function GlobalLoginPage() {
         {/* ── Phase EMAIL ── */}
         {phase === 'EMAIL' && (
           <>
-            <h1 className="mb-2 text-3xl font-extrabold">{t('platform.login.email.title')}</h1>
+            <h1 className="mb-2 text-3xl font-extrabold">
+              {t('platform.login.email.title')}
+            </h1>
             <p className="mb-8 text-muted-foreground">
               {t('platform.login.email.subtitle')}
             </p>
@@ -270,11 +275,15 @@ export default function GlobalLoginPage() {
 
                 <div className="relative my-5 flex items-center gap-3">
                   <div className="h-px flex-1 bg-border" />
-                  <span className="text-xs text-muted-foreground">{t('common.misc.or')}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {t('common.misc.or')}
+                  </span>
                   <div className="h-px flex-1 bg-border" />
                 </div>
 
-                <p className="mb-2 text-sm font-medium">{t('platform.login.choice.notFound.hasSchool')}</p>
+                <p className="mb-2 text-sm font-medium">
+                  {t('platform.login.choice.notFound.hasSchool')}
+                </p>
                 <p className="mb-3 text-xs text-muted-foreground">
                   {t('platform.login.choice.notFound.hasSchoolSubtitle')}
                 </p>
@@ -291,7 +300,9 @@ export default function GlobalLoginPage() {
                             .replace(/[^a-z0-9-]/g, '')
                         )
                       }
-                      placeholder={t('platform.login.choice.notFound.slugPlaceholder')}
+                      placeholder={t(
+                        'platform.login.choice.notFound.slugPlaceholder'
+                      )}
                       className="flex-1 bg-transparent py-2 outline-none"
                     />
                   </div>
@@ -352,13 +363,17 @@ export default function GlobalLoginPage() {
             </button>
 
             <h1 className="mb-1 text-3xl font-extrabold">
-              {loginCtx.type === 'platform' ? t('platform.login.password.platformTitle') : t('platform.login.email.title')}
+              {loginCtx.type === 'platform'
+                ? t('platform.login.password.platformTitle')
+                : t('platform.login.email.title')}
             </h1>
             <p className="mb-3 text-sm text-muted-foreground">{email}</p>
 
             {loginCtx.type === 'tenant' && (
               <p className="mb-6 inline-flex items-center gap-1.5 rounded-full border bg-muted px-3 py-1 text-xs font-medium">
-                {t('platform.login.password.schoolBadge', { name: loginCtx.name })}
+                {t('platform.login.password.schoolBadge', {
+                  name: loginCtx.name
+                })}
               </p>
             )}
             {loginCtx.type === 'platform' && (

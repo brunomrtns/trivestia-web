@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { ExternalLink, Play } from 'lucide-react';
 import type { LessonStepDTO } from '@/types/api';
@@ -66,6 +67,7 @@ function TextContent({ body }: { body: string }) {
 }
 
 function VideoContent({ url, provider }: { url: string; provider: string }) {
+  const { t } = useTranslation();
   const embedUrl = getEmbedUrl(url, provider);
 
   if (embedUrl) {
@@ -76,7 +78,7 @@ function VideoContent({ url, provider }: { url: string; provider: string }) {
           className="h-full w-full"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
-          title="Video player"
+          title={t('learning.stepPlayer.videoTitle')}
         />
       </div>
     );
@@ -129,6 +131,7 @@ function ActivityContent({
   title: string;
   onOpen: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center gap-4 py-8 text-center">
       <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
@@ -137,14 +140,14 @@ function ActivityContent({
       <div>
         <h3 className="text-lg font-bold">{title}</h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          Clique para iniciar esta atividade interativa
+          {t('learning.stepPlayer.activityDescription')}
         </p>
       </div>
       <button
         onClick={onOpen}
         className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
       >
-        Iniciar atividade
+        {t('learning.stepPlayer.activityButton')}
         <ExternalLink className="h-4 w-4" />
       </button>
     </div>

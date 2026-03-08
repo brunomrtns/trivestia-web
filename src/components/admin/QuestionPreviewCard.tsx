@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CheckCircle2, XCircle, ImageOff } from 'lucide-react';
 import type { ActivityType } from '@/types/api';
 
@@ -19,6 +20,7 @@ function ChartMarkupPreview({
 }: {
   jsonData: Record<string, unknown>;
 }) {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 0, h: 0 });
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -51,7 +53,7 @@ function ChartMarkupPreview({
     return (
       <div className="flex h-32 items-center justify-center gap-2 rounded-lg border bg-muted/40 text-sm text-muted-foreground">
         <ImageOff className="h-4 w-4" />
-        Sem imagem
+        {t('admin.questionPreview.noImage')}
       </div>
     );
   }
@@ -66,7 +68,7 @@ function ChartMarkupPreview({
       >
         <img
           src={cm.imageUrl}
-          alt="Gráfico gabarito"
+          alt={t('admin.questionPreview.chartAlt')}
           className="block w-full h-auto pointer-events-none"
           draggable={false}
           onLoad={() => setImgLoaded(true)}
@@ -102,12 +104,16 @@ function ChartMarkupPreview({
       </div>
       <div className="flex gap-4 text-xs text-muted-foreground">
         <span>
-          <span className="font-medium text-foreground">Zonas:</span>{' '}
+          <span className="font-medium text-foreground">
+            {t('admin.questionPreview.zones')}
+          </span>{' '}
           {zones.length}
         </span>
         {cm.threshold !== undefined && (
           <span>
-            <span className="font-medium text-foreground">Threshold IoU:</span>{' '}
+            <span className="font-medium text-foreground">
+              {t('admin.questionPreview.threshold')}
+            </span>{' '}
             {(cm.threshold * 100).toFixed(0)}%
           </span>
         )}
@@ -127,6 +133,7 @@ function RiskCalculatorPreview({
 }: {
   jsonData: Record<string, unknown>;
 }) {
+  const { t } = useTranslation();
   const rc = jsonData.riskCalc as
     | {
         balance?: number;
@@ -152,14 +159,19 @@ function RiskCalculatorPreview({
 
   const rows = [
     {
-      label: 'Saldo',
+      label: t('learning.riskCalc.scenario.balance'),
       value: `$ ${rc.balance?.toLocaleString('pt-BR') ?? '—'}`
     },
-    { label: 'Risco', value: `${rc.riskPercent}%` },
-    { label: 'Entrada', value: `$ ${rc.entryPrice}` },
-    { label: 'Stop', value: `$ ${rc.stopPrice}` },
-    ...(cv !== 1 ? [{ label: 'Contrato', value: `$ ${cv}` }] : []),
-    { label: 'Tolerância', value: `${rc.tolerancePercent}%` }
+    { label: t('learning.riskCalc.scenario.risk'), value: `${rc.riskPercent}%` },
+    { label: t('learning.riskCalc.scenario.entry'), value: `$ ${rc.entryPrice}` },
+    { label: t('learning.riskCalc.scenario.stop'), value: `$ ${rc.stopPrice}` },
+    ...(cv !== 1
+      ? [{ label: t('admin.questionPreview.contract'), value: `$ ${cv}` }]
+      : []),
+    {
+      label: t('admin.questionPreview.tolerance'),
+      value: `${rc.tolerancePercent}%`
+    }
   ];
 
   return (
@@ -175,10 +187,12 @@ function RiskCalculatorPreview({
       {expected !== null && (
         <div className="rounded-md bg-primary/10 px-3 py-2 flex items-center gap-2">
           <span className="text-xs text-muted-foreground">
-            Resposta esperada:
+            {t('admin.questionPreview.expectedAnswer')}
           </span>
           <span className="text-lg font-bold text-primary">{expected}</span>
-          <span className="text-xs text-muted-foreground">contratos</span>
+          <span className="text-xs text-muted-foreground">
+            {t('admin.questionPreview.contracts')}
+          </span>
         </div>
       )}
     </div>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Portal } from '@/components/ui/Portal';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Search,
   Plus,
@@ -17,6 +18,7 @@ import type { SuperTenant, CreateTenantSuperData } from '@/types/api';
 // ─── Create Tenant Modal ──────────────────────────────────────────────────────
 
 function CreateTenantModal({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [form, setForm] = useState<CreateTenantSuperData>({
     name: '',
@@ -28,12 +30,14 @@ function CreateTenantModal({ onClose }: { onClose: () => void }) {
   const createMut = useMutation({
     mutationFn: () => superadminEndpoints.createTenant(form),
     onSuccess: () => {
-      toast.success('Escola criada com sucesso!');
+      toast.success(t('super.tenants.toast.created'));
       qc.invalidateQueries({ queryKey: ['super', 'tenants'] });
       onClose();
     },
     onError: (err: any) => {
-      toast.error(err?.response?.data?.message || 'Erro ao criar escola');
+      toast.error(
+        err?.response?.data?.message || t('super.tenants.toast.createError')
+      );
     }
   });
 
@@ -47,119 +51,131 @@ function CreateTenantModal({ onClose }: { onClose: () => void }) {
 
   return (
     <Portal>
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="mx-4 w-full max-w-lg rounded-xl border bg-card p-6 shadow-xl">
-        <h2 className="mb-4 text-lg font-bold">Nova Escola</h2>
-        <div className="space-y-4">
-          <div>
-            <label className="mb-1 block text-sm font-medium">Nome</label>
-            <input
-              className="w-full rounded-md border px-3 py-2 text-sm"
-              value={form.name}
-              onChange={(e) => {
-                const name = e.target.value;
-                setForm((f) => ({ ...f, name, slug: slugify(name) }));
-              }}
-              placeholder="Ex: Escola de Trading ABC"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium">Slug</label>
-            <input
-              className="w-full rounded-md border px-3 py-2 text-sm font-mono"
-              value={form.slug}
-              onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
-              placeholder="escola-abc"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium">
-              Bio (opcional)
-            </label>
-            <textarea
-              className="w-full rounded-md border px-3 py-2 text-sm"
-              value={form.bio ?? ''}
-              onChange={(e) => setForm((f) => ({ ...f, bio: e.target.value }))}
-              rows={2}
-              placeholder="Descrição breve da escola"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="enabled"
-              checked={form.enabled}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, enabled: e.target.checked }))
-              }
-            />
-            <label htmlFor="enabled" className="text-sm">
-              Habilitada
-            </label>
-          </div>
-
-          <hr />
-          <p className="text-xs text-muted-foreground">
-            Owner (opcional) — se preenchido, cria o owner junto.
-          </p>
-          <div className="grid grid-cols-2 gap-3">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div className="mx-4 w-full max-w-lg rounded-xl border bg-card p-6 shadow-xl">
+          <h2 className="mb-4 text-lg font-bold">
+            {t('super.tenants.modal.title')}
+          </h2>
+          <div className="space-y-4">
             <div>
               <label className="mb-1 block text-sm font-medium">
-                Nome do Owner
+                {t('super.tenants.modal.nameLabel')}
               </label>
               <input
                 className="w-full rounded-md border px-3 py-2 text-sm"
-                value={form.ownerName ?? ''}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, ownerName: e.target.value }))
-                }
+                value={form.name}
+                onChange={(e) => {
+                  const name = e.target.value;
+                  setForm((f) => ({ ...f, name, slug: slugify(name) }));
+                }}
+                placeholder="Ex: Escola de Trading ABC"
               />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium">
-                Email do Owner
+                {t('super.tenants.modal.slugLabel')}
               </label>
               <input
-                className="w-full rounded-md border px-3 py-2 text-sm"
-                value={form.ownerEmail ?? ''}
+                className="w-full rounded-md border px-3 py-2 text-sm font-mono"
+                value={form.slug}
                 onChange={(e) =>
-                  setForm((f) => ({ ...f, ownerEmail: e.target.value }))
+                  setForm((f) => ({ ...f, slug: e.target.value }))
+                }
+                placeholder="escola-abc"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">
+                {t('super.tenants.modal.bioLabel')}
+              </label>
+              <textarea
+                className="w-full rounded-md border px-3 py-2 text-sm"
+                value={form.bio ?? ''}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, bio: e.target.value }))
+                }
+                rows={2}
+                placeholder={t('super.tenants.modal.bioPlaceholder')}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="enabled"
+                checked={form.enabled}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, enabled: e.target.checked }))
+                }
+              />
+              <label htmlFor="enabled" className="text-sm">
+                {t('super.tenants.modal.enabledLabel')}
+              </label>
+            </div>
+
+            <hr />
+            <p className="text-xs text-muted-foreground">
+              {t('super.tenants.modal.ownerHint')}
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1 block text-sm font-medium">
+                  {t('super.tenants.modal.ownerNameLabel')}
+                </label>
+                <input
+                  className="w-full rounded-md border px-3 py-2 text-sm"
+                  value={form.ownerName ?? ''}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, ownerName: e.target.value }))
+                  }
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium">
+                  {t('super.tenants.modal.ownerEmailLabel')}
+                </label>
+                <input
+                  className="w-full rounded-md border px-3 py-2 text-sm"
+                  value={form.ownerEmail ?? ''}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, ownerEmail: e.target.value }))
+                  }
+                />
+              </div>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">
+                {t('super.tenants.modal.ownerPasswordLabel')}
+              </label>
+              <input
+                type="password"
+                className="w-full rounded-md border px-3 py-2 text-sm"
+                value={form.ownerPassword ?? ''}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, ownerPassword: e.target.value }))
                 }
               />
             </div>
           </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium">
-              Senha do Owner
-            </label>
-            <input
-              type="password"
-              className="w-full rounded-md border px-3 py-2 text-sm"
-              value={form.ownerPassword ?? ''}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, ownerPassword: e.target.value }))
-              }
-            />
-          </div>
-        </div>
 
-        <div className="mt-6 flex justify-end gap-2">
-          <button
-            onClick={onClose}
-            className="rounded-md border px-4 py-2 text-sm transition-colors hover:bg-accent"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={() => createMut.mutate()}
-            disabled={!form.name || !form.slug || createMut.isPending}
-            className="rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700 disabled:opacity-50"
-          >
-            {createMut.isPending ? 'Criando...' : 'Criar Escola'}
-          </button>
+          <div className="mt-6 flex justify-end gap-2">
+            <button
+              onClick={onClose}
+              className="rounded-md border px-4 py-2 text-sm transition-colors hover:bg-accent"
+            >
+              {t('common.actions.cancel')}
+            </button>
+            <button
+              onClick={() => createMut.mutate()}
+              disabled={!form.name || !form.slug || createMut.isPending}
+              className="rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700 disabled:opacity-50"
+            >
+              {createMut.isPending
+                ? t('super.tenants.modal.creating')
+                : t('super.tenants.modal.createButton')}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
     </Portal>
   );
 }
@@ -169,6 +185,7 @@ function CreateTenantModal({ onClose }: { onClose: () => void }) {
 export default function SuperTenantsPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [enabledFilter, setEnabledFilter] = useState<'all' | 'true' | 'false'>(
     'all'
@@ -194,7 +211,7 @@ export default function SuperTenantsPage() {
     mutationFn: ({ id, enabled }: { id: string; enabled: boolean }) =>
       superadminEndpoints.updateTenant(id, { enabled }),
     onSuccess: () => {
-      toast.success('Status atualizado');
+      toast.success(t('super.tenants.toast.statusUpdated'));
       qc.invalidateQueries({ queryKey: ['super', 'tenants'] });
       qc.invalidateQueries({ queryKey: ['super', 'stats'] });
     }
@@ -204,16 +221,16 @@ export default function SuperTenantsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Escolas</h1>
-          <p className="text-muted-foreground">
-            Gerencie todos os tenants da plataforma.
-          </p>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {t('super.tenants.title')}
+          </h1>
+          <p className="text-muted-foreground">{t('super.tenants.subtitle')}</p>
         </div>
         <button
           onClick={() => setShowCreate(true)}
           className="flex items-center gap-2 rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700"
         >
-          <Plus className="h-4 w-4" /> Nova Escola
+          <Plus className="h-4 w-4" /> {t('super.tenants.newButton')}
         </button>
       </div>
 
@@ -223,7 +240,7 @@ export default function SuperTenantsPage() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             className="w-full rounded-md border py-2 pl-10 pr-3 text-sm"
-            placeholder="Buscar por nome ou slug..."
+            placeholder={t('super.tenants.searchPlaceholder')}
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -239,9 +256,9 @@ export default function SuperTenantsPage() {
             setPage(1);
           }}
         >
-          <option value="all">Todas</option>
-          <option value="true">Ativas</option>
-          <option value="false">Desativadas</option>
+          <option value="all">{t('super.tenants.filter.all')}</option>
+          <option value="true">{t('super.tenants.filter.active')}</option>
+          <option value="false">{t('super.tenants.filter.disabled')}</option>
         </select>
       </div>
 
@@ -260,47 +277,68 @@ export default function SuperTenantsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50 text-left">
-                <th className="px-4 py-3 font-medium">Escola</th>
-                <th className="px-4 py-3 font-medium">Slug</th>
-                <th className="px-4 py-3 font-medium text-center">Usuários</th>
-                <th className="px-4 py-3 font-medium text-center">Cursos</th>
-                <th className="px-4 py-3 font-medium text-center">Status</th>
-                <th className="px-4 py-3 font-medium text-right">Ações</th>
+                <th className="px-4 py-3 font-medium">
+                  {t('super.tenants.table.school')}
+                </th>
+                <th className="px-4 py-3 font-medium">{t('super.tenants.table.slug')}</th>
+                <th className="px-4 py-3 font-medium text-center">
+                  {t('super.tenants.table.users')}
+                </th>
+                <th className="px-4 py-3 font-medium text-center">
+                  {t('super.tenants.table.courses')}
+                </th>
+                <th className="px-4 py-3 font-medium text-center">
+                  {t('super.tenants.table.status')}
+                </th>
+                <th className="px-4 py-3 font-medium text-right">
+                  {t('super.tenants.table.actions')}
+                </th>
               </tr>
             </thead>
             <tbody>
-              {data?.data.map((t: SuperTenant) => (
+              {data?.data.map((tenant: SuperTenant) => (
                 <tr
-                  key={t.id}
+                  key={tenant.id}
                   className="border-b last:border-0 hover:bg-muted/30"
                 >
-                  <td className="px-4 py-3 font-medium">{t.name}</td>
+                  <td className="px-4 py-3 font-medium">{tenant.name}</td>
                   <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                    {t.slug}
+                    {tenant.slug}
                   </td>
-                  <td className="px-4 py-3 text-center">{t._count.users}</td>
-                  <td className="px-4 py-3 text-center">{t._count.courses}</td>
+                  <td className="px-4 py-3 text-center">
+                    {tenant._count.users}
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    {tenant._count.courses}
+                  </td>
                   <td className="px-4 py-3 text-center">
                     <button
                       onClick={() =>
-                        toggleMut.mutate({ id: t.id, enabled: !t.enabled })
+                        toggleMut.mutate({
+                          id: tenant.id,
+                          enabled: !tenant.enabled
+                        })
                       }
                       className="inline-flex items-center gap-1 text-xs"
                       title={
-                        t.enabled
-                          ? 'Clique para desativar'
-                          : 'Clique para ativar'
+                        tenant.enabled
+                          ? t('super.tenants.status.clickToDisable')
+                          : t('super.tenants.status.clickToEnable')
                       }
                     >
-                      {t.enabled ? (
+                      {tenant.enabled ? (
                         <>
                           <ToggleRight className="h-5 w-5 text-green-600" />
-                          <span className="text-green-600">Ativa</span>
+                          <span className="text-green-600">
+                            {t('super.tenants.status.active')}
+                          </span>
                         </>
                       ) : (
                         <>
                           <ToggleLeft className="h-5 w-5 text-red-500" />
-                          <span className="text-red-500">Desativada</span>
+                          <span className="text-red-500">
+                            {t('super.tenants.status.disabled')}
+                          </span>
                         </>
                       )}
                     </button>
@@ -308,17 +346,17 @@ export default function SuperTenantsPage() {
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <button
-                        onClick={() => navigate(`/super/tenants/${t.id}`)}
+                        onClick={() => navigate(`/super/tenants/${tenant.id}`)}
                         className="rounded-md border px-3 py-1 text-xs transition-colors hover:bg-accent"
                       >
-                        Editar
+                        {t('super.tenants.editButton')}
                       </button>
                       <a
-                        href={`/t/${t.slug}`}
+                        href={`/t/${tenant.slug}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="rounded-md border px-3 py-1 text-xs transition-colors hover:bg-accent"
-                        title="Abrir escola"
+                        title={t('super.tenants.linkTitle')}
                       >
                         <ExternalLink className="h-3 w-3" />
                       </a>
@@ -332,7 +370,7 @@ export default function SuperTenantsPage() {
                     colSpan={6}
                     className="px-4 py-8 text-center text-muted-foreground"
                   >
-                    Nenhuma escola encontrada.
+                    {t('super.tenants.empty')}
                   </td>
                 </tr>
               )}
@@ -343,8 +381,11 @@ export default function SuperTenantsPage() {
           {data && data.pagination.totalPages > 1 && (
             <div className="flex items-center justify-between border-t px-4 py-3">
               <span className="text-xs text-muted-foreground">
-                {data.pagination.total} escola(s) • Página{' '}
-                {data.pagination.page} de {data.pagination.totalPages}
+                {t('super.tenants.pagination', {
+                  total: data.pagination.total,
+                  page: data.pagination.page,
+                  totalPages: data.pagination.totalPages
+                })}
               </span>
               <div className="flex gap-2">
                 <button
@@ -352,14 +393,14 @@ export default function SuperTenantsPage() {
                   disabled={page <= 1}
                   className="rounded-md border px-3 py-1 text-xs disabled:opacity-50"
                 >
-                  Anterior
+                  {t('common.pagination.previous')}
                 </button>
                 <button
                   onClick={() => setPage((p) => p + 1)}
                   disabled={page >= data.pagination.totalPages}
                   className="rounded-md border px-3 py-1 text-xs disabled:opacity-50"
                 >
-                  Próxima
+                  {t('common.pagination.next')}
                 </button>
               </div>
             </div>

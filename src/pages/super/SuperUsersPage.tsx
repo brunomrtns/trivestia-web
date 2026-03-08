@@ -3,32 +3,37 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Portal } from '@/components/ui/Portal';
 import { Search, Shield, Crown, Zap, User as UserIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { superadminEndpoints } from '@/services/endpoints/superadmin.endpoints';
 import type { SuperUser, Role } from '@/types/api';
 
-const ROLE_LABELS: Record<
-  Role,
-  {
-    label: string;
-    color: string;
-    icon: React.ComponentType<{ className?: string }>;
-  }
-> = {
-  SUPER_ADMIN: {
-    label: 'Super Admin',
-    color: 'bg-purple-100 text-purple-700',
-    icon: Zap
-  },
-  OWNER: { label: 'Owner', color: 'bg-amber-100 text-amber-700', icon: Crown },
-  ADMIN: { label: 'Admin', color: 'bg-blue-100 text-blue-700', icon: Shield },
-  STUDENT: {
-    label: 'Aluno',
-    color: 'bg-gray-100 text-gray-700',
-    icon: UserIcon
-  }
-};
-
 function RoleBadge({ role }: { role: Role }) {
+  const { t } = useTranslation();
+  const ROLE_LABELS: Record<
+    Role,
+    {
+      label: string;
+      color: string;
+      icon: React.ComponentType<{ className?: string }>;
+    }
+  > = {
+    SUPER_ADMIN: {
+      label: 'Super Admin',
+      color: 'bg-purple-100 text-purple-700',
+      icon: Zap
+    },
+    OWNER: {
+      label: 'Owner',
+      color: 'bg-amber-100 text-amber-700',
+      icon: Crown
+    },
+    ADMIN: { label: 'Admin', color: 'bg-blue-100 text-blue-700', icon: Shield },
+    STUDENT: {
+      label: t('common.roles.student'),
+      color: 'bg-gray-100 text-gray-700',
+      icon: UserIcon
+    }
+  };
   const cfg = ROLE_LABELS[role];
   const Icon = cfg.icon;
   return (
@@ -50,60 +55,65 @@ function ChangeRoleModal({
   user: SuperUser;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [role, setRole] = useState<Role>(user.role);
 
   const mut = useMutation({
     mutationFn: () => superadminEndpoints.updateUserRole(user.id, role),
     onSuccess: () => {
-      toast.success('Role atualizado com sucesso!');
+      toast.success(t('super.users.toast.roleUpdated'));
       qc.invalidateQueries({ queryKey: ['super', 'users'] });
       onClose();
     },
     onError: (err: any) => {
-      toast.error(err?.response?.data?.message || 'Erro ao atualizar role');
+      toast.error(
+        err?.response?.data?.message || t('super.users.toast.updateError')
+      );
     }
   });
 
   return (
     <Portal>
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="mx-4 w-full max-w-sm rounded-xl border bg-card p-6 shadow-xl">
-        <h3 className="mb-2 font-bold">Alterar Role</h3>
-        <p className="mb-4 text-sm text-muted-foreground">
-          {user.name} ({user.email})
-          <br />
-          Escola: <span className="font-mono">{user.tenant.slug}</span>
-        </p>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div className="mx-4 w-full max-w-sm rounded-xl border bg-card p-6 shadow-xl">
+          <h3 className="mb-2 font-bold">{t('super.users.modal.title')}</h3>
+          <p className="mb-4 text-sm text-muted-foreground">
+            {user.name} ({user.email})
+            <br />
+            {t('super.users.modal.schoolBadge', { slug: user.tenant.slug })}
+          </p>
 
-        <select
-          className="w-full rounded-md border px-3 py-2 text-sm"
-          value={role}
-          onChange={(e) => setRole(e.target.value as Role)}
-        >
-          <option value="SUPER_ADMIN">Super Admin</option>
-          <option value="OWNER">Owner</option>
-          <option value="ADMIN">Admin</option>
-          <option value="STUDENT">Aluno</option>
-        </select>
+          <select
+            className="w-full rounded-md border px-3 py-2 text-sm"
+            value={role}
+            onChange={(e) => setRole(e.target.value as Role)}
+          >
+            <option value="SUPER_ADMIN">Super Admin</option>
+            <option value="OWNER">Owner</option>
+            <option value="ADMIN">Admin</option>
+            <option value="STUDENT">{t('common.roles.student')}</option>
+          </select>
 
-        <div className="mt-4 flex justify-end gap-2">
-          <button
-            onClick={onClose}
-            className="rounded-md border px-4 py-2 text-sm hover:bg-accent"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={() => mut.mutate()}
-            disabled={role === user.role || mut.isPending}
-            className="rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
-          >
-            {mut.isPending ? 'Salvando...' : 'Confirmar'}
-          </button>
+          <div className="mt-4 flex justify-end gap-2">
+            <button
+              onClick={onClose}
+              className="rounded-md border px-4 py-2 text-sm hover:bg-accent"
+            >
+              {t('common.actions.cancel')}
+            </button>
+            <button
+              onClick={() => mut.mutate()}
+              disabled={role === user.role || mut.isPending}
+              className="rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
+            >
+              {mut.isPending
+                ? t('common.actions.saving')
+                : t('super.users.modal.confirmButton')}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
     </Portal>
   );
 }
@@ -115,6 +125,7 @@ export default function SuperUsersPage() {
   const [roleFilter, setRoleFilter] = useState<Role | ''>('');
   const [page, setPage] = useState(1);
   const [editingUser, setEditingUser] = useState<SuperUser | null>(null);
+  const { t } = useTranslation();
 
   const { data, isLoading } = useQuery({
     queryKey: ['super', 'users', { search, role: roleFilter, page }],
@@ -131,11 +142,9 @@ export default function SuperUsersPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">
-          Usuários da Plataforma
+          {t('super.users.title')}
         </h1>
-        <p className="text-muted-foreground">
-          Visualize e gerencie todos os usuários de todas as escolas.
-        </p>
+        <p className="text-muted-foreground">{t('super.users.subtitle')}</p>
       </div>
 
       {/* Filters */}
@@ -144,7 +153,7 @@ export default function SuperUsersPage() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             className="w-full rounded-md border py-2 pl-10 pr-3 text-sm"
-            placeholder="Buscar por nome ou email..."
+            placeholder={t('super.users.searchPlaceholder')}
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -160,11 +169,11 @@ export default function SuperUsersPage() {
             setPage(1);
           }}
         >
-          <option value="">Todos os roles</option>
+          <option value="">{t('super.users.filter.allRoles')}</option>
           <option value="SUPER_ADMIN">Super Admin</option>
           <option value="OWNER">Owner</option>
           <option value="ADMIN">Admin</option>
-          <option value="STUDENT">Aluno</option>
+          <option value="STUDENT">{t('common.roles.student')}</option>
         </select>
       </div>
 
@@ -183,11 +192,21 @@ export default function SuperUsersPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50 text-left">
-                <th className="px-4 py-3 font-medium">Nome</th>
-                <th className="px-4 py-3 font-medium">Email</th>
-                <th className="px-4 py-3 font-medium">Escola</th>
-                <th className="px-4 py-3 font-medium">Role</th>
-                <th className="px-4 py-3 font-medium text-right">Ações</th>
+                <th className="px-4 py-3 font-medium">
+                  {t('super.users.table.name')}
+                </th>
+                <th className="px-4 py-3 font-medium">
+                  {t('super.users.table.email')}
+                </th>
+                <th className="px-4 py-3 font-medium">
+                  {t('super.users.table.school')}
+                </th>
+                <th className="px-4 py-3 font-medium">
+                  {t('super.users.table.role')}
+                </th>
+                <th className="px-4 py-3 font-medium text-right">
+                  {t('super.users.table.actions')}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -211,7 +230,7 @@ export default function SuperUsersPage() {
                       onClick={() => setEditingUser(u)}
                       className="rounded-md border px-3 py-1 text-xs transition-colors hover:bg-accent"
                     >
-                      Alterar Role
+                      {t('super.users.changeRoleButton')}
                     </button>
                   </td>
                 </tr>
@@ -222,7 +241,7 @@ export default function SuperUsersPage() {
                     colSpan={5}
                     className="px-4 py-8 text-center text-muted-foreground"
                   >
-                    Nenhum usuário encontrado.
+                    {t('super.users.empty')}
                   </td>
                 </tr>
               )}
@@ -233,8 +252,11 @@ export default function SuperUsersPage() {
           {data && data.pagination.totalPages > 1 && (
             <div className="flex items-center justify-between border-t px-4 py-3">
               <span className="text-xs text-muted-foreground">
-                {data.pagination.total} usuário(s) • Página{' '}
-                {data.pagination.page} de {data.pagination.totalPages}
+                {t('super.users.pagination', {
+                  total: data.pagination.total,
+                  page: data.pagination.page,
+                  totalPages: data.pagination.totalPages
+                })}
               </span>
               <div className="flex gap-2">
                 <button
@@ -242,14 +264,14 @@ export default function SuperUsersPage() {
                   disabled={page <= 1}
                   className="rounded-md border px-3 py-1 text-xs disabled:opacity-50"
                 >
-                  Anterior
+                  {t('common.pagination.previous')}
                 </button>
                 <button
                   onClick={() => setPage((p) => p + 1)}
                   disabled={page >= data.pagination.totalPages}
                   className="rounded-md border px-3 py-1 text-xs disabled:opacity-50"
                 >
-                  Próxima
+                  {t('common.pagination.next')}
                 </button>
               </div>
             </div>

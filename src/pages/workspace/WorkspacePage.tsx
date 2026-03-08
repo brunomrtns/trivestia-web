@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Loader2, School, ExternalLink } from 'lucide-react';
 import { usePlatformAuthStore } from '@/features/platform/platform.store';
@@ -9,6 +10,7 @@ import type { PlatformMeResponse } from '@/types/api';
 
 export default function WorkspacePage() {
   const { user } = usePlatformAuthStore();
+  const { t } = useTranslation();
   const tenantSetAuth = useAuthStore((s) => s.setAuth);
   const tenantIsAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const [meData, setMeData] = useState<PlatformMeResponse | null>(null);
@@ -35,7 +37,7 @@ export default function WorkspacePage() {
           }
         }
       })
-      .catch(() => toast.error('Erro ao carregar dados.'))
+      .catch(() => toast.error(t('workspace.page.toast.loadError')))
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -53,10 +55,10 @@ export default function WorkspacePage() {
     return (
       <div className="container max-w-2xl py-16">
         <h1 className="mb-2 text-3xl font-extrabold">
-          Bem-vindo, {user?.name}
+          {t('workspace.page.welcome', { name: user?.name })}
         </h1>
         <p className="mb-8 text-muted-foreground">
-          Gerencie sua escola a partir do painel administrativo.
+          {t('workspace.page.subtitle')}
         </p>
 
         <div className="rounded-2xl border bg-card p-8 shadow-sm">
@@ -73,7 +75,7 @@ export default function WorkspacePage() {
               href={`/t/${meData.tenantSlug}/admin/courses`}
               className="flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow transition hover:opacity-90"
             >
-              Gerenciar escola
+              {t('workspace.page.manageButton')}
               <ExternalLink className="h-4 w-4" />
             </a>
             <a
@@ -82,7 +84,7 @@ export default function WorkspacePage() {
               rel="noreferrer"
               className="flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-semibold transition hover:bg-accent"
             >
-              Ver como aluno
+              {t('workspace.page.viewAsStudent')}
               <ExternalLink className="h-4 w-4" />
             </a>
           </div>

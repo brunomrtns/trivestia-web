@@ -12,12 +12,21 @@ import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { progressEndpoints } from '@/services/endpoints/progress.endpoints';
 import { dashboardEndpoints } from '@/services/endpoints/dashboard.endpoints';
 import { useAuthStore } from '@/features/auth/auth.store';
-import { getProgressLabel, getProgressColor } from '@/lib/utils';
+import { getProgressColor } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { tenantPath } from '@/lib/tenant';
-import { ContinueCard, ContinueCardSkeleton } from '@/components/dashboard/ContinueCard';
-import { LabSummaryCard, LabSummaryCardSkeleton } from '@/components/dashboard/LabSummaryCard';
-import { WeeklyGoalWidget, WeeklyGoalWidgetSkeleton } from '@/components/dashboard/WeeklyGoalWidget';
+import {
+  ContinueCard,
+  ContinueCardSkeleton
+} from '@/components/dashboard/ContinueCard';
+import {
+  LabSummaryCard,
+  LabSummaryCardSkeleton
+} from '@/components/dashboard/LabSummaryCard';
+import {
+  WeeklyGoalWidget,
+  WeeklyGoalWidgetSkeleton
+} from '@/components/dashboard/WeeklyGoalWidget';
 
 export default function DashboardPage() {
   const { t } = useTranslation();
@@ -76,9 +85,13 @@ export default function DashboardPage() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-extrabold">
-          {t('app.dashboard.greeting', { firstName: user?.name?.split(' ')[0] })}
+          {t('app.dashboard.greeting', {
+            firstName: user?.name?.split(' ')[0]
+          })}
         </h1>
-        <p className="mt-1 text-muted-foreground">{t('app.dashboard.subtitle')}</p>
+        <p className="mt-1 text-muted-foreground">
+          {t('app.dashboard.subtitle')}
+        </p>
       </div>
 
       {/* Continue Card */}
@@ -159,7 +172,9 @@ export default function DashboardPage() {
       {/* Cursos */}
       <div>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold">{t('app.dashboard.availableCourses')}</h2>
+          <h2 className="text-xl font-bold">
+            {t('app.dashboard.availableCourses')}
+          </h2>
           <Link
             to={tenantPath(slug, '/app/courses')}
             className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
@@ -204,7 +219,9 @@ export default function DashboardPage() {
       {progress && progress.length > 0 && (
         <div>
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-bold">{t('app.dashboard.recentActivity')}</h2>
+            <h2 className="text-xl font-bold">
+              {t('app.dashboard.recentActivity')}
+            </h2>
             <Link
               to={tenantPath(slug, '/app/progress')}
               className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
@@ -220,10 +237,10 @@ export default function DashboardPage() {
               >
                 <div>
                   <p className="text-sm font-medium">
-                    {p.lesson?.title ?? 'Aula'}
+                    {p.lesson?.title ?? t('app.lesson.fallbackTitle')}
                   </p>
                   <p className={`text-xs ${getProgressColor(p.status)}`}>
-                    {getProgressLabel(p.status)}
+                    {t(`common.progressStatus.${p.status}`, { defaultValue: p.status })}
                   </p>
                 </div>
                 <span className="text-sm font-bold text-primary">

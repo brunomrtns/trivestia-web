@@ -47,7 +47,9 @@ export default function AdminAnnouncementsPage() {
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ['announcements-admin', slug] });
     queryClient.invalidateQueries({ queryKey: ['announcements-unread', slug] });
-    queryClient.invalidateQueries({ queryKey: ['announcements-preview', slug] });
+    queryClient.invalidateQueries({
+      queryKey: ['announcements-preview', slug]
+    });
   };
 
   const createMutation = useMutation({
@@ -125,7 +127,9 @@ export default function AdminAnnouncementsPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Megaphone className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold">{t('admin.announcements.page.title')}</h1>
+          <h1 className="text-2xl font-bold">
+            {t('admin.announcements.page.title')}
+          </h1>
         </div>
         <button
           onClick={openCreate}
@@ -140,18 +144,21 @@ export default function AdminAnnouncementsPage() {
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="animate-pulse h-14 rounded-xl border bg-muted" />
+            <div
+              key={i}
+              className="animate-pulse h-14 rounded-xl border bg-muted"
+            />
           ))}
         </div>
       ) : !data || data.data.length === 0 ? (
         <div className="rounded-xl border bg-muted/40 p-12 text-center text-muted-foreground">
           <Megaphone className="mx-auto mb-3 h-10 w-10 opacity-40" />
-          <p>Nenhum aviso publicado ainda.</p>
+          <p>{t('admin.announcements.page.empty')}</p>
           <button
             onClick={openCreate}
             className="mt-4 rounded-lg border px-4 py-2 text-sm font-medium hover:bg-accent"
           >
-            Criar primeiro aviso
+            {t('admin.announcements.page.createFirstButton')}
           </button>
         </div>
       ) : (
@@ -159,46 +166,76 @@ export default function AdminAnnouncementsPage() {
           <table className="w-full text-sm">
             <thead className="bg-muted/60 text-muted-foreground">
               <tr>
-                <th className="px-4 py-3 text-left font-medium">Título</th>
-                <th className="px-4 py-3 text-left font-medium">Prioridade</th>
-                <th className="px-4 py-3 text-left font-medium">Autor</th>
-                <th className="px-4 py-3 text-left font-medium">Publicado</th>
-                <th className="px-4 py-3 text-left font-medium">Expira</th>
-                <th className="px-4 py-3 text-center font-medium">Leituras</th>
-                <th className="px-4 py-3 text-right font-medium">Ações</th>
+                <th className="px-4 py-3 text-left font-medium">
+                  {t('admin.announcements.table.title')}
+                </th>
+                <th className="px-4 py-3 text-left font-medium">
+                  {t('admin.announcements.table.priority')}
+                </th>
+                <th className="px-4 py-3 text-left font-medium">
+                  {t('admin.announcements.table.author')}
+                </th>
+                <th className="px-4 py-3 text-left font-medium">
+                  {t('admin.announcements.table.published')}
+                </th>
+                <th className="px-4 py-3 text-left font-medium">
+                  {t('admin.announcements.table.expires')}
+                </th>
+                <th className="px-4 py-3 text-center font-medium">
+                  {t('admin.announcements.table.reads')}
+                </th>
+                <th className="px-4 py-3 text-right font-medium">
+                  {t('admin.announcements.table.actions')}
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {data.data.map((ann) => (
                 <tr
                   key={ann.id}
-                  className={cn('bg-card transition-colors hover:bg-muted/30', ann.isExpired && 'opacity-60')}
+                  className={cn(
+                    'bg-card transition-colors hover:bg-muted/30',
+                    ann.isExpired && 'opacity-60'
+                  )}
                 >
                   <td className="px-4 py-3 font-medium max-w-xs truncate">
                     {ann.title}
                     {ann.isExpired && (
                       <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground uppercase font-bold">
-                        expirado
+                        {t('admin.announcements.badge.expired')}
                       </span>
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={cn('rounded px-2 py-0.5 text-xs font-bold uppercase', priorityBadge[ann.priority])}>
-                      {t(`admin.announcements.priority.${ann.priority.toLowerCase()}`)}
+                    <span
+                      className={cn(
+                        'rounded px-2 py-0.5 text-xs font-bold uppercase',
+                        priorityBadge[ann.priority]
+                      )}
+                    >
+                      {t(
+                        `admin.announcements.priority.${ann.priority.toLowerCase()}`
+                      )}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">{ann.author.name}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{formatDate(ann.publishedAt)}</td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {ann.author.name}
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {formatDate(ann.publishedAt)}
+                  </td>
                   <td className="px-4 py-3 text-muted-foreground">
                     {ann.expiresAt ? formatDate(ann.expiresAt) : '—'}
                   </td>
-                  <td className="px-4 py-3 text-center text-muted-foreground">{ann.readCount}</td>
+                  <td className="px-4 py-3 text-center text-muted-foreground">
+                    {ann.readCount}
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-1">
                       <button
                         onClick={() => openEdit(ann)}
                         className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-primary"
-                        title="Editar"
+                        title={t('admin.announcements.aria.edit')}
                       >
                         <Pencil className="h-4 w-4" />
                       </button>
@@ -210,7 +247,7 @@ export default function AdminAnnouncementsPage() {
                             disabled={deleteMutation.isPending}
                             className="rounded-md px-2 py-1 text-xs bg-destructive text-destructive-foreground hover:opacity-90 disabled:opacity-60"
                           >
-                            Confirmar
+                            {t('admin.announcements.aria.confirm')}
                           </button>
                           <button
                             onClick={() => setDeletingId(null)}
@@ -223,7 +260,7 @@ export default function AdminAnnouncementsPage() {
                         <button
                           onClick={() => setDeletingId(ann.id)}
                           className="rounded-md p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                          title="Remover"
+                          title={t('admin.announcements.aria.delete')}
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>

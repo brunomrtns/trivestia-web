@@ -86,7 +86,10 @@ export function WeeklyGoalWidget({ data, slug }: WeeklyGoalWidgetProps) {
               {t('app.dashboard.weeklyGoal.title')}
             </h2>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              {t('app.dashboard.weeklyGoal.progress', { weeklyCompleted, weeklyTarget })}
+              {t('app.dashboard.weeklyGoal.progress', {
+                weeklyCompleted,
+                weeklyTarget
+              })}
             </p>
           </div>
           <button
@@ -136,7 +139,9 @@ export function WeeklyGoalWidget({ data, slug }: WeeklyGoalWidgetProps) {
                     {currentStreak}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {t('app.dashboard.weeklyGoal.streakDay', { count: currentStreak })}
+                    {t('app.dashboard.weeklyGoal.streakDay', {
+                      count: currentStreak
+                    })}
                   </p>
                 </div>
               </div>
@@ -148,7 +153,9 @@ export function WeeklyGoalWidget({ data, slug }: WeeklyGoalWidgetProps) {
                     <p className="text-sm font-bold leading-none">
                       {longestStreak}
                     </p>
-                    <p className="text-xs">{t('app.dashboard.weeklyGoal.record')}</p>
+                    <p className="text-xs">
+                      {t('app.dashboard.weeklyGoal.record')}
+                    </p>
                   </div>
                 </div>
               )}
@@ -167,7 +174,10 @@ export function WeeklyGoalWidget({ data, slug }: WeeklyGoalWidgetProps) {
                       {DAY_LABELS[i]}
                     </span>
                     <div
-                      title={t('app.dashboard.weeklyGoal.activityTooltip', { date: day.date, count: day.count })}
+                      title={t('app.dashboard.weeklyGoal.activityTooltip', {
+                        date: day.date,
+                        count: day.count
+                      })}
                       className={cn(
                         'h-6 w-6 rounded-md transition-colors',
                         day.hit ? 'bg-primary' : 'bg-muted',

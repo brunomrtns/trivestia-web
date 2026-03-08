@@ -80,7 +80,9 @@ export default function CoursesPage() {
                   <div className="mt-4 flex items-center justify-between text-sm">
                     <span className="flex items-center gap-1 text-muted-foreground">
                       <Layers className="h-4 w-4" />
-                      {t('public.courses.card.modules', { n: course.modules?.length ?? 0 })}
+                      {t('public.courses.card.modules', {
+                        n: course.modules?.length ?? 0
+                      })}
                     </span>
                     <span className="flex items-center gap-1 font-medium text-primary">
                       {t('public.courses.card.viewCourse')}

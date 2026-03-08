@@ -51,7 +51,9 @@ export default function AnnouncementsPage() {
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ['announcements-unread', slug] });
     queryClient.invalidateQueries({ queryKey: ['announcements', slug, page] });
-    queryClient.invalidateQueries({ queryKey: ['announcements-preview', slug] });
+    queryClient.invalidateQueries({
+      queryKey: ['announcements-preview', slug]
+    });
   };
 
   const markReadMutation = useMutation({
@@ -64,7 +66,9 @@ export default function AnnouncementsPage() {
     mutationFn: () => announcementsEndpoints.markAllRead(slug),
     onSuccess: (res) => {
       invalidate();
-      toast.success(t('app.announcements.toast.markAllSuccess', { count: res.marked }));
+      toast.success(
+        t('app.announcements.toast.markAllSuccess', { count: res.marked })
+      );
     }
   });
 
@@ -99,7 +103,10 @@ export default function AnnouncementsPage() {
       {isLoading ? (
         <div className="space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="animate-pulse h-24 rounded-xl border bg-muted" />
+            <div
+              key={i}
+              className="animate-pulse h-24 rounded-xl border bg-muted"
+            />
           ))}
         </div>
       ) : !data || data.data.length === 0 ? (
@@ -142,7 +149,11 @@ export default function AnnouncementsPage() {
                     <p className="mt-2 text-xs text-muted-foreground">
                       {ann.author.name} · {formatDate(ann.publishedAt)}
                       {ann.expiresAt && (
-                        <span>{t('app.announcements.expiresAt', { date: formatDate(ann.expiresAt) })}</span>
+                        <span>
+                          {t('app.announcements.expiresAt', {
+                            date: formatDate(ann.expiresAt)
+                          })}
+                        </span>
                       )}
                     </p>
                   </div>

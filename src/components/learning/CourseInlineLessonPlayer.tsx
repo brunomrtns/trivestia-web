@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
@@ -21,6 +22,7 @@ export function CourseInlineLessonPlayer({
   initialStepId,
   onLessonComplete
 }: CourseInlineLessonPlayerProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -60,7 +62,7 @@ export function CourseInlineLessonPlayer({
   if (steps.length === 0) {
     return (
       <div className="py-16 text-center text-muted-foreground">
-        <p>Esta aula ainda não possui conteúdo.</p>
+        <p>{t('app.lessonPlayer.noContent')}</p>
       </div>
     );
   }
@@ -90,9 +92,15 @@ export function CourseInlineLessonPlayer({
         >
           <h2 className="text-lg font-bold">{timeline?.lesson.title}</h2>
           <p className="text-xs text-muted-foreground">
-            Etapa {currentStep + 1} de {steps.length}
+            {t('app.lessonPlayer.stepOf', {
+              n: currentStep + 1,
+              total: steps.length
+            })}
             {timeline?.progress
-              ? ` · ${timeline.progress.viewed}/${timeline.progress.total} concluídas`
+              ? t('app.lessonPlayer.completedSuffix', {
+                  viewed: timeline.progress.viewed,
+                  total: timeline.progress.total
+                })
               : ''}
           </p>
         </motion.div>
@@ -116,7 +124,7 @@ export function CourseInlineLessonPlayer({
             className="flex items-center gap-1.5 rounded-xl border bg-card px-4 py-2.5 text-sm font-medium shadow-sm transition-all hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <ChevronLeft className="h-4 w-4" />
-            Anterior
+            {t('common.pagination.previous')}
           </button>
 
           <span className="text-xs text-muted-foreground xl:hidden">
@@ -128,7 +136,7 @@ export function CourseInlineLessonPlayer({
               onClick={onLessonComplete}
               className="flex items-center gap-1.5 rounded-xl bg-green-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-green-700"
             >
-              Concluir aula
+              {t('app.lessonPlayer.completeLesson')}
               <ChevronRight className="h-4 w-4" />
             </button>
           ) : (
@@ -136,7 +144,7 @@ export function CourseInlineLessonPlayer({
               onClick={() => setCurrentStep((s) => s + 1)}
               className="flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:opacity-90"
             >
-              Próxima
+              {t('app.lesson.nav.next')}
               <ChevronRight className="h-4 w-4" />
             </button>
           )}

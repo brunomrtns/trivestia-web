@@ -1,5 +1,13 @@
 import { motion } from 'framer-motion';
-import { BarChart2, TrendingUp, Trophy, Target, TrendingDown, Clock, ArrowRight } from 'lucide-react';
+import {
+  BarChart2,
+  TrendingUp,
+  Trophy,
+  Target,
+  TrendingDown,
+  Clock,
+  ArrowRight
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { tenantPath } from '@/lib/tenant';
 import type { DashboardLabSummaryDTO } from '@/types/api';
@@ -16,7 +24,10 @@ export function LabSummaryCardSkeleton() {
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="animate-pulse rounded-xl border bg-muted/30 p-4 h-20" />
+          <div
+            key={i}
+            className="animate-pulse rounded-xl border bg-muted/30 p-4 h-20"
+          />
         ))}
       </div>
     </div>
@@ -32,7 +43,12 @@ interface MiniStatProps {
   valueClass?: string;
 }
 
-function MiniStat({ icon: Icon, label, value, valueClass = '' }: MiniStatProps) {
+function MiniStat({
+  icon: Icon,
+  label,
+  value,
+  valueClass = ''
+}: MiniStatProps) {
   return (
     <div className="rounded-xl border bg-card/60 p-4">
       <div className="flex items-center gap-2 mb-1">
@@ -102,9 +118,10 @@ export function LabSummaryCard({ data, slug }: LabSummaryCardProps) {
 
   // ── Formatar última sessão ────────────────────────────────────────────────
   const lastAt = lastSessionAt
-    ? new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(
-        new Date(lastSessionAt)
-      )
+    ? new Intl.DateTimeFormat('pt-BR', {
+        day: '2-digit',
+        month: 'short'
+      }).format(new Date(lastSessionAt))
     : '—';
 
   const stats: MiniStatProps[] = [

@@ -27,7 +27,9 @@ export function WrongTenantGate({ correctSlug }: WrongTenantGateProps) {
 
         {/* Texto */}
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold text-foreground">{t('error.wrongTenant.title')}</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            {t('error.wrongTenant.title')}
+          </h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
             {t('error.wrongTenant.message', { correctSlug })}
           </p>

@@ -19,10 +19,26 @@ export default function LandingPage() {
   const slug = tenantSlug ?? authStorage.getLastTenantSlug();
 
   const features = [
-    { icon: Layers, title: t('public.landing.features.structured.title'), description: t('public.landing.features.structured.description') },
-    { icon: CheckCircle2, title: t('public.landing.features.activities.title'), description: t('public.landing.features.activities.description') },
-    { icon: BarChart3, title: t('public.landing.features.progress.title'), description: t('public.landing.features.progress.description') },
-    { icon: Trophy, title: t('public.landing.features.trading.title'), description: t('public.landing.features.trading.description') }
+    {
+      icon: Layers,
+      title: t('public.landing.features.structured.title'),
+      description: t('public.landing.features.structured.description')
+    },
+    {
+      icon: CheckCircle2,
+      title: t('public.landing.features.activities.title'),
+      description: t('public.landing.features.activities.description')
+    },
+    {
+      icon: BarChart3,
+      title: t('public.landing.features.progress.title'),
+      description: t('public.landing.features.progress.description')
+    },
+    {
+      icon: Trophy,
+      title: t('public.landing.features.trading.title'),
+      description: t('public.landing.features.trading.description')
+    }
   ];
 
   const stats = [

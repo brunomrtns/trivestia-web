@@ -86,7 +86,11 @@ export default function LoginPage() {
       {displaySchoolName && (
         <div className="mb-4 flex items-center gap-2 rounded-full border bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary w-fit">
           {tenant?.logoUrl ? (
-            <img src={tenant.logoUrl} alt="" className="h-3.5 w-3.5 rounded-full" />
+            <img
+              src={tenant.logoUrl}
+              alt=""
+              className="h-3.5 w-3.5 rounded-full"
+            />
           ) : (
             <span className="inline-block h-2 w-2 rounded-full bg-primary" />
           )}

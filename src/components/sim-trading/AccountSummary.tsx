@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import type { SimulationState } from '@/types/api';
 
@@ -10,6 +11,7 @@ export function AccountSummary({
   engineState,
   initialBalance
 }: AccountSummaryProps) {
+  const { t } = useTranslation();
   const pnl = engineState.equity - initialBalance;
   const pnlPct = (pnl / initialBalance) * 100;
   const fees = engineState.totalFees ?? 0;
@@ -29,27 +31,27 @@ export function AccountSummary({
 
   const items = [
     {
-      label: 'Saldo',
+      label: t('sim.accountSummary.balance'),
       value: `$${engineState.balance.toFixed(2)}`,
       color: 'text-foreground'
     },
     {
-      label: 'Equity',
+      label: t('sim.accountSummary.equity'),
       value: `$${engineState.equity.toFixed(2)}`,
       color: 'text-foreground'
     },
     {
-      label: 'PnL',
+      label: t('sim.accountSummary.pnl'),
       value: `${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)} (${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(2)}%)`,
       color: pnl >= 0 ? 'text-emerald-400' : 'text-red-400'
     },
     {
-      label: 'Fees',
+      label: t('sim.accountSummary.fees'),
       value: `$${fees.toFixed(2)}`,
       color: 'text-orange-400'
     },
     {
-      label: 'DD Máx',
+      label: t('sim.accountSummary.maxDD'),
       value: `${maxDDPct.toFixed(2)}%`,
       color: 'text-yellow-400'
     }

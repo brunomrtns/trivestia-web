@@ -24,12 +24,18 @@ function isActivePeriod(period: PeriodDTO) {
 }
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+  return new Date(iso).toLocaleString('pt-BR', {
+    dateStyle: 'short',
+    timeStyle: 'short'
+  });
 }
 
 export default function AdminPeriodsPage() {
   const { t } = useTranslation();
-  const { tenantSlug, courseId } = useParams<{ tenantSlug: string; courseId: string }>();
+  const { tenantSlug, courseId } = useParams<{
+    tenantSlug: string;
+    courseId: string;
+  }>();
   const slug = tenantSlug ?? '';
   const cId = courseId ?? '';
   const qc = useQueryClient();
@@ -63,10 +69,10 @@ export default function AdminPeriodsPage() {
             <ArrowLeft className="h-3.5 w-3.5" />
             {t('admin.periods.backButton')}
           </Link>
-          <h1 className="text-3xl font-extrabold">{t('admin.periods.title')}</h1>
-          <p className="text-muted-foreground">
-            {t('admin.periods.subtitle')}
-          </p>
+          <h1 className="text-3xl font-extrabold">
+            {t('admin.periods.title')}
+          </h1>
+          <p className="text-muted-foreground">{t('admin.periods.subtitle')}</p>
         </div>
         <button
           onClick={() => setShowCreate(true)}
@@ -96,23 +102,27 @@ export default function AdminPeriodsPage() {
                 transition={{ delay: i * 0.04 }}
                 className="flex items-start gap-4 rounded-2xl border bg-card p-5 shadow-sm"
               >
-                <div className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${active ? 'bg-emerald-500/15' : 'bg-muted'}`}>
-                  {active
-                    ? <CheckCircle2 className="h-4.5 w-4.5 text-emerald-600 dark:text-emerald-400" />
-                    : <Clock className="h-4.5 w-4.5 text-muted-foreground" />
-                  }
+                <div
+                  className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${active ? 'bg-emerald-500/15' : 'bg-muted'}`}
+                >
+                  {active ? (
+                    <CheckCircle2 className="h-4.5 w-4.5 text-emerald-600 dark:text-emerald-400" />
+                  ) : (
+                    <Clock className="h-4.5 w-4.5 text-muted-foreground" />
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="font-semibold">{period.title}</p>
                     {active && (
                       <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                      {t('admin.periods.status.active')}
+                        {t('admin.periods.status.active')}
                       </span>
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {formatDate(period.startDate)} — {formatDate(period.endDate)}
+                    {formatDate(period.startDate)} —{' '}
+                    {formatDate(period.endDate)}
                   </p>
                   <div className="mt-1.5 flex flex-wrap gap-1.5">
                     {period.modules.map((pm) => (
@@ -141,10 +151,11 @@ export default function AdminPeriodsPage() {
                     className="rounded-lg p-2 text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
                     aria-label={t('admin.periods.aria.delete')}
                   >
-                    {deleteMut.isPending
-                      ? <Loader2 className="h-4 w-4 animate-spin" />
-                      : <Trash2 className="h-4 w-4" />
-                    }
+                    {deleteMut.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
               </motion.div>

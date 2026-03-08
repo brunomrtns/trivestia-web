@@ -59,7 +59,9 @@ function CourseForm({ initial, onSave, onCancel, loading }: CourseFormProps) {
   const handleSave = (data: FormData) => {
     return onSave({
       ...data,
-      deadline: data.deadline ? new Date(data.deadline).toISOString() : undefined
+      deadline: data.deadline
+        ? new Date(data.deadline).toISOString()
+        : undefined
     });
   };
 
@@ -69,7 +71,9 @@ function CourseForm({ initial, onSave, onCancel, loading }: CourseFormProps) {
       className="space-y-4 rounded-2xl border bg-card p-5 shadow-sm"
     >
       <div>
-        <label className="mb-1 block text-sm font-medium">{t('admin.courses.form.title')}</label>
+        <label className="mb-1 block text-sm font-medium">
+          {t('admin.courses.form.title')}
+        </label>
         <input
           placeholder={t('admin.courses.form.titlePlaceholder')}
           className="w-full rounded-lg border bg-background px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
@@ -82,7 +86,9 @@ function CourseForm({ initial, onSave, onCancel, loading }: CourseFormProps) {
         )}
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium">{t('admin.courses.form.description')}</label>
+        <label className="mb-1 block text-sm font-medium">
+          {t('admin.courses.form.description')}
+        </label>
         <textarea
           rows={3}
           placeholder={t('admin.courses.form.descriptionPlaceholder')}
@@ -116,7 +122,7 @@ function CourseForm({ initial, onSave, onCancel, loading }: CourseFormProps) {
           className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
         >
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-          Salvar
+          {t('admin.courses.page.saveButton')}
         </button>
         <button
           type="button"
@@ -162,9 +168,9 @@ export default function AdminCoursesPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['courses', slug] });
       setEditing(null);
-      toast.success('Curso atualizado!');
+      toast.success(t('admin.courses.toast.updated'));
     },
-    onError: () => toast.error('Erro ao atualizar curso.')
+    onError: () => toast.error(t('admin.courses.toast.updateError'))
   });
 
   // DELETE /courses/:id — Bearer ADMIN
@@ -172,18 +178,20 @@ export default function AdminCoursesPage() {
     mutationFn: (id: string) => adminEndpoints.deleteCourse(slug, id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['courses', slug] });
-      toast.success('Curso excluído.');
+      toast.success(t('admin.courses.toast.deleted'));
     },
-    onError: () => toast.error('Erro ao excluir curso.')
+    onError: () => toast.error(t('admin.courses.toast.deleteError'))
   });
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold">{t('admin.nav.manageCourses')}</h1>
+          <h1 className="text-3xl font-extrabold">
+            {t('admin.nav.manageCourses')}
+          </h1>
           <p className="text-muted-foreground">
-            Crie, edite e organize os cursos da plataforma.
+            {t('admin.courses.page.subtitle')}
           </p>
         </div>
         {!creating && (
@@ -192,7 +200,7 @@ export default function AdminCoursesPage() {
             className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
           >
             <Plus className="h-4 w-4" />
-            Novo curso
+            {t('admin.courses.page.newButton')}
           </button>
         )}
       </div>
@@ -242,7 +250,11 @@ export default function AdminCoursesPage() {
                     {course.deadline && (
                       <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1 mt-0.5">
                         <Calendar className="h-3 w-3" />
-                        Prazo: {new Date(course.deadline).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
+                        {t('admin.courses.page.deadlinePrefix')}{' '}
+                        {new Date(course.deadline).toLocaleString('pt-BR', {
+                          dateStyle: 'short',
+                          timeStyle: 'short'
+                        })}
                       </p>
                     )}
                   </div>
@@ -250,33 +262,33 @@ export default function AdminCoursesPage() {
                     <Link
                       to={`/t/${slug}/admin/courses/${course.id}/lessons`}
                       className="flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-2 text-xs font-semibold text-primary transition hover:bg-primary/20"
-                      aria-label="Gerenciar módulos e aulas"
+                      aria-label={t('admin.courses.aria.manage')}
                     >
                       <Settings2 className="h-3.5 w-3.5" />
-                      Gerenciar
+                      {t('admin.courses.page.manageButton')}
                     </Link>
                     <Link
                       to={`/t/${slug}/admin/courses/${course.id}/periods`}
                       className="flex items-center gap-1.5 rounded-lg bg-amber-500/10 px-3 py-2 text-xs font-semibold text-amber-600 dark:text-amber-400 transition hover:bg-amber-500/20"
-                      aria-label="Períodos avaliativos"
+                      aria-label={t('admin.courses.aria.periods')}
                     >
                       <Calendar className="h-3.5 w-3.5" />
-                      Períodos
+                      {t('admin.courses.page.periodsButton')}
                     </Link>
                     <button
                       onClick={() => setEditing(course)}
                       className="rounded-lg p-2 text-muted-foreground transition hover:bg-accent hover:text-foreground"
-                      aria-label="Editar"
+                      aria-label={t('admin.courses.aria.edit')}
                     >
                       <Pencil className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => {
-                        if (confirm(`Excluir "${course.title}"?`))
+                        if (confirm(t('admin.courses.confirm.delete', { title: course.title })))
                           deleteMut.mutate(course.id);
                       }}
                       className="rounded-lg p-2 text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
-                      aria-label="Excluir"
+                      aria-label={t('admin.courses.aria.delete')}
                     >
                       {deleteMut.isPending ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -293,7 +305,7 @@ export default function AdminCoursesPage() {
           {courses?.length === 0 && (
             <div className="py-16 text-center text-muted-foreground">
               <BookOpen className="mx-auto mb-4 h-12 w-12 opacity-30" />
-              <p>Nenhum curso criado ainda.</p>
+              <p>{t('admin.courses.page.empty')}</p>
             </div>
           )}
         </div>

@@ -1,4 +1,5 @@
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMemo } from 'react';
@@ -12,23 +13,21 @@ import {
   Loader2
 } from 'lucide-react';
 
-// ─── Schema ──────────────────────────────────────────
+// ─── Types ───────────────────────────────────────────
 
-const riskCalcSchema = z.object({
-  statement: z.string().min(5, 'Mínimo 5 caracteres'),
-  explanation: z.string().optional(),
-  difficulty: z.number().min(1).max(5).default(3),
-  weight: z.number().min(1).default(1),
-  balance: z.number().positive('Deve ser positivo'),
-  riskPercent: z.number().positive('Deve ser positivo').max(100, 'Máximo 100%'),
-  entryPrice: z.number().positive('Deve ser positivo'),
-  stopPrice: z.number().positive('Deve ser positivo'),
-  contractValue: z.number().positive('Deve ser positivo').default(1),
-  rounding: z.number().int().min(0).max(8).default(2),
-  tolerancePercent: z.number().min(0).max(100).default(5)
-});
-
-type RiskCalcFormData = z.infer<typeof riskCalcSchema>;
+interface RiskCalcFormData {
+  statement: string;
+  explanation?: string;
+  difficulty: number;
+  weight: number;
+  balance: number;
+  riskPercent: number;
+  entryPrice: number;
+  stopPrice: number;
+  contractValue: number;
+  rounding: number;
+  tolerancePercent: number;
+}
 
 interface Props {
   onSave: (data: {
@@ -50,6 +49,30 @@ export function RiskCalculatorQuestionForm({
   onCancel,
   loading
 }: Props) {
+  const { t } = useTranslation();
+
+  const riskCalcSchema = z.object({
+    statement: z.string().min(5, t('admin.riskCalcForm.validation.statement')),
+    explanation: z.string().optional(),
+    difficulty: z.number().min(1).max(5).default(3),
+    weight: z.number().min(1).default(1),
+    balance: z.number().positive(t('admin.riskCalcForm.validation.positive')),
+    riskPercent: z
+      .number()
+      .positive(t('admin.riskCalcForm.validation.positive'))
+      .max(100, t('admin.riskCalcForm.validation.maxRisk')),
+    entryPrice: z
+      .number()
+      .positive(t('admin.riskCalcForm.validation.positive')),
+    stopPrice: z.number().positive(t('admin.riskCalcForm.validation.positive')),
+    contractValue: z
+      .number()
+      .positive(t('admin.riskCalcForm.validation.positive'))
+      .default(1),
+    rounding: z.number().int().min(0).max(8).default(2),
+    tolerancePercent: z.number().min(0).max(100).default(5)
+  });
+
   const {
     register,
     handleSubmit,
@@ -116,11 +139,13 @@ export function RiskCalculatorQuestionForm({
     >
       {/* Statement */}
       <div>
-        <label className="mb-1 block text-sm font-medium">Enunciado</label>
+        <label className="mb-1 block text-sm font-medium">
+          {t('admin.riskCalcForm.statementLabel')}
+        </label>
         <textarea
           rows={3}
           className="w-full resize-none rounded-lg border bg-background px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
-          placeholder="Ex: Calcule o tamanho da posição para este cenário"
+          placeholder={t('admin.riskCalcForm.statementPlaceholder')}
           {...register('statement')}
         />
         {errors.statement && (
@@ -133,7 +158,7 @@ export function RiskCalculatorQuestionForm({
       {/* Explanation */}
       <div>
         <label className="mb-1 block text-sm font-medium">
-          Explicação (pós-resposta)
+          {t('admin.riskCalcForm.explanationLabel')}
         </label>
         <textarea
           rows={2}
@@ -146,7 +171,7 @@ export function RiskCalculatorQuestionForm({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="mb-1 block text-sm font-medium">
-            Dificuldade (1-5)
+            {t('admin.riskCalcForm.difficultyLabel')}
           </label>
           <input
             type="number"
@@ -157,7 +182,9 @@ export function RiskCalculatorQuestionForm({
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium">Peso</label>
+          <label className="mb-1 block text-sm font-medium">
+            {t('admin.riskCalcForm.weightLabel')}
+          </label>
           <input
             type="number"
             min={1}
@@ -169,13 +196,15 @@ export function RiskCalculatorQuestionForm({
 
       {/* Scenario Fields */}
       <div className="space-y-3">
-        <p className="text-sm font-semibold">Dados do cenário</p>
+        <p className="text-sm font-semibold">
+          {t('admin.riskCalcForm.scenarioTitle')}
+        </p>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="mb-1 flex items-center gap-1.5 text-sm font-medium">
               <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
-              Saldo da conta
+              {t('admin.riskCalcForm.balanceLabel')}
             </label>
             <input
               type="number"
@@ -193,7 +222,7 @@ export function RiskCalculatorQuestionForm({
           <div>
             <label className="mb-1 flex items-center gap-1.5 text-sm font-medium">
               <Percent className="h-3.5 w-3.5 text-muted-foreground" />
-              Risco (%)
+              {t('admin.riskCalcForm.riskPercentLabel')}
             </label>
             <input
               type="number"
@@ -213,7 +242,7 @@ export function RiskCalculatorQuestionForm({
           <div>
             <label className="mb-1 flex items-center gap-1.5 text-sm font-medium">
               <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
-              Preço de entrada
+              {t('admin.riskCalcForm.entryPriceLabel')}
             </label>
             <input
               type="number"
@@ -231,7 +260,7 @@ export function RiskCalculatorQuestionForm({
           <div>
             <label className="mb-1 flex items-center gap-1.5 text-sm font-medium">
               <TrendingDown className="h-3.5 w-3.5 text-muted-foreground" />
-              Preço do stop
+              {t('admin.riskCalcForm.stopPriceLabel')}
             </label>
             <input
               type="number"
@@ -251,7 +280,7 @@ export function RiskCalculatorQuestionForm({
           <div>
             <label className="mb-1 flex items-center gap-1.5 text-sm font-medium">
               <Info className="h-3.5 w-3.5 text-muted-foreground" />
-              Valor/contrato
+              {t('admin.riskCalcForm.contractValueLabel')}
             </label>
             <input
               type="number"
@@ -263,7 +292,7 @@ export function RiskCalculatorQuestionForm({
 
           <div>
             <label className="mb-1 block text-sm font-medium">
-              Casas decimais
+              {t('admin.riskCalcForm.roundingLabel')}
             </label>
             <input
               type="number"
@@ -276,7 +305,7 @@ export function RiskCalculatorQuestionForm({
 
           <div>
             <label className="mb-1 block text-sm font-medium">
-              Tolerância (%)
+              {t('admin.riskCalcForm.toleranceLabel')}
             </label>
             <input
               type="number"
@@ -299,13 +328,13 @@ export function RiskCalculatorQuestionForm({
       {expectedSize !== null && (
         <div className="rounded-xl border bg-muted/50 p-4">
           <p className="mb-2 text-xs font-medium text-muted-foreground">
-            Preview — resposta esperada
+            {t('admin.riskCalcForm.previewTitle')}
           </p>
           <div className="flex items-center gap-3">
             <Calculator className="h-5 w-5 text-primary" />
             <p className="text-2xl font-bold text-primary">{expectedSize}</p>
             <span className="text-sm text-muted-foreground">
-              contratos / lotes
+              {t('admin.riskCalcForm.previewContracts')}
             </span>
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
@@ -324,14 +353,14 @@ export function RiskCalculatorQuestionForm({
           className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
         >
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-          Salvar questão
+          {t('admin.riskCalcForm.saveButton')}
         </button>
         <button
           type="button"
           onClick={onCancel}
           className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-accent"
         >
-          Cancelar
+          {t('common.actions.cancel')}
         </button>
       </div>
     </form>

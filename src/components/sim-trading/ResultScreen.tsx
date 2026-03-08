@@ -1,4 +1,5 @@
 import { Trophy, XCircle, AlertTriangle, RotateCcw, Home } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import type {
   SimulationResult,
@@ -30,6 +31,7 @@ export function ResultScreen({
   const score = challengeResult?.score ?? 0;
   const maxScore = challengeResult?.maxScore ?? 100;
   const tamperDetected = challengeResult?.tamperDetected ?? false;
+  const { t } = useTranslation();
 
   const pnl = result.totalPnl;
   const pnlPct = result.totalPnlPercent; // já em %, ex: 5.23
@@ -60,16 +62,16 @@ export function ResultScreen({
       <div>
         <h2 className="text-xl font-bold">
           {mode === 'PRACTICE'
-            ? 'Sessão Concluída!'
+            ? t('sim.result.practice.title')
             : passed
-              ? 'Desafio Aprovado!'
-              : 'Desafio Não Aprovado'}
+              ? t('sim.result.challenge.approvedTitle')
+              : t('sim.result.challenge.failedTitle')}
         </h2>
         {mode === 'CHALLENGE' && (
           <p className="mt-1 text-sm text-muted-foreground">
             {passed
-              ? 'Parabéns! Você atingiu os critérios de aprovação.'
-              : 'Continue praticando e tente novamente.'}
+              ? t('sim.result.challenge.approvedSubtitle')
+              : t('sim.result.challenge.failedSubtitle')}
           </p>
         )}
       </div>
@@ -85,7 +87,9 @@ export function ResultScreen({
           >
             {score}/{maxScore}
           </div>
-          <div className="text-sm text-muted-foreground">pontos</div>
+          <div className="text-sm text-muted-foreground">
+            {t('sim.result.scoreUnit')}
+          </div>
         </div>
       )}
 
@@ -93,22 +97,22 @@ export function ResultScreen({
       <div className="grid w-full max-w-sm grid-cols-2 gap-3 rounded-lg border bg-card p-4 text-left">
         {[
           {
-            label: 'PnL',
+            label: t('sim.result.metrics.pnl'),
             value: `${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)} (${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(2)}%)`,
             color: pnl >= 0 ? 'text-emerald-400' : 'text-red-400'
           },
           {
-            label: 'Saldo Final',
+            label: t('sim.result.metrics.finalBalance'),
             value: `$${result.finalBalance.toFixed(2)}`,
             color: 'text-foreground'
           },
           {
-            label: 'Trades',
+            label: t('sim.result.metrics.trades'),
             value: `${result.tradeCount} (${result.winRate.toFixed(0)}% win)`,
             color: 'text-foreground'
           },
           {
-            label: 'Max Drawdown',
+            label: t('sim.result.metrics.maxDrawdown'),
             value: `${result.maxDrawdownPercent.toFixed(2)}%`,
             color:
               result.maxDrawdownPercent < 10
@@ -116,7 +120,7 @@ export function ResultScreen({
                 : 'text-red-400'
           },
           {
-            label: 'Sharpe',
+            label: t('sim.result.metrics.sharpe'),
             value: result.sharpeRatio.toFixed(2),
             color:
               result.sharpeRatio >= 1
@@ -126,7 +130,7 @@ export function ResultScreen({
                   : 'text-red-400'
           },
           {
-            label: 'Fees',
+            label: t('sim.result.metrics.fees'),
             value: `$${result.totalFees.toFixed(2)}`,
             color: 'text-orange-400'
           }
@@ -144,7 +148,7 @@ export function ResultScreen({
       {tamperDetected && (
         <div className="flex items-center gap-2 rounded-md border border-orange-500/30 bg-orange-500/10 px-4 py-2 text-xs text-orange-400">
           <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-          Divergência detectada — resultado calculado pelo servidor
+          {t('sim.result.tamperWarning')}
         </div>
       )}
 
@@ -156,7 +160,7 @@ export function ResultScreen({
             className="flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition hover:bg-accent"
           >
             <RotateCcw className="h-4 w-4" />
-            Tentar Novamente
+            {t('sim.result.retryButton')}
           </button>
         )}
         {onGoHome && (
@@ -165,7 +169,9 @@ export function ResultScreen({
             className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
           >
             <Home className="h-4 w-4" />
-            {mode === 'PRACTICE' ? 'Nova Sessão' : 'Voltar'}
+            {mode === 'PRACTICE'
+              ? t('sim.result.practice.newSessionButton')
+              : t('common.actions.back')}
           </button>
         )}
       </div>

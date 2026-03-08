@@ -1,5 +1,6 @@
 import { Menu, LogOut, User as UserIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/features/auth/auth.store';
 
 interface SuperTopbarProps {
@@ -9,6 +10,7 @@ interface SuperTopbarProps {
 export function SuperTopbar({ onMenuClick }: SuperTopbarProps) {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleLogout = () => {
     logout();
@@ -20,7 +22,7 @@ export function SuperTopbar({ onMenuClick }: SuperTopbarProps) {
       <button
         onClick={onMenuClick}
         className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-        aria-label="Menu"
+        aria-label={t('super.layout.aria.menu')}
       >
         <Menu className="h-5 w-5" />
       </button>
@@ -35,7 +37,7 @@ export function SuperTopbar({ onMenuClick }: SuperTopbarProps) {
         <button
           onClick={handleLogout}
           className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-          aria-label="Sair"
+          aria-label={t('super.layout.aria.logout')}
         >
           <LogOut className="h-5 w-5" />
         </button>

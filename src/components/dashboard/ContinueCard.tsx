@@ -23,7 +23,11 @@ interface ContinueCardProps {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function ContinueCard({ data, slug, hasAnyCompleted }: ContinueCardProps) {
+export function ContinueCard({
+  data,
+  slug,
+  hasAnyCompleted
+}: ContinueCardProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { hasContinuation, course, module, lesson, next } = data;
@@ -40,7 +44,10 @@ export function ContinueCard({ data, slug, hasAnyCompleted }: ContinueCardProps)
         );
       } else if (next.kind === 'ACTIVITY' && next.activityId) {
         navigate(
-          tenantPath(slug, `/app/lessons/${lesson.id}/activities/${next.activityId}`)
+          tenantPath(
+            slug,
+            `/app/lessons/${lesson.id}/activities/${next.activityId}`
+          )
         );
       }
     };
@@ -103,7 +110,9 @@ export function ContinueCard({ data, slug, hasAnyCompleted }: ContinueCardProps)
           <Trophy className="h-6 w-6 text-yellow-500" />
         </div>
         <div>
-          <p className="font-semibold">{t('app.dashboard.continueCard.allDone')}</p>
+          <p className="font-semibold">
+            {t('app.dashboard.continueCard.allDone')}
+          </p>
           <p className="text-sm text-muted-foreground">
             {t('app.dashboard.continueCard.allDoneSubtitle')}
           </p>
@@ -124,7 +133,9 @@ export function ContinueCard({ data, slug, hasAnyCompleted }: ContinueCardProps)
           <BookOpen className="h-6 w-6 text-primary" />
         </div>
         <div>
-          <p className="font-semibold">{t('app.dashboard.continueCard.startFirst')}</p>
+          <p className="font-semibold">
+            {t('app.dashboard.continueCard.startFirst')}
+          </p>
           <p className="text-sm text-muted-foreground">
             {t('app.dashboard.continueCard.startFirstSubtitle')}
           </p>
@@ -134,7 +145,8 @@ export function ContinueCard({ data, slug, hasAnyCompleted }: ContinueCardProps)
         to={tenantPath(slug, '/app/courses')}
         className="shrink-0 flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 active:scale-95 transition-all"
       >
-        {t('app.dashboard.continueCard.viewCourses')} <ArrowRight className="h-4 w-4" />
+        {t('app.dashboard.continueCard.viewCourses')}{' '}
+        <ArrowRight className="h-4 w-4" />
       </Link>
     </motion.div>
   );

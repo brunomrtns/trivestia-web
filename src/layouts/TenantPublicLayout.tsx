@@ -1,4 +1,5 @@
 import { Link, Outlet, useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { BookOpen, LayoutDashboard, LogOut } from 'lucide-react';
 import { useAuthStore } from '@/features/auth/auth.store';
 import { useTenant } from '@/hooks/useTenant';
@@ -11,6 +12,7 @@ export function TenantPublicLayout() {
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const { tenant } = useTenant();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const base = `/t/${tenantSlug}`;
 
@@ -32,14 +34,14 @@ export function TenantPublicLayout() {
             ) : (
               <BookOpen className="h-6 w-6 text-primary" />
             )}
-            <span>{tenant?.name ?? 'Trivestia'}</span>
+            <span>{tenant?.name ?? t('common.brandName')}</span>
           </Link>
           <nav className="flex items-center gap-6">
             <Link
               to={`${base}/courses`}
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
-              Cursos
+              {t('workspace.tenantPublic.nav.courses')}
             </Link>
             {isAuthenticated ? (
               <div className="flex items-center gap-3">
@@ -51,13 +53,13 @@ export function TenantPublicLayout() {
                   className="flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
                 >
                   <LayoutDashboard className="h-4 w-4" />
-                  Dashboard
+                  {t('workspace.tenantPublic.nav.dashboard')}
                 </Link>
                 <button
                   onClick={handleLogout}
                   className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                  aria-label="Sair"
-                  title="Sair"
+                  aria-label={t('common.aria.logout')}
+                  title={t('common.aria.logout')}
                 >
                   <LogOut className="h-4 w-4" />
                 </button>
@@ -67,7 +69,7 @@ export function TenantPublicLayout() {
                 to={`${base}/login`}
                 className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
               >
-                Entrar
+                {t('workspace.tenantPublic.nav.login')}
               </Link>
             )}
           </nav>
@@ -77,8 +79,8 @@ export function TenantPublicLayout() {
         <Outlet />
       </main>
       <footer className="border-t py-8 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} {tenant?.name ?? 'Trivestia'}. Todos os
-        direitos reservados.
+        © {new Date().getFullYear()} {tenant?.name ?? t('common.brandName')}.{' '}
+        {t('workspace.tenantPublic.footer')}
       </footer>
     </div>
   );

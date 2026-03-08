@@ -24,7 +24,7 @@ import { SimTradingTerminal } from '@/components/sim-trading/SimTradingTerminal'
 import { ChallengeBriefingScreen } from '@/components/sim-trading/ChallengeBriefingScreen';
 import { HelpDrawer } from '@/components/sim-trading/HelpDrawer';
 import { useTutorialProgress } from '@/components/sim-trading/useTutorialProgress';
-import { getActivityTypeLabel, formatPercentage } from '@/lib/utils';
+import { formatPercentage } from '@/lib/utils';
 import type { Answer, SubmissionResult, SubmissionResponse } from '@/types/api';
 
 export default function ActivityPlayerPage() {
@@ -44,7 +44,11 @@ export default function ActivityPlayerPage() {
 
   // GET /lessons/:lessonId/activities/:activityId — Bearer ANY
   // staleTime:0 garante que novas questões criadas pelo admin aparecem sem F5
-  const { data: activity, isLoading, isFetching } = useQuery({
+  const {
+    data: activity,
+    isLoading,
+    isFetching
+  } = useQuery({
     queryKey: ['activity', slug, lessonId, activityId],
     queryFn: () => learningEndpoints.getActivity(slug, lessonId!, activityId!),
     enabled: !!lessonId && !!activityId,
@@ -60,7 +64,9 @@ export default function ActivityPlayerPage() {
     onSuccess: (data) => {
       setResult(data);
       // Força reload da revisão após submissão
-      qc.invalidateQueries({ queryKey: ['submission-review', slug, activityId] });
+      qc.invalidateQueries({
+        queryKey: ['submission-review', slug, activityId]
+      });
       toast.success(t('app.activity.toast.submitSuccess'));
     },
     onError: () => {
@@ -76,7 +82,8 @@ export default function ActivityPlayerPage() {
       try {
         return await progressEndpoints.getSubmission(slug, activityId!);
       } catch (err: unknown) {
-        const status = (err as { response?: { status?: number } })?.response?.status;
+        const status = (err as { response?: { status?: number } })?.response
+          ?.status;
         if (status === 404) return null; // sem submissão ainda
         throw err;
       }
@@ -97,7 +104,12 @@ export default function ActivityPlayerPage() {
 
   // Aguarda: carregamento da atividade E verificação de submissão existente
   // Inclui caso: refetch em background com 0 questões no cache (evita currentQuestion=undefined)
-  if (isLoading || !activity || (!result && loadingReview) || (isFetching && activity.questions.length === 0)) {
+  if (
+    isLoading ||
+    !activity ||
+    (!result && loadingReview) ||
+    (isFetching && activity.questions.length === 0)
+  ) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -145,11 +157,12 @@ export default function ActivityPlayerPage() {
 
   // Tela de resultado: exibe se acabou de submeter OU se já tinha submissão anterior
   // submissionReview=null significa sem submissão; submissionReview=object significa já submeteu
-  if (result !== null || (submissionReview != null)) {
+  if (result !== null || submissionReview != null) {
     const score = result?.score ?? submissionReview?.score ?? 0;
     const maxScore = result?.maxScore ?? submissionReview?.maxScore ?? 1;
     const pct =
-      result?.percentage ?? (maxScore > 0 ? Math.round((score / maxScore) * 100) : 0);
+      result?.percentage ??
+      (maxScore > 0 ? Math.round((score / maxScore) * 100) : 0);
     const passed = pct >= 60;
 
     return (
@@ -171,7 +184,9 @@ export default function ActivityPlayerPage() {
             {formatPercentage(pct)}
           </h1>
           <p className="mb-1 text-lg font-semibold">
-            {passed ? t('app.activity.result.passed') : t('app.activity.result.failed')}
+            {passed
+              ? t('app.activity.result.passed')
+              : t('app.activity.result.failed')}
           </p>
           <p className="mb-8 text-muted-foreground">
             {t('app.activity.result.scoreLabel', { score, maxScore })}
@@ -187,7 +202,9 @@ export default function ActivityPlayerPage() {
 
         {submissionReview && !loadingReview && (
           <div className="space-y-4">
-            <h2 className="text-lg font-bold">{t('app.activity.result.reviewTitle')}</h2>
+            <h2 className="text-lg font-bold">
+              {t('app.activity.result.reviewTitle')}
+            </h2>
 
             {/* Política: NEVER */}
             {submissionReview.reviewPolicy === 'NEVER' && (
@@ -205,7 +222,9 @@ export default function ActivityPlayerPage() {
                   <span>
                     {t('app.activity.result.policyAfterDate', {
                       date: submissionReview.reviewAvailableAt
-                        ? new Date(submissionReview.reviewAvailableAt).toLocaleString('pt-BR')
+                        ? new Date(
+                            submissionReview.reviewAvailableAt
+                          ).toLocaleString('pt-BR')
                         : t('app.activity.result.policyDateFallback')
                     })}
                   </span>
@@ -236,8 +255,14 @@ export default function ActivityPlayerPage() {
                       )}
                       <span className="text-xs font-semibold text-muted-foreground">
                         {t('app.activity.result.questionN', { n: idx + 1 })} ·{' '}
-                        {r.isCorrect ? t('app.activity.result.correct') : t('app.activity.result.incorrect')} ·{' '}
-                        {t('app.activity.result.questionScore', { earned: r.earnedScore, weight: r.question.weight })}
+                        {r.isCorrect
+                          ? t('app.activity.result.correct')
+                          : t('app.activity.result.incorrect')}{' '}
+                        ·{' '}
+                        {t('app.activity.result.questionScore', {
+                          earned: r.earnedScore,
+                          weight: r.question.weight
+                        })}
                       </span>
                     </div>
 
@@ -284,7 +309,9 @@ export default function ActivityPlayerPage() {
                     {/* Explicação */}
                     {r.question.explanation && (
                       <div className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-sm text-primary/90">
-                        <span className="mr-1 font-semibold">{t('app.activity.result.explanationLabel')}</span>
+                        <span className="mr-1 font-semibold">
+                          {t('app.activity.result.explanationLabel')}
+                        </span>
                         {r.question.explanation}
                       </div>
                     )}
@@ -361,7 +388,7 @@ export default function ActivityPlayerPage() {
       {/* Header */}
       <div>
         <div className="mb-2 flex items-center justify-between text-sm text-muted-foreground">
-          <span>{getActivityTypeLabel(activity.type)}</span>
+          <span>{t(`common.activityTypes.${activity.type}`, { defaultValue: activity.type })}</span>
           <span>
             {currentIndex + 1}/{totalQuestions}
           </span>

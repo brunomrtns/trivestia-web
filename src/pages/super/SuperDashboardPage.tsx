@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { Building2, Users, BookOpen, Activity } from 'lucide-react';
 import { superadminEndpoints } from '@/services/endpoints/superadmin.endpoints';
 
@@ -29,6 +30,7 @@ function StatCard({
 }
 
 export default function SuperDashboardPage() {
+  const { t } = useTranslation();
   const { data: stats, isLoading } = useQuery({
     queryKey: ['super', 'stats'],
     queryFn: () => superadminEndpoints.stats()
@@ -38,11 +40,9 @@ export default function SuperDashboardPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">
-          Visão Geral da Plataforma
+          {t('super.dashboard.title')}
         </h1>
-        <p className="text-muted-foreground">
-          Painel de controle do Super Admin — todas as escolas e usuários.
-        </p>
+        <p className="text-muted-foreground">{t('super.dashboard.subtitle')}</p>
       </div>
 
       {isLoading ? (
@@ -58,25 +58,25 @@ export default function SuperDashboardPage() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
             icon={Building2}
-            label="Total de Escolas"
+            label={t('super.dashboard.stats.totalTenants')}
             value={stats.tenants.total}
             color="bg-purple-100 text-purple-600"
           />
           <StatCard
             icon={Activity}
-            label="Escolas Ativas"
+            label={t('super.dashboard.stats.activeTenants')}
             value={stats.tenants.active}
             color="bg-green-100 text-green-600"
           />
           <StatCard
             icon={Users}
-            label="Usuários"
+            label={t('super.dashboard.stats.users')}
             value={stats.users}
             color="bg-blue-100 text-blue-600"
           />
           <StatCard
             icon={BookOpen}
-            label="Cursos"
+            label={t('super.dashboard.stats.courses')}
             value={stats.courses}
             color="bg-amber-100 text-amber-600"
           />

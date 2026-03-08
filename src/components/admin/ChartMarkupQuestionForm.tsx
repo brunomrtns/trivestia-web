@@ -2,28 +2,24 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useState, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Crosshair, Eraser, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// ─── Schema ──────────────────────────────────────────
+// ─── Schema ──────────────────────────
 
-const chartMarkupSchema = z.object({
-  statement: z.string().min(5, 'Mínimo 5 caracteres'),
-  explanation: z.string().optional(),
-  difficulty: z.number().min(1).max(5).default(3),
-  weight: z.number().min(1).default(1),
-  imageUrl: z.string().url('URL inválida'),
-  zoneType: z.enum(['SUPPORT', 'RESISTANCE', 'SUPPLY', 'DEMAND']),
-  threshold: z.number().min(0.1).max(1).default(0.5),
-  expected: z.object({
-    x1: z.number().min(0).max(1),
-    y1: z.number().min(0).max(1),
-    x2: z.number().min(0).max(1),
-    y2: z.number().min(0).max(1)
-  })
-});
+// (moved inside component to allow useTranslation)
 
-type ChartMarkupFormData = z.infer<typeof chartMarkupSchema>;
+interface ChartMarkupFormData {
+  statement: string;
+  explanation?: string;
+  difficulty: number;
+  weight: number;
+  imageUrl: string;
+  zoneType: 'SUPPORT' | 'RESISTANCE' | 'SUPPLY' | 'DEMAND';
+  threshold: number;
+  expected: { x1: number; y1: number; x2: number; y2: number };
+}
 
 interface Props {
   onSave: (data: {
@@ -41,6 +37,25 @@ interface Props {
 // ─── Component ───────────────────────────────────────
 
 export function ChartMarkupQuestionForm({ onSave, onCancel, loading }: Props) {
+  const { t } = useTranslation();
+  const chartMarkupSchema = z.object({
+    statement: z
+      .string()
+      .min(5, t('admin.chartMarkupForm.validation.statement')),
+    explanation: z.string().optional(),
+    difficulty: z.number().min(1).max(5).default(3),
+    weight: z.number().min(1).default(1),
+    imageUrl: z.string().url(t('admin.chartMarkupForm.validation.imageUrl')),
+    zoneType: z.enum(['SUPPORT', 'RESISTANCE', 'SUPPLY', 'DEMAND']),
+    threshold: z.number().min(0.1).max(1).default(0.5),
+    expected: z.object({
+      x1: z.number().min(0).max(1),
+      y1: z.number().min(0).max(1),
+      x2: z.number().min(0).max(1),
+      y2: z.number().min(0).max(1)
+    })
+  });
+
   const containerRef = useRef<HTMLDivElement>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
@@ -175,11 +190,13 @@ export function ChartMarkupQuestionForm({ onSave, onCancel, loading }: Props) {
     >
       {/* Statement */}
       <div>
-        <label className="mb-1 block text-sm font-medium">Enunciado</label>
+        <label className="mb-1 block text-sm font-medium">
+          {t('admin.chartMarkupForm.statementLabel')}
+        </label>
         <textarea
           rows={3}
           className="w-full resize-none rounded-lg border bg-background px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
-          placeholder="Ex: Marque a zona de suporte principal neste gráfico"
+          placeholder={t('admin.chartMarkupForm.statementPlaceholder')}
           {...register('statement')}
         />
         {errors.statement && (
@@ -192,7 +209,7 @@ export function ChartMarkupQuestionForm({ onSave, onCancel, loading }: Props) {
       {/* Explanation */}
       <div>
         <label className="mb-1 block text-sm font-medium">
-          Explicação (pós-resposta)
+          {t('admin.chartMarkupForm.explanationLabel')}
         </label>
         <textarea
           rows={2}
@@ -205,7 +222,7 @@ export function ChartMarkupQuestionForm({ onSave, onCancel, loading }: Props) {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="mb-1 block text-sm font-medium">
-            Dificuldade (1-5)
+            {t('admin.chartMarkupForm.difficultyLabel')}
           </label>
           <input
             type="number"
@@ -216,7 +233,9 @@ export function ChartMarkupQuestionForm({ onSave, onCancel, loading }: Props) {
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium">Peso</label>
+          <label className="mb-1 block text-sm font-medium">
+            {t('admin.chartMarkupForm.weightLabel')}
+          </label>
           <input
             type="number"
             min={1}
@@ -229,12 +248,12 @@ export function ChartMarkupQuestionForm({ onSave, onCancel, loading }: Props) {
       {/* Image URL */}
       <div>
         <label className="mb-1 block text-sm font-medium">
-          URL da imagem do gráfico
+          {t('admin.chartMarkupForm.imageUrlLabel')}
         </label>
         <input
           type="url"
           className="w-full rounded-lg border bg-background px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
-          placeholder="https://exemplo.com/chart.png"
+          placeholder={t('admin.chartMarkupForm.imageUrlPlaceholder')}
           {...register('imageUrl')}
           onChange={(e) => {
             register('imageUrl').onChange(e);
@@ -252,20 +271,30 @@ export function ChartMarkupQuestionForm({ onSave, onCancel, loading }: Props) {
       {/* Zone type + threshold */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="mb-1 block text-sm font-medium">Tipo de zona</label>
+          <label className="mb-1 block text-sm font-medium">
+            {t('admin.chartMarkupForm.zoneTypeLabel')}
+          </label>
           <select
             className="w-full rounded-lg border bg-background px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
             {...register('zoneType')}
           >
-            <option value="SUPPORT">Suporte</option>
-            <option value="RESISTANCE">Resistência</option>
-            <option value="SUPPLY">Zona de Oferta</option>
-            <option value="DEMAND">Zona de Demanda</option>
+            <option value="SUPPORT">
+              {t('admin.chartMarkupForm.zoneTypes.support')}
+            </option>
+            <option value="RESISTANCE">
+              {t('admin.chartMarkupForm.zoneTypes.resistance')}
+            </option>
+            <option value="SUPPLY">
+              {t('admin.chartMarkupForm.zoneTypes.supply')}
+            </option>
+            <option value="DEMAND">
+              {t('admin.chartMarkupForm.zoneTypes.demand')}
+            </option>
           </select>
         </div>
         <div>
           <label className="mb-1 block text-sm font-medium">
-            Threshold IoU (0.1 – 1.0)
+            {t('admin.chartMarkupForm.thresholdLabel')}
           </label>
           <input
             type="number"
@@ -286,7 +315,7 @@ export function ChartMarkupQuestionForm({ onSave, onCancel, loading }: Props) {
       {/* Visual zone editor */}
       <div className="space-y-2">
         <label className="block text-sm font-medium">
-          Gabarito — desenhe a zona esperada
+          {t('admin.chartMarkupForm.answerZoneLabel')}
         </label>
 
         <div
@@ -306,7 +335,7 @@ export function ChartMarkupQuestionForm({ onSave, onCancel, loading }: Props) {
           {previewUrl || imageUrl ? (
             <img
               src={previewUrl || imageUrl}
-              alt="Preview"
+              alt={t('admin.questions.form.previewAlt')}
               className="block w-full h-auto pointer-events-none"
               draggable={false}
               onLoad={() => setImageLoaded(true)}
@@ -314,7 +343,7 @@ export function ChartMarkupQuestionForm({ onSave, onCancel, loading }: Props) {
             />
           ) : (
             <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">
-              Cole a URL acima para carregar a imagem
+              {t('admin.chartMarkupForm.imagePrompt')}
             </div>
           )}
 
@@ -363,7 +392,9 @@ export function ChartMarkupQuestionForm({ onSave, onCancel, loading }: Props) {
               )}
             >
               <Crosshair className="h-3.5 w-3.5" />
-              {drawMode ? 'Desenhando...' : 'Desenhar gabarito'}
+              {drawMode
+                ? t('admin.chartMarkupForm.drawing')
+                : t('admin.chartMarkupForm.drawButton')}
             </button>
             {hasZone && (
               <button
@@ -372,7 +403,7 @@ export function ChartMarkupQuestionForm({ onSave, onCancel, loading }: Props) {
                 className="flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent"
               >
                 <Eraser className="h-3.5 w-3.5" />
-                Limpar
+                {t('admin.chartMarkupForm.clearButton')}
               </button>
             )}
           </div>
@@ -388,7 +419,7 @@ export function ChartMarkupQuestionForm({ onSave, onCancel, loading }: Props) {
 
         {errors.expected && (
           <p className="text-xs text-destructive">
-            Desenhe a zona esperada no gráfico
+            {t('admin.chartMarkupForm.zoneError')}
           </p>
         )}
       </div>
@@ -401,14 +432,14 @@ export function ChartMarkupQuestionForm({ onSave, onCancel, loading }: Props) {
           className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
         >
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-          Salvar questão
+          {t('admin.chartMarkupForm.saveButton')}
         </button>
         <button
           type="button"
           onClick={onCancel}
           className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-accent"
         >
-          Cancelar
+          {t('common.actions.cancel')}
         </button>
       </div>
     </form>
