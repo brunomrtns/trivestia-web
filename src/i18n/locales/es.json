@@ -708,7 +708,9 @@
         "title": "Comienza tu viaje hoy",
         "subtitle": "Accede gratis y descubre cómo invertir de forma inteligente.",
         "button": "Crear cuenta gratis"
-      }
+      },
+      "titlePrefix": "Invierte en tu",
+      "titleHighlight": "conocimiento"
     },
     "createSchool": {
       "title": "Crea tu escuela",

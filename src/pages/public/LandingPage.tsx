@@ -69,9 +69,9 @@ export default function LandingPage() {
               {t('public.landing.badge')}
             </span>
             <h1 className="mb-6 text-5xl font-extrabold leading-tight tracking-tight lg:text-7xl">
-              Invista no seu{' '}
+              {t('public.landing.titlePrefix')}{' '}
               <span className="bg-gradient-to-r from-primary to-violet-400 bg-clip-text text-transparent">
-                conhecimento
+                {t('public.landing.titleHighlight')}
               </span>
             </h1>
             <p className="mx-auto mb-10 max-w-2xl text-xl text-muted-foreground">

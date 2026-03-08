@@ -708,7 +708,9 @@
         "title": "Start your journey today",
         "subtitle": "Access for free and discover how to invest intelligently.",
         "button": "Create free account"
-      }
+      },
+      "titlePrefix": "Invest in your",
+      "titleHighlight": "knowledge"
     },
     "createSchool": {
       "title": "Create your school",

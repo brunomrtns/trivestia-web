@@ -708,7 +708,9 @@
         "title": "Comece sua jornada hoje",
         "subtitle": "Acesse gratuitamente e descubra como investir com inteligência.",
         "button": "Criar conta grátis"
-      }
+      },
+      "titlePrefix": "Invista no seu",
+      "titleHighlight": "conhecimento"
     },
     "createSchool": {
       "title": "Criar sua escola",
