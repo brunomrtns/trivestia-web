@@ -177,12 +177,17 @@ export function SimTradingTerminal({
                 </div>
                 <div className="text-left">
                   <div className="text-base font-bold">
-                    {isPausedAtStart ? t('sim.terminal.overlay.startTitle') : t('sim.terminal.overlay.continueTitle')}
+                    {isPausedAtStart
+                      ? t('sim.terminal.overlay.startTitle')
+                      : t('sim.terminal.overlay.continueTitle')}
                   </div>
                   <div className="text-xs text-muted-foreground">
                     {isPausedAtStart
                       ? t('sim.terminal.overlay.startHint')
-                      : t('sim.terminal.overlay.pausedHint', { visible: visibleCount, total: candles.length })}
+                      : t('sim.terminal.overlay.pausedHint', {
+                          visible: visibleCount,
+                          total: candles.length
+                        })}
                   </div>
                 </div>
               </button>

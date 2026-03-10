@@ -7,7 +7,8 @@ import type {
   PracticeScenarioRequest,
   PracticeScenarioResponse,
   PracticeSubmitResponse,
-  PracticeHistoryResponse
+  PracticeHistoryResponse,
+  PracticeSessionData
 } from '@/types/api';
 
 export const simulationEndpoints = {
@@ -61,5 +62,11 @@ export const simulationEndpoints = {
       .get<PracticeHistoryResponse>('/sim/practice/history', {
         params: { page, limit }
       })
+      .then((r) => r.data),
+
+  /** GET /t/:slug/sim/practice/sessions/:sessionId */
+  getSession: (slug: string, sessionId: string) =>
+    apiTenant(slug)
+      .get<PracticeSessionData>(`/sim/practice/sessions/${sessionId}`)
       .then((r) => r.data)
 };

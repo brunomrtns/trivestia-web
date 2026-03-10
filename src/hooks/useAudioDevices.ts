@@ -16,7 +16,8 @@ export interface UseAudioDevicesReturn {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const isMediaDevicesSupported =
-  typeof navigator !== 'undefined' && !!navigator?.mediaDevices?.enumerateDevices;
+  typeof navigator !== 'undefined' &&
+  !!navigator?.mediaDevices?.enumerateDevices;
 
 /**
  * Executa `enumerateDevices` e devolve os arrays de mics/speakers.
@@ -81,7 +82,11 @@ export function useAudioDevices(): UseAudioDevicesReturn {
   const enumerate = useCallback(async (): Promise<boolean> => {
     if (!isMediaDevicesSupported) return false;
     try {
-      const { microphones: mics, speakers: spks, hasLabels } = await readDevices();
+      const {
+        microphones: mics,
+        speakers: spks,
+        hasLabels
+      } = await readDevices();
       setMicrophones(mics);
       setSpeakers(spks);
       return hasLabels;
@@ -122,7 +127,10 @@ export function useAudioDevices(): UseAudioDevicesReturn {
     const handleDeviceChange = () => void enumerate();
     navigator.mediaDevices.addEventListener('devicechange', handleDeviceChange);
     return () => {
-      navigator.mediaDevices.removeEventListener('devicechange', handleDeviceChange);
+      navigator.mediaDevices.removeEventListener(
+        'devicechange',
+        handleDeviceChange
+      );
     };
   }, [enumerate]);
 

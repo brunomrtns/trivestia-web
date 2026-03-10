@@ -14,4 +14,5 @@ export { scoreSimulation } from './scoring.js';
 export { computeStateHash, stableStringify } from './hash.js';
 // ─── Validation ───────────────────────────────────────
 export { validateEvents } from './validation.js';
+export { calculateMA, calculateEMA, calculateRSI } from './indicators.js';
 //# sourceMappingURL=index.js.map

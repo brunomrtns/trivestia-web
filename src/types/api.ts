@@ -564,7 +564,7 @@ export interface DashboardLabSummaryDTO {
 // ─── Goals / Streak DTOs ─────────────────────────────────────────────────────
 
 export interface WeekDayEntry {
-  date: string;   // 'YYYY-MM-DD'
+  date: string; // 'YYYY-MM-DD'
   count: number;
   hit: boolean;
 }
@@ -601,20 +601,33 @@ export interface AnnouncementItem {
   isRead: boolean;
 }
 
-export interface AnnouncementAdminItem extends Omit<AnnouncementItem, 'isRead'> {
+export interface AnnouncementAdminItem extends Omit<
+  AnnouncementItem,
+  'isRead'
+> {
   isExpired: boolean;
   readCount: number;
 }
 
 export interface AnnouncementListDTO {
   data: AnnouncementItem[];
-  pagination: { page: number; pageSize: number; total: number; totalPages: number };
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
   unreadCount: number;
 }
 
 export interface AnnouncementAdminListDTO {
   data: AnnouncementAdminItem[];
-  pagination: { page: number; pageSize: number; total: number; totalPages: number };
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 export interface AnnouncementUnreadCountDTO {
@@ -758,6 +771,13 @@ export interface PracticeHistoryResponse {
     total: number;
     pages: number;
   };
+}
+
+export interface PracticeSessionData {
+  id: string;
+  createdAt: string;
+  candles: Candle[];
+  result: SimulationResult | null;
 }
 
 // ─── Super Admin Types ────────────────────────────────────────────────────────

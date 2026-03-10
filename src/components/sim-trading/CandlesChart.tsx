@@ -5,27 +5,42 @@ import {
   ColorType,
   CrosshairMode,
   CandlestickSeries,
+  LineSeries,
   type IChartApi,
   type ISeriesApi,
   type CandlestickData,
+  type LineData,
   type Time
 } from 'lightweight-charts';
 import { Maximize2 } from 'lucide-react';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import { cn } from '@/lib/utils';
 import type { Candle } from '@/types/api';
+import type { IndicatorSeries } from './useIndicators';
 import { useAutoZoomTimeScale } from './useAutoZoomTimeScale';
 
 interface CandlesChartProps {
   candles: Candle[];
   visibleCount: number;
+  maSeries?: IndicatorSeries | null;
+  emaSeries?: IndicatorSeries | null;
+  rsiSeries?: number[] | null;
 }
 
-export function CandlesChart({ candles, visibleCount }: CandlesChartProps) {
+export function CandlesChart({
+  candles,
+  visibleCount,
+  maSeries,
+  emaSeries,
+  rsiSeries
+}: CandlesChartProps) {
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
+  const maSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
+  const emaSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
+  const rsiSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
 
   /**
    * chart também fica em estado (além da ref) para que o hook
@@ -113,6 +128,9 @@ export function CandlesChart({ candles, visibleCount }: CandlesChartProps) {
       c.remove();
       chartRef.current = null;
       seriesRef.current = null;
+      maSeriesRef.current = null;
+      emaSeriesRef.current = null;
+      rsiSeriesRef.current = null;
       setChart(null);
     };
   }, []);
@@ -126,20 +144,110 @@ export function CandlesChart({ candles, visibleCount }: CandlesChartProps) {
   useEffect(() => {
     if (!seriesRef.current || candles.length === 0) return;
 
-    const data: CandlestickData[] = candles.slice(0, visibleCount).map((c, i) => ({
-      // c.time está em ms; lightweight-charts precisa de segundos ascendentes.
-      // Fallback sintético caso time seja falsy/NaN (ex: candle sem startTimestamp).
-      time: (c.time
-        ? Math.floor(c.time / 1000)
-        : 1_700_000_000 + i * 60) as Time,
-      open: c.open,
-      high: c.high,
-      low: c.low,
-      close: c.close
-    }));
+    const data: CandlestickData[] = candles
+      .slice(0, visibleCount)
+      .map((c, i) => ({
+        // c.time está em ms; lightweight-charts precisa de segundos ascendentes.
+        // Fallback sintético caso time seja falsy/NaN (ex: candle sem startTimestamp).
+        time: (c.time
+          ? Math.floor(c.time / 1000)
+          : 1_700_000_000 + i * 60) as Time,
+        open: c.open,
+        high: c.high,
+        low: c.low,
+        close: c.close
+      }));
 
     seriesRef.current.setData(data);
   }, [candles, visibleCount]);
+
+  // ─── Atualiza séries MA / EMA ───────────────────────────────────────────
+
+  useEffect(() => {
+    const c = chartRef.current;
+    if (!c) return;
+
+    const times = candles
+      .slice(0, visibleCount)
+      .map(
+        (cd, i) =>
+          (cd.time
+            ? Math.floor(cd.time / 1000)
+            : 1_700_000_000 + i * 60) as Time
+      );
+
+    // MA
+    if (maSeries) {
+      if (!maSeriesRef.current) {
+        maSeriesRef.current = c.addSeries(LineSeries, {
+          color: maSeries.color,
+          lineWidth: 1,
+          priceLineVisible: false,
+          lastValueVisible: false
+        });
+      } else {
+        maSeriesRef.current.applyOptions({ color: maSeries.color });
+      }
+      const maData: LineData[] = maSeries.values
+        .slice(0, visibleCount)
+        .map((v, i) => ({ time: times[i], value: v }))
+        .filter((p) => !isNaN(p.value));
+      maSeriesRef.current.setData(maData);
+    } else if (maSeriesRef.current) {
+      c.removeSeries(maSeriesRef.current);
+      maSeriesRef.current = null;
+    }
+
+    // EMA
+    if (emaSeries) {
+      if (!emaSeriesRef.current) {
+        emaSeriesRef.current = c.addSeries(LineSeries, {
+          color: emaSeries.color,
+          lineWidth: 1,
+          priceLineVisible: false,
+          lastValueVisible: false
+        });
+      } else {
+        emaSeriesRef.current.applyOptions({ color: emaSeries.color });
+      }
+      const emaData: LineData[] = emaSeries.values
+        .slice(0, visibleCount)
+        .map((v, i) => ({ time: times[i], value: v }))
+        .filter((p) => !isNaN(p.value));
+      emaSeriesRef.current.setData(emaData);
+    } else if (emaSeriesRef.current) {
+      c.removeSeries(emaSeriesRef.current);
+      emaSeriesRef.current = null;
+    }
+
+    // RSI (painel separado — pane 1)
+    if (rsiSeries) {
+      if (!rsiSeriesRef.current) {
+        rsiSeriesRef.current = c.addSeries(
+          LineSeries,
+          {
+            color: '#60a5fa',
+            lineWidth: 1,
+            priceLineVisible: false,
+            lastValueVisible: false,
+            priceScaleId: 'rsi'
+          },
+          1
+        );
+        c.priceScale('rsi').applyOptions({
+          scaleMargins: { top: 0.1, bottom: 0.1 }
+        });
+      }
+      const rsiData: LineData[] = rsiSeries
+        .slice(0, visibleCount)
+        .map((v, i) => ({ time: times[i], value: v }))
+        .filter((p) => !isNaN(p.value));
+      rsiSeriesRef.current.setData(rsiData);
+    } else if (rsiSeriesRef.current) {
+      c.removeSeries(rsiSeriesRef.current);
+      rsiSeriesRef.current = null;
+    }
+  }, [candles, visibleCount, maSeries, emaSeries, rsiSeries]);
 
   // ─── Hook de auto-follow ─────────────────────────────────────────────────
   //
