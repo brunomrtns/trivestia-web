@@ -22,6 +22,11 @@ const isMediaDevicesSupported =
  * Executa `enumerateDevices` e devolve os arrays de mics/speakers.
  * Retorna `hasLabels = true` quando o browser já retornou nomes reais
  * (indica que permissão foi concedida anteriormente).
+ *
+ * Dispositivos com `deviceId === 'default'` são filtrados pois representam
+ * o dispositivo padrão do sistema — já coberto pela opção vazia no UI.
+ * Sem labels reais (sem permissão), retorna arrays vazios para que o banner
+ * de solicitação de permissão seja exibido corretamente.
  */
 async function readDevices(): Promise<{
   microphones: AudioDevice[];
@@ -30,21 +35,26 @@ async function readDevices(): Promise<{
 }> {
   const raw = await navigator.mediaDevices.enumerateDevices();
 
+  const hasLabels = raw.some((d) => d.label.trim().length > 0);
+
+  // Sem permissão não há labels reais — evita poluir a lista com nomes genéricos
+  if (!hasLabels) {
+    return { microphones: [], speakers: [], hasLabels: false };
+  }
+
   const microphones: AudioDevice[] = raw
-    .filter((d) => d.kind === 'audioinput')
+    .filter((d) => d.kind === 'audioinput' && d.deviceId !== 'default')
     .map((d, i) => ({
       deviceId: d.deviceId,
       label: d.label.trim() || `Microfone ${i + 1}`
     }));
 
   const speakers: AudioDevice[] = raw
-    .filter((d) => d.kind === 'audiooutput')
+    .filter((d) => d.kind === 'audiooutput' && d.deviceId !== 'default')
     .map((d, i) => ({
       deviceId: d.deviceId,
       label: d.label.trim() || `Alto-falante ${i + 1}`
     }));
-
-  const hasLabels = raw.some((d) => d.label.trim().length > 0);
 
   return { microphones, speakers, hasLabels };
 }

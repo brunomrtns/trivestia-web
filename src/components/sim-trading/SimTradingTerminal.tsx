@@ -228,11 +228,11 @@ export function SimTradingTerminal({
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-            tab === 'orders'
+              {tab === 'orders'
                 ? t('sim.terminal.tabs.orders')
                 : tab === 'fills'
                   ? t('sim.terminal.tabs.fills')
-                  : t('sim.terminal.tabs.metrics')
+                  : t('sim.terminal.tabs.metrics')}
             </button>
           ))}
         </div>
