@@ -274,7 +274,7 @@ const router = createBrowserRouter([
 
   // ── Catch-all ────────────────────────────────────────────────────────────
   { path: '*', element: <Navigate to="/" /> }
-]);
+], { basename: '/trivestia' });
 
 export function AppRouter() {
   return (

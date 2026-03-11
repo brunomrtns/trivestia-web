@@ -7,7 +7,9 @@ import { authStorage } from '@/features/auth/storage';
 
 const BASE_URL = import.meta.env.DEV
   ? 'http://localhost:3333'
-  : 'https://trademaster-api.vercel.app';
+  : window.location.hostname === 'trivestia.vercel.app'
+    ? 'https://trademaster-api.vercel.app'
+    : `${window.location.origin}/trivestia/api`;
 
 /**
  * Factory: cria instancia Axios com baseURL /t/{slug}.
