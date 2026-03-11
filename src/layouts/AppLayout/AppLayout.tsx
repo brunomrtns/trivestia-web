@@ -3,6 +3,7 @@ import { useLocation, useOutlet } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
+import { ChatFloating } from '@/features/chat/ChatFloating';
 
 const pageVariants = {
   initial: { opacity: 0, x: 24 },
@@ -40,6 +41,7 @@ export function AppLayout() {
           </AnimatePresence>
         </main>
       </div>
+      <ChatFloating />
     </div>
   );
 }
