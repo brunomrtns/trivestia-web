@@ -173,108 +173,114 @@ const tenantAdminRoutes = [
 
 // ─── Router ──────────────────────────────────────────────────────────────────
 
-const router = createBrowserRouter([
-  // ── Global pages (sem tenant) ────────────────────────────────────────────
-  {
-    element: <PublicLayout />,
-    children: [{ path: '/', element: <LandingPage /> }]
-  },
-  { path: '/create-school', element: <CreateSchoolPage /> },
+const router = createBrowserRouter(
+  [
+    // ── Global pages (sem tenant) ────────────────────────────────────────────
+    {
+      element: <PublicLayout />,
+      children: [{ path: '/', element: <LandingPage /> }]
+    },
+    { path: '/create-school', element: <CreateSchoolPage /> },
 
-  // ── Login global (2-step: professor + aluno) ─────────────────────────────
-  { path: '/login', element: <GlobalLoginPage /> },
+    // ── Login global (2-step: professor + aluno) ─────────────────────────────
+    { path: '/login', element: <GlobalLoginPage /> },
 
-  // ── Workspace (professor autenticado) ────────────────────────────────────
-  {
-    element: <PlatformGuard />,
-    children: [
-      {
-        path: '/workspace',
-        element: <WorkspaceLayout />,
-        children: [
-          { index: true, element: <WorkspacePage /> },
-          { path: 'create-school', element: <WorkspaceCreateSchoolPage /> }
-        ]
-      }
-    ]
-  },
+    // ── Workspace (professor autenticado) ────────────────────────────────────
+    {
+      element: <PlatformGuard />,
+      children: [
+        {
+          path: '/workspace',
+          element: <WorkspaceLayout />,
+          children: [
+            { index: true, element: <WorkspacePage /> },
+            { path: 'create-school', element: <WorkspaceCreateSchoolPage /> }
+          ]
+        }
+      ]
+    },
 
-  // ── Registro de professor (conta da plataforma) ────────────────────────────
-  { path: '/register', element: <ProfessorRegisterPage /> },
+    // ── Registro de professor (conta da plataforma) ────────────────────────────
+    { path: '/register', element: <ProfessorRegisterPage /> },
 
-  // ── Legacy routes — redireciona para tenant ──────────────────────────────
-  { path: '/app/*', element: <LegacyRedirect /> },
-  { path: '/admin/*', element: <LegacyRedirect /> },
-  { path: '/courses', element: <LegacyRedirect /> },
-  { path: '/courses/:courseId', element: <LegacyRedirect /> },
+    // ── Legacy routes — redireciona para tenant ──────────────────────────────
+    { path: '/app/*', element: <LegacyRedirect /> },
+    { path: '/admin/*', element: <LegacyRedirect /> },
+    { path: '/courses', element: <LegacyRedirect /> },
+    { path: '/courses/:courseId', element: <LegacyRedirect /> },
 
-  // ── Tenant routes (/t/:tenantSlug/*) ─────────────────────────────────────
-  {
-    path: '/t/:tenantSlug',
-    children: [
-      // Public tenant pages
-      {
-        element: <TenantPublicLayout />,
-        children: [
-          { index: true, element: <CoursesPage /> },
-          { path: 'courses', element: <CoursesPage /> },
-          { path: 'courses/:courseId', element: <CourseDetailPage /> }
-        ]
-      },
-      // Auth pages (login/register)
-      {
-        element: <TenantAuthLayout />,
-        children: [
-          { path: 'login', element: <LoginPage /> },
-          { path: 'register', element: <RegisterPage /> }
-        ]
-      },
-      // Authenticated student routes
-      {
-        element: <AuthGuard />,
-        children: [
-          {
-            path: 'app',
-            element: <AppLayout />,
-            children: tenantAppRoutes
-          }
-        ]
-      },
-      // Admin routes (ADMIN + OWNER)
-      {
-        element: <AdminGuard />,
-        children: [
-          {
-            path: 'admin',
-            element: <AppLayout />,
-            children: tenantAdminRoutes
-          }
-        ]
-      }
-    ]
-  },
+    // ── Tenant routes (/t/:tenantSlug/*) ─────────────────────────────────────
+    {
+      path: '/t/:tenantSlug',
+      children: [
+        // Public tenant pages
+        {
+          element: <TenantPublicLayout />,
+          children: [
+            { index: true, element: <CoursesPage /> },
+            { path: 'courses', element: <CoursesPage /> },
+            { path: 'courses/:courseId', element: <CourseDetailPage /> }
+          ]
+        },
+        // Auth pages (login/register)
+        {
+          element: <TenantAuthLayout />,
+          children: [
+            { path: 'login', element: <LoginPage /> },
+            { path: 'register', element: <RegisterPage /> }
+          ]
+        },
+        // Authenticated student routes
+        {
+          element: <AuthGuard />,
+          children: [
+            {
+              path: 'app',
+              element: <AppLayout />,
+              children: tenantAppRoutes
+            }
+          ]
+        },
+        // Admin routes (ADMIN + OWNER)
+        {
+          element: <AdminGuard />,
+          children: [
+            {
+              path: 'admin',
+              element: <AppLayout />,
+              children: tenantAdminRoutes
+            }
+          ]
+        }
+      ]
+    },
 
-  // ── Super Admin routes (/super/*) ──────────────────────────────────────────
-  {
-    element: <SuperAdminGuard />,
-    children: [
-      {
-        path: '/super',
-        element: <SuperAdminLayout />,
-        children: [
-          { index: true, element: <Navigate to="/super/dashboard" replace /> },
-          { path: 'dashboard', element: <SuperDashboardPage /> },
-          { path: 'tenants', element: <SuperTenantsPage /> },
-          { path: 'tenants/:tenantId', element: <SuperTenantEditPage /> },
-          { path: 'users', element: <SuperUsersPage /> }
-        ]
-      }
-    ]
-  },
+    // ── Super Admin routes (/super/*) ──────────────────────────────────────────
+    {
+      element: <SuperAdminGuard />,
+      children: [
+        {
+          path: '/super',
+          element: <SuperAdminLayout />,
+          children: [
+            {
+              index: true,
+              element: <Navigate to="/super/dashboard" replace />
+            },
+            { path: 'dashboard', element: <SuperDashboardPage /> },
+            { path: 'tenants', element: <SuperTenantsPage /> },
+            { path: 'tenants/:tenantId', element: <SuperTenantEditPage /> },
+            { path: 'users', element: <SuperUsersPage /> }
+          ]
+        }
+      ]
+    },
 
-  // ── Catch-all ────────────────────────────────────────────────────────────
-  { path: '*', element: <Navigate to="/" /> }
-], { basename: '/trivestia' });
+    // ── Catch-all ────────────────────────────────────────────────────────────
+    { path: '*', element: <Navigate to="/" /> }
+  ],
+  { basename: '/trivestia' }
+);
 
 export function AppRouter() {
   return (

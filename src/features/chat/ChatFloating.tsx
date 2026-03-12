@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { MessageSquare } from 'lucide-react';
+import { MessageSquare, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useChatToken } from './useChatToken';
 
@@ -14,15 +14,12 @@ export function ChatFloating() {
   const [unreadMap, setUnreadMap] = useState<Record<string, number>>({});
   const totalUnread = Object.values(unreadMap).reduce((a, b) => a + b, 0);
 
-  // ref para chamar openConversation no widget via elemento do DOM
   const widgetContainerRef = useRef<HTMLDivElement>(null);
 
-  // useCallback estável — evita re-registro do event listener a cada render
   const handleUnread = useCallback((convId: string, count: number) => {
     setUnreadMap((prev) => ({ ...prev, [convId]: count }));
   }, []);
 
-  // Clique na notificação do browser → abre o chat na conversa correta
   const handleNotificationClick = useCallback((conversationId: string) => {
     setOpen(true);
     setUnreadMap((prev) => ({ ...prev, [conversationId]: 0 }));
@@ -39,7 +36,6 @@ export function ChatFloating() {
     setUnreadMap({});
   };
 
-  // Pedir permissão de notificação assim que o token estiver disponível
   useEffect(() => {
     if (!chatToken) return;
     if ('Notification' in window && Notification.permission === 'default') {
@@ -47,26 +43,37 @@ export function ChatFloating() {
     }
   }, [chatToken]);
 
-  // Nada a renderizar se o usuário ainda não está pronto
+  /** 
+   * CONFIGURAÇÃO DINÂMICA DE CORES
+   * Aqui "pescamos" as cores do seu arquivo globals.css / tailwind 
+   * O ChatWidget receberá as variáveis HSL e as aplicará no Shadow DOM.
+   */
+  const chatColorScheme = {
+    // Usamos as variáveis CSS do Trivestia (definidas no globals.css)
+    primary: 'hsl(var(--primary))', 
+    primaryHover: 'hsl(var(--primary) / 0.9)',
+    borderRadius: 'var(--radius)',
+    headerBg: 'hsl(var(--primary))', // Agora a nav usa a cor primária do seu projeto
+    headerText: 'hsl(var(--primary-foreground))', // Texto com contraste automático
+  };
+
   if (!chatToken && !isLoading && !error) return null;
 
   return (
     <>
-      {/* Botão flutuante — toggle abre/fecha */}
       <button
         onClick={open ? () => setOpen(false) : handleOpen}
         aria-label={open ? t('chat.close', 'Fechar chat') : t('chat.openChat', 'Abrir chat')}
         className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <MessageSquare className="h-6 w-6" />
-        {totalUnread > 0 && (
+        {open ? <X className="h-6 w-6" /> : <MessageSquare className="h-6 w-6" />}
+        {!open && totalUnread > 0 && (
           <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
             {totalUnread > 9 ? '9+' : totalUnread}
           </span>
         )}
       </button>
 
-      {/* Loading / erro — só exibidos quando o painel está aberto */}
       {open && isLoading && (
         <div className="fixed bottom-24 right-6 z-50 flex h-[600px] w-[380px] items-center justify-center overflow-hidden rounded-2xl border bg-background shadow-2xl">
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -78,12 +85,10 @@ export function ChatFloating() {
         </div>
       )}
 
-      {/* Widget SEMPRE montado quando token disponível — socket fica conectado mesmo com painel fechado */}
-      {/* display:none esconde visualmente mas mantém React/socket ativos */}
       {chatToken && !isLoading && (
         <div
           ref={widgetContainerRef}
-          className="fixed bottom-24 right-6 z-50 flex h-[600px] w-[380px] flex-col overflow-hidden rounded-2xl border bg-background shadow-2xl"
+          className="fixed bottom-24 right-6 z-50 flex h-[600px] w-[380px] flex-col overflow-hidden rounded-2xl border border-border/40 bg-background shadow-2xl"
           style={{ display: open ? 'flex' : 'none' }}
           aria-hidden={!open}
         >
@@ -92,6 +97,8 @@ export function ChatFloating() {
             serverUrl={serverUrl}
             tenantId={tenantId}
             locale={document.documentElement.lang || 'pt-BR'}
+            // Enviando o esquema dinâmico
+            colorScheme={chatColorScheme}
             onUnreadCountChange={handleUnread}
             onClose={() => setOpen(false)}
             onNotificationClick={handleNotificationClick}
