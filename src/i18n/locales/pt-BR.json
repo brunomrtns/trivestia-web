@@ -591,6 +591,17 @@
       "title": "Entrar",
       "newHere": "Novo por aqui?",
       "changeEmail": "Trocar",
+      "orContinueWith": "Ou continue com",
+      "google": {
+        "error": "Falha na autenticação com Google."
+      },
+      "stats": {
+        "totalTrades": "Total de Trades",
+        "winRate": "Taxa de Acerto",
+        "totalPnl": "PnL Acumulado",
+        "avgR": "Média R"
+      },
+      "invalidProtection": "Nível de proteção inválido.",
       "toast": {
         "success": "Bem-vindo, {{name}}!",
         "error": "E-mail ou senha inválidos."

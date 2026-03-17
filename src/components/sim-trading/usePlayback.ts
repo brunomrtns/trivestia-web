@@ -1,13 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-export type PlaybackSpeed = 250 | 500 | 1000 | 2000;
+export type PlaybackSpeed = 40 | 100 | 200 | 250 | 500 | 1000 | 2000;
 
 interface UsePlaybackOptions {
   onAdvance: () => void;
+  onRewind?: () => void;
   isFinished: boolean;
 }
 
-export function usePlayback({ onAdvance, isFinished }: UsePlaybackOptions) {
+export function usePlayback({
+  onAdvance,
+  onRewind,
+  isFinished
+}: UsePlaybackOptions) {
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeedState] = useState<PlaybackSpeed>(1000);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -56,5 +61,9 @@ export function usePlayback({ onAdvance, isFinished }: UsePlaybackOptions) {
     if (!isFinished) onAdvance();
   }, [onAdvance, isFinished]);
 
-  return { playing, speed, play, pause, setSpeed, stepForward };
+  const stepBackward = useCallback(() => {
+    if (onRewind) onRewind();
+  }, [onRewind]);
+
+  return { playing, speed, play, pause, setSpeed, stepForward, stepBackward };
 }

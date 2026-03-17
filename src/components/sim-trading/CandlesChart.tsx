@@ -6,18 +6,22 @@ import {
   CrosshairMode,
   CandlestickSeries,
   LineSeries,
+  LineStyle,
   type IChartApi,
   type ISeriesApi,
   type CandlestickData,
   type LineData,
-  type Time
+  type Time,
+  type IPriceLine,
+  type SeriesMarker
 } from 'lightweight-charts';
 import { Maximize2 } from 'lucide-react';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import { cn } from '@/lib/utils';
-import type { Candle } from '@/types/api';
+import type { Candle, SimulationState } from '@/types/api';
 import type { IndicatorSeries } from './useIndicators';
 import { useAutoZoomTimeScale } from './useAutoZoomTimeScale';
+import { toast } from 'sonner';
 
 interface CandlesChartProps {
   candles: Candle[];
@@ -25,6 +29,9 @@ interface CandlesChartProps {
   maSeries?: IndicatorSeries | null;
   emaSeries?: IndicatorSeries | null;
   rsiSeries?: number[] | null;
+  onTimeClick?: (timestamp: number) => void;
+  onUpdateProtection?: (sl?: number, tp?: number) => void;
+  engineState?: SimulationState | null;
 }
 
 export function CandlesChart({
@@ -32,7 +39,10 @@ export function CandlesChart({
   visibleCount,
   maSeries,
   emaSeries,
-  rsiSeries
+  rsiSeries,
+  onTimeClick,
+  onUpdateProtection,
+  engineState
 }: CandlesChartProps) {
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -41,15 +51,23 @@ export function CandlesChart({
   const maSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
   const emaSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
   const rsiSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
+  const pathsSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
 
-  /**
-   * chart também fica em estado (além da ref) para que o hook
-   * useAutoZoomTimeScale reaja via useEffect quando a instância
-   * muda de null para o objeto criado.
-   */
+  const priceLinesRef = useRef<{
+    SL?: IPriceLine;
+    TP?: IPriceLine;
+    ENTRY?: IPriceLine;
+    PENDING: IPriceLine[];
+  }>({ PENDING: [] });
+
+  const draggingRef = useRef<{
+    type: 'SL' | 'TP';
+    line: IPriceLine;
+  } | null>(null);
+
   const [chart, setChart] = useState<IChartApi | null>(null);
 
-  // ─── Criação do chart (uma vez) ──────────────────────────────────────────
+  // ─── Inicialização do Chart ────────────────────────────────────────────────
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -68,31 +86,9 @@ export function CandlesChart({
         borderColor: 'rgba(255,255,255,0.1)',
         timeVisible: true,
         secondsVisible: false,
-        /**
-         * rightOffset: espaço visual (em larguras de barra) entre o último
-         * candle e a borda direita do chart. Evita que a vela mais recente
-         * fique encostada na borda.
-         */
         rightOffset: 3,
-        /**
-         * fixRightEdge: impede que o usuário role para além do último candle
-         * (sem espaço vazio à direita). Isso "gruda" o último candle na borda
-         * direita e torna o scrollToRealTime() imediato e previsível.
-         */
         fixRightEdge: true,
-        /**
-         * lockVisibleTimeRangeOnResize: ao redimensionar o container, mantém
-         * o mesmo intervalo de tempo visível em vez de reajustar o zoom.
-         * Evita saltos visuais ao abrir/fechar painéis laterais.
-         */
         lockVisibleTimeRangeOnResize: true,
-        /**
-         * rightBarStaysOnScroll: comportamento nativo de "follow latest".
-         * Enquanto o usuário estiver com o chart no extremo direito (última
-         * barra visível), novos candles adicionados mantêm esse alinhamento
-         * automaticamente. O hook ainda chama scrollToRealTime() para garantir
-         * o posicionamento correto após setData().
-         */
         rightBarStaysOnScroll: true
       },
       rightPriceScale: { borderColor: 'rgba(255,255,255,0.1)' },
@@ -108,9 +104,24 @@ export function CandlesChart({
       wickDownColor: '#ef5350'
     });
 
+    const pathsSeries = c.addSeries(LineSeries, {
+      color: 'rgba(255, 255, 255, 0.3)',
+      lineWidth: 1,
+      lineStyle: LineStyle.Dashed,
+      crosshairMarkerVisible: false,
+      lastValueVisible: false,
+      priceLineVisible: false
+    });
+
     chartRef.current = c;
-    seriesRef.current = series;
+    seriesRef.current = series as any;
+    pathsSeriesRef.current = pathsSeries as any;
     setChart(c);
+
+    c.subscribeClick((param) => {
+      if (!param.time || !onTimeClick) return;
+      onTimeClick((param.time as number) * 1000);
+    });
 
     const ro = new ResizeObserver((entries) => {
       const entry = entries[0];
@@ -131,15 +142,12 @@ export function CandlesChart({
       maSeriesRef.current = null;
       emaSeriesRef.current = null;
       rsiSeriesRef.current = null;
+      pathsSeriesRef.current = null;
       setChart(null);
     };
   }, []);
 
-  // ─── Atualiza dados ───────────────────────────────────────────────────────
-  //
-  // NÃO chamamos scrollToRealTime aqui. O hook de auto-follow é responsável
-  // pelo posicionamento, e sua ordem de declaração garante que esse effect
-  // (setData) sempre rode antes do effect de follow do hook.
+  // ─── Atualização de Dados (Candles) ────────────────────────────────────────
 
   useEffect(() => {
     if (!seriesRef.current || candles.length === 0) return;
@@ -147,11 +155,7 @@ export function CandlesChart({
     const data: CandlestickData[] = candles
       .slice(0, visibleCount)
       .map((c, i) => ({
-        // c.time está em ms; lightweight-charts precisa de segundos ascendentes.
-        // Fallback sintético caso time seja falsy/NaN (ex: candle sem startTimestamp).
-        time: (c.time
-          ? Math.floor(c.time / 1000)
-          : 1_700_000_000 + i * 60) as Time,
+        time: (c.time ? Math.floor(c.time / 1000) : 1_700_000_000 + i * 60) as Time,
         open: c.open,
         high: c.high,
         low: c.low,
@@ -161,7 +165,7 @@ export function CandlesChart({
     seriesRef.current.setData(data);
   }, [candles, visibleCount]);
 
-  // ─── Atualiza séries MA / EMA ───────────────────────────────────────────
+  // ─── Atualização de Indicadores ────────────────────────────────────────────
 
   useEffect(() => {
     const c = chartRef.current;
@@ -169,146 +173,284 @@ export function CandlesChart({
 
     const times = candles
       .slice(0, visibleCount)
-      .map(
-        (cd, i) =>
-          (cd.time
-            ? Math.floor(cd.time / 1000)
-            : 1_700_000_000 + i * 60) as Time
-      );
+      .map((cd, i) => (cd.time ? Math.floor(cd.time / 1000) : 1_700_000_000 + i * 60) as Time);
 
-    // MA
     if (maSeries) {
-      if (!maSeriesRef.current) {
-        maSeriesRef.current = c.addSeries(LineSeries, {
+      const maLineSeries = maSeriesRef.current ?? (c.addSeries(LineSeries, {
           color: maSeries.color,
           lineWidth: 1,
           priceLineVisible: false,
           lastValueVisible: false
-        });
-      } else {
-        maSeriesRef.current.applyOptions({ color: maSeries.color });
-      }
+        }) as any);
+      maSeriesRef.current = maLineSeries;
+      maLineSeries.applyOptions({ color: maSeries.color });
       const maData: LineData[] = maSeries.values
         .slice(0, visibleCount)
         .map((v, i) => ({ time: times[i], value: v }))
         .filter((p) => !isNaN(p.value));
-      maSeriesRef.current.setData(maData);
+      maLineSeries.setData(maData);
     } else if (maSeriesRef.current) {
       c.removeSeries(maSeriesRef.current);
       maSeriesRef.current = null;
     }
 
-    // EMA
     if (emaSeries) {
-      if (!emaSeriesRef.current) {
-        emaSeriesRef.current = c.addSeries(LineSeries, {
+      const emaLineSeries = emaSeriesRef.current ?? (c.addSeries(LineSeries, {
           color: emaSeries.color,
           lineWidth: 1,
           priceLineVisible: false,
           lastValueVisible: false
-        });
-      } else {
-        emaSeriesRef.current.applyOptions({ color: emaSeries.color });
-      }
+        }) as any);
+      emaSeriesRef.current = emaLineSeries;
+      emaLineSeries.applyOptions({ color: emaSeries.color });
       const emaData: LineData[] = emaSeries.values
         .slice(0, visibleCount)
         .map((v, i) => ({ time: times[i], value: v }))
         .filter((p) => !isNaN(p.value));
-      emaSeriesRef.current.setData(emaData);
+      emaLineSeries.setData(emaData);
     } else if (emaSeriesRef.current) {
       c.removeSeries(emaSeriesRef.current);
       emaSeriesRef.current = null;
     }
 
-    // RSI (painel separado — pane 1)
     if (rsiSeries) {
-      if (!rsiSeriesRef.current) {
-        rsiSeriesRef.current = c.addSeries(
-          LineSeries,
-          {
-            color: '#60a5fa',
-            lineWidth: 1,
-            priceLineVisible: false,
-            lastValueVisible: false,
-            priceScaleId: 'rsi'
-          },
-          1
-        );
-        c.priceScale('rsi').applyOptions({
-          scaleMargins: { top: 0.1, bottom: 0.1 }
-        });
+      const isNewRsiSeries = !rsiSeriesRef.current;
+      const rsiLineSeries = rsiSeriesRef.current ?? (c.addSeries(LineSeries, {
+        color: '#60a5fa',
+        lineWidth: 1,
+        priceLineVisible: false,
+        lastValueVisible: false,
+        priceScaleId: 'rsi'
+      }, 1) as any);
+      rsiSeriesRef.current = rsiLineSeries;
+      if (isNewRsiSeries) {
+        c.priceScale('rsi').applyOptions({ scaleMargins: { top: 0.1, bottom: 0.1 } });
       }
       const rsiData: LineData[] = rsiSeries
         .slice(0, visibleCount)
         .map((v, i) => ({ time: times[i], value: v }))
         .filter((p) => !isNaN(p.value));
-      rsiSeriesRef.current.setData(rsiData);
+      rsiLineSeries.setData(rsiData);
     } else if (rsiSeriesRef.current) {
       c.removeSeries(rsiSeriesRef.current);
       rsiSeriesRef.current = null;
     }
   }, [candles, visibleCount, maSeries, emaSeries, rsiSeries]);
 
-  // ─── Hook de auto-follow ─────────────────────────────────────────────────
-  //
-  // Declarado após os effects acima. React garante ordem de execução:
-  //   1. setData  (effect acima)
-  //   2. zoom inicial / scrollToRealTime  (effects do hook)
+  // ─── Visual Trading: Markers, Paths, Entry, SL, TP ─────────────────────────
 
-  const { autoFollowEnabled, resetAutoFollow } = useAutoZoomTimeScale(
-    chart,
-    containerRef,
-    { visibleCount }
-  );
+  useEffect(() => {
+    const series = seriesRef.current;
+    const pathSeries = pathsSeriesRef.current;
+    if (!series || !engineState || !pathSeries || !chart) return;
 
-  // ─── Render ──────────────────────────────────────────────────────────────
+    // 1. Limpar Linhas Anteriores
+    if (priceLinesRef.current.SL) series.removePriceLine(priceLinesRef.current.SL);
+    if (priceLinesRef.current.TP) series.removePriceLine(priceLinesRef.current.TP);
+    if (priceLinesRef.current.ENTRY) series.removePriceLine(priceLinesRef.current.ENTRY);
+    priceLinesRef.current.PENDING.forEach((line) => series.removePriceLine(line));
+    priceLinesRef.current = { PENDING: [] };
+
+    const { position, openOrders, fills } = engineState;
+
+    // 2. Markers (Sinalização de Trades) e Paths (Trajeto)
+    const markers: SeriesMarker<Time>[] = [];
+    const pathData: LineData[] = [];
+
+    fills.forEach((fill) => {
+      const time = (candles[fill.candleIndex]?.time
+        ? Math.floor(candles[fill.candleIndex].time / 1000)
+        : 1_700_000_000 + fill.candleIndex * 60) as Time;
+
+      const isEntry = fill.reason === 'MARKET' || fill.reason === 'LIMIT' || fill.reason === 'STOP';
+
+      markers.push({
+        time,
+        position: fill.side === 'BUY' ? 'belowBar' : 'aboveBar',
+        color: fill.side === 'BUY' ? '#10b981' : '#ef4444',
+        shape: fill.side === 'BUY' ? 'arrowUp' : 'arrowDown',
+        text: fill.reason
+      });
+
+      pathData.push({ time, value: fill.fillPrice });
+    });
+
+    // Marcador do Candle Atual (Replay Highlight)
+    if (visibleCount > 0) {
+      const lastCandle = candles[visibleCount - 1];
+      const currentTime = (lastCandle?.time ? Math.floor(lastCandle.time / 1000) : 0) as Time;
+      if (currentTime) {
+        markers.push({
+          time: currentTime,
+          position: 'aboveBar',
+          color: '#3b82f6',
+          shape: 'circle',
+          size: 0.1
+        });
+      }
+    }
+
+    if (typeof (series as any).setMarkers === 'function') {
+      (series as any).setMarkers(markers);
+    }
+    pathSeries.setData(pathData);
+
+    // 3. Linha de Entrada com PnL Dinâmico
+    if (position && position.side !== 'FLAT') {
+      const pnl = position.unrealizedPnl;
+      const pnlStr = `${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}`;
+      
+      const entryLine = series.createPriceLine({
+        price: position.entryPrice,
+        color: '#3b82f6',
+        lineWidth: 2,
+        lineStyle: LineStyle.Solid,
+        axisLabelVisible: true,
+        title: `ENTRY (${position.side}) PnL: ${pnlStr}`
+      });
+      priceLinesRef.current.ENTRY = entryLine;
+
+      // 4. Linhas de SL e TP (Active protections)
+      const sltps = (engineState as any).activeSlTps || [];
+      sltps.forEach((sltp: any) => {
+        if (sltp.sl !== undefined) {
+          priceLinesRef.current.SL = series.createPriceLine({
+            price: sltp.sl,
+            color: '#ef4444',
+            lineWidth: 1,
+            lineStyle: LineStyle.Dashed,
+            axisLabelVisible: true,
+            title: 'SL'
+          });
+        }
+        if (sltp.tp !== undefined) {
+          priceLinesRef.current.TP = series.createPriceLine({
+            price: sltp.tp,
+            color: '#10b981',
+            lineWidth: 1,
+            lineStyle: LineStyle.Dashed,
+            axisLabelVisible: true,
+            title: 'TP'
+          });
+        }
+      });
+    }
+
+    // 5. Linhas de Ordens Pendentes
+    if (openOrders && openOrders.length > 0) {
+      openOrders.forEach((order) => {
+        if (order.price !== undefined) {
+          priceLinesRef.current.PENDING.push(series.createPriceLine({
+            price: order.price,
+            color: '#f59e0b',
+            lineWidth: 1,
+            lineStyle: LineStyle.Dotted,
+            axisLabelVisible: true,
+            title: `${order.type} ${order.side}`
+          }));
+        }
+      });
+    }
+  }, [engineState, candles, visibleCount, chart]);
+
+  // ─── Arraste Interativo de SL/TP ───────────────────────────────────────────
+
+  useEffect(() => {
+    const container = containerRef.current;
+    const c = chart;
+    const series = seriesRef.current;
+    if (!container || !c || !series || !onUpdateProtection) return;
+
+    const handleMouseDown = (e: MouseEvent) => {
+      const { SL, TP } = priceLinesRef.current;
+      if (!SL && !TP) return;
+
+      const rect = container.getBoundingClientRect();
+      const y = e.clientY - rect.top;
+      
+      const checkGrab = (line: IPriceLine, type: 'SL' | 'TP') => {
+        const linePrice = line.options().price;
+        const lineY = series.priceToCoordinate(linePrice);
+        if (lineY !== null && Math.abs(lineY - y) < 15) {
+          draggingRef.current = { type, line };
+          c.applyOptions({ handleScroll: false, handleScale: false });
+          return true;
+        }
+        return false;
+      };
+
+      if (SL && checkGrab(SL, 'SL')) return;
+      if (TP && checkGrab(TP, 'TP')) return;
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!draggingRef.current) return;
+      const rect = container.getBoundingClientRect();
+      const y = e.clientY - rect.top;
+      const price = series.coordinateToPrice(y);
+      if (price !== null) draggingRef.current.line.applyOptions({ price });
+    };
+
+    const handleMouseUp = () => {
+      if (!draggingRef.current || !engineState) return;
+      const { type, line } = draggingRef.current;
+      const newPrice = line.options().price;
+      const pos = engineState.position;
+
+      let isValid = true;
+      if (pos.side === 'LONG') {
+        if (type === 'SL' && newPrice >= pos.entryPrice) isValid = false;
+        if (type === 'TP' && newPrice <= pos.entryPrice) isValid = false;
+      } else if (pos.side === 'SHORT') {
+        if (type === 'SL' && newPrice <= pos.entryPrice) isValid = false;
+        if (type === 'TP' && newPrice >= pos.entryPrice) isValid = false;
+      }
+
+      if (isValid) {
+        if (type === 'SL') onUpdateProtection(newPrice, undefined);
+        if (type === 'TP') onUpdateProtection(undefined, newPrice);
+      } else {
+        toast.error(t('sim.chart.invalidProtection'));
+      }
+      draggingRef.current = null;
+      c.applyOptions({ handleScroll: true, handleScale: true });
+    };
+
+    container.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      container.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [chart, onUpdateProtection, engineState, t]);
+
+  // ─── Auto-follow Hook ──────────────────────────────────────────────────────
+
+  const { autoFollowEnabled, resetAutoFollow } = useAutoZoomTimeScale(chart, containerRef, { visibleCount });
 
   return (
     <TooltipPrimitive.Provider delayDuration={400}>
       <div className="relative h-full w-full">
-        {/* Canvas do chart */}
-        <div
-          ref={containerRef}
-          className="h-full w-full rounded-lg overflow-hidden"
-        />
-
-        {/* Botão de reativar auto-follow — canto superior direito */}
+        <div ref={containerRef} className="h-full w-full rounded-lg overflow-hidden" />
         <div className="absolute right-2 top-2 z-10">
           <TooltipPrimitive.Root>
             <TooltipPrimitive.Trigger asChild>
               <button
                 onClick={resetAutoFollow}
-                aria-label={
-                  autoFollowEnabled
-                    ? t('sim.candles.autoFollow.active')
-                    : t('sim.candles.autoFollow.reactivate')
-                }
                 className={cn(
                   'flex h-7 w-7 items-center justify-center rounded-md border transition-colors',
                   'bg-background/80 backdrop-blur-sm',
-                  autoFollowEnabled
-                    ? 'border-primary/40 bg-primary/10 text-primary'
-                    : 'border-white/10 text-muted-foreground hover:border-primary/50 hover:bg-primary/10 hover:text-primary'
+                  autoFollowEnabled ? 'border-primary/40 bg-primary/10 text-primary' : 'border-white/10 text-muted-foreground'
                 )}
               >
                 <Maximize2 className="h-3.5 w-3.5" />
               </button>
             </TooltipPrimitive.Trigger>
-
             <TooltipPrimitive.Portal>
-              <TooltipPrimitive.Content
-                side="left"
-                sideOffset={6}
-                className={cn(
-                  'z-50 rounded-md px-2.5 py-1 text-xs shadow-md',
-                  'bg-popover text-popover-foreground',
-                  'animate-in fade-in-0 zoom-in-95',
-                  'data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95'
-                )}
-              >
-                {autoFollowEnabled
-                  ? t('sim.candles.autoFollow.active')
-                  : t('sim.candles.autoFollow.reactivate')}
+              <TooltipPrimitive.Content side="left" className="z-50 rounded-md bg-popover px-2.5 py-1 text-xs text-popover-foreground shadow-md">
+                {autoFollowEnabled ? t('sim.candles.autoFollow.active') : t('sim.candles.autoFollow.reactivate')}
                 <TooltipPrimitive.Arrow className="fill-popover" />
               </TooltipPrimitive.Content>
             </TooltipPrimitive.Portal>

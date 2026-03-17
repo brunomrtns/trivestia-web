@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Loader2, HelpCircle, Play } from 'lucide-react';
@@ -12,6 +12,7 @@ import { FillsPanel } from './FillsPanel';
 import { AccountSummary } from './AccountSummary';
 import { MetricsPanel } from './MetricsPanel';
 import { PlaybackControls } from './PlaybackControls';
+import { SessionStats } from './SessionStats';
 import { ResultScreen } from './ResultScreen';
 import { ScenarioLoader } from './ScenarioLoader';
 import { HelpDrawer } from './HelpDrawer';
@@ -80,8 +81,49 @@ export function SimTradingTerminal({
 
   const playback = usePlayback({
     onAdvance: engine.advanceCandle,
+    onRewind: engine.stepBack,
     isFinished: engine.phase === 'FINISHED' || engine.phase === 'RESULT'
   });
+
+  // ─── Keyboard Shortcuts ──────────────────────────────────────────────────
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if focus is in an input or textarea
+      if (
+        document.activeElement instanceof HTMLInputElement ||
+        document.activeElement instanceof HTMLTextAreaElement
+      ) {
+        return;
+      }
+
+      switch (e.code) {
+        case 'Space':
+          e.preventDefault();
+          playback.playing ? playback.pause() : playback.play();
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          if (e.shiftKey) {
+            engine.jumpForwardSteps(10);
+          } else {
+            playback.stepForward();
+          }
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          if (e.shiftKey) {
+            engine.jumpBackwardSteps(10);
+          } else {
+            playback.stepBackward();
+          }
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [playback, engine]);
 
   // ─── Loading / Error ────────────────────────────────────────────────────────
 
@@ -163,7 +205,13 @@ export function SimTradingTerminal({
       <div className="flex min-h-0 flex-1 gap-2">
         {/* Chart + Onboarding overlay */}
         <div className="relative flex-1 min-w-0 min-h-0">
-          <CandlesChart candles={candles} visibleCount={visibleCount} />
+          <CandlesChart
+            candles={candles}
+            visibleCount={visibleCount}
+            onTimeClick={engine.jumpToTimestamp}
+            onUpdateProtection={engine.updateProtection}
+            engineState={engineState}
+          />
 
           {/* Paused overlay — prominent, on top of chart */}
           {isPaused && (
@@ -219,6 +267,9 @@ export function SimTradingTerminal({
         </div>
       </div>
 
+      {/* Session Stats Panel */}
+      <SessionStats engineState={engineState} initialBalance={initialBalance} />
+
       {/* Bottom tabs: Orders / Fills / Metrics */}
       <div className="flex shrink-0 flex-col gap-1.5 rounded-lg border bg-card">
         {/* Tab bar */}
@@ -264,11 +315,14 @@ export function SimTradingTerminal({
         speed={playback.speed}
         visibleCount={visibleCount}
         totalCandles={candles.length}
+        candles={candles}
         isFinished={isFinished}
         isLoading={engine.phase === 'SUBMITTING'}
         onPlay={playback.play}
         onPause={playback.pause}
         onStepForward={playback.stepForward}
+        onStepBackward={playback.stepBackward}
+        onJumpTo={engine.jumpTo}
         onSkipToEnd={engine.skipToEnd}
         onSetSpeed={playback.setSpeed}
       />

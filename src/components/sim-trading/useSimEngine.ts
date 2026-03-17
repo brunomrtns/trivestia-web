@@ -56,6 +56,7 @@ type Action =
     }
   | { type: 'SET_PHASE'; phase: SimPhase }
   | { type: 'ADVANCE'; newState: SimulationState }
+  | { type: 'JUMP'; index: number; newState: SimulationState }
   | { type: 'ADD_EVENT'; event: SimEvent; newState: SimulationState }
   | { type: 'FINISH'; result: SimulationResult }
   | {
@@ -88,6 +89,12 @@ function reducer(state: SimEngineState, action: Action): SimEngineState {
       return {
         ...state,
         visibleCount: Math.min(state.visibleCount + 1, state.candles.length),
+        engineState: action.newState
+      };
+    case 'JUMP':
+      return {
+        ...state,
+        visibleCount: action.index,
         engineState: action.newState
       };
     case 'ADD_EVENT':
@@ -230,6 +237,97 @@ export function useSimEngine({
     }
   }, [state]);
 
+  const jumpTo = useCallback(
+    (targetIndex: number) => {
+      if (
+        !state.scenario ||
+        targetIndex < 1 ||
+        targetIndex > state.candles.length ||
+        !engineRef.current
+      )
+        return;
+
+      // Optimization: if jumping forward, just advance from current
+      if (targetIndex >= state.visibleCount) {
+        const diff = targetIndex - state.visibleCount;
+        if (diff === 0) return;
+
+        for (let i = state.visibleCount; i < targetIndex; i++) {
+          // Process any events that happened at this index
+          const eventsAtThisIndex = state.events.filter((e) => {
+            if (e.type === 'PLACE_ORDER') return e.order.candleIndex === i;
+            if (e.type === 'CANCEL_ORDER' || e.type === 'MODIFY_ORDER')
+              return e.candleIndex === i;
+            return false;
+          });
+          eventsAtThisIndex.forEach((e) => engineRef.current!.processEvent(e, i));
+          engineRef.current.advanceCandle(i);
+        }
+
+        const newState = engineRef.current.getState();
+        dispatch({ type: 'JUMP', index: targetIndex, newState });
+        return;
+      }
+
+      // If jumping backward, we must reset and replay
+      // 1. Re-instantiate engine to reset state
+      const eng = new SimulationEngine(
+        state.candles,
+        state.scenario.executionConfig
+      );
+
+      // 2. Replay all events and candles up to targetIndex
+      for (let i = 0; i < targetIndex; i++) {
+        const eventsAtThisCandle = state.events.filter((e) => {
+          if (e.type === 'PLACE_ORDER') return e.order.candleIndex === i;
+          if (e.type === 'CANCEL_ORDER' || e.type === 'MODIFY_ORDER')
+            return e.candleIndex === i;
+          return false;
+        });
+
+        eventsAtThisCandle.forEach((e) => eng.processEvent(e, i));
+
+        if (i > 0) {
+          eng.advanceCandle(i);
+        }
+      }
+
+      engineRef.current = eng;
+      const newState = eng.getState();
+      dispatch({ type: 'JUMP', index: targetIndex, newState });
+    },
+    [state]
+  );
+
+  const jumpToTimestamp = useCallback(
+    (timestamp: number) => {
+      if (!state.candles.length) return;
+      const index = state.candles.findIndex((c) => c.time >= timestamp);
+      if (index !== -1) {
+        jumpTo(index + 1);
+      }
+    },
+    [state.candles, jumpTo]
+  );
+
+  const jumpForwardSteps = useCallback(
+    (steps: number) => {
+      jumpTo(Math.min(state.candles.length, state.visibleCount + steps));
+    },
+    [jumpTo, state.candles.length, state.visibleCount]
+  );
+
+  const jumpBackwardSteps = useCallback(
+    (steps: number) => {
+      jumpTo(Math.max(1, state.visibleCount - steps));
+    },
+    [jumpTo, state.visibleCount]
+  );
+
+  const stepBack = useCallback(() => {
+    jumpTo(Math.max(1, state.visibleCount - 1));
+  }, [jumpTo, state.visibleCount]);
+
   const skipToEnd = useCallback(() => {
     if (!engineRef.current || !state.scenario) return;
     const { candles, visibleCount } = state;
@@ -309,6 +407,16 @@ export function useSimEngine({
     dispatch({ type: 'ADD_EVENT', event, newState });
   }, [state]);
 
+  const updateProtection = useCallback(
+    (sl?: number, tp?: number) => {
+      if (!engineRef.current) return;
+      (engineRef.current as any).updateProtection(sl, tp);
+      const newState = engineRef.current.getState();
+      dispatch({ type: 'ADVANCE', newState }); // Reuse ADVANCE to trigger UI update
+    },
+    [dispatch]
+  );
+
   // ─── Submit ───────────────────────────────────────────────────────────────────
 
   const submit = useCallback(async () => {
@@ -353,10 +461,16 @@ export function useSimEngine({
   return {
     ...state,
     advanceCandle,
+    stepBack,
+    jumpTo,
+    jumpToTimestamp,
+    jumpForwardSteps,
+    jumpBackwardSteps,
     skipToEnd,
     placeOrder,
     cancelOrder,
     closePosition,
+    updateProtection,
     submit,
     setPhase
   };

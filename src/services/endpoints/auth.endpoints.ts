@@ -19,6 +19,11 @@ export const authEndpoints = {
       .post<AuthResponse>('/auth/login', data)
       .then((r) => r.data),
 
+  googleLogin: (slug: string, idToken: string) =>
+    apiTenant(slug)
+      .post<AuthResponse>('/auth/google', { idToken })
+      .then((r) => r.data),
+
   refresh: (slug: string, refreshToken: string) =>
     apiTenant(slug)
       .post<RefreshResponse>('/auth/refresh', { refreshToken })

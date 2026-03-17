@@ -591,6 +591,17 @@
       "title": "To enter",
       "newHere": "New here?",
       "changeEmail": "To replace",
+      "orContinueWith": "Or continue with",
+      "google": {
+        "error": "Google authentication failed."
+      },
+      "stats": {
+        "totalTrades": "Total Trades",
+        "winRate": "Win Rate",
+        "totalPnl": "Total PnL",
+        "avgR": "Avg R"
+      },
+      "invalidProtection": "Invalid protection level.",
       "toast": {
         "success": "Welcome, {{name}}!",
         "error": "Invalid email or password."

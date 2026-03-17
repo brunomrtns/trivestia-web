@@ -26,11 +26,11 @@ export default defineConfig(({ mode }) => {
           replacement: isDev
             ? path.resolve(
                 __dirname,
-                '../chat-platform/packages/chat-widget/src/react-wrapper/index.ts'
+                '../../chat-platform/packages/chat-widget/src/react-wrapper/index.ts'
               )
             : path.resolve(
                 __dirname,
-                '../chat-platform/packages/chat-widget/dist/react.mjs'
+                '../../chat-platform/packages/chat-widget/dist/react.mjs'
               )
         },
         {
@@ -38,11 +38,11 @@ export default defineConfig(({ mode }) => {
           replacement: isDev
             ? path.resolve(
                 __dirname,
-                '../chat-platform/packages/chat-widget/src/index.ts'
+                '../../chat-platform/packages/chat-widget/src/index.ts'
               )
             : path.resolve(
                 __dirname,
-                '../chat-platform/packages/chat-widget/dist/index.mjs'
+                '../../chat-platform/packages/chat-widget/dist/index.mjs'
               )
         },
         {
@@ -50,11 +50,11 @@ export default defineConfig(({ mode }) => {
           replacement: isDev
             ? path.resolve(
                 __dirname,
-                '../chat-platform/packages/chat-types/src/index.ts'
+                '../../chat-platform/packages/chat-types/src/index.ts'
               )
             : path.resolve(
                 __dirname,
-                '../chat-platform/packages/chat-types/dist/index.mjs'
+                '../../chat-platform/packages/chat-types/dist/index.mjs'
               )
         }
       ]
