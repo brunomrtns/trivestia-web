@@ -162,6 +162,7 @@ export interface Course {
   id: string;
   title: string;
   description: string;
+  thumbnailUrl?: string | null;
   deadline: string | null;
   createdAt: string;
   modules?: Module[];
@@ -186,6 +187,8 @@ export interface Lesson {
   title: string;
   order: number;
   moduleId: string;
+  videoUrl?: string | null;
+  materialUrl?: string | null;
   availableFrom: string | null;
   prerequisiteLessonId: string | null;
   prerequisiteMinScore: number | null;
@@ -653,11 +656,14 @@ export interface UpdateAnnouncementRequest {
 export interface CreateCourseDTO {
   title: string;
   description: string;
+  thumbnailUrl?: string | null;
+  deadline?: string | null;
 }
 
 export interface UpdateCourseDTO {
   title?: string;
   description?: string;
+  thumbnailUrl?: string | null;
   deadline?: string | null;
 }
 
@@ -669,6 +675,8 @@ export interface CreateModuleDTO {
 export interface CreateLessonDTO {
   title: string;
   order: number;
+  videoUrl?: string | null;
+  materialUrl?: string | null;
   availableFrom?: string | null;
   prerequisiteLessonId?: string | null;
   prerequisiteMinScore?: number | null;

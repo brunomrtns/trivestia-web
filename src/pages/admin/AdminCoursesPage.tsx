@@ -13,7 +13,6 @@ import {
   Trash2,
   Loader2,
   BookOpen,
-  X,
   Settings2,
   Calendar,
   ImagePlus
@@ -23,9 +22,22 @@ import { adminEndpoints } from '@/services/endpoints/admin.endpoints';
 import { FileUploadService } from '@/services/FileUploadService';
 import type { Course } from '@/types/api';
 
+// Helper para construir URLs de storage
+const getStorageUrl = (path: string | null | undefined): string | null => {
+  if (!path) return null;
+  if (path.startsWith('http')) return path;
+  // Usa window.location.origin para montar a URL absoluta
+  return `${window.location.origin}/trivestia/storage${path}`;
+};
+
 // ─── Schema (definido dentro de CourseForm para usar t()) ───────────────────────
 
-type FormData = { title: string; description: string; deadline?: string; thumbnailUrl?: string | null };
+type FormData = {
+  title: string;
+  description: string;
+  deadline?: string;
+  thumbnailUrl?: string | null;
+};
 
 interface CourseFormProps {
   initial?: Course;
@@ -35,16 +47,18 @@ interface CourseFormProps {
   slug: string;
 }
 
-function CourseForm({ initial, onSave, onCancel, loading, slug }: CourseFormProps) {
+function CourseForm({
+  initial,
+  onSave,
+  onCancel,
+  loading,
+  slug
+}: CourseFormProps) {
   const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(
-    initial?.thumbnailUrl
-      ? (initial.thumbnailUrl.startsWith('http')
-          ? initial.thumbnailUrl
-          : `${import.meta.env.VITE_API_BASE_URL}/storage${initial.thumbnailUrl}`)
-      : null
+    getStorageUrl(initial?.thumbnailUrl)
   );
 
   const schema = z.object({
@@ -97,6 +111,7 @@ function CourseForm({ initial, onSave, onCancel, loading, slug }: CourseFormProp
       toast.success('Thumbnail enviada com sucesso!');
     } catch (error) {
       toast.error('Falha ao enviar a imagem.');
+      console.error('Erro ao enviar thumbnail:', error);
     } finally {
       setUploadProgress(null);
     }
@@ -111,41 +126,53 @@ function CourseForm({ initial, onSave, onCancel, loading, slug }: CourseFormProp
         {/* Thumbnail Picker */}
         <div className="shrink-0">
           <label className="mb-1.5 block text-sm font-medium">Thumbnail</label>
-          <div 
+          <div
             onClick={() => fileInputRef.current?.click()}
             className="relative flex h-32 w-56 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed bg-muted/30 transition hover:border-primary/50 hover:bg-muted/50"
           >
             {previewUrl ? (
-              <img src={previewUrl} alt="Thumbnail" className="h-full w-full object-cover" />
+              <img
+                src={previewUrl}
+                alt="Thumbnail"
+                className="h-full w-full object-cover"
+              />
             ) : (
               <div className="flex flex-col items-center gap-1 text-muted-foreground">
                 <ImagePlus className="h-8 w-8 opacity-40" />
                 <span className="text-xs">Upload imagem</span>
               </div>
             )}
-            
+
             {uploadProgress !== null && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[1px]">
                 <div className="w-2/3 space-y-1.5">
                   <div className="h-1 w-full overflow-hidden rounded-full bg-white/20">
-                    <div className="h-full bg-primary transition-all" style={{ width: `${uploadProgress}%` }} />
+                    <div
+                      className="h-full bg-primary transition-all"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
                   </div>
-                  <p className="text-center text-[10px] font-bold text-white">{uploadProgress}%</p>
+                  <p className="text-center text-[10px] font-bold text-white">
+                    {uploadProgress}%
+                  </p>
                 </div>
               </div>
             )}
           </div>
-          <input 
+          <input
             ref={fileInputRef}
-            type="file" 
-            accept="image/*" 
-            className="hidden" 
-            onChange={handleFileChange} 
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileChange}
           />
           {previewUrl && (
-            <button 
+            <button
               type="button"
-              onClick={() => { setPreviewUrl(null); setValue('thumbnailUrl', null, { shouldDirty: true }); }}
+              onClick={() => {
+                setPreviewUrl(null);
+                setValue('thumbnailUrl', null, { shouldDirty: true });
+              }}
               className="mt-2 text-xs text-destructive hover:underline"
             >
               Remover imagem
@@ -328,10 +355,10 @@ export default function AdminCoursesPage() {
               ) : (
                 <div className="flex items-center gap-4 rounded-2xl border bg-card px-5 py-4 shadow-sm">
                   {course.thumbnailUrl ? (
-                    <img 
-                      src={course.thumbnailUrl.startsWith('http') ? course.thumbnailUrl : `${import.meta.env.VITE_API_BASE_URL}/storage${course.thumbnailUrl}`} 
-                      alt="" 
-                      className="h-16 w-28 shrink-0 rounded-lg object-cover bg-muted" 
+                    <img
+                      src={getStorageUrl(course.thumbnailUrl) || ''}
+                      alt=""
+                      className="h-16 w-28 shrink-0 rounded-lg object-cover bg-muted"
                     />
                   ) : (
                     <div className="flex h-16 w-28 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -380,7 +407,13 @@ export default function AdminCoursesPage() {
                     </button>
                     <button
                       onClick={() => {
-                        if (confirm(t('admin.courses.confirm.delete', { title: course.title })))
+                        if (
+                          confirm(
+                            t('admin.courses.confirm.delete', {
+                              title: course.title
+                            })
+                          )
+                        )
                           deleteMut.mutate(course.id);
                       }}
                       className="rounded-lg p-2 text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"

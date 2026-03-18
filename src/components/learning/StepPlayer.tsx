@@ -24,7 +24,7 @@ export function StepPlayer({ slug, step, lessonId }: StepPlayerProps) {
       className="rounded-2xl border bg-card p-6 shadow-sm"
     >
       {step.type === 'CONTENT_TEXT' && (
-        <TextContent body={content.body as string} />
+        <TextContent content={content} />
       )}
       {step.type === 'CONTENT_VIDEO' && (
         <VideoContent
@@ -57,12 +57,70 @@ export function StepPlayer({ slug, step, lessonId }: StepPlayerProps) {
 
 // ─── Sub-renderers ────────────────────────────────────────────────────────────
 
-function TextContent({ body }: { body: string }) {
+function TextContent({ content }: { content: Record<string, unknown> }) {
+  const body = (content.body as string) ?? '';
+  const articleVideoUrl = resolveStorageUrl((content.videoUrl as string) ?? '');
+  const articleImageUrl = resolveStorageUrl((content.imageUrl as string) ?? '');
+  const articleAttachmentUrl = resolveStorageUrl(
+    (content.attachmentUrl as string) ?? ''
+  );
+  const embedVideoUrl = articleVideoUrl
+    ? getEmbedUrl(articleVideoUrl, 'direct')
+    : null;
+
   return (
-    <div
-      className="prose prose-invert max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-a:text-primary"
-      dangerouslySetInnerHTML={{ __html: body }}
-    />
+    <div className="space-y-4">
+      <div
+        className="prose prose-invert max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-a:text-primary"
+        dangerouslySetInnerHTML={{ __html: body }}
+      />
+
+      {articleVideoUrl && (
+        <div className="aspect-video overflow-hidden rounded-xl bg-black">
+          {embedVideoUrl ? (
+            <iframe
+              src={embedVideoUrl}
+              className="h-full w-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              title="Vídeo do artigo"
+            />
+          ) : (
+            <video
+              src={articleVideoUrl}
+              controls
+              className="h-full w-full"
+              preload="metadata"
+            />
+          )}
+        </div>
+      )}
+
+      {articleImageUrl && (
+        <figure className="space-y-2">
+          <div className="overflow-hidden rounded-xl bg-muted">
+            <img
+              src={articleImageUrl}
+              alt="Imagem do artigo"
+              className="mx-auto max-h-[500px] object-contain"
+              loading="lazy"
+            />
+          </div>
+        </figure>
+      )}
+
+      {articleAttachmentUrl && (
+        <a
+          href={articleAttachmentUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium text-primary hover:bg-primary/5"
+        >
+          <ExternalLink className="h-4 w-4" />
+          Abrir material em PDF
+        </a>
+      )}
+    </div>
   );
 }
 
@@ -170,6 +228,19 @@ function getEmbedUrl(url: string, provider: string): string | null {
     return id ? `https://player.vimeo.com/video/${id}` : null;
   }
   return null;
+}
+
+function resolveStorageUrl(urlOrPath: string): string {
+  if (!urlOrPath) return '';
+  if (urlOrPath.startsWith('http')) return urlOrPath;
+
+  if (urlOrPath.startsWith('/')) {
+    return import.meta.env.DEV
+      ? `http://localhost:3333/storage${urlOrPath}`
+      : `${window.location.origin}/trivestia/storage${urlOrPath}`;
+  }
+
+  return urlOrPath;
 }
 
 function extractYoutubeId(url: string): string | null {

@@ -127,8 +127,8 @@ export default function PeriodFormModal({
 
   return (
     <Portal>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-        <div className="w-full max-w-md rounded-2xl bg-card shadow-2xl">
+      <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm">
+        <div className="my-4 flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-2xl bg-card shadow-2xl">
           {/* Modal Header */}
           <div className="flex items-center justify-between border-b px-5 py-4">
             <div className="flex items-center gap-2.5">
@@ -148,7 +148,11 @@ export default function PeriodFormModal({
           </div>
 
           {/* Modal Body */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-5">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex min-h-0 flex-1 flex-col"
+          >
+            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
             {/* Title */}
             <div>
               <label className="mb-1 block text-sm font-medium">
@@ -256,9 +260,10 @@ export default function PeriodFormModal({
                 </p>
               )}
             </div>
+            </div>
 
             {/* Actions */}
-            <div className="flex gap-2 pt-1">
+            <div className="flex gap-2 border-t px-5 py-4">
               <button
                 type="submit"
                 disabled={isPending}

@@ -137,12 +137,12 @@ function UserDetailModal({
 
   return (
     <Portal>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
-          className="w-full max-w-lg rounded-2xl border bg-card shadow-xl"
+          className="my-4 flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border bg-card shadow-xl"
         >
           <div className="flex items-center justify-between border-b px-6 py-4">
             <h2 className="text-lg font-semibold">
@@ -161,7 +161,7 @@ function UserDetailModal({
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
           ) : data ? (
-            <div className="space-y-5 p-6">
+            <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-6">
               {/* Header */}
               <div className="flex items-center gap-4">
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">

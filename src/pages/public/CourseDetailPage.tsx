@@ -12,6 +12,19 @@ import {
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { useAuthStore } from '@/features/auth/auth.store';
 
+function resolveCourseImageUrl(pathOrUrl?: string | null) {
+  if (!pathOrUrl) return null;
+  if (pathOrUrl.startsWith('http')) return pathOrUrl;
+
+  if (pathOrUrl.startsWith('/')) {
+    return import.meta.env.DEV
+      ? `http://localhost:3333/storage${pathOrUrl}`
+      : `${window.location.origin}/trivestia/storage${pathOrUrl}`;
+  }
+
+  return pathOrUrl;
+}
+
 export default function CourseDetailPage() {
   const { t } = useTranslation();
   const { courseId, tenantSlug } = useParams<{
@@ -65,9 +78,19 @@ export default function CourseDetailPage() {
 
       {/* Header */}
       <div className="mb-12">
-        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-          <BookOpen className="h-8 w-8 text-primary" />
-        </div>
+        {course?.thumbnailUrl ? (
+          <div className="mb-5 overflow-hidden rounded-2xl border bg-muted">
+            <img
+              src={resolveCourseImageUrl(course.thumbnailUrl) ?? ''}
+              alt={course.title}
+              className="h-56 w-full object-cover"
+            />
+          </div>
+        ) : (
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+            <BookOpen className="h-8 w-8 text-primary" />
+          </div>
+        )}
         <h1 className="text-4xl font-extrabold">{course?.title}</h1>
         <p className="mt-3 max-w-2xl text-lg text-muted-foreground">
           {course?.description}

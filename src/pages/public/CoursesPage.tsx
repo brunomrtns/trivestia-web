@@ -5,10 +5,23 @@ import { motion } from 'framer-motion';
 import { BookOpen, ChevronRight, Layers } from 'lucide-react';
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 
+function resolveCourseImageUrl(pathOrUrl?: string | null) {
+  if (!pathOrUrl) return null;
+  if (pathOrUrl.startsWith('http')) return pathOrUrl;
+
+  if (pathOrUrl.startsWith('/')) {
+    return import.meta.env.DEV
+      ? `http://localhost:3333/storage${pathOrUrl}`
+      : `${window.location.origin}/trivestia/storage${pathOrUrl}`;
+  }
+
+  return pathOrUrl;
+}
+
 function CourseCardSkeleton() {
   return (
     <div className="animate-pulse rounded-2xl border bg-card p-6">
-      <div className="mb-4 h-12 w-12 rounded-xl bg-muted" />
+      <div className="mb-4 h-36 w-full rounded-xl bg-muted" />
       <div className="mb-2 h-5 w-3/4 rounded-md bg-muted" />
       <div className="h-4 w-full rounded-md bg-muted" />
       <div className="mt-4 h-4 w-1/2 rounded-md bg-muted" />
@@ -68,9 +81,20 @@ export default function CoursesPage() {
                   to={`${base}/courses/${course.id}`}
                   className="group flex flex-col rounded-2xl border bg-card p-6 shadow-sm transition-all hover:shadow-md hover:border-primary/40"
                 >
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-                    <BookOpen className="h-6 w-6 text-primary" />
-                  </div>
+                  {course.thumbnailUrl ? (
+                    <div className="mb-4 overflow-hidden rounded-xl border bg-muted">
+                      <img
+                        src={resolveCourseImageUrl(course.thumbnailUrl) ?? ''}
+                        alt={course.title}
+                        className="h-36 w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                        loading="lazy"
+                      />
+                    </div>
+                  ) : (
+                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                      <BookOpen className="h-6 w-6 text-primary" />
+                    </div>
+                  )}
                   <h2 className="mb-2 text-lg font-bold group-hover:text-primary transition-colors">
                     {course.title}
                   </h2>

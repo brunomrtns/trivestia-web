@@ -22,6 +22,45 @@ const queryClient = new QueryClient({
   }
 });
 
+function forceRefreshForChunkError() {
+  const key = '__chunk_reload_global';
+  const alreadyReloaded = sessionStorage.getItem(key);
+  if (alreadyReloaded) return;
+
+  sessionStorage.setItem(key, '1');
+
+  const url = new URL(window.location.href);
+  url.searchParams.set('_v', Date.now().toString());
+  window.location.replace(url.toString());
+}
+
+function isChunkLoadMessage(msg: string) {
+  return (
+    msg.includes('Failed to fetch dynamically imported module') ||
+    msg.includes('Importing a module script failed') ||
+    msg.includes('ChunkLoadError')
+  );
+}
+
+// Captura erros de import dinâmico fora do React error boundary (ex: Router lazy)
+window.addEventListener('error', (event) => {
+  const message =
+    (event.error as Error | undefined)?.message ?? event.message ?? '';
+  if (isChunkLoadMessage(String(message))) {
+    forceRefreshForChunkError();
+  }
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  const reason = event.reason;
+  const message =
+    (reason as Error | undefined)?.message ??
+    (typeof reason === 'string' ? reason : '');
+  if (isChunkLoadMessage(String(message))) {
+    forceRefreshForChunkError();
+  }
+});
+
 // Hidrata os stores a partir do localStorage antes do primeiro render
 useAuthStore.getState().loadSession();
 usePlatformAuthStore.getState().loadSession();
