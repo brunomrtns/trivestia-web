@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -22,7 +22,9 @@ import {
   Video,
   Image,
   Lock,
-  ShieldCheck
+  ShieldCheck,
+  FileUp,
+  ExternalLink
 } from 'lucide-react';
 import {
   DndContext,
@@ -43,6 +45,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { adminEndpoints } from '@/services/endpoints/admin.endpoints';
+import { FileUploadService } from '@/services/FileUploadService';
 import { StepFormModal } from '@/components/admin/StepFormModal';
 import { cn } from '@/lib/utils';
 import type {
@@ -64,6 +67,8 @@ type LessonForm = {
   availableFrom?: string;
   prerequisiteLessonId?: string;
   prerequisiteMinScore?: number;
+  videoUrl?: string | null;
+  materialUrl?: string | null;
 };
 
 type ActivityForm = {
@@ -255,12 +260,17 @@ function LessonSection({
 }) {
   const qc = useQueryClient();
   const { t } = useTranslation();
+  const [videoProgress, setVideoProgress] = useState<number | null>(null);
+  const [materialProgress, setMaterialProgress] = useState<number | null>(null);
+
   const lessonSchema = z.object({
     title: z.string().min(2, t('admin.lessons.validation.title')),
     order: z.coerce.number().min(1, t('admin.lessons.validation.order')),
     availableFrom: z.string().optional(),
     prerequisiteLessonId: z.string().optional(),
-    prerequisiteMinScore: z.coerce.number().min(0).max(100).optional()
+    prerequisiteMinScore: z.coerce.number().min(0).max(100).optional(),
+    videoUrl: z.string().optional().nullable(),
+    materialUrl: z.string().optional().nullable()
   });
   const activitySchema = z.object({
     title: z.string().min(2, t('admin.lessons.validation.title')),
@@ -473,7 +483,9 @@ function LessonSection({
         ? new Date(lesson.availableFrom).toISOString().slice(0, 16)
         : '',
       prerequisiteLessonId: lesson.prerequisiteLessonId ?? '',
-      prerequisiteMinScore: lesson.prerequisiteMinScore ?? 0
+      prerequisiteMinScore: lesson.prerequisiteMinScore ?? 0,
+      videoUrl: lesson.videoUrl ?? null,
+      materialUrl: lesson.materialUrl ?? null
     }
   });
 
@@ -494,6 +506,8 @@ function LessonSection({
       adminEndpoints.updateLesson(slug, moduleId, lesson.id, {
         title: data.title,
         order: data.order,
+        videoUrl: data.videoUrl,
+        materialUrl: data.materialUrl,
         availableFrom: data.availableFrom
           ? new Date(data.availableFrom).toISOString()
           : null,

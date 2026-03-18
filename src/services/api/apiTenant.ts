@@ -18,108 +18,133 @@ const BASE_URL = import.meta.env.DEV
  */
 const instanceCache = new Map<string, AxiosInstance>();
 
-export function apiTenant(slug: string): AxiosInstance {
-  const cached = instanceCache.get(slug);
-  if (cached) return cached;
+export function apiTenant(slug: string) {
+  let instance = instanceCache.get(slug);
+  
+  if (!instance) {
+    instance = axios.create({
+      baseURL: `${BASE_URL}/t/${slug}`,
+      timeout: 60000, // Aumentado para suportar uploads grandes
+      headers: { 'Content-Type': 'application/json' }
+    });
 
-  const instance = axios.create({
-    baseURL: `${BASE_URL}/t/${slug}`,
-    timeout: 15000,
-    headers: { 'Content-Type': 'application/json' }
-  });
-
-  // Request interceptor: inject Bearer token
-  instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-    const token = authStorage.getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  });
-
-  // Response interceptor: refresh automatico em 401
-  let isRefreshing = false;
-  let failedQueue: Array<{
-    resolve: (token: string) => void;
-    reject: (err: unknown) => void;
-  }> = [];
-
-  function processQueue(error: unknown, token: string | null) {
-    failedQueue.forEach((p) => (error ? p.reject(error) : p.resolve(token!)));
-    failedQueue = [];
-  }
-
-  interface RetryConfig extends InternalAxiosRequestConfig {
-    _retry?: boolean;
-  }
-
-  instance.interceptors.response.use(
-    (res: AxiosResponse) => res,
-    async (error) => {
-      const originalRequest = error.config as RetryConfig;
-
-      const isAuthRoute = originalRequest?.url?.startsWith('/auth/');
-      if (
-        error.response?.status !== 401 ||
-        originalRequest?._retry ||
-        isAuthRoute
-      ) {
-        return Promise.reject(error);
+    // Request interceptor: inject Bearer token
+    instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+      const token = authStorage.getToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
       }
+      return config;
+    });
 
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        }).then((token) => {
-          originalRequest.headers.Authorization = `Bearer ${token}`;
-          return instance(originalRequest);
-        });
-      }
+    // Response interceptor: refresh automatico em 401
+    let isRefreshing = false;
+    let failedQueue: Array<{
+      resolve: (token: string) => void;
+      reject: (err: unknown) => void;
+    }> = [];
 
-      originalRequest._retry = true;
-      isRefreshing = true;
+    const processQueue = (error: unknown, token: string | null) => {
+      failedQueue.forEach((p) => (error ? p.reject(error) : p.resolve(token!)));
+      failedQueue = [];
+    };
 
-      // Salvar antes de qualquer limpeza: so redirecionar se havia sessao ativa
-      const hadSession = !!authStorage.getToken();
+    instance.interceptors.response.use(
+      (res: AxiosResponse) => res,
+      async (error) => {
+        const originalRequest = error.config as any;
 
-      try {
-        const refreshToken = authStorage.getRefreshToken();
-        if (!refreshToken) throw new Error('No refresh token');
-
-        const { data } = await axios.post(
-          `${BASE_URL}/t/${slug}/auth/refresh`,
-          { refreshToken }
-        );
-
-        // CORRECAO: nao sobrescrever user com string no refresh
-        const currentUser = authStorage.getUser();
-        authStorage.setSession(
-          data.token,
-          data.refreshToken,
-          currentUser ?? ''
-        );
-
-        processQueue(null, data.token);
-        originalRequest.headers.Authorization = `Bearer ${data.token}`;
-        return instance(originalRequest);
-      } catch (err) {
-        processQueue(err, null);
-        authStorage.clearSession();
-        // Só redirecionar se o usuario tinha uma sessao ativa (token expirado).
-        // Se nao havia token (ex: useTenant() na pagina de login), rejeitar
-        // silenciosamente para nao criar loop infinito.
-        if (hadSession) {
-          window.location.href = `/t/${slug}/login`;
+        const isAuthRoute = originalRequest?.url?.startsWith('/auth/');
+        if (
+          error.response?.status !== 401 ||
+          originalRequest?._retry ||
+          isAuthRoute
+        ) {
+          return Promise.reject(error);
         }
-        return Promise.reject(err);
-      } finally {
-        isRefreshing = false;
-      }
-    }
-  );
 
-  instanceCache.set(slug, instance);
-  return instance;
+        if (isRefreshing) {
+          return new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
+          }).then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return instance!(originalRequest);
+          });
+        }
+
+        originalRequest._retry = true;
+        isRefreshing = true;
+
+        const hadSession = !!authStorage.getToken();
+
+        try {
+          const refreshToken = authStorage.getRefreshToken();
+          if (!refreshToken) throw new Error('No refresh token');
+
+          const { data } = await axios.post(
+            `${BASE_URL}/t/${slug}/auth/refresh`,
+            { refreshToken }
+          );
+
+          const currentUser = authStorage.getUser();
+          authStorage.setSession(
+            data.token,
+            data.refreshToken,
+            currentUser ?? ''
+          );
+
+          processQueue(null, data.token);
+          originalRequest.headers.Authorization = `Bearer ${data.token}`;
+          return instance!(originalRequest);
+        } catch (err) {
+          processQueue(err, null);
+          authStorage.clearSession();
+          if (hadSession) {
+            window.location.href = `/t/${slug}/login`;
+          }
+          return Promise.reject(err);
+        } finally {
+          isRefreshing = false;
+        }
+      }
+    );
+
+    instanceCache.set(slug, instance);
+  }
+
+  return {
+    ...instance,
+    get: instance.get.bind(instance),
+    post: instance.post.bind(instance),
+    put: instance.put.bind(instance),
+    patch: instance.patch.bind(instance),
+    delete: instance.delete.bind(instance),
+    /**
+     * Helper para upload de arquivos com progresso.
+     */
+    async upload<T>(
+      url: string,
+      file: File,
+      category: string,
+      onProgress?: (pct: number) => void
+    ) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('category', category);
+
+      return instance!.post<T>(url, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: (progressEvent) => {
+          if (onProgress && progressEvent.total) {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            onProgress(percentCompleted);
+          }
+        }
+      });
+    }
+  };
 }
 
 /**

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -15,41 +15,56 @@ import {
   BookOpen,
   X,
   Settings2,
-  Calendar
+  Calendar,
+  ImagePlus
 } from 'lucide-react';
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { adminEndpoints } from '@/services/endpoints/admin.endpoints';
+import { FileUploadService } from '@/services/FileUploadService';
 import type { Course } from '@/types/api';
 
 // ─── Schema (definido dentro de CourseForm para usar t()) ───────────────────────
 
-type FormData = { title: string; description: string; deadline?: string };
+type FormData = { title: string; description: string; deadline?: string; thumbnailUrl?: string | null };
 
 interface CourseFormProps {
   initial?: Course;
   onSave: (data: FormData) => Promise<unknown>;
   onCancel: () => void;
   loading: boolean;
+  slug: string;
 }
 
-function CourseForm({ initial, onSave, onCancel, loading }: CourseFormProps) {
+function CourseForm({ initial, onSave, onCancel, loading, slug }: CourseFormProps) {
   const { t } = useTranslation();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    initial?.thumbnailUrl
+      ? (initial.thumbnailUrl.startsWith('http')
+          ? initial.thumbnailUrl
+          : `${import.meta.env.VITE_API_BASE_URL}/storage${initial.thumbnailUrl}`)
+      : null
+  );
 
   const schema = z.object({
     title: z.string().min(3, t('admin.courses.validation.title')),
     description: z.string().min(10, t('admin.courses.validation.description')),
-    deadline: z.string().optional()
+    deadline: z.string().optional(),
+    thumbnailUrl: z.string().optional().nullable()
   });
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors }
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       title: initial?.title ?? '',
       description: initial?.description ?? '',
+      thumbnailUrl: initial?.thumbnailUrl ?? null,
       deadline: initial?.deadline
         ? new Date(initial.deadline).toISOString().slice(0, 16)
         : ''
@@ -65,72 +80,143 @@ function CourseForm({ initial, onSave, onCancel, loading }: CourseFormProps) {
     });
   };
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploadProgress(0);
+      const res = await FileUploadService.upload(
+        slug,
+        file,
+        'courses/thumbnails',
+        (pct) => setUploadProgress(pct)
+      );
+      setValue('thumbnailUrl', res.path, { shouldDirty: true });
+      setPreviewUrl(res.url);
+      toast.success('Thumbnail enviada com sucesso!');
+    } catch (error) {
+      toast.error('Falha ao enviar a imagem.');
+    } finally {
+      setUploadProgress(null);
+    }
+  };
+
   return (
     <form
       onSubmit={handleSubmit(handleSave)}
       className="space-y-4 rounded-2xl border bg-card p-5 shadow-sm"
     >
-      <div>
-        <label className="mb-1 block text-sm font-medium">
-          {t('admin.courses.form.title')}
-        </label>
-        <input
-          placeholder={t('admin.courses.form.titlePlaceholder')}
-          className="w-full rounded-lg border bg-background px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
-          {...register('title')}
-        />
-        {errors.title && (
-          <p className="mt-1 text-xs text-destructive">
-            {errors.title.message}
-          </p>
-        )}
+      <div className="flex flex-col md:flex-row gap-6">
+        {/* Thumbnail Picker */}
+        <div className="shrink-0">
+          <label className="mb-1.5 block text-sm font-medium">Thumbnail</label>
+          <div 
+            onClick={() => fileInputRef.current?.click()}
+            className="relative flex h-32 w-56 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed bg-muted/30 transition hover:border-primary/50 hover:bg-muted/50"
+          >
+            {previewUrl ? (
+              <img src={previewUrl} alt="Thumbnail" className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex flex-col items-center gap-1 text-muted-foreground">
+                <ImagePlus className="h-8 w-8 opacity-40" />
+                <span className="text-xs">Upload imagem</span>
+              </div>
+            )}
+            
+            {uploadProgress !== null && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[1px]">
+                <div className="w-2/3 space-y-1.5">
+                  <div className="h-1 w-full overflow-hidden rounded-full bg-white/20">
+                    <div className="h-full bg-primary transition-all" style={{ width: `${uploadProgress}%` }} />
+                  </div>
+                  <p className="text-center text-[10px] font-bold text-white">{uploadProgress}%</p>
+                </div>
+              </div>
+            )}
+          </div>
+          <input 
+            ref={fileInputRef}
+            type="file" 
+            accept="image/*" 
+            className="hidden" 
+            onChange={handleFileChange} 
+          />
+          {previewUrl && (
+            <button 
+              type="button"
+              onClick={() => { setPreviewUrl(null); setValue('thumbnailUrl', null, { shouldDirty: true }); }}
+              className="mt-2 text-xs text-destructive hover:underline"
+            >
+              Remover imagem
+            </button>
+          )}
+        </div>
+
+        <div className="flex-1 space-y-4">
+          <div>
+            <label className="mb-1 block text-sm font-medium">
+              {t('admin.courses.form.title')}
+            </label>
+            <input
+              placeholder={t('admin.courses.form.titlePlaceholder')}
+              className="w-full rounded-lg border bg-background px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+              {...register('title')}
+            />
+            {errors.title && (
+              <p className="mt-1 text-xs text-destructive">
+                {errors.title.message}
+              </p>
+            )}
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium">
+              {t('admin.courses.form.description')}
+            </label>
+            <textarea
+              rows={3}
+              placeholder={t('admin.courses.form.descriptionPlaceholder')}
+              className="w-full resize-none rounded-lg border bg-background px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+              {...register('description')}
+            />
+            {errors.description && (
+              <p className="mt-1 text-xs text-destructive">
+                {errors.description.message}
+              </p>
+            )}
+          </div>
+        </div>
       </div>
-      <div>
-        <label className="mb-1 block text-sm font-medium">
-          {t('admin.courses.form.description')}
-        </label>
-        <textarea
-          rows={3}
-          placeholder={t('admin.courses.form.descriptionPlaceholder')}
-          className="w-full resize-none rounded-lg border bg-background px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
-          {...register('description')}
-        />
-        {errors.description && (
-          <p className="mt-1 text-xs text-destructive">
-            {errors.description.message}
-          </p>
-        )}
-      </div>
-      <div>
-        <label className="mb-1 block text-sm font-medium flex items-center gap-1.5">
-          <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-          {t('admin.courses.form.deadline')}
-        </label>
-        <input
-          type="datetime-local"
-          className="w-full rounded-lg border bg-background px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
-          {...register('deadline')}
-        />
-        <p className="mt-1 text-xs text-muted-foreground">
-          {t('admin.courses.form.deadlineHint')}
-        </p>
-      </div>
-      <div className="flex gap-2">
-        <button
-          type="submit"
-          disabled={loading}
-          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
-        >
-          {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-          {t('admin.courses.page.saveButton')}
-        </button>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="rounded-lg border px-4 py-2 text-sm font-medium transition hover:bg-accent"
-        >
-          {t('common.actions.cancel')}
-        </button>
+
+      <div className="flex flex-wrap items-end justify-between gap-4 border-t pt-4">
+        <div className="w-full max-w-xs">
+          <label className="mb-1 block text-sm font-medium flex items-center gap-1.5">
+            <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+            {t('admin.courses.form.deadline')}
+          </label>
+          <input
+            type="datetime-local"
+            className="w-full rounded-lg border bg-background px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+            {...register('deadline')}
+          />
+        </div>
+        <div className="flex gap-2">
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2 text-sm font-semibold text-primary-foreground shadow transition hover:opacity-90 disabled:opacity-60"
+          >
+            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+            {t('admin.courses.page.saveButton')}
+          </button>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded-lg border px-6 py-2 text-sm font-medium transition hover:bg-accent"
+          >
+            {t('common.actions.cancel')}
+          </button>
+        </div>
       </div>
     </form>
   );
@@ -207,6 +293,7 @@ export default function AdminCoursesPage() {
 
       {creating && (
         <CourseForm
+          slug={slug}
           onSave={(data) => createMut.mutateAsync(data)}
           onCancel={() => setCreating(false)}
           loading={createMut.isPending}
@@ -230,6 +317,7 @@ export default function AdminCoursesPage() {
             >
               {editing?.id === course.id ? (
                 <CourseForm
+                  slug={slug}
                   initial={course}
                   onSave={(data) =>
                     updateMut.mutateAsync({ id: course.id, data })
@@ -239,9 +327,17 @@ export default function AdminCoursesPage() {
                 />
               ) : (
                 <div className="flex items-center gap-4 rounded-2xl border bg-card px-5 py-4 shadow-sm">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-                    <BookOpen className="h-5 w-5 text-primary" />
-                  </div>
+                  {course.thumbnailUrl ? (
+                    <img 
+                      src={course.thumbnailUrl.startsWith('http') ? course.thumbnailUrl : `${import.meta.env.VITE_API_BASE_URL}/storage${course.thumbnailUrl}`} 
+                      alt="" 
+                      className="h-16 w-28 shrink-0 rounded-lg object-cover bg-muted" 
+                    />
+                  ) : (
+                    <div className="flex h-16 w-28 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <BookOpen className="h-6 w-6" />
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold truncate">{course.title}</p>
                     <p className="text-sm text-muted-foreground truncate">
