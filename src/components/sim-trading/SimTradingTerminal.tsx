@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Loader2, HelpCircle, Play } from 'lucide-react';
+import { Loader2, HelpCircle, Play, ChevronLeft, LayoutGrid } from 'lucide-react';
 import { useSimEngine } from './useSimEngine';
 import { usePlayback } from './usePlayback';
 import { CandlesChart } from './CandlesChart';
@@ -18,6 +18,12 @@ import { ScenarioLoader } from './ScenarioLoader';
 import { HelpDrawer } from './HelpDrawer';
 import { OnboardingTour } from './OnboardingTour';
 import { useTutorialProgress } from './useTutorialProgress';
+import { TerminalSidebar } from './TerminalSidebar';
+import { DrawingOverlay } from './DrawingOverlay';
+import { SearchOverlay } from './SearchOverlay';
+import { IndicatorsPanel } from './IndicatorsPanel';
+import { useIndicators } from './useIndicators';
+import { toast } from 'sonner';
 import type { Candle, ScenarioPayload, OrderRequest } from '@/types/api';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -37,6 +43,7 @@ interface SimTradingTerminalProps {
 // ─── Tab types ────────────────────────────────────────────────────────────────
 
 type BottomTab = 'orders' | 'fills' | 'metrics';
+type ActivePanel = 'none' | 'search' | 'indicators' | 'settings';
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -55,7 +62,57 @@ export function SimTradingTerminal({
   const { t } = useTranslation();
   const [bottomTab, setBottomTab] = useState<BottomTab>('orders');
   const [helpOpen, setHelpOpen] = useState(false);
+  const [activeTool, setActiveTool] = useState('cursor');
+  const [activePanel, setActivePanel] = useState<ActivePanel>('none');
+  const [drawingInProgress, setDrawingInProgress] = useState(false);
+  const [chartApi, setChartApi] = useState<any>(null);
+  const [mainSeries, setMainSeries] = useState<any>(null);
   const tutorial = useTutorialProgress();
+
+  const handleChartLoad = useCallback((chart: any | null, series: any | null) => {
+    setChartApi(chart);
+    setMainSeries(series);
+  }, []);
+
+  const handleToolChange = useCallback((toolId: string) => {
+    // 1. Determine if the tool is a 'Panel' (ephemeral UI) or a 'Mode' (interaction state)
+    const isPanel = ['search', 'indicators', 'settings'].includes(toolId);
+
+    if (isPanel) {
+      // Toggle panel without losing current interaction mode
+      setActivePanel(prev => prev === toolId ? 'none' : toolId as ActivePanel);
+      console.log(`[Terminal] Panel toggled: ${toolId}`);
+      
+      if (toolId === 'settings') {
+        toast.info(t('sim.terminal.settingsUnderConstruction'));
+         setActivePanel('none');
+      }
+    } else {
+      // Switch interaction mode and close any open panels
+      setActiveTool(toolId);
+      setActivePanel('none');
+      console.log(`[Terminal] Mode selected: ${toolId}`);
+    }
+  }, [t]);
+
+  // Update cursor based on active tool
+  useEffect(() => {
+    const cursorMap: Record<string, string> = {
+      cursor: 'default',
+      drawings: 'crosshair',
+      replay: 'copy', // Using 'copy' or 'crosshair' for replay selection feel
+      indicators: 'default',
+      settings: 'default',
+      search: 'text'
+    };
+    
+    const newCursor = cursorMap[activeTool] || 'default';
+    document.body.style.cursor = newCursor;
+    
+    return () => {
+      document.body.style.cursor = 'default';
+    };
+  }, [activeTool]);
 
   const handleComplete = useCallback(() => {
     onComplete?.();
@@ -85,6 +142,9 @@ export function SimTradingTerminal({
     isFinished: engine.phase === 'FINISHED' || engine.phase === 'RESULT'
   });
 
+  // Indicators Logic
+  const indicators = useIndicators(engine.candles);
+
   // ─── Keyboard Shortcuts ──────────────────────────────────────────────────
 
   useEffect(() => {
@@ -94,11 +154,32 @@ export function SimTradingTerminal({
         document.activeElement instanceof HTMLInputElement ||
         document.activeElement instanceof HTMLTextAreaElement
       ) {
+        if (e.code === 'Escape') {
+           (document.activeElement as HTMLElement).blur();
+        }
         return;
       }
 
       switch (e.code) {
+        case 'Escape':
+          // Drawing cancellation has priority over panel closing / mode exit.
+          if (activeTool === 'drawings' && drawingInProgress) {
+            e.preventDefault();
+            return;
+          }
+
+          if (activePanel !== 'none') {
+            e.preventDefault();
+            setActivePanel('none');
+          } else if (activeTool !== 'cursor') {
+            e.preventDefault();
+            setActiveTool('cursor');
+          }
+          break;
         case 'Space':
+          if (activeTool === 'drawings') {
+            return;
+          }
           e.preventDefault();
           playback.playing ? playback.pause() : playback.play();
           break;
@@ -123,7 +204,7 @@ export function SimTradingTerminal({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [playback, engine]);
+  }, [playback, engine, activePanel, activeTool, drawingInProgress]);
 
   // ─── Loading / Error ────────────────────────────────────────────────────────
 
@@ -178,67 +259,115 @@ export function SimTradingTerminal({
   const isPausedAtStart =
     !playback.playing && !isFinished && engine.phase === 'READY';
   const isPaused = !playback.playing && !isFinished;
+  const isReadyPhase = engine.phase === 'READY';
+  const showPlaybackControls = ['READY', 'PAUSED', 'PLAYING', 'FINISHED', 'SUBMITTING'].includes(engine.phase);
 
   // ─── Layout ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex h-screen max-h-screen flex-col gap-2 p-3 bg-background overflow-hidden">
-      {/* Top: AccountSummary + Help button */}
-      <div className="flex items-center gap-2">
-        <div className="flex-1">
-          <AccountSummary
-            engineState={engineState}
-            initialBalance={initialBalance}
-          />
-        </div>
-        <button
-          onClick={handleOpenHelp}
-          className="flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-foreground"
-          title={t('sim.terminal.helpTitle')}
-        >
-          <HelpCircle className="h-3.5 w-3.5" />
-          {t('sim.terminal.helpButton')}
-        </button>
-      </div>
+    <div className="flex h-full w-full bg-background overflow-hidden text-foreground antialiased selection:bg-primary/30">
+      {/* 1. LEFT SIDEBAR (Tools) */}
+      <TerminalSidebar activeTool={activeTool} onToolChange={handleToolChange} />
 
-      {/* Middle: Chart + Right panel */}
-      <div className="flex min-h-0 flex-1 gap-2">
-        {/* Chart + Onboarding overlay */}
+      {/* 2. CENTER (Chart Area) */}
+      <main className="flex-1 relative flex flex-col min-w-0 bg-background">
         <div className="relative flex-1 min-w-0 min-h-0">
           <CandlesChart
             candles={candles}
             visibleCount={visibleCount}
             onTimeClick={engine.jumpToTimestamp}
             onUpdateProtection={engine.updateProtection}
+            onChartLoad={handleChartLoad}
             engineState={engineState}
+            maSeries={indicators.maSeries}
+            emaSeries={indicators.emaSeries}
+            rsiSeries={indicators.rsiSeries}
           />
 
-          {/* Paused overlay — prominent, on top of chart */}
-          {isPaused && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
-              <button
-                onClick={playback.play}
-                className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-primary/30 bg-background/90 px-6 py-4 shadow-2xl backdrop-blur-sm transition hover:border-primary/70 hover:scale-105 active:scale-100"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg">
-                  <Play className="h-6 w-6" />
-                </div>
-                <div className="text-left">
-                  <div className="text-base font-bold">
-                    {isPausedAtStart
-                      ? t('sim.terminal.overlay.startTitle')
-                      : t('sim.terminal.overlay.continueTitle')}
+          {/* Tool Overlays */}
+          <DrawingOverlay 
+            active={activeTool === 'drawings'} 
+            chart={chartApi}
+            series={mainSeries}
+            onDrawingStateChange={setDrawingInProgress}
+          />
+          
+          {/* Replay Selection Mode Banner */}
+          {activeTool === 'replay' && engine.phase === 'READY' && (
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40 animate-in slide-in-from-top-2 duration-300">
+              <div className="flex items-center gap-2 rounded-full border border-primary/30 bg-background/95 px-4 py-2 shadow-xl backdrop-blur-md">
+                <div className="h-2 w-2 animate-pulse rounded-full bg-primary" />
+                <span className="text-xs font-bold uppercase tracking-widest text-foreground">
+                  {t('sim.terminal.replayBanner.title')}
+                </span>
+                <span className="text-[10px] text-muted-foreground">
+                  {t('sim.terminal.replayBanner.hint')}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {activePanel === 'search' && (
+            <SearchOverlay 
+              onClose={() => setActivePanel('none')} 
+              onSearch={(symbol) => {
+                console.log(`[Terminal] Symbol search: ${symbol}`);
+                toast.success(t('sim.terminal.searchChangedSymbol', { symbol }));
+              }}
+            />
+          )}
+
+          {activePanel === 'indicators' && (
+             <IndicatorsPanel 
+                onClose={() => setActivePanel('none')}
+                activeIndicators={{
+                  ma: indicators.state.ma.enabled,
+                  ema: indicators.state.ema.enabled,
+                  rsi: indicators.state.rsi.enabled,
+                }}
+                onToggle={(id) => {
+                  if (id === 'ma') indicators.toggleMA();
+                  if (id === 'ema') indicators.toggleEMA();
+                  if (id === 'rsi') indicators.toggleRSI();
+                }}
+             />
+          )}
+
+          {/* Floating Playback Controls (bottom-center) - Session shell controls, independent from replay tool */}
+          {showPlaybackControls && (
+            <div
+              className={`absolute left-1/2 -translate-x-1/2 z-30 w-full px-4 pointer-events-none animate-in slide-in-from-bottom-4 duration-300 ${
+                isReadyPhase ? 'bottom-4 max-w-xl' : 'bottom-6 max-w-2xl'
+              }`}
+            >
+              <div className="pointer-events-auto">
+                {/* Subtle Paused Status (replaces giant centered overlay) */}
+                {isPaused && !isFinished && !isPausedAtStart && (
+                  <div className="mb-2 flex justify-center animate-in fade-in slide-in-from-bottom-1 duration-500">
+                    <div className="flex items-center gap-2 rounded-md border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] text-amber-500/80 backdrop-blur-sm">
+                      {t('sim.terminal.playbackPaused')}
+                    </div>
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    {isPausedAtStart
-                      ? t('sim.terminal.overlay.startHint')
-                      : t('sim.terminal.overlay.pausedHint', {
-                          visible: visibleCount,
-                          total: candles.length
-                        })}
-                  </div>
-                </div>
-              </button>
+                )}
+                
+                <PlaybackControls
+                  playing={playback.playing}
+                  speed={playback.speed}
+                  visibleCount={visibleCount}
+                  totalCandles={candles.length}
+                  candles={candles}
+                  isFinished={isFinished}
+                  isLoading={engine.phase === 'SUBMITTING'}
+                  onPlay={playback.play}
+                  onPause={playback.pause}
+                  onStepForward={playback.stepForward}
+                  onStepBackward={playback.stepBackward}
+                  onJumpTo={engine.jumpTo}
+                  onSkipToEnd={engine.skipToEnd}
+                  onSetSpeed={playback.setSpeed}
+                  floating
+                />
+              </div>
             </div>
           )}
 
@@ -249,9 +378,33 @@ export function SimTradingTerminal({
             </div>
           )}
         </div>
+      </main>
 
-        {/* Right: OrderTicket + PositionPanel */}
-        <div className="flex w-52 shrink-0 flex-col gap-2 overflow-y-auto">
+      {/* 3. RIGHT PANEL (Trading / Info) */}
+      <aside className="w-[320px] shrink-0 border-l border-border bg-card flex flex-col min-h-0 overflow-hidden">
+        {/* Account Info Section */}
+        <div className="p-4 border-b border-border bg-card/50">
+          <div className="flex items-center justify-between mb-3">
+             <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+               <LayoutGrid className="h-3.5 w-3.5" />
+               {t('sim.terminal.accountTerminal')}
+             </h2>
+             <button
+                onClick={handleOpenHelp}
+                className="text-muted-foreground hover:text-foreground transition"
+                title={t('sim.terminal.helpTitle')}
+              >
+                <HelpCircle className="h-4 w-4" />
+              </button>
+          </div>
+          <AccountSummary
+            engineState={engineState}
+            initialBalance={initialBalance}
+          />
+        </div>
+
+        {/* Action Panel (Order + Position) */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
           <OrderTicket
             onPlaceOrder={(order) =>
               engine.placeOrder(order as Omit<OrderRequest, 'candleIndex'>)
@@ -259,105 +412,85 @@ export function SimTradingTerminal({
             disabled={isFinished}
             currentPrice={currentPrice}
           />
+          
           <PositionPanel
             position={engineState.position}
             onClose={engine.closePosition}
             disabled={isFinished}
           />
+
+          <SessionStats engineState={engineState} initialBalance={initialBalance} />
+
+          {/* Data Tabs (Orders, Fills, Metrics) */}
+          <div className="rounded-lg border border-border bg-background overflow-hidden flex flex-col">
+            <div className="flex border-b border-border bg-muted/30">
+              {(['orders', 'fills', 'metrics'] as BottomTab[]).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setBottomTab(tab)}
+                  className={`flex-1 px-3 py-2 text-[10px] font-bold uppercase tracking-wider transition capitalize ${
+                    bottomTab === tab
+                      ? 'bg-background text-primary border-b-2 border-primary'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                  }`}
+                >
+                  {tab === 'orders'
+                    ? t('sim.terminal.tabs.orders')
+                    : tab === 'fills'
+                      ? t('sim.terminal.tabs.fills')
+                      : t('sim.terminal.tabs.metrics')}
+                </button>
+              ))}
+            </div>
+            <div className="max-h-64 overflow-y-auto p-2 min-h-[120px]">
+              {bottomTab === 'orders' && (
+                <OrdersPanel
+                  engineState={engineState}
+                  onCancel={engine.cancelOrder}
+                  disabled={isFinished}
+                />
+              )}
+              {bottomTab === 'fills' && (
+                <FillsPanel fills={engineState.fills ?? []} />
+              )}
+              {bottomTab === 'metrics' && <MetricsPanel result={engine.result} />}
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* Session Stats Panel */}
-      <SessionStats engineState={engineState} initialBalance={initialBalance} />
-
-      {/* Bottom tabs: Orders / Fills / Metrics */}
-      <div className="flex shrink-0 flex-col gap-1.5 rounded-lg border bg-card">
-        {/* Tab bar */}
-        <div className="flex border-b">
-          {(['orders', 'fills', 'metrics'] as BottomTab[]).map((tab) => (
+        {/* Bottom Bar: Submit Button */}
+        <div className="p-4 border-t border-border bg-card">
+          {(engine.phase === 'FINISHED' || engine.phase === 'SUBMITTING') ? (
             <button
-              key={tab}
-              onClick={() => setBottomTab(tab)}
-              className={`px-4 py-1.5 text-xs font-medium transition capitalize ${
-                bottomTab === tab
-                  ? 'border-b-2 border-primary text-primary'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
+              onClick={engine.submit}
+              disabled={engine.phase === 'SUBMITTING'}
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 shadow-lg shadow-primary/20 disabled:opacity-50"
             >
-              {tab === 'orders'
-                ? t('sim.terminal.tabs.orders')
-                : tab === 'fills'
-                  ? t('sim.terminal.tabs.fills')
-                  : t('sim.terminal.tabs.metrics')}
+              {engine.phase === 'SUBMITTING' ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {t('sim.terminal.submitting')}
+                </>
+              ) : (
+                t('sim.terminal.submitButton')
+              )}
             </button>
-          ))}
-        </div>
-
-        {/* Tab content */}
-        <div className="max-h-36 overflow-y-auto px-3 pb-2">
-          {bottomTab === 'orders' && (
-            <OrdersPanel
-              engineState={engineState}
-              onCancel={engine.cancelOrder}
-              disabled={isFinished}
-            />
-          )}
-          {bottomTab === 'fills' && (
-            <FillsPanel fills={engineState.fills ?? []} />
-          )}
-          {bottomTab === 'metrics' && <MetricsPanel result={engine.result} />}
-        </div>
-      </div>
-
-      {/* Playback Controls */}
-      <PlaybackControls
-        playing={playback.playing}
-        speed={playback.speed}
-        visibleCount={visibleCount}
-        totalCandles={candles.length}
-        candles={candles}
-        isFinished={isFinished}
-        isLoading={engine.phase === 'SUBMITTING'}
-        onPlay={playback.play}
-        onPause={playback.pause}
-        onStepForward={playback.stepForward}
-        onStepBackward={playback.stepBackward}
-        onJumpTo={engine.jumpTo}
-        onSkipToEnd={engine.skipToEnd}
-        onSetSpeed={playback.setSpeed}
-      />
-
-      {/* Submit button when finished */}
-      {engine.phase === 'FINISHED' && (
-        <button
-          onClick={engine.submit}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
-        >
-          {engine.phase === 'FINISHED' ? (
-            t('sim.terminal.submitButton')
           ) : (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              {t('sim.terminal.submitting')}
-            </>
+            <div className="text-[10px] font-bold text-center text-muted-foreground uppercase tracking-widest">
+              {t('sim.terminal.liveSessionActive')}
+            </div>
           )}
-        </button>
-      )}
-      {engine.phase === 'SUBMITTING' && (
-        <div className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary/50 py-2.5 text-sm font-semibold text-primary-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          {t('sim.terminal.submitting')}
         </div>
-      )}
+      </aside>
 
       {/* Error toast */}
       {engine.error && (
-        <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-1.5 text-xs text-destructive">
+        <div className="fixed bottom-4 right-4 z-50 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-2 text-xs text-destructive backdrop-blur-md shadow-2xl animate-in fade-in slide-in-from-bottom-2">
           {engine.error}
         </div>
       )}
 
-      {/* Help Drawer (internal — used when no external handler) */}
+      {/* Help Drawer */}
       {!externalHelpOpen && (
         <HelpDrawer
           open={helpOpen}

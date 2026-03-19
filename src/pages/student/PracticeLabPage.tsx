@@ -98,131 +98,133 @@ export default function PracticeLabPage() {
   }
 
   return (
-    <div className="mx-auto max-w-xl py-8 px-4">
-      {/* Header */}
-      <div className="mb-8 flex items-start justify-between">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <BarChart2 className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold">{t('app.lab.title')}</h1>
+    <div className="p-6">
+      <div className="mx-auto max-w-xl py-8 px-4">
+        {/* Header */}
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <BarChart2 className="h-6 w-6 text-primary" />
+              <h1 className="text-2xl font-bold">{t('app.lab.title')}</h1>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {t('app.lab.subtitle')}
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground">
-            {t('app.lab.subtitle')}
-          </p>
+          <Link
+            to={`/t/${slug}/app/lab/history`}
+            className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition hover:bg-accent"
+          >
+            <History className="h-3.5 w-3.5" />
+            {t('app.lab.historyLink')}
+          </Link>
         </div>
-        <Link
-          to={`/t/${slug}/app/lab/history`}
-          className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition hover:bg-accent"
+
+        {/* Config Form */}
+        <form
+          onSubmit={handleSubmit(onStart)}
+          className="space-y-5 rounded-xl border bg-card p-6"
         >
-          <History className="h-3.5 w-3.5" />
-          {t('app.lab.historyLink')}
-        </Link>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            {t('app.lab.form.title')}
+          </h2>
+
+          {/* Candles + Timeframe */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">
+                {t('app.lab.form.candles')}
+              </label>
+              <input
+                type="number"
+                className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                {...register('numCandles')}
+              />
+              {errors.numCandles && (
+                <p className="mt-1 text-xs text-destructive">
+                  {errors.numCandles.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">
+                {t('app.lab.form.timeframe')}
+              </label>
+              <select
+                className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                {...register('timeframeMs')}
+              >
+                {TIMEFRAMES.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Volatilidade + Trend */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">
+                {t('app.lab.form.volatility')}
+              </label>
+              <input
+                type="number"
+                step="0.001"
+                className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                {...register('volatility')}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">
+                {t('app.lab.form.trend')}
+              </label>
+              <input
+                type="number"
+                step="0.1"
+                min="-1"
+                max="1"
+                className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                {...register('trend')}
+              />
+            </div>
+          </div>
+
+          {/* Spread + Saldo */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">
+                {t('app.lab.form.spread')}
+              </label>
+              <input
+                type="number"
+                className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                {...register('spreadBps')}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">
+                {t('app.lab.form.balance')}
+              </label>
+              <input
+                type="number"
+                className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                {...register('initialBalance')}
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
+          >
+            <TrendingUp className="h-4 w-4" />
+            {loading ? t('app.lab.form.submitLoading') : t('app.lab.form.submit')}
+          </button>
+        </form>
       </div>
-
-      {/* Config Form */}
-      <form
-        onSubmit={handleSubmit(onStart)}
-        className="space-y-5 rounded-xl border bg-card p-6"
-      >
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          {t('app.lab.form.title')}
-        </h2>
-
-        {/* Candles + Timeframe */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-medium text-muted-foreground mb-1">
-              {t('app.lab.form.candles')}
-            </label>
-            <input
-              type="number"
-              className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              {...register('numCandles')}
-            />
-            {errors.numCandles && (
-              <p className="mt-1 text-xs text-destructive">
-                {errors.numCandles.message}
-              </p>
-            )}
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-muted-foreground mb-1">
-              {t('app.lab.form.timeframe')}
-            </label>
-            <select
-              className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              {...register('timeframeMs')}
-            >
-              {TIMEFRAMES.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Volatilidade + Trend */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-medium text-muted-foreground mb-1">
-              {t('app.lab.form.volatility')}
-            </label>
-            <input
-              type="number"
-              step="0.001"
-              className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              {...register('volatility')}
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-muted-foreground mb-1">
-              {t('app.lab.form.trend')}
-            </label>
-            <input
-              type="number"
-              step="0.1"
-              min="-1"
-              max="1"
-              className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              {...register('trend')}
-            />
-          </div>
-        </div>
-
-        {/* Spread + Saldo */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-medium text-muted-foreground mb-1">
-              {t('app.lab.form.spread')}
-            </label>
-            <input
-              type="number"
-              className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              {...register('spreadBps')}
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-muted-foreground mb-1">
-              {t('app.lab.form.balance')}
-            </label>
-            <input
-              type="number"
-              className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              {...register('initialBalance')}
-            />
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
-        >
-          <TrendingUp className="h-4 w-4" />
-          {loading ? t('app.lab.form.submitLoading') : t('app.lab.form.submit')}
-        </button>
-      </form>
     </div>
   );
 }

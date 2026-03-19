@@ -535,7 +535,7 @@ function SimTradingChallengeFlow({
   // PHASE: BRIEFING
   if (phase === 'BRIEFING') {
     return (
-      <>
+      <div className="p-6">
         <ChallengeBriefingScreen
           briefing={briefing}
           onStart={() => setPhase('TERMINAL')}
@@ -547,7 +547,7 @@ function SimTradingChallengeFlow({
           onClose={() => setHelpOpen(false)}
           onRestartTutorial={tutorial.restart}
         />
-      </>
+      </div>
     );
   }
 

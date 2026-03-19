@@ -32,39 +32,49 @@ export function AccountSummary({
   const items = [
     {
       label: t('sim.accountSummary.balance'),
-      value: `$${engineState.balance.toFixed(2)}`,
+      value: `$${engineState.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       color: 'text-foreground'
     },
     {
       label: t('sim.accountSummary.equity'),
-      value: `$${engineState.equity.toFixed(2)}`,
+      value: `$${engineState.equity.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       color: 'text-foreground'
     },
     {
       label: t('sim.accountSummary.pnl'),
-      value: `${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)} (${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(2)}%)`,
+      value: `${pnl >= 0 ? '+' : ''}$${Math.abs(pnl).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      subValue: `${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(2)}%`,
       color: pnl >= 0 ? 'text-emerald-400' : 'text-red-400'
     },
     {
       label: t('sim.accountSummary.fees'),
       value: `$${fees.toFixed(2)}`,
-      color: 'text-orange-400'
+      color: 'text-muted-foreground'
     },
     {
       label: t('sim.accountSummary.maxDD'),
       value: `${maxDDPct.toFixed(2)}%`,
-      color: 'text-yellow-400'
+      color: 'text-yellow-500/80'
     }
   ];
 
   return (
-    <div className="flex flex-wrap gap-x-4 gap-y-1 rounded-lg border bg-card px-4 py-2">
+    <div className="grid grid-cols-2 gap-x-4 gap-y-3">
       {items.map((item) => (
-        <div key={item.label} className="flex items-center gap-1.5 text-xs">
-          <span className="text-muted-foreground">{item.label}:</span>
-          <span className={cn('font-mono font-semibold', item.color)}>
-            {item.value}
+        <div key={item.label} className="flex flex-col gap-0.5">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
+            {item.label}
           </span>
+          <div className="flex items-baseline gap-1.5">
+            <span className={cn('font-mono text-sm font-bold tracking-tight', item.color)}>
+              {item.value}
+            </span>
+            {item.subValue && (
+              <span className={cn('font-mono text-[10px] font-medium opacity-80', item.color)}>
+                {item.subValue}
+              </span>
+            )}
+          </div>
         </div>
       ))}
     </div>

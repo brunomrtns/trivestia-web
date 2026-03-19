@@ -594,7 +594,18 @@
       "toast": {
         "success": "¡Bienvenido, {{name}}!",
         "error": "Correo electrónico o contraseña no válidos."
-      }
+      },
+      "orContinueWith": "O continuar con",
+      "google": {
+        "error": "La autenticación con Google falló."
+      },
+      "stats": {
+        "totalTrades": "Operaciones totales",
+        "winRate": "Tasa de aciertos",
+        "totalPnl": "PnL acumulado",
+        "avgR": "Promedio R"
+      },
+      "invalidProtection": "Nivel de protección no válido."
     },
     "register": {
       "title": "Crear una cuenta",
@@ -1500,7 +1511,9 @@
       "skipToEndTitle": "Saltar al final",
       "speedLabel": "Velocidad:",
       "finished": "✓ Fin",
-      "progress": "Vela {{visible}}/{{total}}"
+      "progress": "Vela {{visible}}/{{total}}",
+      "stepBackwardTitle": "Atrás 1 vela",
+      "candlesLabel": "Velas"
     },
     "position": {
       "flat": "Ninguna posición abierta",
@@ -1538,11 +1551,69 @@
         "orders": "Órdenes",
         "fills": "Rellenos",
         "metrics": "Métrica"
+      },
+      "settingsUnderConstruction": "Panel de configuración en construcción",
+      "searchChangedSymbol": "El símbolo cambió a {{symbol}}",
+      "replayBanner": {
+        "title": "Modo de selección de repetición",
+        "hint": "• Haga clic en una vela para establecer el punto de partida"
+      },
+      "playbackPaused": "Reproducción en pausa",
+      "accountTerminal": "terminal de cuenta",
+      "liveSessionActive": "Sesión activa",
+      "drawing": {
+        "instructions": {
+          "setStartPoint": "Dibujo: establecer el punto de partida",
+          "finalizeLine": "Haga clic nuevamente para finalizar la línea.",
+          "escapeHint": "ESC cancela la línea actual"
+        },
+        "initializingChartInteraction": "Inicializando la interacción del gráfico..."
+      },
+      "tools": {
+        "cursor": "Cursor",
+        "replay": "Repetición",
+        "speed": "Velocidad",
+        "indicators": "Indicadores",
+        "drawings": "Diseños",
+        "layers": "capas",
+        "search": "Símbolo de búsqueda",
+        "settings": "Ajustes"
+      },
+      "search": {
+        "placeholder": "Símbolo de búsqueda (por ejemplo: BTC/USD)",
+        "recentTitle": "Símbolos recientes"
+      },
+      "indicatorsPanel": {
+        "title": "Indicadores",
+        "hint": "Haga clic para cambiar de indicador en el área del gráfico.",
+        "items": {
+          "ma": {
+            "name": "Media móvil (SMA)",
+            "description": "Media móvil simple de 20 períodos"
+          },
+          "ema": {
+            "name": "Media móvil exponencial (EMA)",
+            "description": "Media móvil exponencial de 50 períodos"
+          },
+          "rsi": {
+            "name": "Índice de fuerza relativa (RSI)",
+            "description": "Oscilador de momento (14 periodos)"
+          }
+        }
+      },
+      "playbackAnchor": {
+        "expand": "Ampliar los controles de reproducción",
+        "collapse": "Contraer controles de reproducción"
       }
     },
     "engine": {
       "loadError": "Escenario de error al cargar",
       "submitError": "Error al enviar el resultado"
+    },
+    "stats": {
+      "sessionPerformance": "Rendimiento de la sesión",
+      "totalTrades": "Operaciones totales",
+      "totalPnl": "pérdidas y ganancias totales"
     }
   }
 }

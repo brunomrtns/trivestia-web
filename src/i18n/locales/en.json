@@ -1511,7 +1511,9 @@
       "skipToEndTitle": "Skip to end",
       "speedLabel": "Speed:",
       "finished": "✓ End",
-      "progress": "Candle {{visible}}/{{total}}"
+      "progress": "Candle {{visible}}/{{total}}",
+      "stepBackwardTitle": "Back 1 candle",
+      "candlesLabel": "Candles"
     },
     "position": {
       "flat": "No open position",
@@ -1549,11 +1551,69 @@
         "orders": "Orders",
         "fills": "Fillers",
         "metrics": "Metrics"
+      },
+      "settingsUnderConstruction": "Settings panel under construction",
+      "searchChangedSymbol": "Symbol changed to {{symbol}}",
+      "replayBanner": {
+        "title": "Replay selection mode",
+        "hint": "• Click on a candle to set the starting point"
+      },
+      "playbackPaused": "Playback paused",
+      "accountTerminal": "Account terminal",
+      "liveSessionActive": "Active session",
+      "drawing": {
+        "instructions": {
+          "setStartPoint": "Drawing: set the starting point",
+          "finalizeLine": "Click again to end the line",
+          "escapeHint": "ESC cancels the current line"
+        },
+        "initializingChartInteraction": "Initializing graph interaction..."
+      },
+      "tools": {
+        "cursor": "Cursor",
+        "replay": "Replay",
+        "speed": "Speed",
+        "indicators": "Indicators",
+        "drawings": "Designs",
+        "layers": "Layers",
+        "search": "Search symbol",
+        "settings": "Settings"
+      },
+      "search": {
+        "placeholder": "Search symbol (e.g.: BTC/USD)",
+        "recentTitle": "Recent Symbols"
+      },
+      "indicatorsPanel": {
+        "title": "Indicators",
+        "hint": "Click to switch indicators in the chart area.",
+        "items": {
+          "ma": {
+            "name": "Moving Average (SMA)",
+            "description": "20 Period Simple Moving Average"
+          },
+          "ema": {
+            "name": "Exponential Moving Average (EMA)",
+            "description": "50-period exponential moving average"
+          },
+          "rsi": {
+            "name": "Relative Strength Index (RSI)",
+            "description": "Momentum oscillator (14 periods)"
+          }
+        }
+      },
+      "playbackAnchor": {
+        "expand": "Expand playback controls",
+        "collapse": "Collapse playback controls"
       }
     },
     "engine": {
       "loadError": "Error loading scenario",
       "submitError": "Error sending result"
+    },
+    "stats": {
+      "sessionPerformance": "Session performance",
+      "totalTrades": "Total operations",
+      "totalPnl": "total P&L"
     }
   }
 }

@@ -1464,6 +1464,11 @@
       "feesTotal": "Fees Total",
       "events": "Eventos"
     },
+    "stats": {
+      "sessionPerformance": "Performance da sessão",
+      "totalTrades": "Total de operações",
+      "totalPnl": "P&L total"
+    },
     "tutorial": {
       "stepOf": "Passo {{current}} de {{total}}",
       "closeTitle": "Fechar tutorial",
@@ -1507,11 +1512,13 @@
       "playTitle": "Iniciar simulação",
       "pausedAtStartHint": "▶ Pressione Play para iniciar",
       "pausedLabel": "Pausado",
+      "stepBackwardTitle": "Voltar 1 candle",
       "stepForwardTitle": "Avançar 1 candle",
       "skipToEndTitle": "Pular para o fim",
       "speedLabel": "Vel:",
       "finished": "✓ Fim",
-      "progress": "Candle {{visible}}/{{total}}"
+      "progress": "Candle {{visible}}/{{total}}",
+      "candlesLabel": "Velas"
     },
     "position": {
       "flat": "Sem posição aberta",
@@ -1539,6 +1546,59 @@
       "helpButton": "Ajuda",
       "submitButton": "Enviar Resultado",
       "submitting": "Enviando...",
+      "tools": {
+        "cursor": "Cursor",
+        "replay": "Replay",
+        "speed": "Velocidade",
+        "indicators": "Indicadores",
+        "drawings": "Desenhos",
+        "layers": "Camadas",
+        "search": "Buscar símbolo",
+        "settings": "Configurações"
+      },
+      "settingsUnderConstruction": "Painel de configurações em construção",
+      "searchChangedSymbol": "Símbolo alterado para {{symbol}}",
+      "replayBanner": {
+        "title": "Modo de seleção de replay",
+        "hint": "• Clique em um candle para definir o ponto inicial"
+      },
+      "search": {
+        "placeholder": "Buscar símbolo (ex.: BTC/USD)",
+        "recentTitle": "Símbolos recentes"
+      },
+      "indicatorsPanel": {
+        "title": "Indicadores",
+        "hint": "Clique para alternar indicadores na área do gráfico.",
+        "items": {
+          "ma": {
+            "name": "Média Móvel (SMA)",
+            "description": "Média móvel simples de 20 períodos"
+          },
+          "ema": {
+            "name": "Média Móvel Exponencial (EMA)",
+            "description": "Média móvel exponencial de 50 períodos"
+          },
+          "rsi": {
+            "name": "Índice de Força Relativa (RSI)",
+            "description": "Oscilador de momentum (14 períodos)"
+          }
+        }
+      },
+      "playbackPaused": "Playback pausado",
+      "accountTerminal": "Terminal da conta",
+      "liveSessionActive": "Sessão ativa",
+      "playbackAnchor": {
+        "expand": "Expandir controles de playback",
+        "collapse": "Recolher controles de playback"
+      },
+      "drawing": {
+        "instructions": {
+          "setStartPoint": "Desenho: defina o ponto inicial",
+          "finalizeLine": "Clique novamente para finalizar a linha",
+          "escapeHint": "ESC cancela a linha atual"
+        },
+        "initializingChartInteraction": "Inicializando interação do gráfico..."
+      },
       "overlay": {
         "startTitle": "Iniciar Simulação",
         "continueTitle": "Continuar",

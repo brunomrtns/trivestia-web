@@ -31,6 +31,7 @@ interface CandlesChartProps {
   rsiSeries?: number[] | null;
   onTimeClick?: (timestamp: number) => void;
   onUpdateProtection?: (sl?: number, tp?: number) => void;
+  onChartLoad?: (chart: IChartApi | null, series: ISeriesApi<'Candlestick'> | null) => void;
   engineState?: SimulationState | null;
 }
 
@@ -42,6 +43,7 @@ export function CandlesChart({
   rsiSeries,
   onTimeClick,
   onUpdateProtection,
+  onChartLoad,
   engineState
 }: CandlesChartProps) {
   const { t } = useTranslation();
@@ -92,6 +94,10 @@ export function CandlesChart({
         rightBarStaysOnScroll: true
       },
       rightPriceScale: { borderColor: 'rgba(255,255,255,0.1)' },
+      leftPriceScale: {
+        visible: true,
+        borderColor: 'rgba(255,255,255,0.1)',
+      },
       width: containerRef.current.clientWidth,
       height: containerRef.current.clientHeight
     });
@@ -117,6 +123,14 @@ export function CandlesChart({
     seriesRef.current = series as any;
     pathsSeriesRef.current = pathsSeries as any;
     setChart(c);
+
+    if (onChartLoad) {
+      console.log('[CandlesChart] onChartLoad(create)', {
+        hasChart: !!c,
+        hasSeries: !!series,
+      });
+      onChartLoad(c, series as any);
+    }
 
     c.subscribeClick((param) => {
       if (!param.time || !onTimeClick) return;
@@ -144,8 +158,24 @@ export function CandlesChart({
       rsiSeriesRef.current = null;
       pathsSeriesRef.current = null;
       setChart(null);
+      if (onChartLoad) {
+        console.log('[CandlesChart] onChartLoad(cleanup)', {
+          hasChart: false,
+          hasSeries: false,
+        });
+        onChartLoad(null, null);
+      }
     };
-  }, []);
+  }, [onChartLoad]);
+
+  useEffect(() => {
+    if (!onChartLoad || !chartRef.current || !seriesRef.current) return;
+    console.log('[CandlesChart] onChartLoad(sync)', {
+      hasChart: !!chartRef.current,
+      hasSeries: !!seriesRef.current,
+    });
+    onChartLoad(chartRef.current, seriesRef.current as any);
+  }, [onChartLoad, chart]);
 
   // ─── Atualização de Dados (Candles) ────────────────────────────────────────
 
@@ -220,11 +250,14 @@ export function CandlesChart({
         lineWidth: 1,
         priceLineVisible: false,
         lastValueVisible: false,
-        priceScaleId: 'rsi'
+        priceScaleId: 'left'
       }, 1) as any);
       rsiSeriesRef.current = rsiLineSeries;
       if (isNewRsiSeries) {
-        c.priceScale('rsi').applyOptions({ scaleMargins: { top: 0.1, bottom: 0.1 } });
+        c.priceScale('left').applyOptions({ 
+          scaleMargins: { top: 0.8, bottom: 0.05 },
+          visible: true
+        });
       }
       const rsiData: LineData[] = rsiSeries
         .slice(0, visibleCount)
@@ -234,6 +267,8 @@ export function CandlesChart({
     } else if (rsiSeriesRef.current) {
       c.removeSeries(rsiSeriesRef.current);
       rsiSeriesRef.current = null;
+      // Optionally hide left scale if no other series uses it
+      c.priceScale('left').applyOptions({ visible: false });
     }
   }, [candles, visibleCount, maSeries, emaSeries, rsiSeries]);
 
