@@ -1,7 +1,13 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Loader2, HelpCircle, Play, ChevronLeft, LayoutGrid } from 'lucide-react';
+import {
+  Loader2,
+  HelpCircle,
+  Play,
+  ChevronLeft,
+  LayoutGrid
+} from 'lucide-react';
 import { useSimEngine } from './useSimEngine';
 import { usePlayback } from './usePlayback';
 import { CandlesChart } from './CandlesChart';
@@ -43,7 +49,7 @@ interface SimTradingTerminalProps {
 // ─── Tab types ────────────────────────────────────────────────────────────────
 
 type BottomTab = 'orders' | 'fills' | 'metrics';
-type ActivePanel = 'none' | 'search' | 'indicators' | 'settings';
+type ActivePanel = 'none' | 'search' | 'indicators';
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -69,31 +75,34 @@ export function SimTradingTerminal({
   const [mainSeries, setMainSeries] = useState<any>(null);
   const tutorial = useTutorialProgress();
 
-  const handleChartLoad = useCallback((chart: any | null, series: any | null) => {
-    setChartApi(chart);
-    setMainSeries(series);
-  }, []);
+  const handleChartLoad = useCallback(
+    (chart: any | null, series: any | null) => {
+      setChartApi(chart);
+      setMainSeries(series);
+    },
+    []
+  );
 
-  const handleToolChange = useCallback((toolId: string) => {
-    // 1. Determine if the tool is a 'Panel' (ephemeral UI) or a 'Mode' (interaction state)
-    const isPanel = ['search', 'indicators', 'settings'].includes(toolId);
+  const handleToolChange = useCallback(
+    (toolId: string) => {
+      // 1. Determine if the tool is a 'Panel' (ephemeral UI) or a 'Mode' (interaction state)
+      const isPanel = ['search', 'indicators'].includes(toolId);
 
-    if (isPanel) {
-      // Toggle panel without losing current interaction mode
-      setActivePanel(prev => prev === toolId ? 'none' : toolId as ActivePanel);
-      console.log(`[Terminal] Panel toggled: ${toolId}`);
-      
-      if (toolId === 'settings') {
-        toast.info(t('sim.terminal.settingsUnderConstruction'));
-         setActivePanel('none');
+      if (isPanel) {
+        // Toggle panel without losing current interaction mode
+        setActivePanel((prev) =>
+          prev === toolId ? 'none' : (toolId as ActivePanel)
+        );
+        console.log(`[Terminal] Panel toggled: ${toolId}`);
+      } else {
+        // Switch interaction mode and close any open panels
+        setActiveTool(toolId);
+        setActivePanel('none');
+        console.log(`[Terminal] Mode selected: ${toolId}`);
       }
-    } else {
-      // Switch interaction mode and close any open panels
-      setActiveTool(toolId);
-      setActivePanel('none');
-      console.log(`[Terminal] Mode selected: ${toolId}`);
-    }
-  }, [t]);
+    },
+    [t]
+  );
 
   // Update cursor based on active tool
   useEffect(() => {
@@ -102,13 +111,12 @@ export function SimTradingTerminal({
       drawings: 'crosshair',
       replay: 'copy', // Using 'copy' or 'crosshair' for replay selection feel
       indicators: 'default',
-      settings: 'default',
       search: 'text'
     };
-    
+
     const newCursor = cursorMap[activeTool] || 'default';
     document.body.style.cursor = newCursor;
-    
+
     return () => {
       document.body.style.cursor = 'default';
     };
@@ -155,7 +163,7 @@ export function SimTradingTerminal({
         document.activeElement instanceof HTMLTextAreaElement
       ) {
         if (e.code === 'Escape') {
-           (document.activeElement as HTMLElement).blur();
+          (document.activeElement as HTMLElement).blur();
         }
         return;
       }
@@ -260,14 +268,23 @@ export function SimTradingTerminal({
     !playback.playing && !isFinished && engine.phase === 'READY';
   const isPaused = !playback.playing && !isFinished;
   const isReadyPhase = engine.phase === 'READY';
-  const showPlaybackControls = ['READY', 'PAUSED', 'PLAYING', 'FINISHED', 'SUBMITTING'].includes(engine.phase);
+  const showPlaybackControls = [
+    'READY',
+    'PAUSED',
+    'PLAYING',
+    'FINISHED',
+    'SUBMITTING'
+  ].includes(engine.phase);
 
   // ─── Layout ────────────────────────────────────────────────────────────────
 
   return (
     <div className="flex h-full w-full bg-background overflow-hidden text-foreground antialiased selection:bg-primary/30">
       {/* 1. LEFT SIDEBAR (Tools) */}
-      <TerminalSidebar activeTool={activeTool} onToolChange={handleToolChange} />
+      <TerminalSidebar
+        activeTool={activeTool}
+        onToolChange={handleToolChange}
+      />
 
       {/* 2. CENTER (Chart Area) */}
       <main className="flex-1 relative flex flex-col min-w-0 bg-background">
@@ -285,13 +302,13 @@ export function SimTradingTerminal({
           />
 
           {/* Tool Overlays */}
-          <DrawingOverlay 
-            active={activeTool === 'drawings'} 
+          <DrawingOverlay
+            active={activeTool === 'drawings'}
             chart={chartApi}
             series={mainSeries}
             onDrawingStateChange={setDrawingInProgress}
           />
-          
+
           {/* Replay Selection Mode Banner */}
           {activeTool === 'replay' && engine.phase === 'READY' && (
             <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40 animate-in slide-in-from-top-2 duration-300">
@@ -308,29 +325,31 @@ export function SimTradingTerminal({
           )}
 
           {activePanel === 'search' && (
-            <SearchOverlay 
-              onClose={() => setActivePanel('none')} 
+            <SearchOverlay
+              onClose={() => setActivePanel('none')}
               onSearch={(symbol) => {
                 console.log(`[Terminal] Symbol search: ${symbol}`);
-                toast.success(t('sim.terminal.searchChangedSymbol', { symbol }));
+                toast.success(
+                  t('sim.terminal.searchChangedSymbol', { symbol })
+                );
               }}
             />
           )}
 
           {activePanel === 'indicators' && (
-             <IndicatorsPanel 
-                onClose={() => setActivePanel('none')}
-                activeIndicators={{
-                  ma: indicators.state.ma.enabled,
-                  ema: indicators.state.ema.enabled,
-                  rsi: indicators.state.rsi.enabled,
-                }}
-                onToggle={(id) => {
-                  if (id === 'ma') indicators.toggleMA();
-                  if (id === 'ema') indicators.toggleEMA();
-                  if (id === 'rsi') indicators.toggleRSI();
-                }}
-             />
+            <IndicatorsPanel
+              onClose={() => setActivePanel('none')}
+              activeIndicators={{
+                ma: indicators.state.ma.enabled,
+                ema: indicators.state.ema.enabled,
+                rsi: indicators.state.rsi.enabled
+              }}
+              onToggle={(id) => {
+                if (id === 'ma') indicators.toggleMA();
+                if (id === 'ema') indicators.toggleEMA();
+                if (id === 'rsi') indicators.toggleRSI();
+              }}
+            />
           )}
 
           {/* Floating Playback Controls (bottom-center) - Session shell controls, independent from replay tool */}
@@ -349,7 +368,7 @@ export function SimTradingTerminal({
                     </div>
                   </div>
                 )}
-                
+
                 <PlaybackControls
                   playing={playback.playing}
                   speed={playback.speed}
@@ -383,19 +402,19 @@ export function SimTradingTerminal({
       {/* 3. RIGHT PANEL (Trading / Info) */}
       <aside className="w-[320px] shrink-0 border-l border-border bg-card flex flex-col min-h-0 overflow-hidden">
         {/* Account Info Section */}
-        <div className="p-4 border-b border-border bg-card/50">
-          <div className="flex items-center justify-between mb-3">
-             <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-               <LayoutGrid className="h-3.5 w-3.5" />
-               {t('sim.terminal.accountTerminal')}
-             </h2>
-             <button
-                onClick={handleOpenHelp}
-                className="text-muted-foreground hover:text-foreground transition"
-                title={t('sim.terminal.helpTitle')}
-              >
-                <HelpCircle className="h-4 w-4" />
-              </button>
+        <div className="p-3 border-b border-border bg-card/50">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+              <LayoutGrid className="h-3.5 w-3.5" />
+              {t('sim.terminal.accountTerminal')}
+            </h2>
+            <button
+              onClick={handleOpenHelp}
+              className="text-muted-foreground hover:text-foreground transition"
+              title={t('sim.terminal.helpTitle')}
+            >
+              <HelpCircle className="h-4 w-4" />
+            </button>
           </div>
           <AccountSummary
             engineState={engineState}
@@ -412,14 +431,17 @@ export function SimTradingTerminal({
             disabled={isFinished}
             currentPrice={currentPrice}
           />
-          
+
           <PositionPanel
             position={engineState.position}
             onClose={engine.closePosition}
             disabled={isFinished}
           />
 
-          <SessionStats engineState={engineState} initialBalance={initialBalance} />
+          <SessionStats
+            engineState={engineState}
+            initialBalance={initialBalance}
+          />
 
           {/* Data Tabs (Orders, Fills, Metrics) */}
           <div className="rounded-lg border border-border bg-background overflow-hidden flex flex-col">
@@ -453,14 +475,16 @@ export function SimTradingTerminal({
               {bottomTab === 'fills' && (
                 <FillsPanel fills={engineState.fills ?? []} />
               )}
-              {bottomTab === 'metrics' && <MetricsPanel result={engine.result} />}
+              {bottomTab === 'metrics' && (
+                <MetricsPanel result={engine.result} />
+              )}
             </div>
           </div>
         </div>
 
         {/* Bottom Bar: Submit Button */}
         <div className="p-4 border-t border-border bg-card">
-          {(engine.phase === 'FINISHED' || engine.phase === 'SUBMITTING') ? (
+          {engine.phase === 'FINISHED' || engine.phase === 'SUBMITTING' ? (
             <button
               onClick={engine.submit}
               disabled={engine.phase === 'SUBMITTING'}

@@ -1,4 +1,10 @@
-import React, { useState, useRef, useEffect, useCallback, useLayoutEffect } from 'react';
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useLayoutEffect
+} from 'react';
 import type { IChartApi, ISeriesApi, Logical } from 'lightweight-charts';
 import { useTranslation } from 'react-i18next';
 
@@ -27,12 +33,21 @@ interface DrawingOverlayProps {
   onDrawingStateChange?: (inProgress: boolean) => void;
 }
 
-export function DrawingOverlay({ active, chart, series, onDrawEnd, onDrawingStateChange }: DrawingOverlayProps) {
+export function DrawingOverlay({
+  active,
+  chart,
+  series,
+  onDrawEnd,
+  onDrawingStateChange
+}: DrawingOverlayProps) {
   const { t } = useTranslation();
   const [lines, setLines] = useState<Line[]>([]);
-  const [currentLine, setCurrentLine] = useState<{ start: ChartPoint; end: ChartPoint } | null>(null);
+  const [currentLine, setCurrentLine] = useState<{
+    start: ChartPoint;
+    end: ChartPoint;
+  } | null>(null);
   const [, setTick] = useState(0); // Used to force re-render on chart pan/zoom
-  
+
   const containerRef = useRef<SVGSVGElement>(null);
   const previewLoggedRef = useRef(false);
   const nullPointLoggedRef = useRef(false);
@@ -40,54 +55,60 @@ export function DrawingOverlay({ active, chart, series, onDrawEnd, onDrawingStat
 
   // ─── Coordinate Conversion ──────────────────────────────────────────────────
 
-  const getChartPoint = useCallback((e: React.MouseEvent | MouseEvent): ChartPoint | null => {
-    if (!containerRef.current || !chart || !series) return null;
-    const rect = containerRef.current.getBoundingClientRect();
-    const rawX = e.clientX - rect.left;
-    const rawY = e.clientY - rect.top;
+  const getChartPoint = useCallback(
+    (e: React.MouseEvent | MouseEvent): ChartPoint | null => {
+      if (!containerRef.current || !chart || !series) return null;
+      const rect = containerRef.current.getBoundingClientRect();
+      const rawX = e.clientX - rect.left;
+      const rawY = e.clientY - rect.top;
 
-    // Clamp coordinates to the drawable area to avoid null conversions on edge clicks.
-    const x = Math.max(0, Math.min(rect.width - 1, rawX));
-    const y = Math.max(0, Math.min(rect.height - 1, rawY));
+      // Clamp coordinates to the drawable area to avoid null conversions on edge clicks.
+      const x = Math.max(0, Math.min(rect.width - 1, rawX));
+      const y = Math.max(0, Math.min(rect.height - 1, rawY));
 
-    const logical = chart.timeScale().coordinateToLogical(x);
-    const price = series.coordinateToPrice(y);
+      const logical = chart.timeScale().coordinateToLogical(x);
+      const price = series.coordinateToPrice(y);
 
-    if (logical === null || price === null) {
-      if (!nullPointLoggedRef.current) {
-        console.log('[DrawingOverlay] coordinate conversion returned null', {
-          logical,
-          price,
-          x,
-          y,
-          width: rect.width,
-          height: rect.height,
-        });
-        nullPointLoggedRef.current = true;
+      if (logical === null || price === null) {
+        if (!nullPointLoggedRef.current) {
+          console.log('[DrawingOverlay] coordinate conversion returned null', {
+            logical,
+            price,
+            x,
+            y,
+            width: rect.width,
+            height: rect.height
+          });
+          nullPointLoggedRef.current = true;
+        }
+        return null;
       }
-      return null;
-    }
 
-    nullPointLoggedRef.current = false;
-    return { logical: logical as Logical, price };
-  }, [chart, series]);
+      nullPointLoggedRef.current = false;
+      return { logical: logical as Logical, price };
+    },
+    [chart, series]
+  );
 
-  const getScreenPoint = useCallback((point: ChartPoint): ScreenPoint | null => {
-    if (!chart || !series) return null;
-    const x = chart.timeScale().logicalToCoordinate(point.logical);
-    const y = series.priceToCoordinate(point.price);
+  const getScreenPoint = useCallback(
+    (point: ChartPoint): ScreenPoint | null => {
+      if (!chart || !series) return null;
+      const x = chart.timeScale().logicalToCoordinate(point.logical);
+      const y = series.priceToCoordinate(point.price);
 
-    if (x === null || y === null) return null;
-    return { x, y };
-  }, [chart, series]);
+      if (x === null || y === null) return null;
+      return { x, y };
+    },
+    [chart, series]
+  );
 
   // ─── Event Subscriptions ───────────────────────────────────────────────────
 
   useLayoutEffect(() => {
     if (!chart) return;
-    
+
     // Force re-render whenever the chart moves/scales
-    const handleUpdate = () => setTick(t => t + 1);
+    const handleUpdate = () => setTick((t) => t + 1);
     const priceScaleApi = chart.priceScale('right') as any;
     const subscribePriceRangeChange =
       typeof priceScaleApi?.subscribePriceRangeChange === 'function'
@@ -97,10 +118,10 @@ export function DrawingOverlay({ active, chart, series, onDrawEnd, onDrawingStat
       typeof priceScaleApi?.unsubscribePriceRangeChange === 'function'
         ? priceScaleApi.unsubscribePriceRangeChange.bind(priceScaleApi)
         : null;
-    
+
     chart.timeScale().subscribeVisibleTimeRangeChange(handleUpdate);
     subscribePriceRangeChange?.(handleUpdate);
-    
+
     return () => {
       chart.timeScale().unsubscribeVisibleTimeRangeChange(handleUpdate);
       unsubscribePriceRangeChange?.(handleUpdate);
@@ -128,7 +149,7 @@ export function DrawingOverlay({ active, chart, series, onDrawEnd, onDrawingStat
     onDrawingStateChange?.(active && !!currentLine);
     console.log('[DrawingOverlay] onDrawingStateChange', {
       active,
-      inProgress: !!currentLine,
+      inProgress: !!currentLine
     });
   }, [active, currentLine, onDrawingStateChange]);
 
@@ -139,7 +160,7 @@ export function DrawingOverlay({ active, chart, series, onDrawEnd, onDrawingStat
       hasSeries: !!series,
       isChartReady,
       hasCurrentLine: !!currentLine,
-      linesCount: lines.length,
+      linesCount: lines.length
     });
   }, [active, chart, series, isChartReady, currentLine, lines.length]);
 
@@ -151,22 +172,25 @@ export function DrawingOverlay({ active, chart, series, onDrawEnd, onDrawingStat
 
   // ─── Interaction Handlers ──────────────────────────────────────────────────
 
-  const finalizeLine = useCallback((end: ChartPoint) => {
-    if (!currentLine) return;
+  const finalizeLine = useCallback(
+    (end: ChartPoint) => {
+      if (!currentLine) return;
 
-    const newLine: Line = {
-      id: Math.random().toString(36).substr(2, 9),
-      start: currentLine.start,
-      end,
-      color: '#4361EE',
-    };
+      const newLine: Line = {
+        id: Math.random().toString(36).substr(2, 9),
+        start: currentLine.start,
+        end,
+        color: '#4361EE'
+      };
 
-    setLines(prev => [...prev, newLine]);
-    setCurrentLine(null);
-    onDrawEnd?.(newLine);
-    previewLoggedRef.current = false;
-    console.log('[Drawing] Line finalized:', newLine);
-  }, [currentLine, onDrawEnd]);
+      setLines((prev) => [...prev, newLine]);
+      setCurrentLine(null);
+      onDrawEnd?.(newLine);
+      previewLoggedRef.current = false;
+      console.log('[Drawing] Line finalized:', newLine);
+    },
+    [currentLine, onDrawEnd]
+  );
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!active || e.button !== 0 || !isChartReady) return;
@@ -174,9 +198,9 @@ export function DrawingOverlay({ active, chart, series, onDrawEnd, onDrawingStat
     console.log('[DrawingOverlay] mouseDown captured', {
       button: e.button,
       isChartReady,
-      hasCurrentLine: !!currentLine,
+      hasCurrentLine: !!currentLine
     });
-    
+
     const point = getChartPoint(e);
     if (!point) return;
 
@@ -200,7 +224,7 @@ export function DrawingOverlay({ active, chart, series, onDrawEnd, onDrawingStat
         console.log('[DrawingOverlay] preview updating');
         previewLoggedRef.current = true;
       }
-      setCurrentLine(prev => prev ? { ...prev, end: point } : null);
+      setCurrentLine((prev) => (prev ? { ...prev, end: point } : null));
     }
   };
 
@@ -212,15 +236,17 @@ export function DrawingOverlay({ active, chart, series, onDrawEnd, onDrawingStat
     const elements: React.ReactNode[] = [];
 
     // Render finalized lines
-    lines.forEach(line => {
+    lines.forEach((line) => {
       const start = getScreenPoint(line.start);
       const end = getScreenPoint(line.end);
       if (start && end) {
         elements.push(
           <line
             key={line.id}
-            x1={start.x} y1={start.y}
-            x2={end.x} y2={end.y}
+            x1={start.x}
+            y1={start.y}
+            x2={end.x}
+            y2={end.y}
             stroke={line.color}
             strokeWidth="2"
             strokeLinecap="round"
@@ -237,8 +263,10 @@ export function DrawingOverlay({ active, chart, series, onDrawEnd, onDrawingStat
         elements.push(
           <line
             key="preview"
-            x1={start.x} y1={start.y}
-            x2={end.x} y2={end.y}
+            x1={start.x}
+            y1={start.y}
+            x2={end.x}
+            y2={end.y}
             stroke="#4361EE"
             strokeWidth="2"
             strokeDasharray="4 4"
@@ -259,7 +287,9 @@ export function DrawingOverlay({ active, chart, series, onDrawEnd, onDrawingStat
       className={`absolute inset-0 z-10 w-full h-full touch-none overflow-hidden transition-opacity duration-200 ${
         active ? 'opacity-100' : 'opacity-100'
       } ${
-        isInteractionBlocked ? 'cursor-crosshair pointer-events-auto' : 'pointer-events-none'
+        isInteractionBlocked
+          ? 'cursor-crosshair pointer-events-auto'
+          : 'pointer-events-none'
       }`}
     >
       {/* SVG roots may ignore events on transparent zones; this rect guarantees full-area hit testing. */}
@@ -277,12 +307,28 @@ export function DrawingOverlay({ active, chart, series, onDrawEnd, onDrawingStat
       )}
 
       {renderLines()}
-      
+
       {active && (
         <g className="pointer-events-none select-none">
           {/* Main Feedback Banner */}
-          <rect x="12" y="12" width="240" height="32" rx="6" fill="#1e222d" fillOpacity="0.9" stroke="#363a45" strokeWidth="1" />
-          <circle cx="28" cy="28" r="4" fill={currentLine ? '#4361EE' : '#8b8fa8'} className={currentLine ? 'animate-pulse' : ''} />
+          <rect
+            x="12"
+            y="12"
+            width="240"
+            height="32"
+            rx="6"
+            fill="#1e222d"
+            fillOpacity="0.9"
+            stroke="#363a45"
+            strokeWidth="1"
+          />
+          <circle
+            cx="28"
+            cy="28"
+            r="4"
+            fill={currentLine ? '#4361EE' : '#8b8fa8'}
+            className={currentLine ? 'animate-pulse' : ''}
+          />
           <text
             x="42"
             y="32"
@@ -296,7 +342,12 @@ export function DrawingOverlay({ active, chart, series, onDrawEnd, onDrawingStat
 
           {/* Helper Hints */}
           {!currentLine && (
-            <text x="12" y="60" fill="#8b8fa8" className="text-[10px] font-medium italic opacity-80">
+            <text
+              x="12"
+              y="60"
+              fill="#8b8fa8"
+              className="text-[10px] font-medium italic opacity-80"
+            >
               {t('sim.terminal.drawing.instructions.escapeHint')}
             </text>
           )}
@@ -306,8 +357,22 @@ export function DrawingOverlay({ active, chart, series, onDrawEnd, onDrawingStat
       {/* Loading state if chart not ready */}
       {active && !isChartReady && (
         <g className="pointer-events-none">
-          <rect x="12" y="72" width="260" height="24" rx="6" fill="black" fillOpacity="0.65" />
-          <text x="50%" y="50%" textAnchor="middle" fill="white" className="text-xs font-bold uppercase tracking-widest animate-pulse">
+          <rect
+            x="12"
+            y="72"
+            width="260"
+            height="24"
+            rx="6"
+            fill="black"
+            fillOpacity="0.65"
+          />
+          <text
+            x="50%"
+            y="50%"
+            textAnchor="middle"
+            fill="white"
+            className="text-xs font-bold uppercase tracking-widest animate-pulse"
+          >
             {t('sim.terminal.drawing.initializingChartInteraction')}
           </text>
         </g>

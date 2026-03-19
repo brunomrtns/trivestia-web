@@ -40,7 +40,7 @@ export function SearchOverlay({ onClose, onSearch }: SearchOverlayProps) {
             <X className="h-4 w-4" />
           </button>
         </form>
-        
+
         <div className="px-4 pb-4">
           <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
             {t('sim.terminal.search.recentTitle')}

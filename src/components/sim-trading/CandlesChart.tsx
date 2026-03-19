@@ -31,9 +31,22 @@ interface CandlesChartProps {
   rsiSeries?: number[] | null;
   onTimeClick?: (timestamp: number) => void;
   onUpdateProtection?: (sl?: number, tp?: number) => void;
-  onChartLoad?: (chart: IChartApi | null, series: ISeriesApi<'Candlestick'> | null) => void;
+  onChartLoad?: (
+    chart: IChartApi | null,
+    series: ISeriesApi<'Candlestick'> | null
+  ) => void;
   engineState?: SimulationState | null;
 }
+
+type CandleSeriesApi = ISeriesApi<'Candlestick'>;
+type LineSeriesApi = ISeriesApi<'Line'>;
+type MarkerCapableSeries = {
+  setMarkers?: (markers: SeriesMarker<Time>[]) => void;
+};
+type ActiveSlTp = { sl?: number; tp?: number };
+type EngineStateWithActiveSlTps = SimulationState & {
+  activeSlTps?: ActiveSlTp[];
+};
 
 export function CandlesChart({
   candles,
@@ -49,11 +62,12 @@ export function CandlesChart({
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
-  const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
-  const maSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
-  const emaSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
-  const rsiSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
-  const pathsSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
+  const seriesRef = useRef<CandleSeriesApi | null>(null);
+  const maSeriesRef = useRef<LineSeriesApi | null>(null);
+  const emaSeriesRef = useRef<LineSeriesApi | null>(null);
+  const rsiSeriesRef = useRef<LineSeriesApi | null>(null);
+  const pathsSeriesRef = useRef<LineSeriesApi | null>(null);
+  const onTimeClickRef = useRef<CandlesChartProps['onTimeClick']>(onTimeClick);
 
   const priceLinesRef = useRef<{
     SL?: IPriceLine;
@@ -68,6 +82,10 @@ export function CandlesChart({
   } | null>(null);
 
   const [chart, setChart] = useState<IChartApi | null>(null);
+
+  useEffect(() => {
+    onTimeClickRef.current = onTimeClick;
+  }, [onTimeClick]);
 
   // ─── Inicialização do Chart ────────────────────────────────────────────────
 
@@ -96,7 +114,7 @@ export function CandlesChart({
       rightPriceScale: { borderColor: 'rgba(255,255,255,0.1)' },
       leftPriceScale: {
         visible: true,
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderColor: 'rgba(255,255,255,0.1)'
       },
       width: containerRef.current.clientWidth,
       height: containerRef.current.clientHeight
@@ -120,21 +138,22 @@ export function CandlesChart({
     });
 
     chartRef.current = c;
-    seriesRef.current = series as any;
-    pathsSeriesRef.current = pathsSeries as any;
+    seriesRef.current = series;
+    pathsSeriesRef.current = pathsSeries;
     setChart(c);
 
     if (onChartLoad) {
       console.log('[CandlesChart] onChartLoad(create)', {
         hasChart: !!c,
-        hasSeries: !!series,
+        hasSeries: !!series
       });
-      onChartLoad(c, series as any);
+      onChartLoad(c, series);
     }
 
     c.subscribeClick((param) => {
-      if (!param.time || !onTimeClick) return;
-      onTimeClick((param.time as number) * 1000);
+      const onTimeClickHandler = onTimeClickRef.current;
+      if (!param.time || !onTimeClickHandler) return;
+      onTimeClickHandler((param.time as number) * 1000);
     });
 
     const ro = new ResizeObserver((entries) => {
@@ -161,7 +180,7 @@ export function CandlesChart({
       if (onChartLoad) {
         console.log('[CandlesChart] onChartLoad(cleanup)', {
           hasChart: false,
-          hasSeries: false,
+          hasSeries: false
         });
         onChartLoad(null, null);
       }
@@ -172,9 +191,9 @@ export function CandlesChart({
     if (!onChartLoad || !chartRef.current || !seriesRef.current) return;
     console.log('[CandlesChart] onChartLoad(sync)', {
       hasChart: !!chartRef.current,
-      hasSeries: !!seriesRef.current,
+      hasSeries: !!seriesRef.current
     });
-    onChartLoad(chartRef.current, seriesRef.current as any);
+    onChartLoad(chartRef.current, seriesRef.current);
   }, [onChartLoad, chart]);
 
   // ─── Atualização de Dados (Candles) ────────────────────────────────────────
@@ -185,7 +204,9 @@ export function CandlesChart({
     const data: CandlestickData[] = candles
       .slice(0, visibleCount)
       .map((c, i) => ({
-        time: (c.time ? Math.floor(c.time / 1000) : 1_700_000_000 + i * 60) as Time,
+        time: (c.time
+          ? Math.floor(c.time / 1000)
+          : 1_700_000_000 + i * 60) as Time,
         open: c.open,
         high: c.high,
         low: c.low,
@@ -203,15 +224,22 @@ export function CandlesChart({
 
     const times = candles
       .slice(0, visibleCount)
-      .map((cd, i) => (cd.time ? Math.floor(cd.time / 1000) : 1_700_000_000 + i * 60) as Time);
+      .map(
+        (cd, i) =>
+          (cd.time
+            ? Math.floor(cd.time / 1000)
+            : 1_700_000_000 + i * 60) as Time
+      );
 
     if (maSeries) {
-      const maLineSeries = maSeriesRef.current ?? (c.addSeries(LineSeries, {
+      const maLineSeries: LineSeriesApi =
+        maSeriesRef.current ??
+        c.addSeries(LineSeries, {
           color: maSeries.color,
           lineWidth: 1,
           priceLineVisible: false,
           lastValueVisible: false
-        }) as any);
+        });
       maSeriesRef.current = maLineSeries;
       maLineSeries.applyOptions({ color: maSeries.color });
       const maData: LineData[] = maSeries.values
@@ -225,12 +253,14 @@ export function CandlesChart({
     }
 
     if (emaSeries) {
-      const emaLineSeries = emaSeriesRef.current ?? (c.addSeries(LineSeries, {
+      const emaLineSeries: LineSeriesApi =
+        emaSeriesRef.current ??
+        c.addSeries(LineSeries, {
           color: emaSeries.color,
           lineWidth: 1,
           priceLineVisible: false,
           lastValueVisible: false
-        }) as any);
+        });
       emaSeriesRef.current = emaLineSeries;
       emaLineSeries.applyOptions({ color: emaSeries.color });
       const emaData: LineData[] = emaSeries.values
@@ -245,16 +275,22 @@ export function CandlesChart({
 
     if (rsiSeries) {
       const isNewRsiSeries = !rsiSeriesRef.current;
-      const rsiLineSeries = rsiSeriesRef.current ?? (c.addSeries(LineSeries, {
-        color: '#60a5fa',
-        lineWidth: 1,
-        priceLineVisible: false,
-        lastValueVisible: false,
-        priceScaleId: 'left'
-      }, 1) as any);
+      const rsiLineSeries: LineSeriesApi =
+        rsiSeriesRef.current ??
+        c.addSeries(
+          LineSeries,
+          {
+            color: '#60a5fa',
+            lineWidth: 1,
+            priceLineVisible: false,
+            lastValueVisible: false,
+            priceScaleId: 'left'
+          },
+          1
+        );
       rsiSeriesRef.current = rsiLineSeries;
       if (isNewRsiSeries) {
-        c.priceScale('left').applyOptions({ 
+        c.priceScale('left').applyOptions({
           scaleMargins: { top: 0.8, bottom: 0.05 },
           visible: true
         });
@@ -280,10 +316,15 @@ export function CandlesChart({
     if (!series || !engineState || !pathSeries || !chart) return;
 
     // 1. Limpar Linhas Anteriores
-    if (priceLinesRef.current.SL) series.removePriceLine(priceLinesRef.current.SL);
-    if (priceLinesRef.current.TP) series.removePriceLine(priceLinesRef.current.TP);
-    if (priceLinesRef.current.ENTRY) series.removePriceLine(priceLinesRef.current.ENTRY);
-    priceLinesRef.current.PENDING.forEach((line) => series.removePriceLine(line));
+    if (priceLinesRef.current.SL)
+      series.removePriceLine(priceLinesRef.current.SL);
+    if (priceLinesRef.current.TP)
+      series.removePriceLine(priceLinesRef.current.TP);
+    if (priceLinesRef.current.ENTRY)
+      series.removePriceLine(priceLinesRef.current.ENTRY);
+    priceLinesRef.current.PENDING.forEach((line) =>
+      series.removePriceLine(line)
+    );
     priceLinesRef.current = { PENDING: [] };
 
     const { position, openOrders, fills } = engineState;
@@ -293,11 +334,11 @@ export function CandlesChart({
     const pathData: LineData[] = [];
 
     fills.forEach((fill) => {
-      const time = (candles[fill.candleIndex]?.time
-        ? Math.floor(candles[fill.candleIndex].time / 1000)
-        : 1_700_000_000 + fill.candleIndex * 60) as Time;
-
-      const isEntry = fill.reason === 'MARKET' || fill.reason === 'LIMIT' || fill.reason === 'STOP';
+      const time = (
+        candles[fill.candleIndex]?.time
+          ? Math.floor(candles[fill.candleIndex].time / 1000)
+          : 1_700_000_000 + fill.candleIndex * 60
+      ) as Time;
 
       markers.push({
         time,
@@ -313,7 +354,9 @@ export function CandlesChart({
     // Marcador do Candle Atual (Replay Highlight)
     if (visibleCount > 0) {
       const lastCandle = candles[visibleCount - 1];
-      const currentTime = (lastCandle?.time ? Math.floor(lastCandle.time / 1000) : 0) as Time;
+      const currentTime = (
+        lastCandle?.time ? Math.floor(lastCandle.time / 1000) : 0
+      ) as Time;
       if (currentTime) {
         markers.push({
           time: currentTime,
@@ -325,8 +368,9 @@ export function CandlesChart({
       }
     }
 
-    if (typeof (series as any).setMarkers === 'function') {
-      (series as any).setMarkers(markers);
+    const markerSeries = series as unknown as MarkerCapableSeries;
+    if (typeof markerSeries.setMarkers === 'function') {
+      markerSeries.setMarkers(markers);
     }
     pathSeries.setData(pathData);
 
@@ -334,7 +378,7 @@ export function CandlesChart({
     if (position && position.side !== 'FLAT') {
       const pnl = position.unrealizedPnl;
       const pnlStr = `${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}`;
-      
+
       const entryLine = series.createPriceLine({
         price: position.entryPrice,
         color: '#3b82f6',
@@ -346,8 +390,9 @@ export function CandlesChart({
       priceLinesRef.current.ENTRY = entryLine;
 
       // 4. Linhas de SL e TP (Active protections)
-      const sltps = (engineState as any).activeSlTps || [];
-      sltps.forEach((sltp: any) => {
+      const sltps =
+        (engineState as EngineStateWithActiveSlTps).activeSlTps ?? [];
+      sltps.forEach((sltp) => {
         if (sltp.sl !== undefined) {
           priceLinesRef.current.SL = series.createPriceLine({
             price: sltp.sl,
@@ -375,14 +420,16 @@ export function CandlesChart({
     if (openOrders && openOrders.length > 0) {
       openOrders.forEach((order) => {
         if (order.price !== undefined) {
-          priceLinesRef.current.PENDING.push(series.createPriceLine({
-            price: order.price,
-            color: '#f59e0b',
-            lineWidth: 1,
-            lineStyle: LineStyle.Dotted,
-            axisLabelVisible: true,
-            title: `${order.type} ${order.side}`
-          }));
+          priceLinesRef.current.PENDING.push(
+            series.createPriceLine({
+              price: order.price,
+              color: '#f59e0b',
+              lineWidth: 1,
+              lineStyle: LineStyle.Dotted,
+              axisLabelVisible: true,
+              title: `${order.type} ${order.side}`
+            })
+          );
         }
       });
     }
@@ -402,7 +449,7 @@ export function CandlesChart({
 
       const rect = container.getBoundingClientRect();
       const y = e.clientY - rect.top;
-      
+
       const checkGrab = (line: IPriceLine, type: 'SL' | 'TP') => {
         const linePrice = line.options().price;
         const lineY = series.priceToCoordinate(linePrice);
@@ -463,12 +510,19 @@ export function CandlesChart({
 
   // ─── Auto-follow Hook ──────────────────────────────────────────────────────
 
-  const { autoFollowEnabled, resetAutoFollow } = useAutoZoomTimeScale(chart, containerRef, { visibleCount });
+  const { autoFollowEnabled, resetAutoFollow } = useAutoZoomTimeScale(
+    chart,
+    containerRef,
+    { visibleCount }
+  );
 
   return (
     <TooltipPrimitive.Provider delayDuration={400}>
       <div className="relative h-full w-full">
-        <div ref={containerRef} className="h-full w-full rounded-lg overflow-hidden" />
+        <div
+          ref={containerRef}
+          className="h-full w-full rounded-lg overflow-hidden"
+        />
         <div className="absolute right-2 top-2 z-10">
           <TooltipPrimitive.Root>
             <TooltipPrimitive.Trigger asChild>
@@ -477,15 +531,22 @@ export function CandlesChart({
                 className={cn(
                   'flex h-7 w-7 items-center justify-center rounded-md border transition-colors',
                   'bg-background/80 backdrop-blur-sm',
-                  autoFollowEnabled ? 'border-primary/40 bg-primary/10 text-primary' : 'border-white/10 text-muted-foreground'
+                  autoFollowEnabled
+                    ? 'border-primary/40 bg-primary/10 text-primary'
+                    : 'border-white/10 text-muted-foreground'
                 )}
               >
                 <Maximize2 className="h-3.5 w-3.5" />
               </button>
             </TooltipPrimitive.Trigger>
             <TooltipPrimitive.Portal>
-              <TooltipPrimitive.Content side="left" className="z-50 rounded-md bg-popover px-2.5 py-1 text-xs text-popover-foreground shadow-md">
-                {autoFollowEnabled ? t('sim.candles.autoFollow.active') : t('sim.candles.autoFollow.reactivate')}
+              <TooltipPrimitive.Content
+                side="left"
+                className="z-50 rounded-md bg-popover px-2.5 py-1 text-xs text-popover-foreground shadow-md"
+              >
+                {autoFollowEnabled
+                  ? t('sim.candles.autoFollow.active')
+                  : t('sim.candles.autoFollow.reactivate')}
                 <TooltipPrimitive.Arrow className="fill-popover" />
               </TooltipPrimitive.Content>
             </TooltipPrimitive.Portal>

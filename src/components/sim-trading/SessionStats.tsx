@@ -8,7 +8,10 @@ interface SessionStatsProps {
   initialBalance: number;
 }
 
-export function SessionStats({ engineState, initialBalance }: SessionStatsProps) {
+export function SessionStats({
+  engineState,
+  initialBalance
+}: SessionStatsProps) {
   const { t } = useTranslation();
 
   const stats = useMemo(() => {
@@ -35,18 +38,38 @@ export function SessionStats({ engineState, initialBalance }: SessionStatsProps)
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">{t('sim.stats.totalTrades')}</span>
-          <span className="text-xs font-mono font-bold">{stats.totalTrades}</span>
+          <span className="text-xs text-muted-foreground">
+            {t('sim.stats.totalTrades')}
+          </span>
+          <span className="text-xs font-mono font-bold">
+            {stats.totalTrades}
+          </span>
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">{t('sim.stats.totalPnl')}</span>
+          <span className="text-xs text-muted-foreground">
+            {t('sim.stats.totalPnl')}
+          </span>
           <div className="flex flex-col items-end">
-            <span className={cn('text-xs font-mono font-bold', stats.currentPnL >= 0 ? 'text-emerald-400' : 'text-red-400')}>
-              {stats.currentPnL >= 0 ? '+' : ''}${Math.abs(stats.currentPnL).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            <span
+              className={cn(
+                'text-xs font-mono font-bold',
+                stats.currentPnL >= 0 ? 'text-emerald-400' : 'text-red-400'
+              )}
+            >
+              {stats.currentPnL >= 0 ? '+' : ''}$
+              {Math.abs(stats.currentPnL).toLocaleString('en-US', {
+                minimumFractionDigits: 2
+              })}
             </span>
-            <span className={cn('text-[10px] font-mono font-medium opacity-80', stats.currentPnL >= 0 ? 'text-emerald-400' : 'text-red-400')}>
-              {stats.pnlPct >= 0 ? '+' : ''}{stats.pnlPct.toFixed(2)}%
+            <span
+              className={cn(
+                'text-[10px] font-mono font-medium opacity-80',
+                stats.currentPnL >= 0 ? 'text-emerald-400' : 'text-red-400'
+              )}
+            >
+              {stats.pnlPct >= 0 ? '+' : ''}
+              {stats.pnlPct.toFixed(2)}%
             </span>
           </div>
         </div>

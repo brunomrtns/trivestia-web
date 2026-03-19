@@ -5,7 +5,7 @@ import {
   ChevronRight,
   ChevronLeft,
   ChevronsUpDown,
-  Loader2,
+  Loader2
 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -105,7 +105,11 @@ export function PlaybackControls({
                 ? 'bg-primary text-primary-foreground hover:scale-105 active:scale-95'
                 : 'text-foreground hover:bg-muted disabled:opacity-40'
             )}
-            title={playing ? t('sim.playback.pauseTitle') : t('sim.playback.playTitle')}
+            title={
+              playing
+                ? t('sim.playback.pauseTitle')
+                : t('sim.playback.playTitle')
+            }
           >
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -205,7 +209,7 @@ export function PlaybackControls({
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
-              
+
               <button
                 onClick={onSkipToEnd}
                 disabled={disabled}
@@ -244,7 +248,10 @@ export function PlaybackControls({
               ) : (
                 <div className="text-right">
                   <div className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">
-                    {t('sim.playback.progress', { visible: visibleCount, total: totalCandles })}
+                    {t('sim.playback.progress', {
+                      visible: visibleCount,
+                      total: totalCandles
+                    })}
                   </div>
                   {!playing && (
                     <div className="text-[9px] font-bold uppercase text-amber-500/80 tracking-wider">
@@ -280,7 +287,9 @@ export function PlaybackControls({
         />
         <div className="flex justify-between text-[9px] font-bold text-muted-foreground uppercase tracking-tighter">
           <span>{formatDate(firstCandle?.time)}</span>
-          <span className="text-primary">{formatDate(currentCandle?.time)}</span>
+          <span className="text-primary">
+            {formatDate(currentCandle?.time)}
+          </span>
           <span>{formatDate(lastCandle?.time)}</span>
         </div>
       </div>
@@ -369,7 +378,9 @@ export function PlaybackControls({
             {visibleCount} / {totalCandles}
           </div>
           <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">
-            {isFinished ? t('sim.playback.finished') : t('sim.playback.candlesLabel')}
+            {isFinished
+              ? t('sim.playback.finished')
+              : t('sim.playback.candlesLabel')}
           </div>
         </div>
       </div>
