@@ -32,7 +32,7 @@ export function AppLayout() {
         className={`flex flex-1 flex-col transition-all duration-200 h-screen overflow-hidden ${collapsed ? 'ml-16' : 'ml-64'}`}
       >
         <Topbar onMenuClick={() => setCollapsed((c) => !c)} />
-        <main className={`flex-1 flex flex-col ${isTerminal ? 'p-0 overflow-hidden' : 'p-6 overflow-hidden'}`}>
+        <main className="flex-1 flex flex-col overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
@@ -41,7 +41,7 @@ export function AppLayout() {
               animate="animate"
               exit="exit"
               transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
-              className={`flex-1 flex flex-col min-h-0 min-w-0 ${isTerminal ? 'overflow-hidden' : 'overflow-y-auto w-full -m-6 p-6'}`}
+              className={`flex-1 flex flex-col min-h-0 min-w-0 ${isTerminal ? 'p-0 overflow-hidden' : 'p-6 overflow-y-auto'}`}
             >
               {outlet}
             </motion.div>
