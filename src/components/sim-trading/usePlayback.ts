@@ -6,12 +6,14 @@ interface UsePlaybackOptions {
   onAdvance: () => void;
   onRewind?: () => void;
   isFinished: boolean;
+  resetKey?: string;
 }
 
 export function usePlayback({
   onAdvance,
   onRewind,
-  isFinished
+  isFinished,
+  resetKey
 }: UsePlaybackOptions) {
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeedState] = useState<PlaybackSpeed>(1000);
@@ -30,6 +32,12 @@ export function usePlayback({
       clearTimer();
     }
   }, [isFinished, clearTimer]);
+
+  useEffect(() => {
+    setPlaying(false);
+    setSpeedState(1000);
+    clearTimer();
+  }, [resetKey, clearTimer]);
 
   useEffect(() => {
     if (playing && !isFinished) {

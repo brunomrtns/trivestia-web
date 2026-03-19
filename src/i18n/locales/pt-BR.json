@@ -1550,6 +1550,17 @@
       },
       "settingsUnderConstruction": "Painel de configurações em construção",
       "searchChangedSymbol": "Símbolo alterado para {{symbol}}",
+      "searchUnsupportedSymbol": "Símbolo {{symbol}} não está disponível neste ambiente local.",
+      "searchUnavailableMode": "Troca de símbolo disponível apenas no modo de prática.",
+      "symbolLocked": "Símbolo Bloqueado",
+      "symbolLockedMessage": "O símbolo é fixo para este desafio e não pode ser alterado.",
+      "symbolLockedInChallenge": "Símbolo fixo para este desafio",
+      "searchAlreadyActiveSymbol": "O símbolo {{symbol}} já está ativo.",
+      "searchResetSessionNotice": "A troca de símbolo inicia uma nova sessão limpa.",
+      "searchLoadingSymbol": "Carregando símbolo {{symbol}}...",
+      "searchLoadError": "Não foi possível carregar o símbolo {{symbol}}.",
+      "symbolSwitchResetsDrawings": "Desenhos da sessão anterior foram limpos para o novo símbolo.",
+      "activeSymbolLabel": "Símbolo ativo",
       "replayBanner": {
         "title": "Modo de seleção de replay",
         "hint": "• Clique em um candle para definir o ponto inicial"

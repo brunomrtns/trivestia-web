@@ -155,7 +155,7 @@ export default function SuperTenantEditPage() {
                 : t('super.tenantEdit.saveButton')}
             </button>
             <a
-              href={`/t/${tenant.slug}`}
+              href={`${import.meta.env.BASE_URL}t/${tenant.slug}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 rounded-md border px-4 py-2 text-sm transition-colors hover:bg-accent"

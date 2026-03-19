@@ -1604,7 +1604,18 @@
       "playbackAnchor": {
         "expand": "Expand playback controls",
         "collapse": "Collapse playback controls"
-      }
+      },
+      "searchUnavailableMode": "Symbol switching is only available in practice mode.",
+      "searchUnsupportedSymbol": "Symbol {{symbol}} is not available in this environment.",
+      "searchAlreadyActiveSymbol": "Symbol {{symbol}} is already active.",
+      "searchResetSessionNotice": "Switching symbols starts a new clean session.",
+      "searchLoadingSymbol": "Loading symbol {{symbol}}...",
+      "searchLoadError": "Could not load symbol {{symbol}}.",
+      "symbolSwitchResetsDrawings": "Drawings from the previous session were cleared for the new symbol.",
+      "activeSymbolLabel": "Active symbol",
+      "symbolLocked": "Symbol Locked",
+      "symbolLockedMessage": "The symbol is fixed for this challenge and cannot be changed.",
+      "symbolLockedInChallenge": "Symbol fixed for this challenge"
     },
     "engine": {
       "loadError": "Error loading scenario",

@@ -352,7 +352,7 @@ export default function SuperTenantsPage() {
                         {t('super.tenants.editButton')}
                       </button>
                       <a
-                        href={`/t/${tenant.slug}`}
+                        href={`${import.meta.env.BASE_URL}t/${tenant.slug}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="rounded-md border px-3 py-1 text-xs transition-colors hover:bg-accent"

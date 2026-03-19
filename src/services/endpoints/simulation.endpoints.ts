@@ -18,11 +18,13 @@ export const simulationEndpoints = {
       .get<ChallengeBriefingData>(`/sim/challenge/${activityId}/briefing`)
       .then((r) => r.data),
 
-  /** GET /t/:slug/sim/challenge/:activityId/scenario */
-  getChallengeScenario: (slug: string, activityId: string) =>
-    apiTenant(slug)
-      .get<ScenarioPayload>(`/sim/challenge/${activityId}/scenario`)
-      .then((r) => r.data),
+  /** GET /t/:slug/sim/challenge/:activityId/scenario(?symbol=) */
+  getChallengeScenario: (slug: string, activityId: string, symbol?: string) => {
+    const params = symbol ? { symbol } : undefined;
+    return apiTenant(slug)
+      .get<ScenarioPayload>(`/sim/challenge/${activityId}/scenario`, { params })
+      .then((r) => r.data);
+  },
 
   /** POST /t/:slug/sim/challenge/submit */
   submitChallenge: (

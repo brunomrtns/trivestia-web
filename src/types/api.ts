@@ -725,6 +725,9 @@ export interface ChallengeBriefingData {
     passed: boolean;
     attemptCount: number;
   };
+  // Phase 1: Symbol switching metadata
+  allowSymbolSwitching: boolean;
+  supportedSymbols: string[];
 }
 
 export interface ChallengeSubmitResponse {

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -29,6 +29,12 @@ import { DrawingOverlay } from './DrawingOverlay';
 import { SearchOverlay } from './SearchOverlay';
 import { IndicatorsPanel } from './IndicatorsPanel';
 import { useIndicators } from './useIndicators';
+import {
+  getSupportedLocalSymbols,
+  isLocalSymbolSupported,
+  normalizeSymbol,
+  resolveLocalPracticeScenario
+} from './localSymbolScenarioResolver';
 import { toast } from 'sonner';
 import type { Candle, ScenarioPayload, OrderRequest } from '@/types/api';
 
@@ -44,12 +50,30 @@ interface SimTradingTerminalProps {
   onComplete?: () => void;
   onOpenHelp?: () => void;
   showOnboarding?: boolean;
+  // Phase 1+2: Symbol Switching (CHALLENGE only)
+  allowSymbolSwitching?: boolean;
+  supportedSymbols?: string[];
+  // Phase 2: Backend callback for symbol resolution in CHALLENGE
+  onSymbolSwitch?: (symbol: string) => Promise<{
+    candles: Candle[];
+    executionConfig: import('@/types/api').ExecutionConfig;
+    scenarioToken: string;
+    scoringConfig?: import('@/types/api').ScoringConfig;
+  }>;
 }
 
 // ─── Tab types ────────────────────────────────────────────────────────────────
 
 type BottomTab = 'orders' | 'fills' | 'metrics';
 type ActivePanel = 'none' | 'search' | 'indicators';
+
+interface PracticeDatasetState {
+  token: string;
+  candles: Candle[];
+  scenario: ScenarioPayload;
+}
+
+const DEFAULT_ACTIVE_SYMBOL = 'BTC/USD';
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -62,7 +86,10 @@ export function SimTradingTerminal({
   practiceScenario,
   onComplete,
   onOpenHelp: externalHelpOpen,
-  showOnboarding = true
+  showOnboarding = true,
+  allowSymbolSwitching = false,
+  supportedSymbols = [],
+  onSymbolSwitch
 }: SimTradingTerminalProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -73,7 +100,37 @@ export function SimTradingTerminal({
   const [drawingInProgress, setDrawingInProgress] = useState(false);
   const [chartApi, setChartApi] = useState<any>(null);
   const [mainSeries, setMainSeries] = useState<any>(null);
+  const [selectedSymbol, setSelectedSymbol] = useState(DEFAULT_ACTIVE_SYMBOL);
+  const [pendingSymbol, setPendingSymbol] = useState<string | null>(null);
+  const [symbolSwitching, setSymbolSwitching] = useState(false);
+  const [engineResetVersion, setEngineResetVersion] = useState(0);
+  const [drawingClearVersion, setDrawingClearVersion] = useState(0);
+  const [practiceDataset, setPracticeDataset] =
+    useState<PracticeDatasetState | null>(null);
+  const basePracticeDatasetRef = useRef<PracticeDatasetState | null>(null);
   const tutorial = useTutorialProgress();
+  const supportedLocalSymbols = getSupportedLocalSymbols();
+
+  useEffect(() => {
+    if (
+      mode !== 'PRACTICE' ||
+      !practiceToken ||
+      !practiceCandles ||
+      !practiceScenario
+    ) {
+      return;
+    }
+
+    const baseDataset = {
+      token: practiceToken,
+      candles: practiceCandles,
+      scenario: practiceScenario
+    };
+
+    basePracticeDatasetRef.current = baseDataset;
+    setPracticeDataset(baseDataset);
+    setSelectedSymbol(DEFAULT_ACTIVE_SYMBOL);
+  }, [mode, practiceToken, practiceCandles, practiceScenario]);
 
   const handleChartLoad = useCallback(
     (chart: any | null, series: any | null) => {
@@ -82,6 +139,9 @@ export function SimTradingTerminal({
     },
     []
   );
+
+  // Phase 1: Determine if search tool should be disabled in sidebar
+  const isSearchDisabled = mode === 'CHALLENGE' && !allowSymbolSwitching;
 
   const handleToolChange = useCallback(
     (toolId: string) => {
@@ -101,7 +161,7 @@ export function SimTradingTerminal({
         console.log(`[Terminal] Mode selected: ${toolId}`);
       }
     },
-    [t]
+    []
   );
 
   // Update cursor based on active tool
@@ -138,20 +198,177 @@ export function SimTradingTerminal({
     slug,
     mode,
     activityId,
-    practiceToken,
-    practiceCandles,
-    practiceScenario,
-    onComplete: handleComplete
+    practiceToken:
+      mode === 'PRACTICE'
+        ? (practiceDataset?.token ?? practiceToken)
+        : practiceToken,
+    practiceCandles:
+      mode === 'PRACTICE'
+        ? (practiceDataset?.candles ?? practiceCandles)
+        : practiceCandles,
+    practiceScenario:
+      mode === 'PRACTICE'
+        ? (practiceDataset?.scenario ?? practiceScenario)
+        : practiceScenario,
+    onComplete: handleComplete,
+    resetKey: `${mode}:${selectedSymbol}:${engineResetVersion}`
   });
 
   const playback = usePlayback({
     onAdvance: engine.advanceCandle,
     onRewind: engine.stepBack,
-    isFinished: engine.phase === 'FINISHED' || engine.phase === 'RESULT'
+    isFinished: engine.phase === 'FINISHED' || engine.phase === 'RESULT',
+    resetKey: `${selectedSymbol}:${engineResetVersion}`
   });
 
   // Indicators Logic
   const indicators = useIndicators(engine.candles);
+  const hasSessionProgress = engine.visibleCount > 1 || engine.events.length > 0;
+
+  // ─── Shared Reset Sequence ─────────────────────────────────────────────────
+
+  const performSymbolReset = useCallback(
+    (
+      newSymbol: string,
+      newDataset: PracticeDatasetState
+    ) => {
+      setPracticeDataset(newDataset);
+      setSelectedSymbol(newSymbol);
+
+      // Reset all symbol-bound UI state — no state leaks
+      setActiveTool('cursor');
+      setActivePanel('none');
+      setBottomTab('orders');
+      setDrawingInProgress(false);
+      setDrawingClearVersion((prev) => prev + 1);
+      setChartApi(null);
+      setMainSeries(null);
+      setEngineResetVersion((prev) => prev + 1);
+
+      toast.info(t('sim.terminal.symbolSwitchResetsDrawings'));
+      toast.success(
+        t('sim.terminal.searchChangedSymbol', { symbol: newSymbol })
+      );
+    },
+    [t]
+  );
+
+  const handleSymbolSearch = useCallback(
+    async (rawSymbol: string) => {
+      const normalized = normalizeSymbol(rawSymbol);
+
+      // Already active check (both modes)
+      if (normalized === selectedSymbol) {
+        toast.info(
+          t('sim.terminal.searchAlreadyActiveSymbol', {
+            symbol: normalized
+          })
+        );
+        return false;
+      }
+
+      // ─── PRACTICE: Frontend local resolver ─────────────────────────
+      if (mode === 'PRACTICE') {
+        if (!basePracticeDatasetRef.current) {
+          toast.error(t('sim.terminal.searchUnavailableMode'));
+          return false;
+        }
+
+        if (!isLocalSymbolSupported(normalized)) {
+          toast.error(
+            t('sim.terminal.searchUnsupportedSymbol', { symbol: normalized })
+          );
+          return false;
+        }
+
+        if (hasSessionProgress || playback.playing) {
+          toast.info(t('sim.terminal.searchResetSessionNotice'));
+        }
+
+        const wasPlaying = playback.playing;
+        playback.pause();
+        setSymbolSwitching(true);
+        setPendingSymbol(normalized);
+
+        try {
+          const resolved = resolveLocalPracticeScenario({
+            symbol: normalized,
+            baseCandles: basePracticeDatasetRef.current.candles,
+            baseScenario: basePracticeDatasetRef.current.scenario,
+            baseToken: basePracticeDatasetRef.current.token
+          });
+
+          performSymbolReset(resolved.symbol, {
+            token: resolved.token,
+            candles: resolved.candles,
+            scenario: resolved.scenario
+          });
+          return true;
+        } catch {
+          if (wasPlaying) playback.play();
+          toast.error(
+            t('sim.terminal.searchLoadError', { symbol: normalized })
+          );
+          return false;
+        } finally {
+          setPendingSymbol(null);
+          setSymbolSwitching(false);
+        }
+      }
+
+      // ─── CHALLENGE: Backend-driven symbol resolution ───────────────
+      if (mode === 'CHALLENGE' && allowSymbolSwitching && onSymbolSwitch) {
+        if (hasSessionProgress || playback.playing) {
+          toast.info(t('sim.terminal.searchResetSessionNotice'));
+        }
+
+        const wasPlaying = playback.playing;
+        playback.pause();
+        setSymbolSwitching(true);
+        setPendingSymbol(normalized);
+
+        try {
+          const result = await onSymbolSwitch(normalized);
+
+          performSymbolReset(normalized, {
+            token: result.scenarioToken,
+            candles: result.candles,
+            scenario: {
+              ...(practiceDataset?.scenario ?? practiceScenario ?? {} as ScenarioPayload),
+              executionConfig: result.executionConfig,
+              ...(result.scoringConfig ? { scoringConfig: result.scoringConfig } : {})
+            }
+          });
+          return true;
+        } catch {
+          if (wasPlaying) playback.play();
+          toast.error(
+            t('sim.terminal.searchLoadError', { symbol: normalized })
+          );
+          return false;
+        } finally {
+          setPendingSymbol(null);
+          setSymbolSwitching(false);
+        }
+      }
+
+      // Fallback: switching not allowed
+      toast.error(t('sim.terminal.searchUnavailableMode'));
+      return false;
+    },
+    [
+      hasSessionProgress,
+      mode,
+      playback,
+      selectedSymbol,
+      t,
+      allowSymbolSwitching,
+      onSymbolSwitch,
+      performSymbolReset,
+      practiceDataset,
+      practiceScenario
+    ]
+  );
 
   // ─── Keyboard Shortcuts ──────────────────────────────────────────────────
 
@@ -284,12 +501,19 @@ export function SimTradingTerminal({
       <TerminalSidebar
         activeTool={activeTool}
         onToolChange={handleToolChange}
+        disabledTools={isSearchDisabled ? ['search'] : []}
+        disabledToolHints={
+          isSearchDisabled
+            ? { search: t('sim.terminal.symbolLockedInChallenge') }
+            : {}
+        }
       />
 
       {/* 2. CENTER (Chart Area) */}
       <main className="flex-1 relative flex flex-col min-w-0 bg-background">
         <div className="relative flex-1 min-w-0 min-h-0">
           <CandlesChart
+            key={`chart-${selectedSymbol}-${engineResetVersion}`}
             candles={candles}
             visibleCount={visibleCount}
             onTimeClick={engine.jumpToTimestamp}
@@ -307,7 +531,25 @@ export function SimTradingTerminal({
             chart={chartApi}
             series={mainSeries}
             onDrawingStateChange={setDrawingInProgress}
+            clearSignal={drawingClearVersion}
           />
+
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 pointer-events-none animate-in slide-in-from-top-2 duration-300">
+            <div className="rounded-full border border-border/60 bg-card/90 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground backdrop-blur-md">
+              {t('sim.terminal.activeSymbolLabel')}: {selectedSymbol}
+            </div>
+          </div>
+
+          {symbolSwitching && (
+            <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/65 backdrop-blur-sm">
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-card/95 px-4 py-2 text-xs font-semibold text-foreground shadow-xl">
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                {t('sim.terminal.searchLoadingSymbol', {
+                  symbol: pendingSymbol ?? selectedSymbol
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Replay Selection Mode Banner */}
           {activeTool === 'replay' && engine.phase === 'READY' && (
@@ -327,12 +569,18 @@ export function SimTradingTerminal({
           {activePanel === 'search' && (
             <SearchOverlay
               onClose={() => setActivePanel('none')}
-              onSearch={(symbol) => {
-                console.log(`[Terminal] Symbol search: ${symbol}`);
-                toast.success(
-                  t('sim.terminal.searchChangedSymbol', { symbol })
-                );
-              }}
+              onSearch={handleSymbolSearch}
+              supportedSymbols={
+                mode === 'PRACTICE'
+                  ? supportedLocalSymbols
+                  : supportedSymbols
+              }
+              activeSymbol={selectedSymbol}
+              loading={symbolSwitching}
+              challengeMode={mode === 'CHALLENGE'}
+              allowSymbolSwitching={
+                mode === 'PRACTICE' || allowSymbolSwitching
+              }
             />
           )}
 

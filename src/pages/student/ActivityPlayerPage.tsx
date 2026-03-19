@@ -166,7 +166,8 @@ export default function ActivityPlayerPage() {
     const passed = pct >= 60;
 
     return (
-      <div className="mx-auto max-w-2xl space-y-6">
+      <div className="flex-1 overflow-y-auto p-6">
+        <div className="mx-auto max-w-2xl space-y-6">
         {/* Score header */}
         <motion.div
           initial={{ opacity: 0, scale: 0.96 }}
@@ -361,6 +362,7 @@ export default function ActivityPlayerPage() {
           </button>
         </div>
       </div>
+    </div>
     );
   }
 
@@ -384,8 +386,9 @@ export default function ActivityPlayerPage() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      {/* Header */}
+    <div className="flex-1 overflow-y-auto p-6">
+      <div className="mx-auto max-w-2xl space-y-6">
+        {/* Header */}
       <div>
         <div className="mb-2 flex items-center justify-between text-sm text-muted-foreground">
           <span>{t(`common.activityTypes.${activity.type}`, { defaultValue: activity.type })}</span>
@@ -468,6 +471,7 @@ export default function ActivityPlayerPage() {
         )}
       </div>
     </div>
+    </div>
   );
 }
 
@@ -532,10 +536,9 @@ function SimTradingChallengeFlow({
 
   if (!briefing) return null;
 
-  // PHASE: BRIEFING
   if (phase === 'BRIEFING') {
     return (
-      <div className="p-6">
+      <div className="flex-1 overflow-y-auto p-6">
         <ChallengeBriefingScreen
           briefing={briefing}
           onStart={() => setPhase('TERMINAL')}
@@ -560,6 +563,25 @@ function SimTradingChallengeFlow({
       onComplete={onGoBack}
       onOpenHelp={() => setHelpOpen(true)}
       showOnboarding={!tutorial.completed}
+      allowSymbolSwitching={briefing?.allowSymbolSwitching ?? false}
+      supportedSymbols={briefing?.supportedSymbols ?? []}
+      onSymbolSwitch={
+        briefing?.allowSymbolSwitching
+          ? async (symbol: string) => {
+              const result = await simulationEndpoints.getChallengeScenario(
+                slug,
+                activityId,
+                symbol
+              );
+              return {
+                candles: result.candles,
+                executionConfig: result.executionConfig,
+                scenarioToken: result.scenarioToken,
+                scoringConfig: result.scoringConfig
+              };
+            }
+          : undefined
+      }
     />
   );
 }

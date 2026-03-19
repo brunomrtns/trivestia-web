@@ -72,14 +72,14 @@ export default function WorkspacePage() {
 
           <div className="flex flex-wrap gap-3">
             <a
-              href={`/t/${meData.tenantSlug}/admin/courses`}
+              href={`${import.meta.env.BASE_URL}t/${meData.tenantSlug}/admin/courses`}
               className="flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow transition hover:opacity-90"
             >
               {t('workspace.page.manageButton')}
               <ExternalLink className="h-4 w-4" />
             </a>
             <a
-              href={`/t/${meData.tenantSlug}`}
+              href={`${import.meta.env.BASE_URL}t/${meData.tenantSlug}`}
               target="_blank"
               rel="noreferrer"
               className="flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-semibold transition hover:bg-accent"

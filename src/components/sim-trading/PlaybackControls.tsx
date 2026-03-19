@@ -142,22 +142,10 @@ export function PlaybackControls({
           isPausedAtStart && 'border-primary/40 ring-1 ring-primary/20'
         )}
       >
-        <button
-          onClick={() => {
-            setIsPinnedExpanded(false);
-          }}
-          className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition hover:bg-background"
-          title={t('sim.terminal.playbackAnchor.collapse')}
-        >
-          <ChevronsUpDown className="h-3.5 w-3.5" />
-        </button>
 
-        <div className="px-3 pb-3 pt-10">
-          {/* Timeline Slider */}
-          <div className="flex items-center gap-3 px-1">
-            <span className="text-[9px] font-bold text-muted-foreground whitespace-nowrap min-w-[70px]">
-              {formatDate(currentCandle?.time)}
-            </span>
+        <div className="px-2.5 pb-2.5 pt-2.5">
+          {/* Timeline row */}
+          <div className="w-full px-1">
             <input
               type="range"
               min="1"
@@ -165,16 +153,18 @@ export function PlaybackControls({
               value={visibleCount}
               onChange={(e) => onJumpTo?.(parseInt(e.target.value))}
               disabled={isLoading}
-              className="h-1 flex-1 cursor-pointer appearance-none rounded-full bg-muted accent-primary focus:outline-none"
+              className="h-1 w-full cursor-pointer appearance-none rounded-full bg-muted accent-primary focus:outline-none"
             />
-            <span className="text-[9px] font-bold text-muted-foreground whitespace-nowrap min-w-[30px] text-right">
-              {visibleCount}/{totalCandles}
-            </span>
           </div>
 
-          <div className="mt-2 flex items-center gap-4">
+          {/* Controls and metadata row */}
+          <div className="mt-2 flex items-center gap-3">
+            <span className="text-[9px] font-bold text-muted-foreground whitespace-nowrap">
+              {formatDate(currentCandle?.time)}
+            </span>
+
             {/* Main Controls Group */}
-            <div className="flex items-center gap-1 bg-muted/30 rounded-lg p-1">
+            <div className="flex items-center gap-1 bg-muted/30 rounded-lg p-0.5">
               <button
                 onClick={onStepBackward}
                 disabled={isLoading || visibleCount <= 1}
@@ -222,13 +212,13 @@ export function PlaybackControls({
             <div className="h-8 w-px bg-border/50" />
 
             {/* Speed selector */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5">
               {SPEEDS.map((s) => (
                 <button
                   key={s.value}
                   onClick={() => onSetSpeed(s.value)}
                   className={cn(
-                    'h-7 px-2 rounded-md text-[10px] font-bold transition-all',
+                    'h-7 px-1.5 rounded-md text-[10px] font-bold transition-all',
                     speed === s.value
                       ? 'bg-foreground text-background shadow-sm'
                       : 'text-muted-foreground hover:bg-muted/50'
@@ -239,28 +229,30 @@ export function PlaybackControls({
               ))}
             </div>
 
-            {/* Status info */}
-            <div className="ml-auto pr-2">
+            <div className="ml-auto mr-0.5 flex items-center gap-1.5 whitespace-nowrap">
               {isFinished ? (
                 <span className="text-[10px] font-black uppercase text-primary animate-pulse">
                   {t('sim.playback.finished')}
                 </span>
               ) : (
-                <div className="text-right">
-                  <div className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">
-                    {t('sim.playback.progress', {
-                      visible: visibleCount,
-                      total: totalCandles
-                    })}
-                  </div>
-                  {!playing && (
-                    <div className="text-[9px] font-bold uppercase text-amber-500/80 tracking-wider">
-                      {t('sim.playback.pausedLabel')}
-                    </div>
-                  )}
-                </div>
+                <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">
+                  {t('sim.playback.progress', {
+                    visible: visibleCount,
+                    total: totalCandles
+                  })}
+                </span>
               )}
+              <button
+                onClick={() => {
+                  setIsPinnedExpanded(false);
+                }}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition hover:bg-background flex-shrink-0"
+                title={t('sim.terminal.playbackAnchor.collapse')}
+              >
+                <ChevronsUpDown className="h-3.5 w-3.5" />
+              </button>
             </div>
+
           </div>
         </div>
       </div>

@@ -1604,7 +1604,18 @@
       "playbackAnchor": {
         "expand": "Ampliar los controles de reproducción",
         "collapse": "Contraer controles de reproducción"
-      }
+      },
+      "searchUnavailableMode": "El cambio de símbolo solo está disponible en modo de práctica.",
+      "searchUnsupportedSymbol": "El símbolo {{symbol}} no está disponible en este entorno.",
+      "searchAlreadyActiveSymbol": "El símbolo {{symbol}} ya está activo.",
+      "searchResetSessionNotice": "Cambiar de símbolo inicia una nueva sesión limpia.",
+      "searchLoadingSymbol": "Cargando símbolo {{symbol}}...",
+      "searchLoadError": "No se pudo cargar el símbolo {{symbol}}.",
+      "symbolSwitchResetsDrawings": "Se limpiaron los dibujos de la sesión anterior para el nuevo símbolo.",
+      "activeSymbolLabel": "Símbolo activo",
+      "symbolLocked": "Símbolo Bloqueado",
+      "symbolLockedMessage": "El símbolo es fijo para este desafío y no se puede cambiar.",
+      "symbolLockedInChallenge": "Símbolo fijo para este desafío"
     },
     "engine": {
       "loadError": "Escenario de error al cargar",

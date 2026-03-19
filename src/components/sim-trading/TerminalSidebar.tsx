@@ -14,6 +14,8 @@ import { cn } from '@/lib/utils';
 interface TerminalSidebarProps {
   activeTool: string;
   onToolChange: (tool: string) => void;
+  disabledTools?: string[];
+  disabledToolHints?: Record<string, string>;
 }
 
 const tools = [
@@ -31,9 +33,12 @@ const tools = [
 
 export function TerminalSidebar({
   activeTool,
-  onToolChange
+  onToolChange,
+  disabledTools = [],
+  disabledToolHints = {}
 }: TerminalSidebarProps) {
   const { t } = useTranslation();
+  const disabledSet = new Set(disabledTools);
 
   return (
     <aside className="w-[60px] border-r border-border bg-card flex flex-col items-center py-4 gap-4 shrink-0 z-20 shadow-xl">
@@ -42,33 +47,44 @@ export function TerminalSidebar({
       </div>
 
       <div className="flex flex-col gap-2.5 w-full px-2">
-        {tools.map((tool) => (
-          <button
-            key={tool.id}
-            onClick={() => onToolChange(tool.id)}
-            className={cn(
-              'group relative flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-300 border border-transparent cursor-pointer',
-              activeTool === tool.id
-                ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30 border-primary/50 scale-105'
-                : 'text-muted-foreground hover:bg-muted hover:text-foreground hover:border-border hover:shadow-md'
-            )}
-            title={t(tool.labelKey)}
-          >
-            <tool.icon
-              className={cn(
-                'h-5 w-5 transition-transform duration-300 group-hover:scale-110',
-                activeTool === tool.id ? 'scale-100' : ''
-              )}
-            />
+        {tools.map((tool) => {
+          const isDisabled = disabledSet.has(tool.id);
+          const tooltipText = isDisabled
+            ? (disabledToolHints[tool.id] ?? t(tool.labelKey))
+            : t(tool.labelKey);
 
-            {/* Tooltip hint - modern style */}
-            <div className="absolute left-[110%] ml-3 hidden group-hover:flex items-center z-[100] pointer-events-none">
-              <div className="bg-popover text-popover-foreground text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-md border border-border whitespace-nowrap shadow-2xl animate-in fade-in zoom-in-95 slide-in-from-left-2">
-                {t(tool.labelKey)}
+          return (
+            <button
+              key={tool.id}
+              disabled={isDisabled}
+              onClick={() => onToolChange(tool.id)}
+              className={cn(
+                'group relative flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-300 border border-transparent',
+                isDisabled
+                  ? 'cursor-not-allowed text-muted-foreground/50 bg-muted/20 border-border/30'
+                  : activeTool === tool.id
+                    ? 'cursor-pointer bg-primary text-primary-foreground shadow-lg shadow-primary/30 border-primary/50 scale-105'
+                    : 'cursor-pointer text-muted-foreground hover:bg-muted hover:text-foreground hover:border-border hover:shadow-md'
+              )}
+              title={tooltipText}
+            >
+              <tool.icon
+                className={cn(
+                  'h-5 w-5 transition-transform duration-300',
+                  !isDisabled && 'group-hover:scale-110',
+                  activeTool === tool.id ? 'scale-100' : ''
+                )}
+              />
+
+              {/* Tooltip hint - modern style */}
+              <div className="absolute left-[110%] ml-3 hidden group-hover:flex items-center z-[100] pointer-events-none">
+                <div className="bg-popover text-popover-foreground text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-md border border-border whitespace-nowrap shadow-2xl animate-in fade-in zoom-in-95 slide-in-from-left-2">
+                  {tooltipText}
+                </div>
               </div>
-            </div>
-          </button>
-        ))}
+            </button>
+          );
+        })}
       </div>
 
       <div className="mt-auto flex flex-col gap-2 w-full px-2">

@@ -47,6 +47,7 @@ export interface SimEngineState {
 }
 
 type Action =
+  | { type: 'RESET_LOADING' }
   | {
       type: 'LOADED';
       candles: Candle[];
@@ -69,6 +70,11 @@ type Action =
 
 function reducer(state: SimEngineState, action: Action): SimEngineState {
   switch (action.type) {
+    case 'RESET_LOADING':
+      return {
+        ...INITIAL,
+        phase: 'LOADING'
+      };
     case 'LOADED':
       return {
         ...state,
@@ -138,6 +144,7 @@ interface UseSimEngineOptions {
   practiceScenario?: ScenarioPayload; // PRACTICE only
   executionConfig?: ExecutionConfig; // override for PRACTICE
   onComplete?: () => void;
+  resetKey?: string;
 }
 
 export function useSimEngine({
@@ -147,11 +154,17 @@ export function useSimEngine({
   practiceToken,
   practiceCandles,
   practiceScenario,
-  onComplete
+  onComplete,
+  resetKey
 }: UseSimEngineOptions) {
   const { t } = useTranslation();
   const [state, dispatch] = useReducer(reducer, INITIAL);
   const engineRef = useRef<SimulationEngine | null>(null);
+
+  useEffect(() => {
+    engineRef.current = null;
+    dispatch({ type: 'RESET_LOADING' });
+  }, [resetKey]);
 
   // ─── Bootstrap ─────────────────────────────────────────────────────────────
 

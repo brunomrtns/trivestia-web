@@ -31,6 +31,7 @@ interface DrawingOverlayProps {
   series: ISeriesApi<'Candlestick'> | null;
   onDrawEnd?: (line: Line) => void;
   onDrawingStateChange?: (inProgress: boolean) => void;
+  clearSignal?: number;
 }
 
 export function DrawingOverlay({
@@ -38,7 +39,8 @@ export function DrawingOverlay({
   chart,
   series,
   onDrawEnd,
-  onDrawingStateChange
+  onDrawingStateChange,
+  clearSignal = 0
 }: DrawingOverlayProps) {
   const { t } = useTranslation();
   const [lines, setLines] = useState<Line[]>([]);
@@ -170,6 +172,17 @@ export function DrawingOverlay({
     }
   }, [active, currentLine]);
 
+  // Symbol switch must intentionally clear all drawings and previews.
+  useEffect(() => {
+    setLines([]);
+    setCurrentLine(null);
+    previewLoggedRef.current = false;
+    nullPointLoggedRef.current = false;
+    console.log('[DrawingOverlay] drawings explicitly cleared', {
+      clearSignal
+    });
+  }, [clearSignal]);
+
   // ─── Interaction Handlers ──────────────────────────────────────────────────
 
   const finalizeLine = useCallback(
@@ -282,101 +295,74 @@ export function DrawingOverlay({
   const isInteractionBlocked = active && isChartReady;
 
   return (
-    <svg
-      ref={containerRef}
-      className={`absolute inset-0 z-10 w-full h-full touch-none overflow-hidden transition-opacity duration-200 ${
-        active ? 'opacity-100' : 'opacity-100'
-      } ${
-        isInteractionBlocked
-          ? 'cursor-crosshair pointer-events-auto'
-          : 'pointer-events-none'
-      }`}
-    >
-      {/* SVG roots may ignore events on transparent zones; this rect guarantees full-area hit testing. */}
-      {isInteractionBlocked && (
-        <rect
-          x="0"
-          y="0"
-          width="100%"
-          height="100%"
-          fill="transparent"
-          pointerEvents="all"
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-        />
-      )}
-
-      {renderLines()}
-
-      {active && (
-        <g className="pointer-events-none select-none">
-          {/* Main Feedback Banner */}
+    <div className="absolute inset-0 z-10">
+      <svg
+        ref={containerRef}
+        className={`absolute inset-0 w-full h-full touch-none overflow-hidden transition-opacity duration-200 ${
+          active ? 'opacity-100' : 'opacity-100'
+        } ${
+          isInteractionBlocked
+            ? 'cursor-crosshair pointer-events-auto'
+            : 'pointer-events-none'
+        }`}
+      >
+        {/* SVG roots may ignore events on transparent zones; this rect guarantees full-area hit testing. */}
+        {isInteractionBlocked && (
           <rect
-            x="12"
-            y="12"
-            width="240"
-            height="32"
-            rx="6"
-            fill="#1e222d"
-            fillOpacity="0.9"
-            stroke="#363a45"
-            strokeWidth="1"
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+            fill="transparent"
+            pointerEvents="all"
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
           />
-          <circle
-            cx="28"
-            cy="28"
-            r="4"
-            fill={currentLine ? '#4361EE' : '#8b8fa8'}
-            className={currentLine ? 'animate-pulse' : ''}
-          />
-          <text
-            x="42"
-            y="32"
-            fill="white"
-            className="text-[11px] font-bold uppercase tracking-wider"
-          >
-            {currentLine
-              ? t('sim.terminal.drawing.instructions.finalizeLine')
-              : t('sim.terminal.drawing.instructions.setStartPoint')}
-          </text>
+        )}
 
-          {/* Helper Hints */}
+        {renderLines()}
+      </svg>
+
+      {/* HTML UI Overlays (responsive to content, not fixed-size SVG) */}
+      {active && isChartReady && (
+        <div className="absolute top-3 left-3 pointer-events-none select-none">
+          {/* Main Instruction Card */}
+          <div className="flex items-center gap-3 rounded-lg border border-primary/30 bg-background/95 px-4 py-2.5 shadow-lg backdrop-blur-md">
+            {/* Status Indicator */}
+            <div
+              className={`h-3 w-3 rounded-full flex-shrink-0 ${
+                currentLine
+                  ? 'bg-primary animate-pulse'
+                  : 'bg-muted-foreground'
+              }`}
+            />
+
+            {/* Main Text */}
+            <span className="text-[11px] font-bold uppercase tracking-wider text-foreground whitespace-nowrap">
+              {currentLine
+                ? t('sim.terminal.drawing.instructions.finalizeLine')
+                : t('sim.terminal.drawing.instructions.setStartPoint')}
+            </span>
+          </div>
+
+          {/* Secondary Hint (only when not drawing) */}
           {!currentLine && (
-            <text
-              x="12"
-              y="60"
-              fill="#8b8fa8"
-              className="text-[10px] font-medium italic opacity-80"
-            >
+            <div className="mt-2 text-[10px] font-medium italic text-foreground/70">
               {t('sim.terminal.drawing.instructions.escapeHint')}
-            </text>
+            </div>
           )}
-        </g>
+        </div>
       )}
 
       {/* Loading state if chart not ready */}
       {active && !isChartReady && (
-        <g className="pointer-events-none">
-          <rect
-            x="12"
-            y="72"
-            width="260"
-            height="24"
-            rx="6"
-            fill="black"
-            fillOpacity="0.65"
-          />
-          <text
-            x="50%"
-            y="50%"
-            textAnchor="middle"
-            fill="white"
-            className="text-xs font-bold uppercase tracking-widest animate-pulse"
-          >
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="flex items-center gap-2 rounded-lg bg-background/70 px-4 py-2 text-xs font-bold uppercase tracking-widest text-foreground backdrop-blur-sm">
+            <div className="h-2 w-2 animate-pulse rounded-full bg-primary" />
             {t('sim.terminal.drawing.initializingChartInteraction')}
-          </text>
-        </g>
+          </div>
+        </div>
       )}
-    </svg>
+    </div>
   );
 }
