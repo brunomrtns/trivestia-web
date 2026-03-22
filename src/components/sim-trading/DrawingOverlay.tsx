@@ -57,36 +57,13 @@ export function DrawingOverlay({
 
   // ─── Coordinate Conversion ──────────────────────────────────────────────────
 
-  const getChartPoint = useCallback(
-    (e: React.MouseEvent | MouseEvent): ChartPoint | null => {
-      if (!containerRef.current || !chart || !series) return null;
-      const rect = containerRef.current.getBoundingClientRect();
-      const rawX = e.clientX - rect.left;
-      const rawY = e.clientY - rect.top;
-
-      // Clamp coordinates to the drawable area to avoid null conversions on edge clicks.
-      const x = Math.max(0, Math.min(rect.width - 1, rawX));
-      const y = Math.max(0, Math.min(rect.height - 1, rawY));
-
+  const getChartPointFromCoords = useCallback(
+    (x: number, y: number): ChartPoint | null => {
+      if (!chart || !series) return null;
       const logical = chart.timeScale().coordinateToLogical(x);
       const price = series.coordinateToPrice(y);
 
-      if (logical === null || price === null) {
-        if (!nullPointLoggedRef.current) {
-          console.log('[DrawingOverlay] coordinate conversion returned null', {
-            logical,
-            price,
-            x,
-            y,
-            width: rect.width,
-            height: rect.height
-          });
-          nullPointLoggedRef.current = true;
-        }
-        return null;
-      }
-
-      nullPointLoggedRef.current = false;
+      if (logical === null || price === null) return null;
       return { logical: logical as Logical, price };
     },
     [chart, series]
@@ -107,7 +84,7 @@ export function DrawingOverlay({
   // ─── Event Subscriptions ───────────────────────────────────────────────────
 
   useLayoutEffect(() => {
-    if (!chart) return;
+    if (!chart || !series) return;
 
     // Force re-render whenever the chart moves/scales
     const handleUpdate = () => setTick((t) => t + 1);
@@ -124,18 +101,59 @@ export function DrawingOverlay({
     chart.timeScale().subscribeVisibleTimeRangeChange(handleUpdate);
     subscribePriceRangeChange?.(handleUpdate);
 
+    // Drawing Interaction via Chart Subscriptions
+    const handleClick = (param: any) => {
+      if (!active || !param.point || !isChartReady) return;
+      
+      const point = getChartPointFromCoords(param.point.x, param.point.y);
+      if (!point) return;
+
+      if (!currentLineRef.current) {
+        // Start line
+        const startPoint = point;
+        currentLineRef.current = { start: startPoint, end: startPoint };
+        setCurrentLine({ start: startPoint, end: startPoint });
+      } else {
+        // Finalize line
+        finalizeLine(point);
+      }
+    };
+
+    const handleCrosshairMove = (param: any) => {
+      if (!active || !currentLineRef.current || !param.point) return;
+      
+      const point = getChartPointFromCoords(param.point.x, param.point.y);
+      if (point) {
+        currentLineRef.current = { ...currentLineRef.current, end: point };
+        setCurrentLine({ ...currentLineRef.current });
+      }
+    };
+
+    chart.subscribeClick(handleClick);
+    chart.subscribeCrosshairMove(handleCrosshairMove);
+
     return () => {
       chart.timeScale().unsubscribeVisibleTimeRangeChange(handleUpdate);
       unsubscribePriceRangeChange?.(handleUpdate);
+      chart.unsubscribeClick(handleClick);
+      chart.unsubscribeCrosshairMove(handleCrosshairMove);
     };
-  }, [chart]);
+  }, [chart, series, active, isChartReady, getChartPointFromCoords]);
+
+  const currentLineRef = useRef<{ start: ChartPoint; end: ChartPoint } | null>(null);
 
   useEffect(() => {
-    if (!active) return;
+    if (!active) {
+      currentLineRef.current = null;
+      setCurrentLine(null);
+    }
+  }, [active]);
 
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Escape' && currentLine) {
+      if (e.code === 'Escape' && currentLineRef.current) {
         e.preventDefault();
+        currentLineRef.current = null;
         setCurrentLine(null);
         console.log('[Drawing] Canceled via Escape');
       }
@@ -145,101 +163,39 @@ export function DrawingOverlay({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [active, currentLine]);
+  }, []);
 
   useEffect(() => {
     onDrawingStateChange?.(active && !!currentLine);
-    console.log('[DrawingOverlay] onDrawingStateChange', {
-      active,
-      inProgress: !!currentLine
-    });
   }, [active, currentLine, onDrawingStateChange]);
-
-  useEffect(() => {
-    console.log('[DrawingOverlay] mount/update', {
-      active,
-      hasChart: !!chart,
-      hasSeries: !!series,
-      isChartReady,
-      hasCurrentLine: !!currentLine,
-      linesCount: lines.length
-    });
-  }, [active, chart, series, isChartReady, currentLine, lines.length]);
-
-  useEffect(() => {
-    if (!active && currentLine) {
-      setCurrentLine(null);
-    }
-  }, [active, currentLine]);
 
   // Symbol switch must intentionally clear all drawings and previews.
   useEffect(() => {
     setLines([]);
+    currentLineRef.current = null;
     setCurrentLine(null);
-    previewLoggedRef.current = false;
-    nullPointLoggedRef.current = false;
-    console.log('[DrawingOverlay] drawings explicitly cleared', {
-      clearSignal
-    });
   }, [clearSignal]);
 
   // ─── Interaction Handlers ──────────────────────────────────────────────────
 
   const finalizeLine = useCallback(
     (end: ChartPoint) => {
-      if (!currentLine) return;
+      if (!currentLineRef.current) return;
 
       const newLine: Line = {
         id: Math.random().toString(36).substr(2, 9),
-        start: currentLine.start,
+        start: currentLineRef.current.start,
         end,
         color: '#4361EE'
       };
 
       setLines((prev) => [...prev, newLine]);
+      currentLineRef.current = null;
       setCurrentLine(null);
       onDrawEnd?.(newLine);
-      previewLoggedRef.current = false;
-      console.log('[Drawing] Line finalized:', newLine);
     },
-    [currentLine, onDrawEnd]
+    [onDrawEnd]
   );
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!active || e.button !== 0 || !isChartReady) return;
-
-    console.log('[DrawingOverlay] mouseDown captured', {
-      button: e.button,
-      isChartReady,
-      hasCurrentLine: !!currentLine
-    });
-
-    const point = getChartPoint(e);
-    if (!point) return;
-
-    if (!currentLine) {
-      // First click: start line
-      setCurrentLine({ start: point, end: point });
-      previewLoggedRef.current = false;
-      console.log('[Drawing] Anchor set at:', point);
-    } else {
-      // Second click: finalize line
-      console.log('[DrawingOverlay] second click finalize');
-      finalizeLine(point);
-    }
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!currentLine || !active || !isChartReady) return;
-    const point = getChartPoint(e);
-    if (point) {
-      if (!previewLoggedRef.current) {
-        console.log('[DrawingOverlay] preview updating');
-        previewLoggedRef.current = true;
-      }
-      setCurrentLine((prev) => (prev ? { ...prev, end: point } : null));
-    }
-  };
 
   // ─── Rendering ─────────────────────────────────────────────────────────────
 
@@ -292,34 +248,12 @@ export function DrawingOverlay({
     return elements;
   };
 
-  const isInteractionBlocked = active && isChartReady;
-
   return (
-    <div className="absolute inset-0 z-10">
+    <div className="absolute inset-0 z-10 pointer-events-none">
       <svg
         ref={containerRef}
-        className={`absolute inset-0 w-full h-full touch-none overflow-hidden transition-opacity duration-200 ${
-          active ? 'opacity-100' : 'opacity-100'
-        } ${
-          isInteractionBlocked
-            ? 'cursor-crosshair pointer-events-auto'
-            : 'pointer-events-none'
-        }`}
+        className="absolute inset-0 w-full h-full touch-none overflow-hidden pointer-events-none"
       >
-        {/* SVG roots may ignore events on transparent zones; this rect guarantees full-area hit testing. */}
-        {isInteractionBlocked && (
-          <rect
-            x="0"
-            y="0"
-            width="100%"
-            height="100%"
-            fill="transparent"
-            pointerEvents="all"
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-          />
-        )}
-
         {renderLines()}
       </svg>
 
