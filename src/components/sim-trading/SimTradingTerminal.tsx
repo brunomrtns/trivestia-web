@@ -604,7 +604,7 @@ export function SimTradingTerminal({
           {showPlaybackControls && (
             <div
               className={`absolute left-1/2 -translate-x-1/2 z-30 w-full px-4 pointer-events-none animate-in slide-in-from-bottom-4 duration-300 ${
-                isReadyPhase ? 'bottom-4 max-w-xl' : 'bottom-6 max-w-2xl'
+                isReadyPhase ? 'bottom-7 max-w-xl' : 'bottom-6 max-w-2xl'
               }`}
             >
               <div className="pointer-events-auto">
