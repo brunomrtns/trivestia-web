@@ -516,7 +516,7 @@ export function SimTradingTerminal({
             key={`chart-${selectedSymbol}-${engineResetVersion}`}
             candles={candles}
             visibleCount={visibleCount}
-            onTimeClick={engine.jumpToTimestamp}
+            onTimeClick={activeTool === 'replay' ? engine.jumpToTimestamp : undefined}
             onUpdateProtection={engine.updateProtection}
             onChartLoad={handleChartLoad}
             engineState={engineState}
