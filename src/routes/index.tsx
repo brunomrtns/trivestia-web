@@ -61,30 +61,24 @@ const PracticeHistoryPage = lazy(
 // Admin
 const AdminCoursesPage = lazy(() => import('@/pages/admin/AdminCoursesPage'));
 const AdminLessonsPage = lazy(() => import('@/pages/admin/AdminLessonsPage'));
-const AdminQuestionsPage = lazy(
-  () => import('@/pages/admin/AdminQuestionsPage')
-);
+const AdminQuestionsPage = lazy(() => import('@/pages/admin/AdminQuestionsPage'));
 const AdminUsersPage = lazy(() => import('@/pages/admin/AdminUsersPage'));
-const AdminLessonStepsPage = lazy(
-  () => import('@/pages/admin/AdminLessonStepsPage')
-);
-const AnnouncementsPage = lazy(
-  () => import('@/pages/student/AnnouncementsPage')
-);
+const AdminLessonStepsPage = lazy(() => import('@/pages/admin/AdminLessonStepsPage'));
+const AnnouncementsPage = lazy(() => import('@/pages/student/AnnouncementsPage'));
 const SettingsPage = lazy(() => import('@/pages/student/SettingsPage'));
-const AdminAnnouncementsPage = lazy(
-  () => import('@/pages/admin/AdminAnnouncementsPage')
-);
+const AdminAnnouncementsPage = lazy(() => import('@/pages/admin/AdminAnnouncementsPage'));
 const AdminPeriodsPage = lazy(() => import('@/pages/admin/AdminPeriodsPage'));
+const AdminOffersPage = lazy(() => import('@/pages/admin/AdminOffersPage'));
+
+// Payment
+const PaymentSuccessPage = lazy(() => import('@/pages/payment/PaymentSuccessPage'));
+const PaymentCancelPage = lazy(() => import('@/pages/payment/PaymentCancelPage'));
+const OnboardingPage = lazy(() => import('@/pages/workspace/OnboardingPage'));
 
 // Super Admin
-const SuperDashboardPage = lazy(
-  () => import('@/pages/super/SuperDashboardPage')
-);
+const SuperDashboardPage = lazy(() => import('@/pages/super/SuperDashboardPage'));
 const SuperTenantsPage = lazy(() => import('@/pages/super/SuperTenantsPage'));
-const SuperTenantEditPage = lazy(
-  () => import('@/pages/super/SuperTenantEditPage')
-);
+const SuperTenantEditPage = lazy(() => import('@/pages/super/SuperTenantEditPage'));
 const SuperUsersPage = lazy(() => import('@/pages/super/SuperUsersPage'));
 
 // ─── Loading fallback ────────────────────────────────────────────────────────
@@ -168,7 +162,8 @@ const tenantAdminRoutes = [
     element: <AdminLessonStepsPage />
   },
   { path: 'users', element: <AdminUsersPage /> },
-  { path: 'announcements', element: <AdminAnnouncementsPage /> }
+  { path: 'announcements', element: <AdminAnnouncementsPage /> },
+  { path: 'offers', element: <AdminOffersPage /> }
 ];
 
 // ─── Router ──────────────────────────────────────────────────────────────────
@@ -194,7 +189,8 @@ const router = createBrowserRouter(
           element: <WorkspaceLayout />,
           children: [
             { index: true, element: <WorkspacePage /> },
-            { path: 'create-school', element: <WorkspaceCreateSchoolPage /> }
+            { path: 'create-school', element: <WorkspaceCreateSchoolPage /> },
+            { path: 'onboarding', element: <OnboardingPage /> }
           ]
         }
       ]
@@ -202,6 +198,10 @@ const router = createBrowserRouter(
 
     // ── Registro de professor (conta da plataforma) ────────────────────────────
     { path: '/register', element: <ProfessorRegisterPage /> },
+
+    // ── Payment result pages ──────────────────────────────────────────────
+    { path: '/payment/success', element: <PaymentSuccessPage /> },
+    { path: '/payment/cancel', element: <PaymentCancelPage /> },
 
     // ── Legacy routes — redireciona para tenant ──────────────────────────────
     { path: '/app/*', element: <LegacyRedirect /> },

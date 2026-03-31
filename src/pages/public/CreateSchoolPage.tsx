@@ -6,8 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { Eye, EyeOff, Loader2, BookOpen, Check, X } from 'lucide-react';
-import { tenantEndpoints } from '@/services/endpoints/tenant.endpoints';
-import { useAuthStore } from '@/features/auth/auth.store';
+import { paymentEndpoints } from '@/services/endpoints/payment.endpoints';
 import { useDebouncedCallback } from '@/hooks/useDebouncedCallback';
 
 // ─── Schema (definido dentro do componente para usar t()) ──────────────────────────────────
@@ -42,7 +41,6 @@ export default function CreateSchoolPage() {
       .regex(/[0-9]/, t('common.validation.passwordNumber'))
   });
 
-  const setAuth = useAuthStore((s) => s.setAuth);
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
   const [slugStatus, setSlugStatus] = useState<
@@ -94,12 +92,8 @@ export default function CreateSchoolPage() {
     }
     setLoading(true);
     try {
-      const res = await tenantEndpoints.createPublic(data);
-      setAuth(res.user, res.token, res.refreshToken, res.tenant.slug);
-      toast.success(
-        t('public.createSchool.toast.success', { name: res.tenant.name })
-      );
-      navigate(`/t/${res.tenant.slug}/app/dashboard`, { replace: true });
+      const result = await paymentEndpoints.createSchoolCheckoutPublic(data);
+      window.location.href = result.checkoutUrl;
     } catch {
       toast.error(t('public.createSchool.toast.error'));
     } finally {

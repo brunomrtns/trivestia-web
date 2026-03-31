@@ -3,33 +3,18 @@ import React, {
   useRef,
   useEffect,
   useCallback,
-  useLayoutEffect
+  useLayoutEffect,
+  useMemo
 } from 'react';
-import type { IChartApi, ISeriesApi, Logical } from 'lightweight-charts';
+import type { IChartApi, ISeriesApi, Logical, Time } from 'lightweight-charts';
 import { useTranslation } from 'react-i18next';
-
-interface ChartPoint {
-  logical: Logical;
-  price: number;
-}
-
-interface ScreenPoint {
-  x: number;
-  y: number;
-}
-
-interface Line {
-  id: string;
-  start: ChartPoint;
-  end: ChartPoint;
-  color: string;
-}
+import { DrawingPrimitive, type ChartPoint, type LineData } from './DrawingPrimitive';
 
 interface DrawingOverlayProps {
   active: boolean;
   chart: IChartApi | null;
   series: ISeriesApi<'Candlestick'> | null;
-  onDrawEnd?: (line: Line) => void;
+  onDrawEnd?: (line: LineData) => void;
   onDrawingStateChange?: (inProgress: boolean) => void;
   clearSignal?: number;
 }
@@ -43,40 +28,50 @@ export function DrawingOverlay({
   clearSignal = 0
 }: DrawingOverlayProps) {
   const { t } = useTranslation();
-  const [lines, setLines] = useState<Line[]>([]);
+  const [lines, setLines] = useState<LineData[]>([]);
   const [currentLine, setCurrentLine] = useState<{
     start: ChartPoint;
     end: ChartPoint;
   } | null>(null);
-  const [, setTick] = useState(0); // Used to force re-render on chart pan/zoom
 
-  const containerRef = useRef<SVGSVGElement>(null);
-  const previewLoggedRef = useRef(false);
-  const nullPointLoggedRef = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const isChartReady = Boolean(chart && series);
+
+  // ─── Native Primitive Integration ──────────────────────────────────────────
+
+  const primitive = useMemo(() => new DrawingPrimitive(), []);
+
+  useEffect(() => {
+    if (!series) return;
+    series.attachPrimitive(primitive);
+    return () => {
+      series.detachPrimitive(primitive);
+    };
+  }, [series, primitive]);
+
+  useEffect(() => {
+    primitive.setData(lines, currentLine);
+    // Force chart redraw
+    if (chart) {
+      chart.timeScale().applyOptions({}); 
+    }
+  }, [lines, currentLine, primitive, chart]);
 
   // ─── Coordinate Conversion ──────────────────────────────────────────────────
 
   const getChartPointFromCoords = useCallback(
     (x: number, y: number): ChartPoint | null => {
       if (!chart || !series) return null;
-      const logical = chart.timeScale().coordinateToLogical(x);
+      const timeScale = chart.timeScale();
+      const logical = timeScale.coordinateToLogical(x);
       const price = series.coordinateToPrice(y);
 
       if (logical === null || price === null) return null;
-      return { logical: logical as Logical, price };
-    },
-    [chart, series]
-  );
 
-  const getScreenPoint = useCallback(
-    (point: ChartPoint): ScreenPoint | null => {
-      if (!chart || !series) return null;
-      const x = chart.timeScale().logicalToCoordinate(point.logical);
-      const y = series.priceToCoordinate(point.price);
-
-      if (x === null || y === null) return null;
-      return { x, y };
+      return {
+        logical: logical as Logical,
+        price
+      };
     },
     [chart, series]
   );
@@ -85,21 +80,6 @@ export function DrawingOverlay({
 
   useLayoutEffect(() => {
     if (!chart || !series) return;
-
-    // Force re-render whenever the chart moves/scales
-    const handleUpdate = () => setTick((t) => t + 1);
-    const priceScaleApi = chart.priceScale('right') as any;
-    const subscribePriceRangeChange =
-      typeof priceScaleApi?.subscribePriceRangeChange === 'function'
-        ? priceScaleApi.subscribePriceRangeChange.bind(priceScaleApi)
-        : null;
-    const unsubscribePriceRangeChange =
-      typeof priceScaleApi?.unsubscribePriceRangeChange === 'function'
-        ? priceScaleApi.unsubscribePriceRangeChange.bind(priceScaleApi)
-        : null;
-
-    chart.timeScale().subscribeVisibleTimeRangeChange(handleUpdate);
-    subscribePriceRangeChange?.(handleUpdate);
 
     // Drawing Interaction via Chart Subscriptions
     const handleClick = (param: any) => {
@@ -110,9 +90,8 @@ export function DrawingOverlay({
 
       if (!currentLineRef.current) {
         // Start line
-        const startPoint = point;
-        currentLineRef.current = { start: startPoint, end: startPoint };
-        setCurrentLine({ start: startPoint, end: startPoint });
+        currentLineRef.current = { start: point, end: point };
+        setCurrentLine({ start: point, end: point });
       } else {
         // Finalize line
         finalizeLine(point);
@@ -133,8 +112,6 @@ export function DrawingOverlay({
     chart.subscribeCrosshairMove(handleCrosshairMove);
 
     return () => {
-      chart.timeScale().unsubscribeVisibleTimeRangeChange(handleUpdate);
-      unsubscribePriceRangeChange?.(handleUpdate);
       chart.unsubscribeClick(handleClick);
       chart.unsubscribeCrosshairMove(handleCrosshairMove);
     };
@@ -155,7 +132,6 @@ export function DrawingOverlay({
         e.preventDefault();
         currentLineRef.current = null;
         setCurrentLine(null);
-        console.log('[Drawing] Canceled via Escape');
       }
     };
 
@@ -182,7 +158,7 @@ export function DrawingOverlay({
     (end: ChartPoint) => {
       if (!currentLineRef.current) return;
 
-      const newLine: Line = {
+      const newLine: LineData = {
         id: Math.random().toString(36).substr(2, 9),
         start: currentLineRef.current.start,
         end,
@@ -199,64 +175,8 @@ export function DrawingOverlay({
 
   // ─── Rendering ─────────────────────────────────────────────────────────────
 
-  if (!active && lines.length === 0) return null;
-
-  const renderLines = () => {
-    const elements: React.ReactNode[] = [];
-
-    // Render finalized lines
-    lines.forEach((line) => {
-      const start = getScreenPoint(line.start);
-      const end = getScreenPoint(line.end);
-      if (start && end) {
-        elements.push(
-          <line
-            key={line.id}
-            x1={start.x}
-            y1={start.y}
-            x2={end.x}
-            y2={end.y}
-            stroke={line.color}
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
-        );
-      }
-    });
-
-    // Render preview line
-    if (currentLine) {
-      const start = getScreenPoint(currentLine.start);
-      const end = getScreenPoint(currentLine.end);
-      if (start && end) {
-        elements.push(
-          <line
-            key="preview"
-            x1={start.x}
-            y1={start.y}
-            x2={end.x}
-            y2={end.y}
-            stroke="#4361EE"
-            strokeWidth="2"
-            strokeDasharray="4 4"
-            strokeLinecap="round"
-          />
-        );
-      }
-    }
-
-    return elements;
-  };
-
   return (
-    <div className="absolute inset-0 z-10 pointer-events-none">
-      <svg
-        ref={containerRef}
-        className="absolute inset-0 w-full h-full touch-none overflow-hidden pointer-events-none"
-      >
-        {renderLines()}
-      </svg>
-
+    <div ref={containerRef} className="absolute inset-0 z-10 pointer-events-none overflow-hidden">
       {/* HTML UI Overlays (responsive to content, not fixed-size SVG) */}
       {active && isChartReady && (
         <div className="absolute top-3 left-3 pointer-events-none select-none">

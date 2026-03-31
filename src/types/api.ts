@@ -919,3 +919,63 @@ export interface CreatePlatformTenantData {
 export interface PlatformTenantCreatedResponse {
   tenant: { id: string; slug: string; name: string };
 }
+
+// ─── Payments ─────────────────────────────────────────────────────────────────
+
+export type OfferType = 'FREE' | 'ONE_TIME' | 'SUBSCRIPTION';
+export type BillingInterval = 'MONTH' | 'YEAR';
+export type PaymentStatus = 'PENDING' | 'SUCCEEDED' | 'FAILED' | 'REFUNDED';
+export type AccessStatus = 'ACTIVE' | 'PENDING' | 'FAILED' | 'CANCELED';
+
+export interface Offer {
+  id: string;
+  tenantId: string;
+  courseId: string | null;
+  title: string;
+  description: string | null;
+  type: OfferType;
+  priceAmount: number | null;
+  priceCurrency: string | null;
+  billingInterval: BillingInterval | null;
+  stripeProductId: string | null;
+  stripePriceId: string | null;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Enrollment {
+  id: string;
+  userId: string;
+  tenantId: string;
+  offerId: string;
+  accessStatus: AccessStatus;
+  paymentStatus: PaymentStatus;
+  stripeSubscriptionId: string | null;
+  startsAt: string;
+  endsAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  offer?: Offer;
+}
+
+export interface ConnectStatus {
+  hasAccount: boolean;
+  accountId: string | null;
+  onboardingComplete: boolean;
+  chargesEnabled: boolean;
+  payoutsEnabled: boolean;
+  detailsSubmitted: boolean;
+}
+
+export interface CheckoutResponse {
+  checkoutUrl?: string;
+  enrolled?: boolean;
+  enrollmentId?: string;
+}
+
+export interface PaymentStatusResponse {
+  status: string;
+  tenantId: string | null;
+  kind: string;
+}

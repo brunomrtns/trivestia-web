@@ -9,6 +9,7 @@ import { Check, Loader2, X } from 'lucide-react';
 import { usePlatformAuthStore } from '@/features/platform/platform.store';
 import { platformStorage } from '@/features/platform/platformStorage';
 import { platformEndpoints } from '@/services/endpoints/platform.endpoints';
+import { paymentEndpoints } from '@/services/endpoints/payment.endpoints';
 import { useDebouncedCallback } from '@/hooks/useDebouncedCallback';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -83,18 +84,8 @@ export default function CreateSchoolPage() {
   const onSubmit = async (data: FormData) => {
     setCreating(true);
     try {
-      const res = await platformEndpoints.createTenant(data);
-      toast.success(
-        t('workspace.createSchool.toast.success', { name: res.tenant.name })
-      );
-
-      // Atualiza o store com o tenantId recebido
-      if (user && token) {
-        const refreshToken = platformStorage.getRefreshToken() ?? '';
-        setAuth({ ...user, tenantId: res.tenant.id }, token, refreshToken);
-      }
-
-      navigate(`/t/${res.tenant.slug}/admin/courses`, { replace: true });
+      const result = await paymentEndpoints.createSchoolCheckoutClaim(data);
+      window.location.href = result.checkoutUrl;
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })
         ?.response?.data?.message;
