@@ -69,6 +69,7 @@ const SettingsPage = lazy(() => import('@/pages/student/SettingsPage'));
 const AdminAnnouncementsPage = lazy(() => import('@/pages/admin/AdminAnnouncementsPage'));
 const AdminPeriodsPage = lazy(() => import('@/pages/admin/AdminPeriodsPage'));
 const AdminOffersPage = lazy(() => import('@/pages/admin/AdminOffersPage'));
+const AdminBillingPage = lazy(() => import('@/pages/admin/AdminBillingPage'));
 
 // Payment
 const PaymentSuccessPage = lazy(() => import('@/pages/payment/PaymentSuccessPage'));
@@ -80,6 +81,7 @@ const SuperDashboardPage = lazy(() => import('@/pages/super/SuperDashboardPage')
 const SuperTenantsPage = lazy(() => import('@/pages/super/SuperTenantsPage'));
 const SuperTenantEditPage = lazy(() => import('@/pages/super/SuperTenantEditPage'));
 const SuperUsersPage = lazy(() => import('@/pages/super/SuperUsersPage'));
+const SuperBillingPage = lazy(() => import('@/pages/super/SuperBillingPage'));
 
 // ─── Loading fallback ────────────────────────────────────────────────────────
 
@@ -163,7 +165,8 @@ const tenantAdminRoutes = [
   },
   { path: 'users', element: <AdminUsersPage /> },
   { path: 'announcements', element: <AdminAnnouncementsPage /> },
-  { path: 'offers', element: <AdminOffersPage /> }
+  { path: 'offers', element: <AdminOffersPage /> },
+  { path: 'billing', element: <AdminBillingPage /> }
 ];
 
 // ─── Router ──────────────────────────────────────────────────────────────────
@@ -270,7 +273,8 @@ const router = createBrowserRouter(
             { path: 'dashboard', element: <SuperDashboardPage /> },
             { path: 'tenants', element: <SuperTenantsPage /> },
             { path: 'tenants/:tenantId', element: <SuperTenantEditPage /> },
-            { path: 'users', element: <SuperUsersPage /> }
+            { path: 'users', element: <SuperUsersPage /> },
+            { path: 'billing', element: <SuperBillingPage /> }
           ]
         }
       ]

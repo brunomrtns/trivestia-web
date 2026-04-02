@@ -22,6 +22,14 @@ import { adminEndpoints } from '@/services/endpoints/admin.endpoints';
 import { FileUploadService } from '@/services/FileUploadService';
 import type { Course } from '@/types/api';
 
+function getApiErrorMessage(error: unknown): string | undefined {
+  if (typeof error !== 'object' || error === null || !('response' in error)) {
+    return undefined;
+  }
+  const withResponse = error as { response?: { data?: { message?: string } } };
+  return withResponse.response?.data?.message;
+}
+
 // Helper para construir URLs de storage
 const getStorageUrl = (path: string | null | undefined): string | null => {
   if (!path) return null;
@@ -217,7 +225,7 @@ function CourseForm({
 
       <div className="flex flex-wrap items-end justify-between gap-4 border-t pt-4">
         <div className="w-full max-w-xs">
-          <label className="mb-1 block text-sm font-medium flex items-center gap-1.5">
+          <label className="mb-1 flex items-center gap-1.5 text-sm font-medium">
             <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
             {t('admin.courses.form.deadline')}
           </label>
@@ -271,7 +279,8 @@ export default function AdminCoursesPage() {
       setCreating(false);
       toast.success(t('admin.courses.toast.created'));
     },
-    onError: () => toast.error(t('admin.courses.toast.error'))
+    onError: (error: unknown) =>
+      toast.error(getApiErrorMessage(error) ?? t('admin.courses.toast.error'))
   });
 
   // PATCH /courses/:id — Bearer ADMIN
@@ -285,7 +294,6 @@ export default function AdminCoursesPage() {
     },
     onError: () => toast.error(t('admin.courses.toast.updateError'))
   });
-
   // DELETE /courses/:id — Bearer ADMIN
   const deleteMut = useMutation({
     mutationFn: (id: string) => adminEndpoints.deleteCourse(slug, id),

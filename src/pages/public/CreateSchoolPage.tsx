@@ -2,11 +2,12 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { Eye, EyeOff, Loader2, BookOpen, Check, X } from 'lucide-react';
 import { paymentEndpoints } from '@/services/endpoints/payment.endpoints';
+import { tenantEndpoints } from '@/services/endpoints/tenant.endpoints';
 import { useDebouncedCallback } from '@/hooks/useDebouncedCallback';
 
 // ─── Schema (definido dentro do componente para usar t()) ──────────────────────────────────
@@ -21,7 +22,6 @@ type FormData = {
 };
 
 export default function CreateSchoolPage() {
-  const navigate = useNavigate();
   const { t } = useTranslation();
 
   const schema = z.object({

@@ -979,3 +979,96 @@ export interface PaymentStatusResponse {
   tenantId: string | null;
   kind: string;
 }
+
+export interface PlanFeatures {
+  maxCourses: number;
+  maxStudents: number;
+  labAccess: boolean;
+  analytics: boolean;
+  priority: boolean;
+  commissionPercent: number;
+}
+
+export interface BillingPlan {
+  id: string;
+  name: string;
+  label: string;
+  description: string;
+  priceAmount: number;
+  currency: string;
+  interval: string;
+  features: PlanFeatures;
+  active: boolean;
+  sortOrder: number;
+  stripePriceId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BillingPlanCatalog extends BillingPlan {
+  displayPrice: {
+    amount: number;
+    currency: string;
+    interval: string;
+    source: 'stripe' | 'local' | 'fallback';
+  };
+}
+
+export type SubscriptionStatus =
+  | 'ACTIVE'
+  | 'PAST_DUE'
+  | 'CANCELED'
+  | 'TRIALING'
+  | 'UNPAID'
+  | 'INCOMPLETE';
+
+export interface TenantSubscription {
+  id: string;
+  tenantId: string;
+  planId: string;
+  status: SubscriptionStatus;
+  stripeSubscriptionId: string | null;
+  stripeCustomerId: string | null;
+  currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
+  createdAt: string;
+  updatedAt: string;
+  plan?: BillingPlan;
+}
+
+export interface BillingStatusResponse {
+  plan: BillingPlan | null;
+  subscription: TenantSubscription | null;
+  features: PlanFeatures;
+  usage: {
+    courses: number;
+    students: number;
+  };
+  limits: {
+    maxCourses: number;
+    maxStudents: number;
+    labAccess: boolean;
+    commissionPercent: number;
+  };
+}
+
+export interface BillingLimitCheckResponse {
+  allowed: boolean;
+  limit: number;
+  current: number;
+}
+
+export interface BillingCoupon {
+  id: string;
+  code: string;
+  description: string | null;
+  discountType: 'PERCENT' | 'FIXED';
+  discountValue: number;
+  stripeCouponId: string | null;
+  maxUses: number | null;
+  usedCount: number;
+  expiresAt: string | null;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}

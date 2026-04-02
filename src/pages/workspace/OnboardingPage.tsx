@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { paymentEndpoints } from '@/services/endpoints/payment.endpoints';
 import { usePlatformAuthStore } from '@/features/platform/platform.store';
 
 export default function OnboardingPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = usePlatformAuthStore();
   const tenantSlug = user?.tenantId ? undefined : undefined;
@@ -25,14 +27,14 @@ export default function OnboardingPage() {
     try {
       const lastSlug = localStorage.getItem('@tm:lastTenantSlug');
       if (!lastSlug) {
-        setError('Nenhuma escola encontrada');
+        setError(t('workspace.onboarding.error.noSchool'));
         setLoading(false);
         return;
       }
       const status = await paymentEndpoints.getConnectStatus(lastSlug);
       setConnectStatus(status);
     } catch {
-      setError('Erro ao verificar status da conta');
+      setError(t('workspace.onboarding.error.statusCheck'));
     } finally {
       setLoading(false);
     }
@@ -44,7 +46,7 @@ export default function OnboardingPage() {
     try {
       const lastSlug = localStorage.getItem('@tm:lastTenantSlug');
       if (!lastSlug) {
-        setError('Nenhuma escola encontrada');
+        setError(t('workspace.onboarding.error.noSchool'));
         return;
       }
 
@@ -56,7 +58,7 @@ export default function OnboardingPage() {
       window.location.href = url;
     } catch (err: any) {
       setError(
-        err?.response?.data?.message ?? 'Erro ao iniciar onboarding'
+        err?.response?.data?.message ?? t('workspace.onboarding.error.start')
       );
     } finally {
       setLoading(false);
@@ -66,10 +68,10 @@ export default function OnboardingPage() {
   return (
     <div className="container max-w-lg py-16">
       <h1 className="mb-2 text-3xl font-extrabold">
-        Configuração Financeira
+        {t('workspace.onboarding.title')}
       </h1>
       <p className="mb-8 text-muted-foreground">
-        Configure sua conta para receber repasses dos pagamentos dos alunos.
+        {t('workspace.onboarding.subtitle')}
       </p>
 
       {loading && !connectStatus && (
@@ -89,14 +91,14 @@ export default function OnboardingPage() {
           <div className="flex items-center gap-2">
             <CheckCircle2 className="h-5 w-5 text-green-600" />
             <span className="font-medium text-green-700">
-              Onboarding completo
+              {t('workspace.onboarding.status.completed')}
             </span>
           </div>
           <p className="mt-1 text-sm text-green-600">
-            Sua conta está configurada para receber pagamentos.
+            {t('workspace.onboarding.status.completedDescription')}
             {connectStatus.chargesEnabled
-              ? ' Cobranças habilitadas.'
-              : ' Aguardando habilitação de cobranças.'}
+              ? ` ${t('workspace.onboarding.status.chargesEnabled')}`
+              : ` ${t('workspace.onboarding.status.chargesPending')}`}
           </p>
         </div>
       )}
@@ -106,8 +108,8 @@ export default function OnboardingPage() {
           <div className="rounded-lg border border-yellow-500/50 bg-yellow-500/10 p-4">
             <p className="text-sm text-yellow-700">
               {connectStatus.hasAccount
-                ? 'Seu onboarding ainda não foi concluído. Clique abaixo para continuar.'
-                : 'Você precisa configurar sua conta Stripe Connect para receber repasses.'}
+                ? t('workspace.onboarding.status.incompleteWithAccount')
+                : t('workspace.onboarding.status.incompleteWithoutAccount')}
             </p>
           </div>
 
@@ -118,8 +120,8 @@ export default function OnboardingPage() {
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             {connectStatus.hasAccount
-              ? 'Continuar Onboarding'
-              : 'Iniciar Configuração'}
+              ? t('workspace.onboarding.actions.continue')
+              : t('workspace.onboarding.actions.start')}
           </button>
         </div>
       )}
@@ -132,7 +134,7 @@ export default function OnboardingPage() {
           }}
           className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow transition hover:opacity-90"
         >
-          Voltar para o painel
+          {t('workspace.onboarding.actions.backToDashboard')}
         </button>
       )}
     </div>

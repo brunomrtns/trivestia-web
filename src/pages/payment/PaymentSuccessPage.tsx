@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { CheckCircle2, Loader2, XCircle } from 'lucide-react';
 import { paymentEndpoints } from '@/services/endpoints/payment.endpoints';
 import { authStorage } from '@/features/auth/storage';
 
 export default function PaymentSuccessPage() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>(
@@ -57,10 +59,10 @@ export default function PaymentSuccessPage() {
           <>
             <Loader2 className="mx-auto h-16 w-16 animate-spin text-primary" />
             <h1 className="mt-6 text-2xl font-bold">
-              Processando pagamento...
+              {t('payment.success.loading.title')}
             </h1>
             <p className="mt-2 text-muted-foreground">
-              Aguarde enquanto confirmamos seu pagamento.
+              {t('payment.success.loading.subtitle')}
             </p>
           </>
         )}
@@ -68,9 +70,9 @@ export default function PaymentSuccessPage() {
         {status === 'success' && (
           <>
             <CheckCircle2 className="mx-auto h-16 w-16 text-green-500" />
-            <h1 className="mt-6 text-2xl font-bold">Pagamento confirmado!</h1>
+            <h1 className="mt-6 text-2xl font-bold">{t('payment.success.success.title')}</h1>
             <p className="mt-2 text-muted-foreground">
-              Sua escola foi criada com sucesso.
+              {t('payment.success.success.subtitle')}
             </p>
             <button
               onClick={() =>
@@ -82,7 +84,7 @@ export default function PaymentSuccessPage() {
               }
               className="mt-8 rounded-lg bg-primary px-8 py-2.5 text-sm font-semibold text-primary-foreground shadow transition hover:opacity-90"
             >
-              Ir para login
+              {t('payment.success.actions.goToLogin')}
             </button>
           </>
         )}
@@ -91,17 +93,16 @@ export default function PaymentSuccessPage() {
           <>
             <XCircle className="mx-auto h-16 w-16 text-destructive" />
             <h1 className="mt-6 text-2xl font-bold">
-              Não foi possível confirmar o pagamento
+              {t('payment.success.error.title')}
             </h1>
             <p className="mt-2 text-muted-foreground">
-              Se o pagamento foi realizado, aguarde alguns minutos e tente
-              fazer login.
+              {t('payment.success.error.subtitle')}
             </p>
             <button
               onClick={() => navigate('/login')}
               className="mt-8 rounded-lg bg-primary px-8 py-2.5 text-sm font-semibold text-primary-foreground shadow transition hover:opacity-90"
             >
-              Ir para login
+              {t('payment.success.actions.goToLogin')}
             </button>
           </>
         )}

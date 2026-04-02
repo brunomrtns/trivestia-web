@@ -28,7 +28,7 @@ export default function AdminOffersPage() {
   const [creating, setCreating] = useState(false);
 
   const schema = z.object({
-    title: z.string().min(2, 'Title must be at least 2 characters'),
+    title: z.string().min(2, t('admin.offers.validation.titleMin')),
     description: z.string().max(1000).optional(),
     type: z.enum(['FREE', 'ONE_TIME', 'SUBSCRIPTION']),
     priceAmount: z.number().positive().optional(),
@@ -61,7 +61,7 @@ export default function AdminOffersPage() {
       const data = await paymentEndpoints.listOffers(tenantSlug, true);
       setOffers(data);
     } catch {
-      toast.error('Error loading offers');
+      toast.error(t('admin.offers.toast.loadError'));
     } finally {
       setLoading(false);
     }
@@ -82,13 +82,13 @@ export default function AdminOffersPage() {
             ? data.billingInterval
             : undefined,
       });
-      toast.success('Offer created successfully');
+      toast.success(t('admin.offers.toast.created'));
       setShowForm(false);
       reset();
       loadOffers();
     } catch (err: any) {
       toast.error(
-        err?.response?.data?.message ?? 'Error creating offer'
+        err?.response?.data?.message ?? t('admin.offers.toast.createError')
       );
     } finally {
       setCreating(false);
@@ -103,7 +103,7 @@ export default function AdminOffersPage() {
       });
       loadOffers();
     } catch {
-      toast.error('Error updating offer');
+      toast.error(t('admin.offers.toast.updateError'));
     }
   }
 
@@ -119,9 +119,9 @@ export default function AdminOffersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Offers</h1>
+          <h1 className="text-2xl font-bold">{t('admin.offers.page.title')}</h1>
           <p className="text-sm text-muted-foreground">
-            Manage course pricing and offers
+            {t('admin.offers.page.subtitle')}
           </p>
         </div>
         <button
@@ -129,7 +129,7 @@ export default function AdminOffersPage() {
           className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow transition hover:opacity-90"
         >
           <Plus className="h-4 w-4" />
-          New Offer
+          {t('admin.offers.page.newButton')}
         </button>
       </div>
 
@@ -141,7 +141,7 @@ export default function AdminOffersPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
               <label className="mb-1.5 block text-sm font-medium">
-                Title
+                {t('admin.offers.form.title')}
               </label>
               <input
                 type="text"
@@ -157,7 +157,7 @@ export default function AdminOffersPage() {
 
             <div className="col-span-2">
               <label className="mb-1.5 block text-sm font-medium">
-                Description (optional)
+                {t('admin.offers.form.descriptionOptional')}
               </label>
               <textarea
                 rows={2}
@@ -168,15 +168,15 @@ export default function AdminOffersPage() {
 
             <div>
               <label className="mb-1.5 block text-sm font-medium">
-                Type
+                {t('admin.offers.form.type')}
               </label>
               <select
                 className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm outline-none ring-offset-background transition focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 {...register('type')}
               >
-                <option value="FREE">Free</option>
-                <option value="ONE_TIME">One-time Payment</option>
-                <option value="SUBSCRIPTION">Subscription</option>
+                <option value="FREE">{t('admin.offers.type.free')}</option>
+                <option value="ONE_TIME">{t('admin.offers.type.oneTimePayment')}</option>
+                <option value="SUBSCRIPTION">{t('admin.offers.type.subscription')}</option>
               </select>
             </div>
 
@@ -184,7 +184,7 @@ export default function AdminOffersPage() {
               <>
                 <div>
                   <label className="mb-1.5 block text-sm font-medium">
-                    Price Amount (cents)
+                    {t('admin.offers.form.priceAmountCents')}
                   </label>
                   <input
                     type="number"
@@ -194,7 +194,7 @@ export default function AdminOffersPage() {
                 </div>
                 <div>
                   <label className="mb-1.5 block text-sm font-medium">
-                    Currency
+                    {t('admin.offers.form.currency')}
                   </label>
                   <select
                     className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm outline-none ring-offset-background transition focus:ring-2 focus:ring-ring focus:ring-offset-2"
@@ -211,14 +211,14 @@ export default function AdminOffersPage() {
             {selectedType === 'SUBSCRIPTION' && (
               <div>
                 <label className="mb-1.5 block text-sm font-medium">
-                  Billing Interval
+                  {t('admin.offers.form.billingInterval')}
                 </label>
                 <select
                   className="w-full rounded-lg border bg-background px-4 py-2.5 text-sm outline-none ring-offset-background transition focus:ring-2 focus:ring-ring focus:ring-offset-2"
                   {...register('billingInterval')}
                 >
-                  <option value="MONTH">Monthly</option>
-                  <option value="YEAR">Yearly</option>
+                  <option value="MONTH">{t('admin.offers.interval.monthly')}</option>
+                  <option value="YEAR">{t('admin.offers.interval.yearly')}</option>
                 </select>
               </div>
             )}
@@ -231,7 +231,7 @@ export default function AdminOffersPage() {
               className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow transition hover:opacity-90 disabled:opacity-60"
             >
               {creating && <Loader2 className="h-4 w-4 animate-spin" />}
-              Create Offer
+              {t('admin.offers.actions.create')}
             </button>
             <button
               type="button"
@@ -241,7 +241,7 @@ export default function AdminOffersPage() {
               }}
               className="rounded-lg border px-4 py-2 text-sm font-medium transition hover:bg-accent"
             >
-              Cancel
+              {t('common.actions.cancel')}
             </button>
           </div>
         </form>
@@ -254,9 +254,9 @@ export default function AdminOffersPage() {
       ) : offers.length === 0 ? (
         <div className="rounded-lg border border-dashed p-12 text-center">
           <Tag className="mx-auto h-10 w-10 text-muted-foreground" />
-          <p className="mt-4 text-lg font-medium">No offers yet</p>
+          <p className="mt-4 text-lg font-medium">{t('admin.offers.empty.title')}</p>
           <p className="text-sm text-muted-foreground">
-            Create your first offer to start selling courses.
+            {t('admin.offers.empty.subtitle')}
           </p>
         </div>
       ) : (
@@ -279,19 +279,19 @@ export default function AdminOffersPage() {
                     }`}
                   >
                     {offer.type === 'FREE'
-                      ? 'Free'
+                      ? t('admin.offers.type.free')
                       : offer.type === 'ONE_TIME'
-                        ? 'One-time'
-                        : `Subscription (${offer.billingInterval?.toLowerCase()})`}
+                        ? t('admin.offers.type.oneTime')
+                        : t('admin.offers.type.subscriptionWithInterval', { interval: offer.billingInterval?.toLowerCase() })}
                   </span>
                   {!offer.active && (
                     <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500">
-                      Inactive
+                      {t('admin.offers.status.inactive')}
                     </span>
                   )}
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {offer.description ?? 'No description'} &middot;{' '}
+                  {offer.description ?? t('admin.offers.noDescription')} &middot;{' '}
                   {formatPrice(offer.priceAmount, offer.priceCurrency)}
                 </p>
               </div>
@@ -303,7 +303,7 @@ export default function AdminOffersPage() {
                     : 'bg-green-500/10 text-green-700 hover:bg-green-500/20'
                 }`}
               >
-                {offer.active ? 'Deactivate' : 'Activate'}
+                {offer.active ? t('admin.offers.actions.deactivate') : t('admin.offers.actions.activate')}
               </button>
             </div>
           ))}

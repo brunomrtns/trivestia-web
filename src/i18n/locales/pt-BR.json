@@ -19,7 +19,8 @@
       "lab": "Laboratório",
       "progress": "Progresso",
       "announcements": "Avisos",
-      "settings": "Configurações"
+      "settings": "Configurações",
+      "billing": "Billing"
     },
     "fields": {
       "email": "E-mail",
@@ -105,6 +106,123 @@
       "manageCourses": "Gerenciar Cursos",
       "users": "Usuários",
       "platform": "Plataforma"
+    },
+    "billing": {
+      "title": "Plano e Billing",
+      "subtitle": "Visualize seu plano atual, limites de uso e faça upgrade quando necessário.",
+      "yes": "Sim",
+      "no": "Não",
+      "interval": {
+        "month": "mês",
+        "year": "ano"
+      },
+      "toast": {
+        "planUpdated": "Plano atualizado com sucesso",
+        "planChangeError": "Não foi possível alterar o plano",
+        "cancelError": "Não foi possível cancelar a assinatura",
+        "portalError": "Não foi possível abrir o portal de cobrança",
+        "couponValid": "Cupom válido: {{discount}} aplicado",
+        "couponInvalid": "Cupom inválido"
+      },
+      "error": {
+        "load": "Não foi possível carregar os dados de billing."
+      },
+      "currentPlan": {
+        "label": "Plano atual",
+        "defaultDescription": "Plano padrão com recursos essenciais.",
+        "platformCommission": "Comissão da plataforma:",
+        "lab": "Lab:",
+        "available": "Disponível",
+        "unavailable": "Indisponível"
+      },
+      "planDescriptions": {
+        "free": "Plano de entrada com recursos essenciais.",
+        "pro": "Plano profissional para escalar a escola.",
+        "elite": "Plano premium com analytics e prioridade."
+      },
+      "usage": {
+        "title": "Limites de uso",
+        "courses": "Cursos",
+        "students": "Alunos",
+        "limitReached": "Limite atingido. Faça upgrade para continuar crescendo.",
+        "labAccess": "Acesso ao Lab",
+        "active": "Ativo",
+        "blocked": "Bloqueado",
+        "labUpgradeHint": "Seu plano atual não inclui o Lab. Faça upgrade para liberar o recurso."
+      },
+      "catalog": {
+        "title": "Catálogo de planos",
+        "current": "Atual",
+        "couponPlaceholder": "Cupom (opcional)",
+        "validateCoupon": "Validar cupom",
+        "free": "Grátis",
+        "maxCourses": "Max cursos: {{count}}",
+        "maxStudents": "Max alunos: {{count}}",
+        "lab": "Lab: {{value}}",
+        "commission": "Comissão: {{value}}%",
+        "unavailableMissingStripe": "Plano indisponível no momento: Stripe Price ID ainda não configurado.",
+        "fallbackStripeWarning": "Não foi possível confirmar o valor no Stripe agora. Exibindo fallback local temporariamente.",
+        "unavailable": "Indisponível",
+        "processing": "Processando...",
+        "currentPlan": "Plano atual",
+        "selectPlan": "Selecionar plano"
+      },
+      "permissions": {
+        "ownerOnly": "Apenas OWNER pode alterar assinatura e abrir portal de cobrança neste tenant."
+      },
+      "actions": {
+        "openPortal": "Abrir portal Stripe",
+        "cancelEndOfCycle": "Cancelar assinatura no fim do ciclo"
+      },
+      "footer": "Os bloqueios de curso/aluno/lab são aplicados no backend. Esta tela apenas representa o estado real do plano e ajuda no upgrade."
+    },
+    "offers": {
+      "validation": {
+        "titleMin": "Título deve ter pelo menos 2 caracteres"
+      },
+      "toast": {
+        "loadError": "Erro ao carregar ofertas",
+        "created": "Oferta criada com sucesso",
+        "createError": "Erro ao criar oferta",
+        "updateError": "Erro ao atualizar oferta"
+      },
+      "page": {
+        "title": "Ofertas",
+        "subtitle": "Gerencie preços e ofertas dos cursos",
+        "newButton": "Nova oferta"
+      },
+      "form": {
+        "title": "Título",
+        "descriptionOptional": "Descrição (opcional)",
+        "type": "Tipo",
+        "priceAmountCents": "Valor (centavos)",
+        "currency": "Moeda",
+        "billingInterval": "Intervalo de cobrança"
+      },
+      "type": {
+        "free": "Grátis",
+        "oneTimePayment": "Pagamento único",
+        "subscription": "Assinatura",
+        "oneTime": "Única",
+        "subscriptionWithInterval": "Assinatura ({{interval}})"
+      },
+      "interval": {
+        "monthly": "Mensal",
+        "yearly": "Anual"
+      },
+      "actions": {
+        "create": "Criar oferta",
+        "activate": "Ativar",
+        "deactivate": "Desativar"
+      },
+      "empty": {
+        "title": "Nenhuma oferta ainda",
+        "subtitle": "Crie sua primeira oferta para começar a vender cursos."
+      },
+      "status": {
+        "inactive": "Inativa"
+      },
+      "noDescription": "Sem descrição"
     },
     "questions": {
       "validation": {
@@ -775,7 +893,15 @@
         "streakDay_other": "dias seguidos",
         "record": "recorde",
         "activityTooltip": "{{date}}: {{count}} atividade(s)",
-        "days": ["S", "T", "Q", "Q", "S", "S", "D"],
+        "days": [
+          "S",
+          "T",
+          "Q",
+          "Q",
+          "S",
+          "S",
+          "D"
+        ],
         "aria": {
           "configure": "Configurar meta"
         }
@@ -1100,6 +1226,47 @@
       }
     }
   },
+  "payment": {
+    "cancel": {
+      "title": "Pagamento cancelado",
+      "subtitle": "O processo de pagamento foi cancelado. Nenhuma cobrança foi realizada.",
+      "actions": {
+        "retry": "Tentar novamente"
+      }
+    },
+    "offerCheckout": {
+      "toast": {
+        "enrolled": "Inscrição realizada com sucesso!",
+        "error": "Erro ao processar pagamento"
+      },
+      "actions": {
+        "enrollFree": "Inscrever-se Grátis",
+        "buy": "Comprar - {{price}}",
+        "subscribe": "Assinar - {{price}}/{{interval}}"
+      },
+      "interval": {
+        "month": "mês",
+        "year": "ano"
+      }
+    },
+    "success": {
+      "loading": {
+        "title": "Processando pagamento...",
+        "subtitle": "Aguarde enquanto confirmamos seu pagamento."
+      },
+      "success": {
+        "title": "Pagamento confirmado!",
+        "subtitle": "Sua escola foi criada com sucesso."
+      },
+      "error": {
+        "title": "Não foi possível confirmar o pagamento",
+        "subtitle": "Se o pagamento foi realizado, aguarde alguns minutos e tente fazer login."
+      },
+      "actions": {
+        "goToLogin": "Ir para login"
+      }
+    }
+  },
   "super": {
     "layout": {
       "brand": "Super Admin",
@@ -1223,6 +1390,77 @@
         "roleUpdated": "Role atualizado com sucesso!",
         "updateError": "Erro ao atualizar role"
       }
+    },
+    "billing": {
+      "title": "Billing da Plataforma",
+      "subtitle": "Gestão de planos e cupons globais utilizados no fluxo de assinatura.",
+      "interval": {
+        "month": "mês",
+        "year": "ano"
+      },
+      "toast": {
+        "planCreated": "Plano criado com sucesso",
+        "planCreateError": "Erro ao criar plano",
+        "planUpdateError": "Erro ao atualizar plano",
+        "couponCreated": "Cupom criado com sucesso",
+        "couponCreateError": "Erro ao criar cupom",
+        "couponUpdateError": "Erro ao atualizar cupom"
+      },
+      "plans": {
+        "title": "Planos",
+        "actions": {
+          "create": "Criar plano"
+        },
+        "form": {
+          "technicalNameLabel": "Nome técnico (ex: PRO)",
+          "technicalNamePlaceholder": "Nome (ex: PRO)",
+          "displayLabel": "Label exibida",
+          "displayPlaceholder": "Label",
+          "basePriceLabel": "Preço base (fallback, não usado se Stripe estiver configurado)",
+          "basePricePlaceholder": "Preço em centavos",
+          "commissionLabel": "Comissão (%)",
+          "commissionPlaceholder": "Comissão %",
+          "stripePriceIdLabel": "Stripe Price ID (define o valor real cobrado)",
+          "stripePriceIdPlaceholder": "Stripe Price ID (price_...)",
+          "stripePriceIdHint": "Planos pagos exigem Stripe Price ID para assinatura.",
+          "stripeControlledBadge": "Preço controlado pelo Stripe",
+          "maxCoursesPlaceholder": "Max cursos",
+          "maxStudentsPlaceholder": "Max alunos",
+          "sortOrderPlaceholder": "Sort order",
+          "descriptionPlaceholder": "Descrição",
+          "labAccess": "Lab access",
+          "analytics": "Analytics",
+          "priority": "Priority"
+        },
+        "list": {
+          "summary": "{{amount}} cents / {{interval}} | Comissão {{commission}}% | Cursos {{courses}} | Alunos {{students}}",
+          "stripePriceIdPlaceholder": "Stripe Price ID",
+          "saveStripeId": "Salvar Stripe ID",
+          "missingStripeWarning": "Plano pago indisponível para assinatura: Stripe Price ID ausente.",
+          "activeToggle": "Ativo (clique p/ desativar)",
+          "inactiveToggle": "Inativo (clique p/ ativar)"
+        }
+      },
+      "coupons": {
+        "title": "Cupons",
+        "actions": {
+          "create": "Criar cupom"
+        },
+        "form": {
+          "codePlaceholder": "Código",
+          "discountTypePercent": "Percentual",
+          "discountTypeFixed": "Valor fixo",
+          "discountValuePlaceholder": "Valor desconto",
+          "maxUsesPlaceholder": "Max usos",
+          "descriptionPlaceholder": "Descrição"
+        },
+        "list": {
+          "summary": "{{discountType}} {{discountValue}} | usos {{usedCount}}/{{maxUses}}",
+          "unlimited": "ilimitado",
+          "activeToggle": "Ativo (clique p/ desativar)",
+          "inactiveToggle": "Inativo (clique p/ ativar)"
+        }
+      }
     }
   },
   "workspace": {
@@ -1265,6 +1503,28 @@
       "toast": {
         "success": "Escola \"{{name}}\" criada com sucesso!",
         "error": "Erro ao criar escola."
+      }
+    },
+    "onboarding": {
+      "title": "Configuração Financeira",
+      "subtitle": "Configure sua conta para receber repasses dos pagamentos dos alunos.",
+      "error": {
+        "noSchool": "Nenhuma escola encontrada",
+        "statusCheck": "Erro ao verificar status da conta",
+        "start": "Erro ao iniciar onboarding"
+      },
+      "status": {
+        "completed": "Onboarding completo",
+        "completedDescription": "Sua conta está configurada para receber pagamentos.",
+        "chargesEnabled": "Cobranças habilitadas.",
+        "chargesPending": "Aguardando habilitação de cobranças.",
+        "incompleteWithAccount": "Seu onboarding ainda não foi concluído. Clique abaixo para continuar.",
+        "incompleteWithoutAccount": "Você precisa configurar sua conta Stripe Connect para receber repasses."
+      },
+      "actions": {
+        "continue": "Continuar Onboarding",
+        "start": "Iniciar Configuração",
+        "backToDashboard": "Voltar para o painel"
       }
     }
   },

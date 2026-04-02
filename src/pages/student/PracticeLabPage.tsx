@@ -77,8 +77,8 @@ export default function PracticeLabPage() {
       setPracticeCandles(res.candles);
       setPracticeScenario(scenario);
       setPhase('terminal');
-    } catch {
-      toast.error(t('app.lab.toast.error'));
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? t('app.lab.toast.error'));
     } finally {
       setLoading(false);
     }

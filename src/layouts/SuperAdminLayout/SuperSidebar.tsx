@@ -5,6 +5,7 @@ import {
   Building2,
   Users,
   BarChart3,
+  Wallet,
   ChevronLeft,
   ChevronRight,
   Zap,
@@ -38,6 +39,11 @@ export function SuperSidebar({ collapsed, onCollapse }: SuperSidebarProps) {
       to: '/super/tenants',
       icon: Building2,
       label: t('super.layout.nav.schools')
+    },
+    {
+      to: '/super/billing',
+      icon: Wallet,
+      label: t('common.nav.billing')
     },
     { to: '/super/users', icon: Users, label: t('super.layout.nav.users') }
   ];

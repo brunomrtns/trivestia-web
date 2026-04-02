@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Loader2, CreditCard, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { paymentEndpoints } from '@/services/endpoints/payment.endpoints';
@@ -11,6 +12,7 @@ interface OfferCheckoutProps {
 }
 
 export function OfferCheckoutButton({ offer, tenantSlug, onSuccess }: OfferCheckoutProps) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
   async function handleCheckout() {
@@ -21,11 +23,11 @@ export function OfferCheckoutButton({ offer, tenantSlug, onSuccess }: OfferCheck
       if (result.checkoutUrl) {
         window.location.href = result.checkoutUrl;
       } else if (result.enrolled) {
-        toast.success('Inscrição realizada com sucesso!');
+        toast.success(t('payment.offerCheckout.toast.enrolled'));
         onSuccess?.();
       }
     } catch (err: any) {
-      toast.error(err?.response?.data?.message ?? 'Erro ao processar pagamento');
+      toast.error(err?.response?.data?.message ?? t('payment.offerCheckout.toast.error'));
     } finally {
       setLoading(false);
     }
@@ -53,10 +55,15 @@ export function OfferCheckoutButton({ offer, tenantSlug, onSuccess }: OfferCheck
         <CreditCard className="h-4 w-4" />
       )}
       {offer.type === 'FREE'
-        ? 'Inscrever-se Grátis'
+        ? t('payment.offerCheckout.actions.enrollFree')
         : offer.type === 'ONE_TIME'
-          ? `Comprar - ${formatPrice()}`
-          : `Assinar - ${formatPrice()}/${offer.billingInterval === 'MONTH' ? 'mês' : 'ano'}`}
+          ? t('payment.offerCheckout.actions.buy', { price: formatPrice() })
+          : t('payment.offerCheckout.actions.subscribe', {
+              price: formatPrice(),
+              interval: offer.billingInterval === 'MONTH'
+                ? t('payment.offerCheckout.interval.month')
+                : t('payment.offerCheckout.interval.year'),
+            })}
     </button>
   );
 }

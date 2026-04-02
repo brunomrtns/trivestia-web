@@ -15,7 +15,8 @@ import {
   TrendingUp,
   Zap,
   Globe,
-  Megaphone
+  Megaphone,
+  Wallet
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/features/auth/auth.store';
@@ -74,6 +75,11 @@ function buildLinks(slug: string, t: (key: string) => string) {
       to: tenantPath(slug, '/admin/announcements'),
       icon: Megaphone,
       label: t('common.nav.announcements')
+    },
+    {
+      to: tenantPath(slug, '/admin/billing'),
+      icon: Wallet,
+      label: t('common.nav.billing')
     }
   ];
 

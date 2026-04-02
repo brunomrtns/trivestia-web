@@ -19,7 +19,8 @@
       "lab": "Laboratory",
       "progress": "Progress",
       "announcements": "Warnings",
-      "settings": "Settings"
+      "settings": "Settings",
+      "billing": "Billing"
     },
     "fields": {
       "email": "E-mail",
@@ -580,6 +581,123 @@
       "validation": {
         "timeframe": "Use 1, 5, 15, 60 or 240 min"
       }
+    },
+    "billing": {
+      "title": "Plan and Billing",
+      "subtitle": "View your current plan, usage limits, and upgrade when needed.",
+      "yes": "Yes",
+      "no": "No",
+      "interval": {
+        "month": "month",
+        "year": "year"
+      },
+      "toast": {
+        "planUpdated": "Plan updated successfully",
+        "planChangeError": "Unable to change plan",
+        "cancelError": "Unable to cancel subscription",
+        "portalError": "Unable to open billing portal",
+        "couponValid": "Valid coupon: {{discount}} applied",
+        "couponInvalid": "Invalid coupon"
+      },
+      "error": {
+        "load": "Unable to load billing data."
+      },
+      "currentPlan": {
+        "label": "Current plan",
+        "defaultDescription": "Standard plan with essential features.",
+        "platformCommission": "Platform commission:",
+        "lab": "Laboratory:",
+        "available": "Available",
+        "unavailable": "Unavailable"
+      },
+      "usage": {
+        "title": "Usage limits",
+        "courses": "Courses",
+        "students": "Students",
+        "limitReached": "Limit reached. Upgrade to keep growing.",
+        "labAccess": "Access to the Lab",
+        "active": "Active",
+        "blocked": "Blocked",
+        "labUpgradeHint": "Your current plan does not include the Lab. Upgrade to unlock the feature."
+      },
+      "catalog": {
+        "title": "Plan catalog",
+        "current": "Current",
+        "couponPlaceholder": "Coupon (optional)",
+        "validateCoupon": "Validate coupon",
+        "free": "Free",
+        "maxCourses": "Max courses: {{count}}",
+        "maxStudents": "Max students: {{count}}",
+        "lab": "Lab: {{value}}",
+        "commission": "Commission: {{value}}%",
+        "unavailableMissingStripe": "Plan currently unavailable: Stripe Price ID not yet configured.",
+        "fallbackStripeWarning": "Unable to confirm the amount on Stripe right now. Temporarily displaying local fallback.",
+        "unavailable": "Unavailable",
+        "processing": "Processing...",
+        "currentPlan": "Current plan",
+        "selectPlan": "Select plan"
+      },
+      "permissions": {
+        "ownerOnly": "Only OWNER can change subscription and open billing portal in this tenant."
+      },
+      "actions": {
+        "openPortal": "Open Stripe portal",
+        "cancelEndOfCycle": "Cancel subscription at the end of the cycle"
+      },
+      "footer": "Course/student/lab locks are applied in the backend. This screen only represents the actual status of the plan and helps with the upgrade.",
+      "planDescriptions": {
+        "free": "Entry plan with essential features.",
+        "pro": "Professional plan for climbing the school.",
+        "elite": "Premium plan with analytics and priority."
+      }
+    },
+    "offers": {
+      "validation": {
+        "titleMin": "Title must have at least 2 characters"
+      },
+      "toast": {
+        "loadError": "Error loading offers",
+        "created": "Offer created successfully",
+        "createError": "Error creating offer",
+        "updateError": "Error updating offer"
+      },
+      "page": {
+        "title": "Offers",
+        "subtitle": "Manage course prices and offers",
+        "newButton": "New offer"
+      },
+      "form": {
+        "title": "Title",
+        "descriptionOptional": "Description (optional)",
+        "type": "Type",
+        "priceAmountCents": "Value (cents)",
+        "currency": "Coin",
+        "billingInterval": "Billing Interval"
+      },
+      "type": {
+        "free": "Free",
+        "oneTimePayment": "Single payment",
+        "subscription": "Signature",
+        "oneTime": "Unique",
+        "subscriptionWithInterval": "Subscription ({{interval}})"
+      },
+      "interval": {
+        "monthly": "Monthly",
+        "yearly": "Annual"
+      },
+      "actions": {
+        "create": "Create offer",
+        "activate": "Activate",
+        "deactivate": "Disable"
+      },
+      "empty": {
+        "title": "No offers yet",
+        "subtitle": "Create your first offer to start selling courses."
+      },
+      "status": {
+        "inactive": "Inactive"
+      },
+      "noDescription": "No description"
     }
   },
   "auth": {
@@ -1231,6 +1349,77 @@
         "roleUpdated": "Scroll updated successfully!",
         "updateError": "Error updating role"
       }
+    },
+    "billing": {
+      "title": "Platform Billing",
+      "subtitle": "Management of global plans and coupons used in the subscription flow.",
+      "interval": {
+        "month": "month",
+        "year": "year"
+      },
+      "toast": {
+        "planCreated": "Plan created successfully",
+        "planCreateError": "Error creating plan",
+        "planUpdateError": "Error when updating plan",
+        "couponCreated": "Coupon created successfully",
+        "couponCreateError": "Error creating coupon",
+        "couponUpdateError": "Error updating coupon"
+      },
+      "plans": {
+        "title": "Plans",
+        "actions": {
+          "create": "Create plan"
+        },
+        "form": {
+          "technicalNameLabel": "Technical name (e.g. PRO)",
+          "technicalNamePlaceholder": "Name (ex: PRO)",
+          "displayLabel": "Label displayed",
+          "displayPlaceholder": "Label",
+          "basePriceLabel": "Base price (fallback, not used if Stripe is configured)",
+          "basePricePlaceholder": "Price in cents",
+          "commissionLabel": "Commission (%)",
+          "commissionPlaceholder": "Commission %",
+          "stripePriceIdLabel": "Stripe Price ID (defines the actual amount charged)",
+          "stripePriceIdPlaceholder": "Stripe Price ID (price_...)",
+          "stripePriceIdHint": "Paid plans require Stripe Price ID to subscribe.",
+          "stripeControlledBadge": "Price controlled by Stripe",
+          "maxCoursesPlaceholder": "Max courses",
+          "maxStudentsPlaceholder": "Max students",
+          "sortOrderPlaceholder": "Sort order",
+          "descriptionPlaceholder": "Description",
+          "labAccess": "lab access",
+          "analytics": "Analytics",
+          "priority": "Priority"
+        },
+        "list": {
+          "summary": "{{amount}} cents / {{interval}} | Commission {{commission}}% | Courses {{courses}} | Students {{students}}",
+          "stripePriceIdPlaceholder": "Stripe Price ID",
+          "saveStripeId": "Save Stripe ID",
+          "missingStripeWarning": "Paid plan unavailable for subscription: Stripe Price ID missing.",
+          "activeToggle": "Active (click to deactivate)",
+          "inactiveToggle": "Inactive (click to activate)"
+        }
+      },
+      "coupons": {
+        "title": "Coupons",
+        "actions": {
+          "create": "Create coupon"
+        },
+        "form": {
+          "codePlaceholder": "Code",
+          "discountTypePercent": "Percentage",
+          "discountTypeFixed": "Fixed value",
+          "discountValuePlaceholder": "Discount value",
+          "maxUsesPlaceholder": "Max uses",
+          "descriptionPlaceholder": "Description"
+        },
+        "list": {
+          "summary": "{{discountType}} {{discountValue}} | uses {{usedCount}}/{{maxUses}}",
+          "unlimited": "unlimited",
+          "activeToggle": "Active (click to deactivate)",
+          "inactiveToggle": "Inactive (click to activate)"
+        }
+      }
     }
   },
   "workspace": {
@@ -1273,6 +1462,28 @@
       "toast": {
         "success": "School \"{{name}}\" successfully created!",
         "error": "Error creating school."
+      }
+    },
+    "onboarding": {
+      "title": "Financial Setup",
+      "subtitle": "Configure your account to receive payments from students.",
+      "error": {
+        "noSchool": "No schools found",
+        "statusCheck": "Error checking account status",
+        "start": "Error starting onboarding"
+      },
+      "status": {
+        "completed": "Complete onboarding",
+        "completedDescription": "Your account is set up to receive payments.",
+        "chargesEnabled": "Charges enabled.",
+        "chargesPending": "Waiting for billing to be activated.",
+        "incompleteWithAccount": "Your onboarding has not yet been completed. Click below to continue.",
+        "incompleteWithoutAccount": "You need to set up your Stripe Connect account to receive payouts."
+      },
+      "actions": {
+        "continue": "Continue Onboarding",
+        "start": "Start Configuration",
+        "backToDashboard": "Return to dashboard"
       }
     }
   },
@@ -1625,6 +1836,47 @@
       "sessionPerformance": "Session performance",
       "totalTrades": "Total operations",
       "totalPnl": "total P&L"
+    }
+  },
+  "payment": {
+    "offerCheckout": {
+      "toast": {
+        "enrolled": "Registration successful!",
+        "error": "Error processing payment"
+      },
+      "actions": {
+        "enrollFree": "Sign up for free",
+        "buy": "Buy - {{price}}",
+        "subscribe": "Subscribe - {{price}}/{{interval}}"
+      },
+      "interval": {
+        "month": "month",
+        "year": "year"
+      }
+    },
+    "success": {
+      "loading": {
+        "title": "Processing payment...",
+        "subtitle": "Please wait while we confirm your payment."
+      },
+      "success": {
+        "title": "Payment confirmed!",
+        "subtitle": "Your school has been successfully created."
+      },
+      "error": {
+        "title": "Unable to confirm payment",
+        "subtitle": "If the payment was made, wait a few minutes and try to log in."
+      },
+      "actions": {
+        "goToLogin": "Go to login"
+      }
+    },
+    "cancel": {
+      "title": "Payment canceled",
+      "subtitle": "The payment process has been cancelled. No charges were made.",
+      "actions": {
+        "retry": "Try again"
+      }
     }
   }
 }

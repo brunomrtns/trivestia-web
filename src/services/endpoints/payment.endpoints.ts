@@ -1,4 +1,11 @@
 import { apiGlobal, apiTenant, apiPlatform } from '../api/apiTenant';
+import type {
+  BillingCoupon,
+  BillingLimitCheckResponse,
+  BillingPlan,
+  BillingPlanCatalog,
+  BillingStatusResponse,
+} from '@/types/api';
 
 export const paymentEndpoints = {
   // ─── School Creation Checkout ──────────────────────────
@@ -115,4 +122,129 @@ export const paymentEndpoints = {
     apiTenant(slug)
       .get(`/payments/access/${courseId}`)
       .then((r) => r.data),
+
+  // ─── Billing (tenant) ──────────────────────────────────
+  getBillingStatus: (slug: string) =>
+    apiTenant(slug)
+      .get<BillingStatusResponse>('/payments/billing/status')
+      .then((r) => r.data),
+
+  listPlans: () =>
+    apiGlobal
+      .get<BillingPlanCatalog[]>('/payments/plans')
+      .then((r) => r.data),
+
+  subscribePlan: (slug: string, planId: string, couponCode?: string) =>
+    apiTenant(slug)
+      .post<{ checkoutUrl: string | null; sessionId?: string; message?: string }>(
+        '/payments/billing/subscribe',
+        { planId, couponCode }
+      )
+      .then((r) => r.data),
+
+  changePlan: (slug: string, planId: string, couponCode?: string) =>
+    apiTenant(slug)
+      .post<{ checkoutUrl: string | null; sessionId?: string; message?: string }>(
+        '/payments/billing/change-plan',
+        { planId, couponCode }
+      )
+      .then((r) => r.data),
+
+  cancelSubscription: (slug: string) =>
+    apiTenant(slug)
+      .post<{ message: string }>('/payments/billing/cancel')
+      .then((r) => r.data),
+
+  createBillingPortalSession: (slug: string) =>
+    apiTenant(slug)
+      .post<{ url: string }>('/payments/billing/portal')
+      .then((r) => r.data),
+
+  validateBillingCoupon: (slug: string, code: string) =>
+    apiTenant(slug)
+      .post<{
+        valid: boolean;
+        code: string;
+        discountType: 'PERCENT' | 'FIXED';
+        discountValue: number;
+      }>('/payments/billing/coupons/validate', { code })
+      .then((r) => r.data),
+
+  checkBillingLimit: (slug: string, limitType: 'courses' | 'students') =>
+    apiTenant(slug)
+      .get<BillingLimitCheckResponse>(`/payments/billing/limits/${limitType}`)
+      .then((r) => r.data),
+
+  // ─── Billing (super admin) ────────────────────────────
+  listAdminPlans: (activeOnly = false) =>
+    apiGlobal
+      .get<BillingPlan[]>(`/payments/super/plans${activeOnly ? '?activeOnly=true' : ''}`)
+      .then((r) => r.data),
+
+  createAdminPlan: (data: {
+    name: string;
+    label: string;
+    description?: string;
+    priceAmount: number;
+    currency?: string;
+    interval?: 'month' | 'year';
+    stripePriceId?: string | null;
+    features: {
+      maxCourses: number;
+      maxStudents: number;
+      labAccess: boolean;
+      analytics: boolean;
+      priority: boolean;
+      commissionPercent: number;
+    };
+    sortOrder?: number;
+  }) => apiGlobal.post<BillingPlan>('/payments/super/plans', data).then((r) => r.data),
+
+  updateAdminPlan: (
+    id: string,
+    data: {
+      label?: string;
+      description?: string;
+      priceAmount?: number;
+      currency?: string;
+      interval?: 'month' | 'year';
+      stripePriceId?: string | null;
+      features?: {
+        maxCourses: number;
+        maxStudents: number;
+        labAccess: boolean;
+        analytics: boolean;
+        priority: boolean;
+        commissionPercent: number;
+      };
+      active?: boolean;
+      sortOrder?: number;
+    }
+  ) => apiGlobal.patch<BillingPlan>(`/payments/super/plans/${id}`, data).then((r) => r.data),
+
+  listAdminCoupons: (activeOnly = false) =>
+    apiGlobal
+      .get<BillingCoupon[]>(
+        `/payments/super/coupons${activeOnly ? '?activeOnly=true' : ''}`
+      )
+      .then((r) => r.data),
+
+  createAdminCoupon: (data: {
+    code: string;
+    description?: string;
+    discountType: 'PERCENT' | 'FIXED';
+    discountValue: number;
+    maxUses?: number;
+    expiresAt?: string;
+  }) => apiGlobal.post<BillingCoupon>('/payments/super/coupons', data).then((r) => r.data),
+
+  updateAdminCoupon: (
+    id: string,
+    data: {
+      description?: string | null;
+      active?: boolean;
+      maxUses?: number | null;
+      expiresAt?: string | null;
+    }
+  ) => apiGlobal.patch<BillingCoupon>(`/payments/super/coupons/${id}`, data).then((r) => r.data),
 };
