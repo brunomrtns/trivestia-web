@@ -1106,9 +1106,22 @@
             "1": "Click the \"New Course\" button in the top right corner of the page.",
             "2": "Fill in the title, description and, if desired, set a deadline.",
             "3": "Upload a cover image by clicking on the thumbnail area.",
-            "4": "Click \"Save\" to create the course."
+            "4": "Click \"Save\" to create the course.",
+            "5": "Click \"Save\" to create the course. It already appears in the list, but still without content."
           },
-          "link": "Go to Manage Courses"
+          "link": "Go to Manage Courses",
+          "context": "A course is the main structure of your school. It is the product that students purchase or access. Everything you will teach — modules, classes, activities — is organized within a course.",
+          "mentalFlow": "Before creating the course, think: what is the central theme? Who is the ideal student? What result will he have when finished? Your course name and description should communicate exactly that.",
+          "expectedResult": "The course appears in the Manage Courses listing and in the school's public showcase. Students can now view it, but there are no classes available yet.",
+          "commonMistakes": {
+            "0": "Creating the course without defining a clear description — this confuses the student when choosing.",
+            "1": "Use a generic title like “Course 1” rather than something descriptive like “Fundamentals of Technical Analysis.”",
+            "2": "Leave the deadline very tight before configuring all the content."
+          },
+          "tips": {
+            "0": "Tip: Write the description with the student in mind, not the content. Ex: \"At the end of this course, you will be able to...\"",
+            "1": "Tip: Create the course first, even without content. This way you can already configure everything before releasing it to students."
+          }
         },
         "createLessons": {
           "title": "How to create modules and classes",
@@ -1119,9 +1132,22 @@
             "2": "To create a module, click on \"New module\" and enter the title.",
             "3": "Within a module, click \"New Class\" to add a class.",
             "4": "Fill in the class title and, optionally, video and supporting material.",
-            "5": "Use the \"Access Rules\" panel to set prerequisites and release date."
+            "5": "Use the \"Access Rules\" panel to set prerequisites and release date.",
+            "6": "When expanding a class, you will see the list of steps (content and activities)."
           },
-          "link": "Go to Manage Courses"
+          "link": "Go to Manage Courses",
+          "context": "Modules are thematic groups within the course — they function like chapters. Each module contains classes. Each class is a learning unit with content and activities.",
+          "mentalFlow": "Think about the student’s journey: what do they need to learn first? Arrange the modules in order of increasing complexity. Within each module, organize classes in the same way: theory before practice.",
+          "expectedResult": "The course now has visible modules, with classes within each module. Once steps are added, students can consume the content in sequence.",
+          "commonMistakes": {
+            "0": "Creating all classes in a single module — loses thematic organization.",
+            "1": "Name classes as \"Class 1\", \"Class 2\" without indicating the subject.",
+            "2": "Do not use prerequisites when the class depends on previous knowledge."
+          },
+          "tips": {
+            "0": "Tip: Start with a short introductory module (1–2 lessons) to quickly engage the learner before jumping into dense content.",
+            "1": "Tip: use the release date to create a delivery schedule, releasing modules week by week."
+          }
         },
         "reorder": {
           "title": "How to reorder classes and steps",
@@ -1132,6 +1158,18 @@
             "2": "Drag up or down to the desired position and release.",
             "3": "The order is automatically saved after dropping the item.",
             "4": "The same mechanism works within each class to reorder the content steps."
+          },
+          "context": "The order of classes and steps defines the student's learning sequence. The system strictly follows this order — the student goes through the steps one by one within each class.",
+          "mentalFlow": "Think of each step as a mini-step. The ideal sequence is: context → theory (text/video) → practice (activity). You can rearrange at any time, but the change immediately impacts the student experience.",
+          "expectedResult": "The new sequence is saved immediately. The student will see the content in the updated order the next time they access it.",
+          "commonMistakes": {
+            "0": "Putting activities before theory — the student has no basis for responding.",
+            "1": "Leave the introductory content in the middle of the module.",
+            "2": "Reordering classes that students have already started without warning — can cause confusion in progress."
+          },
+          "tips": {
+            "0": "Tip: the ideal sequence within a class is usually: text content → video → fixation activity.",
+            "1": "Tip: Use students' progress history to identify where they get stuck and reorganize the content."
           }
         },
         "createActivities": {
@@ -1143,7 +1181,21 @@
             "2": "Select the \"Activity\" tab.",
             "3": "Choose the type of activity: Multiple choice, True/False, Ordering, Trading simulation, among others.",
             "4": "Set the title and review policy (immediate, after date, or never).",
-            "5": "Once created, click on \"Questions\" to add the questions and answers for the activity."
+            "5": "Once created, click on \"Questions\" to add the questions and answers for the activity.",
+            "6": "Click save. The activity appears in the steps list.",
+            "7": "Click on \"Questions\" next to the activity to add questions and alternatives."
+          },
+          "context": "Activities are interactive exercises that the student responds to during class. They exist to secure learning, validate knowledge and generate progress. Without activities, the student has no grade or progress recorded.",
+          "mentalFlow": "Choose the type of activity according to what you want to evaluate: multiple choice for concepts, true/false for myths, ordering for processes, trading simulation for market practice. Each type has a specific purpose.",
+          "expectedResult": "The activity appears in the sequence of steps in the class. The student will need to answer it to advance. The result and grade are recorded in the progress.",
+          "commonMistakes": {
+            "0": "Create the activity but do not add questions — it is empty and the student cannot answer.",
+            "1": "Always use the same type of activity — vary it to maintain engagement.",
+            "2": "Not correctly defining the review policy — students don’t know if they got it right or wrong."
+          },
+          "tips": {
+            "0": "Tip: Use \"Multiple Choice\" for quick concepts and \"Trading Simulation\" for practice lessons — the combination greatly increases retention.",
+            "1": "Tip: Add a short activity (3–5 questions) at the end of each lesson, not just at the end of the module."
           }
         },
         "createContent": {
@@ -1155,7 +1207,21 @@
             "2": "Choose the type: Text, Video or Image.",
             "3": "A modal will open for you to enter the title and corresponding content.",
             "4": "After saving, the step appears in the list and can be freely reordered.",
-            "5": "Content steps are displayed to the student in the defined sequence, interspersed with the activities."
+            "5": "Content steps are displayed to the student in the defined sequence, interspersed with the activities.",
+            "6": "Define the step title (e.g. \"Introduction to technical analysis\") and click save.",
+            "7": "The step appears in the list and can be dragged to the correct position."
+          },
+          "context": "Content steps are the blocks of theory within a lesson: explanatory text, video or image. They appear before activities and are the main learning vehicle before practice.",
+          "mentalFlow": "A content step must have a single focus. Don't try to put everything into one giant text — create separate steps for each block of information. The student takes one step at a time.",
+          "expectedResult": "The content appears following the class. The student sees each step in order, with a forward button between them. Completed steps are marked in the progress.",
+          "commonMistakes": {
+            "0": "Create a single pass of very long text — break it into smaller parts to make it easier to read.",
+            "1": "Don't add alt text to images — affects accessibility.",
+            "2": "Mix content from different topics in the same text step."
+          },
+          "tips": {
+            "0": "Tip: use short videos (up to 10 minutes) to explain the concept and text to summarize the main points below.",
+            "1": "Tip: The text field accepts plain HTML — use <b> for highlights and <ul>/<li> for topic lists."
           }
         },
         "lab": {
@@ -1167,9 +1233,22 @@
             "2": "Click \"Start simulation\" to open the trading terminal.",
             "3": "In the terminal, you can view the candle chart and execute buy and sell orders.",
             "4": "When you end the session, the result is saved in the history.",
-            "5": "Access the simulation history via the \"History\" link on the laboratory screen."
+            "5": "Access the simulation history via the \"History\" link on the laboratory screen.",
+            "6": "Access history via the \"History\" link on the lab screen to review previous sessions."
           },
-          "link": "Go to the Laboratory"
+          "link": "Go to the Laboratory",
+          "context": "The laboratory is a trading simulation environment without real money. It exists so that the student can practice executing orders — buying and selling — under realistic market conditions, without financial risk. It's the equivalent of a flight simulator before actually flying.",
+          "mentalFlow": "Before starting, configure the scenario according to what you want to train: more volatile markets to practice emotional management, defined trends to practice entries in favor of the trend, or sideways markets to practice range trading.",
+          "expectedResult": "When you finish a session, you will see the result: accumulated PnL, maximum drawdown, number of trades and success rate. This data is saved in the history to monitor progress.",
+          "commonMistakes": {
+            "0": "Always use the same parameters — vary to train in different market conditions.",
+            "1": "Ignore the drawdown — risk control is part of the training, not just the profit.",
+            "2": "Close the terminal before ending the session correctly — the result may not be saved."
+          },
+          "tips": {
+            "0": "Tip: start with few candles (50–100) and low spread to familiarize yourself with the interface before simulating more complex scenarios.",
+            "1": "Tip: Use +0.5 or -0.5 trend to simulate markets with clear direction — ideal for beginners to practice trend entries."
+          }
         }
       }
     }

@@ -1106,9 +1106,22 @@
             "1": "Haga clic en el botón \"Nuevo curso\" en la esquina superior derecha de la página.",
             "2": "Complete el título, la descripción y, si lo desea, establezca una fecha límite.",
             "3": "Cargue una imagen de portada haciendo clic en el área de miniaturas.",
-            "4": "Haga clic en \"Guardar\" para crear el curso."
+            "4": "Haga clic en \"Guardar\" para crear el curso.",
+            "5": "Haga clic en \"Guardar\" para crear el curso. Ya aparece en la lista, pero aún sin contenido."
           },
-          "link": "Ir a Administrar Cursos"
+          "link": "Ir a Administrar Cursos",
+          "context": "Un curso es la estructura principal de su escuela. Es el producto que los estudiantes compran o acceden. Todo lo que enseñará (módulos, clases, actividades) está organizado dentro de un curso.",
+          "mentalFlow": "Antes de crear el curso piensa: ¿cuál es el tema central? ¿Quién es el estudiante ideal? ¿Qué resultado tendrá cuando termine? El nombre y la descripción de su curso deben comunicar exactamente eso.",
+          "expectedResult": "El curso aparece en la lista Administrar cursos y en la exhibición pública de la escuela. Los estudiantes ahora pueden verlo, pero aún no hay clases disponibles.",
+          "commonMistakes": {
+            "0": "Crear el curso sin definir una descripción clara, esto confunde al estudiante a la hora de elegir.",
+            "1": "Utilice un título genérico como \"Curso 1\" en lugar de algo descriptivo como \"Fundamentos del análisis técnico\".",
+            "2": "Deja el plazo muy ajustado antes de configurar todo el contenido."
+          },
+          "tips": {
+            "0": "Consejo: escriba la descripción pensando en el estudiante, no en el contenido. Ej: \"Al final de este curso, podrás...\"",
+            "1": "Consejo: primero cree el curso, incluso sin contenido. De esta manera ya puedes configurar todo antes de entregárselo a los estudiantes."
+          }
         },
         "createLessons": {
           "title": "Cómo crear módulos y clases.",
@@ -1119,9 +1132,22 @@
             "2": "Para crear un módulo, haga clic en \"Nuevo módulo\" e ingrese el título.",
             "3": "Dentro de un módulo, haga clic en \"Nueva clase\" para agregar una clase.",
             "4": "Complete el título de la clase y, opcionalmente, el video y el material de apoyo.",
-            "5": "Utilice el panel \"Reglas de acceso\" para establecer los requisitos previos y la fecha de lanzamiento."
+            "5": "Utilice el panel \"Reglas de acceso\" para establecer los requisitos previos y la fecha de lanzamiento.",
+            "6": "Al ampliar una clase, verás la lista de pasos (contenido y actividades)."
           },
-          "link": "Ir a Administrar Cursos"
+          "link": "Ir a Administrar Cursos",
+          "context": "Los módulos son grupos temáticos dentro del curso y funcionan como capítulos. Cada módulo contiene clases. Cada clase es una unidad de aprendizaje con contenidos y actividades.",
+          "mentalFlow": "Piense en el viaje del estudiante: ¿qué necesita aprender primero? Organice los módulos en orden de complejidad creciente. Dentro de cada módulo, organiza las clases de la misma forma: teoría antes que práctica.",
+          "expectedResult": "El curso ahora tiene módulos visibles, con clases dentro de cada módulo. Una vez que se agregan los pasos, los estudiantes pueden consumir el contenido en secuencia.",
+          "commonMistakes": {
+            "0": "Al crear todas las clases en un solo módulo, se pierde organización temática.",
+            "1": "Nombra las clases como \"Clase 1\", \"Clase 2\" sin indicar la materia.",
+            "2": "No utilice prerrequisitos cuando la clase dependa de conocimientos previos."
+          },
+          "tips": {
+            "0": "Consejo: comience con un módulo introductorio breve (1 o 2 lecciones) para involucrar rápidamente al alumno antes de pasar al contenido denso.",
+            "1": "Consejo: utilice la fecha de lanzamiento para crear un cronograma de entrega, publicando módulos semana a semana."
+          }
         },
         "reorder": {
           "title": "Cómo reordenar clases y pasos",
@@ -1132,6 +1158,18 @@
             "2": "Arrastre hacia arriba o hacia abajo hasta la posición deseada y suelte.",
             "3": "El pedido se guarda automáticamente después de soltar el artículo.",
             "4": "El mismo mecanismo funciona dentro de cada clase para reordenar los pasos del contenido."
+          },
+          "context": "El orden de clases y pasos define la secuencia de aprendizaje del estudiante. El sistema sigue estrictamente este orden: el estudiante sigue los pasos uno por uno dentro de cada clase.",
+          "mentalFlow": "Piensa en cada paso como un minipaso. La secuencia ideal es: contexto → teoría (texto/vídeo) → práctica (actividad). Puedes reorganizarlo en cualquier momento, pero el cambio impacta inmediatamente la experiencia del estudiante.",
+          "expectedResult": "La nueva secuencia se guarda inmediatamente. El estudiante verá el contenido en el orden actualizado la próxima vez que acceda a él.",
+          "commonMistakes": {
+            "0": "Anteponer las actividades a la teoría: el estudiante no tiene base para responder.",
+            "1": "Deje el contenido introductorio en la mitad del módulo.",
+            "2": "Reordenar las clases que los estudiantes ya comenzaron sin previo aviso puede causar confusión en el progreso."
+          },
+          "tips": {
+            "0": "Consejo: la secuencia ideal dentro de una clase suele ser: contenido de texto → vídeo → actividad de fijación.",
+            "1": "Consejo: utilice el historial de progreso de los estudiantes para identificar dónde se atascan y reorganizar el contenido."
           }
         },
         "createActivities": {
@@ -1143,7 +1181,21 @@
             "2": "Seleccione la pestaña \"Actividad\".",
             "3": "Elija el tipo de actividad: Opción múltiple, Verdadero/Falso, Ordenación, Simulación de Trading, entre otras.",
             "4": "Establezca el título y la política de revisión (inmediata, posterior a la fecha o nunca).",
-            "5": "Una vez creado, haga clic en \"Preguntas\" para agregar las preguntas y respuestas de la actividad."
+            "5": "Una vez creado, haga clic en \"Preguntas\" para agregar las preguntas y respuestas de la actividad.",
+            "6": "Haga clic en guardar. La actividad aparece en la lista de pasos.",
+            "7": "Haga clic en \"Preguntas\" al lado de la actividad para agregar preguntas y alternativas."
+          },
+          "context": "Las actividades son ejercicios interactivos a los que el estudiante responde durante la clase. Existen para asegurar el aprendizaje, validar el conocimiento y generar progreso. Sin actividades, el estudiante no tiene ninguna calificación ni progreso registrado.",
+          "mentalFlow": "Elija el tipo de actividad según lo que desee evaluar: opción múltiple para conceptos, verdadero/falso para mitos, ordenamiento para procesos, simulación comercial para prácticas de mercado. Cada tipo tiene un propósito específico.",
+          "expectedResult": "La actividad aparece en la secuencia de pasos de la clase. El estudiante deberá responderla para avanzar. El resultado y la calificación se registran en el progreso.",
+          "commonMistakes": {
+            "0": "Cree la actividad pero no agregue preguntas; está vacía y el estudiante no puede responder.",
+            "1": "Utilice siempre el mismo tipo de actividad; varíela para mantener el compromiso.",
+            "2": "No definir correctamente la política de revisión: los estudiantes no saben si lo hicieron bien o mal."
+          },
+          "tips": {
+            "0": "Consejo: utilice \"Opción múltiple\" para conceptos rápidos y \"Simulación de operaciones\" para lecciones prácticas; la combinación aumenta considerablemente la retención.",
+            "1": "Consejo: agregue una actividad breve (de 3 a 5 preguntas) al final de cada lección, no solo al final del módulo."
           }
         },
         "createContent": {
@@ -1155,7 +1207,21 @@
             "2": "Elige el tipo: Texto, Vídeo o Imagen.",
             "3": "Se abrirá un modal para que ingreses el título y el contenido correspondiente.",
             "4": "Después de guardar, el paso aparece en la lista y se puede reordenar libremente.",
-            "5": "Los pasos del contenido se muestran al estudiante en la secuencia definida, intercalados con las actividades."
+            "5": "Los pasos del contenido se muestran al estudiante en la secuencia definida, intercalados con las actividades.",
+            "6": "Defina el título del paso (por ejemplo, \"Introducción al análisis técnico\") y haga clic en guardar.",
+            "7": "El paso aparece en la lista y se puede arrastrar a la posición correcta."
+          },
+          "context": "Los pasos del contenido son los bloques de teoría dentro de una lección: texto explicativo, vídeo o imagen. Aparecen antes de las actividades y son el principal vehículo de aprendizaje antes de la práctica.",
+          "mentalFlow": "Un paso de contenido debe tener un único enfoque. No intentes poner todo en un texto gigante: crea pasos separados para cada bloque de información. El estudiante da un paso a la vez.",
+          "expectedResult": "El contenido aparece siguiendo la clase. El alumno ve cada paso en orden, con un botón de avance entre ellos. Los pasos completados están marcados en el progreso.",
+          "commonMistakes": {
+            "0": "Cree una sola pasada de texto muy largo; divídalo en partes más pequeñas para que sea más fácil de leer.",
+            "1": "No agregue texto alternativo a las imágenes: afecta la accesibilidad.",
+            "2": "Mezcle contenido de diferentes temas en el mismo paso de texto."
+          },
+          "tips": {
+            "0": "Consejo: utilice vídeos cortos (de hasta 10 minutos) para explicar el concepto y texto para resumir los puntos principales a continuación.",
+            "1": "Consejo: El campo de texto acepta HTML simple: use <b> para resaltar y <ul>/<li> para listas de temas."
           }
         },
         "lab": {
@@ -1167,9 +1233,22 @@
             "2": "Haga clic en \"Iniciar simulación\" para abrir la terminal comercial.",
             "3": "En la terminal, puede ver el gráfico de velas y ejecutar órdenes de compra y venta.",
             "4": "Al finalizar la sesión, el resultado se guarda en el historial.",
-            "5": "Acceda al historial de simulación a través del enlace \"Historial\" en la pantalla del laboratorio."
+            "5": "Acceda al historial de simulación a través del enlace \"Historial\" en la pantalla del laboratorio.",
+            "6": "Acceda al historial a través del enlace \"Historial\" en la pantalla del laboratorio para revisar sesiones anteriores."
           },
-          "link": "ir al laboratorio"
+          "link": "ir al laboratorio",
+          "context": "El laboratorio es un entorno de simulación comercial sin dinero real. Existe para que el estudiante pueda practicar la ejecución de órdenes (compra y venta) en condiciones de mercado realistas, sin riesgo financiero. Es el equivalente a un simulador de vuelo antes de volar.",
+          "mentalFlow": "Antes de empezar, configura el escenario según lo que quieras entrenar: mercados más volátiles para practicar la gestión emocional, tendencias definidas para practicar entradas a favor de la tendencia, o mercados laterales para practicar el trading de rango.",
+          "expectedResult": "Cuando finalice una sesión, verá el resultado: PnL acumulado, reducción máxima, número de operaciones y tasa de éxito. Estos datos se guardan en el historial para monitorear el progreso.",
+          "commonMistakes": {
+            "0": "Utilice siempre los mismos parámetros; varíe para entrenar en diferentes condiciones del mercado.",
+            "1": "Ignore la reducción: el control de riesgos es parte de la capacitación, no solo de las ganancias.",
+            "2": "Cierre el terminal antes de finalizar la sesión correctamente; es posible que el resultado no se guarde."
+          },
+          "tips": {
+            "0": "Consejo: comience con pocas velas (50-100) y un diferencial bajo para familiarizarse con la interfaz antes de simular escenarios más complejos.",
+            "1": "Consejo: utilice la tendencia +0,5 o -0,5 para simular mercados con una dirección clara; ideal para que los principiantes practiquen las entradas de tendencias."
+          }
         }
       }
     }

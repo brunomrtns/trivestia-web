@@ -980,74 +980,147 @@
       "sections": {
         "createCourse": {
           "title": "Como criar um curso",
-          "description": "Cursos são a estrutura principal da plataforma. Cada curso contém módulos e aulas.",
+          "context": "Um curso é a estrutura principal da sua escola. É o produto que os alunos compram ou acessam. Tudo o que você vai ensinar (módulos, aulas, atividades) fica organizado dentro de um curso.",
+          "mentalFlow": "Antes de criar o curso, pense: qual é o tema central? Quem é o aluno ideal? Qual resultado ele vai ter ao terminar? O nome e a descrição do curso devem comunicar exatamente isso.",
           "steps": [
             "No menu lateral, acesse \"Gerenciar Cursos\" (área administrativa).",
             "Clique no botão \"Novo curso\" no canto superior direito da página.",
-            "Preencha o título, descrição e, se desejar, defina um prazo limite.",
+            "Preencha o título (nome do curso) e a descrição (o que o aluno vai aprender).",
+            "Se quiser, defina um prazo limite. Após essa data, alunos não poderão enviar respostas.",
             "Faça upload de uma imagem de capa clicando na área de thumbnail.",
-            "Clique em \"Salvar\" para criar o curso."
+            "Clique em \"Salvar\" para criar o curso. Ele já aparece na listagem, mas ainda sem conteúdo."
+          ],
+          "expectedResult": "O curso aparece na listagem de Gerenciar Cursos e na vitrine pública da escola. Alunos já podem visualizá-lo, mas ainda sem aulas disponíveis.",
+          "commonMistakes": [
+            "Criar o curso sem definir uma descrição clara. Isso confunde o aluno na hora de escolher.",
+            "Usar um título genérico como \"Curso 1\" em vez de algo descritivo como \"Fundamentos de Análise Técnica\".",
+            "Deixar o prazo limite muito apertado antes de configurar todo o conteúdo."
+          ],
+          "tips": [
+            "Escreva a descrição pensando no aluno, não no conteúdo. Exemplo: \"Ao final deste curso, você será capaz de...\"",
+            "Crie o curso primeiro, mesmo sem conteúdo. Assim você já configura tudo antes de liberar para os alunos."
           ],
           "link": "Ir para Gerenciar Cursos"
         },
         "createLessons": {
           "title": "Como criar módulos e aulas",
-          "description": "Dentro de cada curso, você organiza o conteúdo em módulos. Cada módulo agrupa aulas relacionadas.",
+          "context": "Módulos são grupos temáticos dentro do curso, como capítulos de um livro. Cada módulo contém aulas. Cada aula é uma unidade de aprendizado com conteúdo e atividades.",
+          "mentalFlow": "Pense na jornada do aluno: o que ele precisa aprender primeiro? Organize os módulos em ordem crescente de complexidade. Dentro de cada módulo, organize as aulas da mesma forma: teoria antes de prática.",
           "steps": [
             "Na listagem de cursos, clique em \"Gerenciar\" no curso desejado.",
-            "Você verá a tela de aulas, dividida em módulos.",
-            "Para criar um módulo, clique em \"Novo módulo\" e informe o título.",
-            "Dentro de um módulo, clique em \"Nova aula\" para adicionar uma aula.",
-            "Preencha o título da aula e, opcionalmente, vídeo e material de apoio.",
-            "Use o painel de \"Regras de acesso\" para definir pré-requisitos e data de liberação."
+            "Você verá a tela de aulas, organizada por módulos.",
+            "Para criar um módulo, clique em \"Novo módulo\", informe o título e salve.",
+            "Dentro de um módulo, clique em \"Adicionar aula\" para criar uma aula.",
+            "Preencha o título da aula. Opcionalmente, adicione URL de vídeo e link de material de apoio.",
+            "Use o painel \"Regras de acesso\" para definir data de liberação ou aula pré-requisito.",
+            "Ao expandir uma aula, você verá a lista de passos (conteúdos e atividades)."
+          ],
+          "expectedResult": "O curso passa a ter módulos visíveis, com aulas dentro de cada módulo. Quando os passos forem adicionados, os alunos poderão consumir o conteúdo em sequência.",
+          "commonMistakes": [
+            "Criar todas as aulas em um único módulo. A organização temática fica comprometida.",
+            "Nomear aulas como \"Aula 1\", \"Aula 2\" sem indicar o assunto.",
+            "Não usar pré-requisitos quando a aula depende de conhecimento anterior."
+          ],
+          "tips": [
+            "Comece com um módulo introdutório curto (1 a 2 aulas) para engajar o aluno antes de entrar em conteúdo mais denso.",
+            "Use a data de liberação para criar um cronograma de entregas, liberando módulos semana a semana."
           ],
           "link": "Ir para Gerenciar Cursos"
         },
         "reorder": {
           "title": "Como reordenar aulas e passos",
-          "description": "A ordem dos módulos, aulas e passos pode ser reorganizada por arrastar e soltar.",
+          "context": "A ordem das aulas e dos passos define a sequência de aprendizado do aluno. O sistema segue essa ordem à risca: o aluno percorre os passos um a um dentro de cada aula.",
+          "mentalFlow": "Pense que cada passo é uma mini-etapa. A sequência ideal vai de contexto para teoria (texto ou vídeo) e termina na prática (atividade). Você pode reorganizar a qualquer momento, mas a mudança afeta imediatamente a experiência do aluno.",
           "steps": [
-            "Na tela de aulas de um curso, localize o ícone de seis pontos (⠿) ao lado de cada item.",
-            "Clique e segure o ícone para ativar o modo de arrasto.",
-            "Arraste para cima ou para baixo até a posição desejada e solte.",
-            "A ordem é salva automaticamente após soltar o item.",
-            "O mesmo mecanismo funciona dentro de cada aula para reordenar os passos de conteúdo."
+            "Na tela de aulas de um curso, localize o ícone de seis pontos (⠿) à esquerda de cada módulo ou aula.",
+            "Clique e segure o ícone para entrar no modo de arraste.",
+            "Arraste o item para a posição desejada e solte.",
+            "A nova ordem é salva automaticamente. Não é necessário clicar em nenhum botão.",
+            "Para reordenar os passos dentro de uma aula, expanda a aula primeiro e use o mesmo ícone nos passos."
+          ],
+          "expectedResult": "A nova sequência é salva imediatamente. O aluno verá o conteúdo na ordem atualizada da próxima vez que acessar.",
+          "commonMistakes": [
+            "Colocar atividades antes da teoria. O aluno não tem base para responder.",
+            "Deixar o conteúdo introdutório no meio do módulo.",
+            "Reordenar aulas que alunos já iniciaram sem avisar. Isso pode causar confusão no progresso."
+          ],
+          "tips": [
+            "A sequência ideal dentro de uma aula costuma ser: texto de contexto, vídeo explicativo e atividade de fixação.",
+            "Use o histórico de progresso dos alunos para identificar onde eles travam e reorganize o conteúdo."
           ]
         },
         "createActivities": {
           "title": "Como criar atividades",
-          "description": "Atividades são exercícios interativos adicionados como passos dentro de uma aula. Podem ser de múltiplos tipos.",
+          "context": "Atividades são exercícios interativos que o aluno responde durante a aula. Elas existem para fixar o aprendizado, validar o conhecimento e gerar progresso. Sem atividades, o aluno não tem nota nem progresso registrado.",
+          "mentalFlow": "Escolha o tipo de atividade de acordo com o que você quer avaliar. Múltipla escolha funciona bem para conceitos, verdadeiro ou falso para mitos, ordenação para processos, e simulação de trading para prática de mercado. Cada tipo tem uma finalidade específica.",
           "steps": [
-            "Abra uma aula na tela de gerenciamento de aulas.",
-            "Clique no botão \"Adicionar passo\" ao final da lista de passos.",
-            "Selecione a aba \"Atividade\".",
-            "Escolha o tipo de atividade: Múltipla escolha, Verdadeiro/Falso, Ordenação, Simulação de trading, entre outros.",
-            "Defina o título e a política de revisão (imediata, após data, ou nunca).",
-            "Após criada, clique em \"Questões\" para adicionar as perguntas e respostas da atividade."
+            "Na tela de aulas, expanda a aula onde deseja adicionar a atividade.",
+            "Clique em \"Adicionar passo\" ao final da lista de passos da aula.",
+            "Na janela que aparecer, selecione a aba \"Atividade\".",
+            "Defina o título da atividade (ex: \"Quiz: Análise de suporte e resistência\").",
+            "Escolha o tipo: Múltipla escolha, Múltipla seleção, Verdadeiro/Falso, Ordenação, Texto livre, Cenário, Marcação de gráfico, Calculadora de risco ou Simulação de trading.",
+            "Defina a política de revisão: imediata (aluno vê gabarito na hora), após data (gabarito liberado em data específica) ou nunca (sem gabarito).",
+            "Clique em salvar. A atividade aparece na lista de passos.",
+            "Clique em \"Questões\" ao lado da atividade para adicionar as perguntas e alternativas."
+          ],
+          "expectedResult": "A atividade aparece na sequência de passos da aula. O aluno precisará respondê-la para avançar. O resultado e a nota são registrados no progresso.",
+          "commonMistakes": [
+            "Criar a atividade sem adicionar questões. Ela fica vazia e o aluno não consegue responder.",
+            "Usar sempre o mesmo tipo de atividade. Varie os tipos para manter o engajamento.",
+            "Não definir corretamente a política de revisão. Os alunos ficam sem saber se acertaram ou erraram."
+          ],
+          "tips": [
+            "Use \"Múltipla escolha\" para conceitos rápidos e \"Simulação de trading\" para aulas de prática. A combinação aumenta muito a retenção.",
+            "Adicione uma atividade curta (3 a 5 questões) no final de cada aula, não apenas no final do módulo."
           ]
         },
         "createContent": {
           "title": "Como criar apresentações e conteúdo",
-          "description": "Além de atividades, você pode adicionar passos de conteúdo: texto, vídeo ou imagem.",
+          "context": "Passos de conteúdo são os blocos de teoria dentro de uma aula: texto explicativo, vídeo ou imagem. Eles aparecem antes das atividades e são o principal veículo de aprendizado antes da prática.",
+          "mentalFlow": "Cada passo de conteúdo deve ter um foco só. Não tente colocar tudo em um texto gigante. Crie passos separados para cada bloco de informação. O aluno percorre um passo por vez.",
           "steps": [
-            "Abra uma aula na tela de gerenciamento.",
+            "Na tela de aulas, expanda a aula desejada.",
             "Clique em \"Adicionar passo\" e selecione a aba \"Conteúdo\".",
-            "Escolha o tipo: Texto, Vídeo ou Imagem.",
-            "Um modal será aberto para você inserir o título e o conteúdo correspondente.",
-            "Após salvar, o passo aparece na lista e pode ser reordenado livremente.",
-            "Passos de conteúdo são exibidos ao aluno na sequência definida, intercalados com as atividades."
+            "Escolha o tipo de conteúdo: Texto, Vídeo ou Imagem.",
+            "Para Texto: um modal abre com um campo de edição que aceita HTML simples (parágrafos, listas, negrito).",
+            "Para Vídeo: cole a URL do vídeo (YouTube, Vimeo ou link direto). O player será embutido automaticamente.",
+            "Para Imagem: faça upload da imagem ou cole uma URL. Adicione um texto alternativo e legenda opcional.",
+            "Defina o título do passo (ex: \"Introdução à análise técnica\") e clique em salvar.",
+            "O passo aparece na lista e pode ser arrastado para a posição correta."
+          ],
+          "expectedResult": "O conteúdo aparece na sequência da aula. O aluno visualiza cada passo em ordem, com um botão de avançar entre eles. Passos concluídos ficam marcados no progresso.",
+          "commonMistakes": [
+            "Criar um único passo de texto muito longo. Divida em partes menores para facilitar a leitura.",
+            "Não adicionar texto alternativo em imagens. Isso afeta a acessibilidade.",
+            "Misturar conteúdo de tópicos diferentes no mesmo passo de texto."
+          ],
+          "tips": [
+            "Use vídeos curtos (até 10 minutos) para explicar o conceito e texto para resumir os pontos principais logo abaixo.",
+            "O campo de texto aceita HTML simples. Use <b> para destaques e <ul>/<li> para listas de tópicos."
           ]
         },
         "lab": {
           "title": "Como usar o laboratório",
-          "description": "O laboratório permite praticar operações em um ambiente de simulação, sem risco. Você configura os parâmetros da simulação e opera no terminal.",
+          "context": "O laboratório é um ambiente de simulação de trading sem dinheiro real. Ele existe para que o aluno pratique a execução de ordens (compra e venda) em condições realistas de mercado, sem risco financeiro. Funciona como um simulador de voo antes de pilotar de verdade.",
+          "mentalFlow": "Antes de iniciar, configure o cenário de acordo com o que você quer treinar. Mercados mais voláteis servem para praticar gestão emocional, tendências definidas ajudam a praticar entradas a favor do movimento, e mercados laterais são bons para treinar range trading.",
           "steps": [
             "No menu lateral, clique em \"Laboratório\".",
-            "Configure os parâmetros da simulação: número de velas, timeframe, volatilidade, tendência, spread e saldo inicial.",
-            "Clique em \"Iniciar simulação\" para abrir o terminal de trading.",
-            "No terminal, você consegue visualizar o gráfico de candles e executar ordens de compra e venda.",
+            "Configure os parâmetros: número de velas (50 a 500), timeframe (1min a 1h), volatilidade, tendência (-1 a +1), spread e saldo inicial.",
+            "Clique em \"Iniciar Simulação\". Isso cria uma sessão com candles gerados.",
+            "No terminal, analise o gráfico de candles e execute ordens de compra (BUY) ou venda (SELL).",
+            "Acompanhe o PnL (resultado) e o drawdown em tempo real.",
             "Ao encerrar a sessão, o resultado é salvo no histórico.",
-            "Acesse o histórico de simulações pelo link \"Histórico\" na tela do laboratório."
+            "Acesse o histórico pelo link \"Histórico\" na tela do laboratório para revisar sessões anteriores."
+          ],
+          "expectedResult": "Ao finalizar uma sessão, você verá o resultado com PnL acumulado, drawdown máximo, número de trades e taxa de acerto. Esses dados ficam salvos no histórico para acompanhar a evolução.",
+          "commonMistakes": [
+            "Usar sempre os mesmos parâmetros. Varie as configurações para treinar em diferentes condições de mercado.",
+            "Ignorar o drawdown. Controle de risco é parte do treinamento, não apenas o lucro.",
+            "Fechar o terminal antes de encerrar a sessão corretamente. O resultado pode não ser salvo."
+          ],
+          "tips": [
+            "Comece com poucos candles (50 a 100) e spread baixo para se familiarizar com a interface antes de simular cenários mais complexos.",
+            "Use tendência +0.5 ou -0.5 para simular mercados com direção clara. É o cenário ideal para iniciantes treinarem entradas a favor da tendência."
           ],
           "link": "Ir para o Laboratório"
         }
