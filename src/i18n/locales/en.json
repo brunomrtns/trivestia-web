@@ -839,7 +839,11 @@
         "button": "Create free account"
       },
       "titlePrefix": "Invest in your",
-      "titleHighlight": "knowledge"
+      "titleHighlight": "knowledge",
+      "guide": {
+        "title": "New here? Access the usage guide.",
+        "subtitle": "Learn how to create courses, classes, activities and use the laboratory with instructions based on the real platform."
+      }
     },
     "createSchool": {
       "title": "Create your school",

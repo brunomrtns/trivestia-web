@@ -6,8 +6,7 @@ import {
   BarChart3,
   CheckCircle2,
   Clock,
-  ChevronRight,
-  BookOpenText
+  ChevronRight
 } from 'lucide-react';
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { progressEndpoints } from '@/services/endpoints/progress.endpoints';
@@ -94,23 +93,6 @@ export default function DashboardPage() {
           {t('app.dashboard.subtitle')}
         </p>
       </div>
-
-      {/* Guia de uso shortcut */}
-      <Link
-        to={tenantPath(slug, '/app/training')}
-        className="flex items-center gap-3 rounded-2xl border bg-card px-5 py-4 shadow-sm transition hover:border-primary/40 hover:shadow-md"
-      >
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-          <BookOpenText className="h-5 w-5 text-primary" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="font-semibold">{t('app.training.dashboardCard.title')}</p>
-          <p className="text-sm text-muted-foreground">
-            {t('app.training.dashboardCard.subtitle')}
-          </p>
-        </div>
-        <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />
-      </Link>
 
       {/* Continue Card */}
       {loadingContinue ? (

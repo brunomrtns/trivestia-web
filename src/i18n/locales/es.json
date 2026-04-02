@@ -839,7 +839,11 @@
         "button": "Crear cuenta gratis"
       },
       "titlePrefix": "Invierte en tu",
-      "titleHighlight": "conocimiento"
+      "titleHighlight": "conocimiento",
+      "guide": {
+        "title": "¿Nuevo aquí? Accede a la guía de uso.",
+        "subtitle": "Aprende a crear cursos, clases, actividades y utilizar el laboratorio con instrucciones basadas en la plataforma real."
+      }
     },
     "createSchool": {
       "title": "Crea tu escuela",

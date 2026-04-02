@@ -803,29 +803,33 @@
     "landing": {
       "badge": "Plataforma de educação financeira",
       "title": "Invista no seu conhecimento",
-      "subtitle": "Aprenda análise de investimentos, gestão de risco e finanças pessoais com conteúdo prático, interativo e no seu ritmo.",
+      "subtitle": "Uma plataforma completa para escolas de finanças: cursos, atividades interativas, laboratório de trading e acompanhamento de progresso.",
       "createSchool": "Criar escola",
       "featuresSection": {
-        "title": "Tudo que você precisa para aprender",
-        "subtitle": "Uma plataforma completa pensada para quem quer ir além"
+        "title": "O que você pode fazer na plataforma",
+        "subtitle": "Para professores que querem criar e para alunos que querem aprender"
       },
       "features": {
         "structured": {
-          "title": "Conteúdo estruturado",
-          "description": "Cursos organizados em módulos e aulas progressivas para uma aprendizagem eficiente."
+          "title": "Cursos com módulos e aulas",
+          "description": "Organize o conteúdo em módulos, defina pré-requisitos e libere aulas por cronograma."
         },
         "activities": {
-          "title": "6 tipos de atividade",
-          "description": "Múltipla escolha, V/F, ordenação, texto livre e cenários para fixar o conhecimento."
+          "title": "9 tipos de atividade",
+          "description": "Múltipla escolha, ordenação, marcação de gráfico, calculadora de risco, simulação de trading e mais."
         },
         "progress": {
-          "title": "Progresso detalhado",
-          "description": "Acompanhe sua evolução com métricas claras de desempenho em cada aula."
+          "title": "Progresso por aluno",
+          "description": "Acompanhe nota, conclusão e desempenho de cada aluno em cada aula."
         },
         "trading": {
-          "title": "Aprenda investindo",
-          "description": "Domine análise fundamentalista, técnica e gestão de risco com didática premium."
+          "title": "Laboratório de trading",
+          "description": "Ambiente de simulação com candles gerados. O aluno pratica sem risco financeiro."
         }
+      },
+      "guide": {
+        "title": "Novo por aqui? Acesse o guia de uso.",
+        "subtitle": "Aprenda a criar cursos, aulas, atividades e a usar o laboratório com instruções baseadas na plataforma real."
       },
       "stats": {
         "activeStudents": "Alunos ativos",
@@ -834,9 +838,9 @@
         "avgScore": "Nota média"
       },
       "cta": {
-        "title": "Comece sua jornada hoje",
-        "subtitle": "Acesse gratuitamente e descubra como investir com inteligência.",
-        "button": "Criar conta grátis"
+        "title": "Pronto para começar?",
+        "subtitle": "Crie sua escola, configure os cursos e comece a publicar conteúdo.",
+        "button": "Criar escola gratuitamente"
       },
       "titlePrefix": "Invista no seu",
       "titleHighlight": "conhecimento"

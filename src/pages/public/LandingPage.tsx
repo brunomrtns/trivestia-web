@@ -5,10 +5,11 @@ import {
   ArrowRight,
   BookOpen,
   BarChart3,
-  Trophy,
   Layers,
   CheckCircle2,
-  Star
+  BookOpenText,
+  ChevronRight,
+  GraduationCap
 } from 'lucide-react';
 import { useAuthStore } from '@/features/auth/auth.store';
 import { authStorage } from '@/features/auth/storage';
@@ -20,7 +21,7 @@ export default function LandingPage() {
 
   const features = [
     {
-      icon: Layers,
+      icon: GraduationCap,
       title: t('public.landing.features.structured.title'),
       description: t('public.landing.features.structured.description')
     },
@@ -35,17 +36,10 @@ export default function LandingPage() {
       description: t('public.landing.features.progress.description')
     },
     {
-      icon: Trophy,
+      icon: Layers,
       title: t('public.landing.features.trading.title'),
       description: t('public.landing.features.trading.description')
     }
-  ];
-
-  const stats = [
-    { label: t('public.landing.stats.activeStudents'), value: '2.400+' },
-    { label: t('public.landing.stats.contentHours'), value: '120+' },
-    { label: t('public.landing.stats.completionRate'), value: '87%' },
-    { label: t('public.landing.stats.avgScore'), value: '4.9', icon: Star }
   ];
 
   // Aluno/admin autenticado vai direto para o dashboard
@@ -96,28 +90,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="border-y bg-muted/50 py-12">
-        <div className="container grid grid-cols-2 gap-8 md:grid-cols-4">
-          {stats.map((stat) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center"
-            >
-              <div className="text-3xl font-extrabold text-primary">
-                {stat.value}
-              </div>
-              <div className="mt-1 text-sm text-muted-foreground">
-                {stat.label}
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
       {/* Features */}
       <section className="py-24">
         <div className="container">
@@ -150,8 +122,35 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Guia de uso */}
+      <section className="py-8 pb-16">
+        <div className="container">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <Link
+              to="/login"
+              className="flex items-center gap-4 rounded-2xl border bg-card px-6 py-5 shadow-sm transition hover:border-primary/40 hover:shadow-md"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                <BookOpenText className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-base">{t('public.landing.guide.title')}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t('public.landing.guide.subtitle')}
+                </p>
+              </div>
+              <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
       {/* CTA */}
-      <section className="py-24">
+      <section className="py-16">
         <div className="container">
           <div className="rounded-3xl bg-primary p-12 text-center text-primary-foreground shadow-2xl shadow-primary/30">
             <h2 className="mb-4 text-3xl font-bold lg:text-4xl">
@@ -161,7 +160,7 @@ export default function LandingPage() {
               {t('public.landing.cta.subtitle')}
             </p>
             <Link
-              to={slug ? `/t/${slug}/register` : '/login'}
+              to={slug ? `/t/${slug}/register` : '/create-school'}
               className="inline-flex items-center gap-2 rounded-xl bg-white px-8 py-3.5 text-base font-bold text-primary shadow-lg transition-all hover:scale-105"
             >
               {t('public.landing.cta.button')}
