@@ -66,6 +66,7 @@ const AdminUsersPage = lazy(() => import('@/pages/admin/AdminUsersPage'));
 const AdminLessonStepsPage = lazy(() => import('@/pages/admin/AdminLessonStepsPage'));
 const AnnouncementsPage = lazy(() => import('@/pages/student/AnnouncementsPage'));
 const SettingsPage = lazy(() => import('@/pages/student/SettingsPage'));
+const TrainingPage = lazy(() => import('@/pages/student/TrainingPage'));
 const AdminAnnouncementsPage = lazy(() => import('@/pages/admin/AdminAnnouncementsPage'));
 const AdminPeriodsPage = lazy(() => import('@/pages/admin/AdminPeriodsPage'));
 const AdminOffersPage = lazy(() => import('@/pages/admin/AdminOffersPage'));
@@ -148,7 +149,8 @@ const tenantAppRoutes = [
   { path: 'lab/history', element: <PracticeHistoryPage /> },
   { path: 'progress', element: <ProgressPage /> },
   { path: 'announcements', element: <AnnouncementsPage /> },
-  { path: 'settings', element: <SettingsPage /> }
+  { path: 'settings', element: <SettingsPage /> },
+  { path: 'training', element: <TrainingPage /> }
 ];
 
 const tenantAdminRoutes = [

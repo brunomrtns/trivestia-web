@@ -967,6 +967,92 @@
       "empty": "Nenhuma sessão de prática ainda.",
       "noResult": "Sessão sem resultado"
     },
+    "training": {
+      "pageTitle": "Guia de uso da plataforma",
+      "pageSubtitle": "Aprenda como utilizar cada funcionalidade do sistema com instruções passo a passo baseadas na plataforma real.",
+      "indexLabel": "Nesta página",
+      "stepPrefix": "Passo {{n}}",
+      "navItem": "Guia de uso",
+      "dashboardCard": {
+        "title": "Guia de uso da plataforma",
+        "subtitle": "Aprenda a criar cursos, aulas, atividades e muito mais."
+      },
+      "sections": {
+        "createCourse": {
+          "title": "Como criar um curso",
+          "description": "Cursos são a estrutura principal da plataforma. Cada curso contém módulos e aulas.",
+          "steps": [
+            "No menu lateral, acesse \"Gerenciar Cursos\" (área administrativa).",
+            "Clique no botão \"Novo curso\" no canto superior direito da página.",
+            "Preencha o título, descrição e, se desejar, defina um prazo limite.",
+            "Faça upload de uma imagem de capa clicando na área de thumbnail.",
+            "Clique em \"Salvar\" para criar o curso."
+          ],
+          "link": "Ir para Gerenciar Cursos"
+        },
+        "createLessons": {
+          "title": "Como criar módulos e aulas",
+          "description": "Dentro de cada curso, você organiza o conteúdo em módulos. Cada módulo agrupa aulas relacionadas.",
+          "steps": [
+            "Na listagem de cursos, clique em \"Gerenciar\" no curso desejado.",
+            "Você verá a tela de aulas, dividida em módulos.",
+            "Para criar um módulo, clique em \"Novo módulo\" e informe o título.",
+            "Dentro de um módulo, clique em \"Nova aula\" para adicionar uma aula.",
+            "Preencha o título da aula e, opcionalmente, vídeo e material de apoio.",
+            "Use o painel de \"Regras de acesso\" para definir pré-requisitos e data de liberação."
+          ],
+          "link": "Ir para Gerenciar Cursos"
+        },
+        "reorder": {
+          "title": "Como reordenar aulas e passos",
+          "description": "A ordem dos módulos, aulas e passos pode ser reorganizada por arrastar e soltar.",
+          "steps": [
+            "Na tela de aulas de um curso, localize o ícone de seis pontos (⠿) ao lado de cada item.",
+            "Clique e segure o ícone para ativar o modo de arrasto.",
+            "Arraste para cima ou para baixo até a posição desejada e solte.",
+            "A ordem é salva automaticamente após soltar o item.",
+            "O mesmo mecanismo funciona dentro de cada aula para reordenar os passos de conteúdo."
+          ]
+        },
+        "createActivities": {
+          "title": "Como criar atividades",
+          "description": "Atividades são exercícios interativos adicionados como passos dentro de uma aula. Podem ser de múltiplos tipos.",
+          "steps": [
+            "Abra uma aula na tela de gerenciamento de aulas.",
+            "Clique no botão \"Adicionar passo\" ao final da lista de passos.",
+            "Selecione a aba \"Atividade\".",
+            "Escolha o tipo de atividade: Múltipla escolha, Verdadeiro/Falso, Ordenação, Simulação de trading, entre outros.",
+            "Defina o título e a política de revisão (imediata, após data, ou nunca).",
+            "Após criada, clique em \"Questões\" para adicionar as perguntas e respostas da atividade."
+          ]
+        },
+        "createContent": {
+          "title": "Como criar apresentações e conteúdo",
+          "description": "Além de atividades, você pode adicionar passos de conteúdo: texto, vídeo ou imagem.",
+          "steps": [
+            "Abra uma aula na tela de gerenciamento.",
+            "Clique em \"Adicionar passo\" e selecione a aba \"Conteúdo\".",
+            "Escolha o tipo: Texto, Vídeo ou Imagem.",
+            "Um modal será aberto para você inserir o título e o conteúdo correspondente.",
+            "Após salvar, o passo aparece na lista e pode ser reordenado livremente.",
+            "Passos de conteúdo são exibidos ao aluno na sequência definida, intercalados com as atividades."
+          ]
+        },
+        "lab": {
+          "title": "Como usar o laboratório",
+          "description": "O laboratório permite praticar operações em um ambiente de simulação, sem risco. Você configura os parâmetros da simulação e opera no terminal.",
+          "steps": [
+            "No menu lateral, clique em \"Laboratório\".",
+            "Configure os parâmetros da simulação: número de velas, timeframe, volatilidade, tendência, spread e saldo inicial.",
+            "Clique em \"Iniciar simulação\" para abrir o terminal de trading.",
+            "No terminal, você consegue visualizar o gráfico de candles e executar ordens de compra e venda.",
+            "Ao encerrar a sessão, o resultado é salvo no histórico.",
+            "Acesse o histórico de simulações pelo link \"Histórico\" na tela do laboratório."
+          ],
+          "link": "Ir para o Laboratório"
+        }
+      }
+    },
     "lesson": {
       "backToCourse": "Voltar ao curso",
       "fallbackTitle": "Aula",

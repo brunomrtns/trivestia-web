@@ -1086,6 +1086,92 @@
         "saved": "¡La configuración se guardó correctamente!",
         "error": "Error al guardar la configuración. Por favor inténtalo de nuevo."
       }
+    },
+    "training": {
+      "pageTitle": "Guía de uso de la plataforma",
+      "pageSubtitle": "Aprenda a utilizar cada función del sistema con instrucciones paso a paso basadas en la plataforma real.",
+      "indexLabel": "En esta página",
+      "stepPrefix": "Paso {{n}}",
+      "navItem": "Guía de uso",
+      "dashboardCard": {
+        "title": "Guía de uso de la plataforma",
+        "subtitle": "Aprenda a crear cursos, clases, actividades y más."
+      },
+      "sections": {
+        "createCourse": {
+          "title": "Cómo crear un curso",
+          "description": "Los cursos son la estructura principal de la plataforma. Cada curso contiene módulos y clases.",
+          "steps": {
+            "0": "En el menú lateral accede a “Gestionar Cursos” (área administrativa).",
+            "1": "Haga clic en el botón \"Nuevo curso\" en la esquina superior derecha de la página.",
+            "2": "Complete el título, la descripción y, si lo desea, establezca una fecha límite.",
+            "3": "Cargue una imagen de portada haciendo clic en el área de miniaturas.",
+            "4": "Haga clic en \"Guardar\" para crear el curso."
+          },
+          "link": "Ir a Administrar Cursos"
+        },
+        "createLessons": {
+          "title": "Cómo crear módulos y clases.",
+          "description": "Dentro de cada curso, organizas el contenido en módulos. Cada módulo agrupa clases relacionadas.",
+          "steps": {
+            "0": "En la lista de cursos, haga clic en \"Administrar\" en el curso deseado.",
+            "1": "Verás la pantalla de clases, dividida en módulos.",
+            "2": "Para crear un módulo, haga clic en \"Nuevo módulo\" e ingrese el título.",
+            "3": "Dentro de un módulo, haga clic en \"Nueva clase\" para agregar una clase.",
+            "4": "Complete el título de la clase y, opcionalmente, el video y el material de apoyo.",
+            "5": "Utilice el panel \"Reglas de acceso\" para establecer los requisitos previos y la fecha de lanzamiento."
+          },
+          "link": "Ir a Administrar Cursos"
+        },
+        "reorder": {
+          "title": "Cómo reordenar clases y pasos",
+          "description": "El orden de los módulos, clases y pasos se puede reorganizar arrastrando y soltando.",
+          "steps": {
+            "0": "En la pantalla de clases de un curso, busque el ícono de seis puntos (⠿) al lado de cada elemento.",
+            "1": "Haga clic y mantenga presionado el ícono para activar el modo de arrastre.",
+            "2": "Arrastre hacia arriba o hacia abajo hasta la posición deseada y suelte.",
+            "3": "El pedido se guarda automáticamente después de soltar el artículo.",
+            "4": "El mismo mecanismo funciona dentro de cada clase para reordenar los pasos del contenido."
+          }
+        },
+        "createActivities": {
+          "title": "Cómo crear actividades",
+          "description": "Las actividades son ejercicios interactivos agregados como pasos dentro de una lección. Pueden ser de múltiples tipos.",
+          "steps": {
+            "0": "Abra una clase desde la pantalla de gestión de clases.",
+            "1": "Haga clic en el botón \"Agregar paso\" al final de la lista de pasos.",
+            "2": "Seleccione la pestaña \"Actividad\".",
+            "3": "Elija el tipo de actividad: Opción múltiple, Verdadero/Falso, Ordenación, Simulación de Trading, entre otras.",
+            "4": "Establezca el título y la política de revisión (inmediata, posterior a la fecha o nunca).",
+            "5": "Una vez creado, haga clic en \"Preguntas\" para agregar las preguntas y respuestas de la actividad."
+          }
+        },
+        "createContent": {
+          "title": "Cómo crear presentaciones y contenido.",
+          "description": "Además de las actividades, puedes agregar pasos de contenido: texto, video o imagen.",
+          "steps": {
+            "0": "Abra una clase desde la pantalla de gestión.",
+            "1": "Haga clic en \"Agregar paso\" y seleccione la pestaña \"Contenido\".",
+            "2": "Elige el tipo: Texto, Vídeo o Imagen.",
+            "3": "Se abrirá un modal para que ingreses el título y el contenido correspondiente.",
+            "4": "Después de guardar, el paso aparece en la lista y se puede reordenar libremente.",
+            "5": "Los pasos del contenido se muestran al estudiante en la secuencia definida, intercalados con las actividades."
+          }
+        },
+        "lab": {
+          "title": "Cómo utilizar el laboratorio",
+          "description": "El laboratorio permite practicar operaciones en un entorno de simulación, sin riesgos. Usted configura los parámetros de simulación y opera en el terminal.",
+          "steps": {
+            "0": "En el menú lateral, haga clic en \"Laboratorio\".",
+            "1": "Configure los parámetros de simulación: número de velas, marco temporal, volatilidad, tendencia, diferencial y saldo inicial.",
+            "2": "Haga clic en \"Iniciar simulación\" para abrir la terminal comercial.",
+            "3": "En la terminal, puede ver el gráfico de velas y ejecutar órdenes de compra y venta.",
+            "4": "Al finalizar la sesión, el resultado se guarda en el historial.",
+            "5": "Acceda al historial de simulación a través del enlace \"Historial\" en la pantalla del laboratorio."
+          },
+          "link": "ir al laboratorio"
+        }
+      }
     }
   },
   "error": {

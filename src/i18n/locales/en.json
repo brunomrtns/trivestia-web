@@ -1086,6 +1086,92 @@
         "saved": "Settings saved successfully!",
         "error": "Error saving settings. Please try again."
       }
+    },
+    "training": {
+      "pageTitle": "Platform usage guide",
+      "pageSubtitle": "Learn how to use each system feature with step-by-step instructions based on the real platform.",
+      "indexLabel": "On this page",
+      "stepPrefix": "Step {{n}}",
+      "navItem": "Usage Guide",
+      "dashboardCard": {
+        "title": "Platform usage guide",
+        "subtitle": "Learn how to create courses, classes, activities and more."
+      },
+      "sections": {
+        "createCourse": {
+          "title": "How to create a course",
+          "description": "Courses are the main structure of the platform. Each course contains modules and classes.",
+          "steps": {
+            "0": "In the side menu, access \"Manage Courses\" (administrative area).",
+            "1": "Click the \"New Course\" button in the top right corner of the page.",
+            "2": "Fill in the title, description and, if desired, set a deadline.",
+            "3": "Upload a cover image by clicking on the thumbnail area.",
+            "4": "Click \"Save\" to create the course."
+          },
+          "link": "Go to Manage Courses"
+        },
+        "createLessons": {
+          "title": "How to create modules and classes",
+          "description": "Within each course, you organize the content into modules. Each module groups together related classes.",
+          "steps": {
+            "0": "In the course listing, click \"Manage\" on the desired course.",
+            "1": "You will see the classes screen, divided into modules.",
+            "2": "To create a module, click on \"New module\" and enter the title.",
+            "3": "Within a module, click \"New Class\" to add a class.",
+            "4": "Fill in the class title and, optionally, video and supporting material.",
+            "5": "Use the \"Access Rules\" panel to set prerequisites and release date."
+          },
+          "link": "Go to Manage Courses"
+        },
+        "reorder": {
+          "title": "How to reorder classes and steps",
+          "description": "The order of modules, classes and steps can be rearranged by drag and drop.",
+          "steps": {
+            "0": "On a course's classes screen, find the six-dot icon (⠿) next to each item.",
+            "1": "Click and hold the icon to activate drag mode.",
+            "2": "Drag up or down to the desired position and release.",
+            "3": "The order is automatically saved after dropping the item.",
+            "4": "The same mechanism works within each class to reorder the content steps."
+          }
+        },
+        "createActivities": {
+          "title": "How to create activities",
+          "description": "Activities are interactive exercises added as steps within a lesson. They can be of multiple types.",
+          "steps": {
+            "0": "Open a class from the class management screen.",
+            "1": "Click the \"Add Step\" button at the end of the step list.",
+            "2": "Select the \"Activity\" tab.",
+            "3": "Choose the type of activity: Multiple choice, True/False, Ordering, Trading simulation, among others.",
+            "4": "Set the title and review policy (immediate, after date, or never).",
+            "5": "Once created, click on \"Questions\" to add the questions and answers for the activity."
+          }
+        },
+        "createContent": {
+          "title": "How to create presentations and content",
+          "description": "In addition to activities, you can add content steps: text, video or image.",
+          "steps": {
+            "0": "Open a class from the management screen.",
+            "1": "Click \"Add step\" and select the \"Content\" tab.",
+            "2": "Choose the type: Text, Video or Image.",
+            "3": "A modal will open for you to enter the title and corresponding content.",
+            "4": "After saving, the step appears in the list and can be freely reordered.",
+            "5": "Content steps are displayed to the student in the defined sequence, interspersed with the activities."
+          }
+        },
+        "lab": {
+          "title": "How to use the laboratory",
+          "description": "The laboratory allows you to practice operations in a simulation environment, without risk. You configure the simulation parameters and operate on the terminal.",
+          "steps": {
+            "0": "In the side menu, click on \"Laboratory\".",
+            "1": "Configure the simulation parameters: number of candles, timeframe, volatility, trend, spread and initial balance.",
+            "2": "Click \"Start simulation\" to open the trading terminal.",
+            "3": "In the terminal, you can view the candle chart and execute buy and sell orders.",
+            "4": "When you end the session, the result is saved in the history.",
+            "5": "Access the simulation history via the \"History\" link on the laboratory screen."
+          },
+          "link": "Go to the Laboratory"
+        }
+      }
     }
   },
   "error": {

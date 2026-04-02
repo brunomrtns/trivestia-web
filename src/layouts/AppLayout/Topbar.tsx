@@ -1,4 +1,4 @@
-import { Menu, LogOut, User as UserIcon, Settings, ChevronDown } from 'lucide-react';
+import { Menu, LogOut, User as UserIcon, Settings, ChevronDown, BookOpenText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { AnnouncementBell } from '@/components/announcements/AnnouncementBell';
@@ -79,6 +79,16 @@ export function Topbar({ onMenuClick }: TopbarProps) {
                 >
                   <Settings className="h-4 w-4 text-muted-foreground" />
                   {t('common.nav.settings')}
+                </Link>
+              </DropdownMenu.Item>
+
+              <DropdownMenu.Item asChild>
+                <Link
+                  to={tenantPath(slug, '/app/training')}
+                  className="flex cursor-pointer select-none items-center gap-2.5 rounded-lg px-3 py-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                >
+                  <BookOpenText className="h-4 w-4 text-muted-foreground" />
+                  {t('app.training.navItem')}
                 </Link>
               </DropdownMenu.Item>
 
