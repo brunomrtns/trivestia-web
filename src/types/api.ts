@@ -847,6 +847,29 @@ export interface SuperUser {
   createdAt: string;
   lastLoginAt: string | null;
   tenant: { slug: string; name: string };
+  tenantOffers: {
+    id: string;
+    tenantId: string;
+    title: string;
+    type: OfferType;
+    active: boolean;
+    billingInterval: BillingInterval | null;
+    priceAmount: number | null;
+    priceCurrency: string | null;
+  }[];
+  currentLicense: {
+    offerId: string;
+    offerTitle: string;
+    offerType: OfferType;
+    startsAt: string;
+    endsAt: string | null;
+  } | null;
+  currentPlan: {
+    id: string;
+    name: string;
+    label: string;
+    active: boolean;
+  } | null;
 }
 
 export interface PaginatedSuperUsers {

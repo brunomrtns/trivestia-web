@@ -5,7 +5,16 @@ import { Search, Shield, Crown, Zap, User as UserIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { superadminEndpoints } from '@/services/endpoints/superadmin.endpoints';
+import { paymentEndpoints } from '@/services/endpoints/payment.endpoints';
 import type { SuperUser, Role } from '@/types/api';
+
+function getApiErrorMessage(error: unknown): string | undefined {
+  if (typeof error !== 'object' || error === null || !('response' in error)) {
+    return undefined;
+  }
+  const withResponse = error as { response?: { data?: { message?: string } } };
+  return withResponse.response?.data?.message;
+}
 
 function RoleBadge({ role }: { role: Role }) {
   const { t } = useTranslation();
@@ -43,6 +52,112 @@ function RoleBadge({ role }: { role: Role }) {
       <Icon className="h-3 w-3" />
       {cfg.label}
     </span>
+  );
+}
+
+// ─── License modal ───────────────────────────────────────────────────────────
+
+function ChangeLicenseModal({
+  user,
+  onClose
+}: {
+  user: SuperUser;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const [planId, setPlanId] = useState(user.currentPlan?.id ?? '');
+  const [reason, setReason] = useState('Concessão manual pelo super admin');
+
+  const plansQuery = useQuery({
+    queryKey: ['super', 'user-license', 'plans'],
+    queryFn: () => paymentEndpoints.listAdminPlans(true)
+  });
+
+  const assignMutation = useMutation({
+    mutationFn: () =>
+      superadminEndpoints.assignUserPlanLicense(user.id, {
+        planId,
+        reason
+      }),
+    onSuccess: () => {
+      toast.success('Plano atribuído com sucesso');
+      qc.invalidateQueries({ queryKey: ['super', 'users'] });
+      onClose();
+    },
+    onError: (error: unknown) => {
+      toast.error(getApiErrorMessage(error) ?? 'Não foi possível atribuir o plano');
+    }
+  });
+
+  return (
+    <Portal>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div className="mx-4 w-full max-w-lg rounded-xl border bg-card p-6 shadow-xl">
+          <h3 className="mb-2 font-bold">Alterar licença</h3>
+          <p className="mb-4 text-sm text-muted-foreground">
+            {user.name} ({user.email})
+            <br />
+            {t('super.users.modal.schoolBadge', { slug: user.tenant.slug })}
+          </p>
+
+          <div className="space-y-3">
+            <label className="block text-xs font-medium text-muted-foreground">
+              Plano/licença
+            </label>
+            <select
+              className="w-full rounded-md border px-3 py-2 text-sm"
+              value={planId}
+              onChange={(e) => setPlanId(e.target.value)}
+              disabled={plansQuery.isLoading}
+            >
+              <option value="">Selecione um plano</option>
+              {plansQuery.data?.map((plan) => (
+                <option key={plan.id} value={plan.id}>
+                  {plan.label} ({plan.name})
+                </option>
+              ))}
+            </select>
+            {plansQuery.isError && (
+              <p className="text-xs text-red-600">
+                Não foi possível carregar o catálogo de planos.
+              </p>
+            )}
+            {plansQuery.data && plansQuery.data.length === 0 && (
+              <p className="text-xs text-muted-foreground">
+                Nenhum plano ativo encontrado no catálogo.
+              </p>
+            )}
+
+            <label className="block text-xs font-medium text-muted-foreground">
+              Motivo da alteração
+            </label>
+            <textarea
+              className="min-h-[80px] w-full rounded-md border px-3 py-2 text-sm"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="Descreva o motivo da concessão da licença"
+            />
+          </div>
+
+          <div className="mt-4 flex justify-end gap-2">
+            <button
+              onClick={onClose}
+              className="rounded-md border px-4 py-2 text-sm hover:bg-accent"
+            >
+              {t('common.actions.cancel')}
+            </button>
+            <button
+              onClick={() => assignMutation.mutate()}
+              disabled={!planId || reason.trim().length < 5 || assignMutation.isPending}
+              className="rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
+            >
+              {assignMutation.isPending ? t('common.actions.saving') : 'Salvar plano'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Portal>
   );
 }
 
@@ -125,6 +240,7 @@ export default function SuperUsersPage() {
   const [roleFilter, setRoleFilter] = useState<Role | ''>('');
   const [page, setPage] = useState(1);
   const [editingUser, setEditingUser] = useState<SuperUser | null>(null);
+  const [licensingUser, setLicensingUser] = useState<SuperUser | null>(null);
   const { t } = useTranslation();
 
   const { data, isLoading } = useQuery({
@@ -204,6 +320,7 @@ export default function SuperUsersPage() {
                 <th className="px-4 py-3 font-medium">
                   {t('super.users.table.role')}
                 </th>
+                <th className="px-4 py-3 font-medium">Licença atual</th>
                 <th className="px-4 py-3 font-medium text-right">
                   {t('super.users.table.actions')}
                 </th>
@@ -225,20 +342,40 @@ export default function SuperUsersPage() {
                   <td className="px-4 py-3">
                     <RoleBadge role={u.role} />
                   </td>
+                  <td className="px-4 py-3">
+                    {u.currentPlan ? (
+                      <div className="space-y-0.5">
+                        <div className="text-xs font-medium">{u.currentPlan.label}</div>
+                        <div className="text-[11px] text-muted-foreground">
+                          {u.currentPlan.name}
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Sem licença ativa</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-right">
-                    <button
-                      onClick={() => setEditingUser(u)}
-                      className="rounded-md border px-3 py-1 text-xs transition-colors hover:bg-accent"
-                    >
-                      {t('super.users.changeRoleButton')}
-                    </button>
+                    <div className="inline-flex items-center gap-2">
+                      <button
+                        onClick={() => setLicensingUser(u)}
+                        className="rounded-md border px-3 py-1 text-xs transition-colors hover:bg-accent"
+                      >
+                        Alterar licença
+                      </button>
+                      <button
+                        onClick={() => setEditingUser(u)}
+                        className="rounded-md border px-3 py-1 text-xs transition-colors hover:bg-accent"
+                      >
+                        {t('super.users.changeRoleButton')}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
               {data?.data.length === 0 && (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={6}
                     className="px-4 py-8 text-center text-muted-foreground"
                   >
                     {t('super.users.empty')}
@@ -283,6 +420,13 @@ export default function SuperUsersPage() {
         <ChangeRoleModal
           user={editingUser}
           onClose={() => setEditingUser(null)}
+        />
+      )}
+
+      {licensingUser && (
+        <ChangeLicenseModal
+          user={licensingUser}
+          onClose={() => setLicensingUser(null)}
         />
       )}
     </div>

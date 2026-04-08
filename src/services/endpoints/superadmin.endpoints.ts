@@ -10,8 +10,19 @@ import type {
   ListSuperTenantsParams,
   ListSuperUsersParams,
   PlatformStats,
-  Role
+  Role,
+  Enrollment
 } from '@/types/api';
+
+type SuperTenantOffer = {
+  id: string;
+  title: string;
+  type: 'FREE' | 'ONE_TIME' | 'SUBSCRIPTION';
+  active: boolean;
+  billingInterval: 'MONTH' | 'YEAR' | null;
+  priceAmount: number | null;
+  priceCurrency: string | null;
+};
 
 /** Rotas globais /super/* — requer SUPER_ADMIN */
 export const superadminEndpoints = {
@@ -25,6 +36,11 @@ export const superadminEndpoints = {
   getTenant: (id: string) =>
     apiGlobal
       .get<SuperTenantDetail>(`/super/tenants/${id}`)
+      .then((r) => r.data),
+
+  listTenantOffers: (tenantId: string) =>
+    apiGlobal
+      .get<SuperTenantOffer[]>(`/super/tenants/${tenantId}/offers`)
       .then((r) => r.data),
 
   createTenant: (data: CreateTenantSuperData) =>
@@ -50,6 +66,28 @@ export const superadminEndpoints = {
   updateUserRole: (id: string, role: Role) =>
     apiGlobal
       .patch<SuperUser>(`/super/users/${id}`, { role })
+      .then((r) => r.data),
+
+  assignUserLicense: (
+    userId: string,
+    data: { offerId: string; reason: string; endsAt?: string }
+  ) =>
+    apiGlobal
+      .post<{
+        license: Enrollment;
+        selfAssignment: boolean;
+      }>(`/super/users/${userId}/licenses`, data)
+      .then((r) => r.data),
+
+  assignUserPlanLicense: (
+    userId: string,
+    data: { planId: string; reason: string }
+  ) =>
+    apiGlobal
+      .post<{
+        plan: { id: string; name: string; label: string };
+        selfAssignment: boolean;
+      }>(`/super/users/${userId}/plan-license`, data)
       .then((r) => r.data),
 
   // ─── Stats ────────────────────────────────────────────────────────────────
