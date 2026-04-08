@@ -1,13 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import {
-  Loader2,
-  HelpCircle,
-  Play,
-  ChevronLeft,
-  LayoutGrid
-} from 'lucide-react';
+import { Loader2, HelpCircle, LayoutGrid } from 'lucide-react';
+import type { IChartApi, ISeriesApi } from 'lightweight-charts';
 import { useSimEngine } from './useSimEngine';
 import { usePlayback } from './usePlayback';
 import { CandlesChart } from './CandlesChart';
@@ -98,8 +93,9 @@ export function SimTradingTerminal({
   const [activeTool, setActiveTool] = useState('cursor');
   const [activePanel, setActivePanel] = useState<ActivePanel>('none');
   const [drawingInProgress, setDrawingInProgress] = useState(false);
-  const [chartApi, setChartApi] = useState<any>(null);
-  const [mainSeries, setMainSeries] = useState<any>(null);
+  const [chartApi, setChartApi] = useState<IChartApi | null>(null);
+  const [mainSeries, setMainSeries] =
+    useState<ISeriesApi<'Candlestick'> | null>(null);
   const [selectedSymbol, setSelectedSymbol] = useState(DEFAULT_ACTIVE_SYMBOL);
   const [pendingSymbol, setPendingSymbol] = useState<string | null>(null);
   const [symbolSwitching, setSymbolSwitching] = useState(false);
@@ -133,7 +129,7 @@ export function SimTradingTerminal({
   }, [mode, practiceToken, practiceCandles, practiceScenario]);
 
   const handleChartLoad = useCallback(
-    (chart: any | null, series: any | null) => {
+    (chart: IChartApi | null, series: ISeriesApi<'Candlestick'> | null) => {
       setChartApi(chart);
       setMainSeries(series);
     },
@@ -143,26 +139,23 @@ export function SimTradingTerminal({
   // Phase 1: Determine if search tool should be disabled in sidebar
   const isSearchDisabled = mode === 'CHALLENGE' && !allowSymbolSwitching;
 
-  const handleToolChange = useCallback(
-    (toolId: string) => {
-      // 1. Determine if the tool is a 'Panel' (ephemeral UI) or a 'Mode' (interaction state)
-      const isPanel = ['search', 'indicators'].includes(toolId);
+  const handleToolChange = useCallback((toolId: string) => {
+    // 1. Determine if the tool is a 'Panel' (ephemeral UI) or a 'Mode' (interaction state)
+    const isPanel = ['search', 'indicators'].includes(toolId);
 
-      if (isPanel) {
-        // Toggle panel without losing current interaction mode
-        setActivePanel((prev) =>
-          prev === toolId ? 'none' : (toolId as ActivePanel)
-        );
-        console.log(`[Terminal] Panel toggled: ${toolId}`);
-      } else {
-        // Switch interaction mode and close any open panels
-        setActiveTool(toolId);
-        setActivePanel('none');
-        console.log(`[Terminal] Mode selected: ${toolId}`);
-      }
-    },
-    []
-  );
+    if (isPanel) {
+      // Toggle panel without losing current interaction mode
+      setActivePanel((prev) =>
+        prev === toolId ? 'none' : (toolId as ActivePanel)
+      );
+      console.log(`[Terminal] Panel toggled: ${toolId}`);
+    } else {
+      // Switch interaction mode and close any open panels
+      setActiveTool(toolId);
+      setActivePanel('none');
+      console.log(`[Terminal] Mode selected: ${toolId}`);
+    }
+  }, []);
 
   // Update cursor based on active tool
   useEffect(() => {
@@ -223,15 +216,13 @@ export function SimTradingTerminal({
 
   // Indicators Logic
   const indicators = useIndicators(engine.candles);
-  const hasSessionProgress = engine.visibleCount > 1 || engine.events.length > 0;
+  const hasSessionProgress =
+    engine.visibleCount > 1 || engine.events.length > 0;
 
   // ─── Shared Reset Sequence ─────────────────────────────────────────────────
 
   const performSymbolReset = useCallback(
-    (
-      newSymbol: string,
-      newDataset: PracticeDatasetState
-    ) => {
+    (newSymbol: string, newDataset: PracticeDatasetState) => {
       setPracticeDataset(newDataset);
       setSelectedSymbol(newSymbol);
 
@@ -334,9 +325,13 @@ export function SimTradingTerminal({
             token: result.scenarioToken,
             candles: result.candles,
             scenario: {
-              ...(practiceDataset?.scenario ?? practiceScenario ?? {} as ScenarioPayload),
+              ...(practiceDataset?.scenario ??
+                practiceScenario ??
+                ({} as ScenarioPayload)),
               executionConfig: result.executionConfig,
-              ...(result.scoringConfig ? { scoringConfig: result.scoringConfig } : {})
+              ...(result.scoringConfig
+                ? { scoringConfig: result.scoringConfig }
+                : {})
             }
           });
           return true;
@@ -406,7 +401,11 @@ export function SimTradingTerminal({
             return;
           }
           e.preventDefault();
-          playback.playing ? playback.pause() : playback.play();
+          if (playback.playing) {
+            playback.pause();
+          } else {
+            playback.play();
+          }
           break;
         case 'ArrowRight':
           e.preventDefault();
@@ -516,7 +515,7 @@ export function SimTradingTerminal({
             key={`chart-${selectedSymbol}-${engineResetVersion}`}
             candles={candles}
             visibleCount={visibleCount}
-            onTimeClick={activeTool === 'replay' ? engine.jumpToTimestamp : undefined}
+            onTimeClick={engine.jumpToTimestamp}
             onUpdateProtection={engine.updateProtection}
             onChartLoad={handleChartLoad}
             engineState={engineState}
@@ -571,16 +570,12 @@ export function SimTradingTerminal({
               onClose={() => setActivePanel('none')}
               onSearch={handleSymbolSearch}
               supportedSymbols={
-                mode === 'PRACTICE'
-                  ? supportedLocalSymbols
-                  : supportedSymbols
+                mode === 'PRACTICE' ? supportedLocalSymbols : supportedSymbols
               }
               activeSymbol={selectedSymbol}
               loading={symbolSwitching}
               challengeMode={mode === 'CHALLENGE'}
-              allowSymbolSwitching={
-                mode === 'PRACTICE' || allowSymbolSwitching
-              }
+              allowSymbolSwitching={mode === 'PRACTICE' || allowSymbolSwitching}
             />
           )}
 
@@ -604,7 +599,7 @@ export function SimTradingTerminal({
           {showPlaybackControls && (
             <div
               className={`absolute left-1/2 -translate-x-1/2 z-30 w-full px-4 pointer-events-none animate-in slide-in-from-bottom-4 duration-300 ${
-                isReadyPhase ? 'bottom-7 max-w-xl' : 'bottom-6 max-w-2xl'
+                isReadyPhase ? 'bottom-4 max-w-xl' : 'bottom-6 max-w-2xl'
               }`}
             >
               <div className="pointer-events-auto">
@@ -698,7 +693,7 @@ export function SimTradingTerminal({
                 <button
                   key={tab}
                   onClick={() => setBottomTab(tab)}
-                  className={`flex-1 px-3 py-2 text-[10px] font-bold uppercase tracking-wider transition capitalize ${
+                  className={`flex-1 px-3 py-2 text-[10px] font-bold uppercase tracking-wider transition ${
                     bottomTab === tab
                       ? 'bg-background text-primary border-b-2 border-primary'
                       : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'

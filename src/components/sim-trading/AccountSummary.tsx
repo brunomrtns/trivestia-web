@@ -65,11 +65,21 @@ export function AccountSummary({
           <span className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground/80">
             {item.label}
           </span>
-          <span className={cn('font-mono text-[11px] font-bold tracking-tight', item.color)}>
+          <span
+            className={cn(
+              'font-mono text-[11px] font-bold tracking-tight',
+              item.color
+            )}
+          >
             {item.value}
           </span>
           {item.subValue && (
-            <span className={cn('font-mono text-[10px] font-medium opacity-80', item.color)}>
+            <span
+              className={cn(
+                'font-mono text-[10px] font-medium opacity-80',
+                item.color
+              )}
+            >
               {item.subValue}
             </span>
           )}

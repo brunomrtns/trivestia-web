@@ -142,7 +142,6 @@ export function PlaybackControls({
           isPausedAtStart && 'border-primary/40 ring-1 ring-primary/20'
         )}
       >
-
         <div className="px-2.5 pb-2.5 pt-2.5">
           {/* Timeline row */}
           <div className="w-full px-1">
@@ -252,7 +251,6 @@ export function PlaybackControls({
                 <ChevronsUpDown className="h-3.5 w-3.5" />
               </button>
             </div>
-
           </div>
         </div>
       </div>

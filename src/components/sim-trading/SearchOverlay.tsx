@@ -69,7 +69,10 @@ export function SearchOverlay({
           </div>
         ) : (
           <>
-            <form onSubmit={handleSubmit} className="flex items-center gap-3 p-4">
+            <form
+              onSubmit={handleSubmit}
+              className="flex items-center gap-3 p-4"
+            >
               <Search className="h-5 w-5 text-primary" />
               <input
                 autoFocus

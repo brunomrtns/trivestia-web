@@ -100,7 +100,9 @@ function ChangeLicenseModal({
     <Portal>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
         <div className="mx-4 w-full max-w-lg rounded-xl border bg-card p-6 shadow-xl">
-          <h3 className="mb-2 font-bold">{t('super.users.license.modal.title')}</h3>
+          <h3 className="mb-2 font-bold">
+            {t('super.users.license.modal.title')}
+          </h3>
           <p className="mb-4 text-sm text-muted-foreground">
             {user.name} ({user.email})
             <br />
@@ -117,7 +119,9 @@ function ChangeLicenseModal({
               onChange={(e) => setPlanId(e.target.value)}
               disabled={plansQuery.isLoading}
             >
-              <option value="">{t('super.users.license.modal.selectPlanPlaceholder')}</option>
+              <option value="">
+                {t('super.users.license.modal.selectPlanPlaceholder')}
+              </option>
               {plansQuery.data?.map((plan) => (
                 <option key={plan.id} value={plan.id}>
                   {plan.label} ({plan.name})
@@ -155,7 +159,9 @@ function ChangeLicenseModal({
             </button>
             <button
               onClick={() => assignMutation.mutate()}
-              disabled={!planId || reason.trim().length < 5 || assignMutation.isPending}
+              disabled={
+                !planId || reason.trim().length < 5 || assignMutation.isPending
+              }
               className="rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
             >
               {assignMutation.isPending
@@ -355,7 +361,9 @@ export default function SuperUsersPage() {
                   <td className="px-4 py-3">
                     {u.currentPlan ? (
                       <div className="space-y-0.5">
-                        <div className="text-xs font-medium">{u.currentPlan.label}</div>
+                        <div className="text-xs font-medium">
+                          {u.currentPlan.label}
+                        </div>
                         <div className="text-[11px] text-muted-foreground">
                           {u.currentPlan.name}
                         </div>

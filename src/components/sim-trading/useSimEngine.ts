@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  generateCandleSeries,
   SimulationEngine,
   replaySimulation,
   computeStateHash,
@@ -59,6 +58,7 @@ type Action =
   | { type: 'ADVANCE'; newState: SimulationState }
   | { type: 'JUMP'; index: number; newState: SimulationState }
   | { type: 'ADD_EVENT'; event: SimEvent; newState: SimulationState }
+  | { type: 'SYNC_STATE'; newState: SimulationState }
   | { type: 'FINISH'; result: SimulationResult }
   | {
       type: 'SUBMITTED';
@@ -109,6 +109,11 @@ function reducer(state: SimEngineState, action: Action): SimEngineState {
         events: [...state.events, action.event],
         engineState: action.newState
       };
+    case 'SYNC_STATE':
+      return {
+        ...state,
+        engineState: action.newState
+      };
     case 'FINISH':
       return { ...state, phase: 'FINISHED', result: action.result };
     case 'SUBMITTED':
@@ -131,6 +136,10 @@ const INITIAL: SimEngineState = {
   result: null,
   submitResult: null,
   error: null
+};
+
+type SimulationEngineWithProtection = SimulationEngine & {
+  updateProtection?: (sl?: number, tp?: number) => void;
 };
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
@@ -194,7 +203,7 @@ export function useSimEngine({
           dispatch({ type: 'ERROR', message: msg });
         });
     }
-  }, [mode, activityId]);
+  }, [mode, activityId, slug, t]);
 
   useEffect(() => {
     if (
@@ -273,7 +282,9 @@ export function useSimEngine({
               return e.candleIndex === i;
             return false;
           });
-          eventsAtThisIndex.forEach((e) => engineRef.current!.processEvent(e, i));
+          eventsAtThisIndex.forEach((e) =>
+            engineRef.current!.processEvent(e, i)
+          );
           engineRef.current.advanceCandle(i);
         }
 
@@ -423,9 +434,12 @@ export function useSimEngine({
   const updateProtection = useCallback(
     (sl?: number, tp?: number) => {
       if (!engineRef.current) return;
-      (engineRef.current as any).updateProtection(sl, tp);
-      const newState = engineRef.current.getState();
-      dispatch({ type: 'ADVANCE', newState }); // Reuse ADVANCE to trigger UI update
+      const engine = engineRef.current as SimulationEngineWithProtection;
+      if (typeof engine.updateProtection !== 'function') return;
+
+      engine.updateProtection(sl, tp);
+      const newState = engine.getState();
+      dispatch({ type: 'SYNC_STATE', newState });
     },
     [dispatch]
   );
@@ -465,7 +479,7 @@ export function useSimEngine({
           ?.error ?? t('sim.engine.submitError');
       dispatch({ type: 'ERROR', message: msg });
     }
-  }, [state, mode, onComplete]);
+  }, [state, mode, onComplete, slug, t]);
 
   const setPhase = useCallback((phase: SimPhase) => {
     dispatch({ type: 'SET_PHASE', phase });
