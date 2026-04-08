@@ -27,16 +27,20 @@ function RoleBadge({ role }: { role: Role }) {
     }
   > = {
     SUPER_ADMIN: {
-      label: 'Super Admin',
+      label: t('common.roles.superAdmin'),
       color: 'bg-purple-100 text-purple-700',
       icon: Zap
     },
     OWNER: {
-      label: 'Owner',
+      label: t('common.roles.owner'),
       color: 'bg-amber-100 text-amber-700',
       icon: Crown
     },
-    ADMIN: { label: 'Admin', color: 'bg-blue-100 text-blue-700', icon: Shield },
+    ADMIN: {
+      label: t('common.roles.admin'),
+      color: 'bg-blue-100 text-blue-700',
+      icon: Shield
+    },
     STUDENT: {
       label: t('common.roles.student'),
       color: 'bg-gray-100 text-gray-700',
@@ -67,7 +71,7 @@ function ChangeLicenseModal({
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [planId, setPlanId] = useState(user.currentPlan?.id ?? '');
-  const [reason, setReason] = useState('Concessão manual pelo super admin');
+  const [reason, setReason] = useState(t('super.users.license.defaultReason'));
 
   const plansQuery = useQuery({
     queryKey: ['super', 'user-license', 'plans'],
@@ -81,12 +85,14 @@ function ChangeLicenseModal({
         reason
       }),
     onSuccess: () => {
-      toast.success('Plano atribuído com sucesso');
+      toast.success(t('super.users.license.toast.planAssigned'));
       qc.invalidateQueries({ queryKey: ['super', 'users'] });
       onClose();
     },
     onError: (error: unknown) => {
-      toast.error(getApiErrorMessage(error) ?? 'Não foi possível atribuir o plano');
+      toast.error(
+        getApiErrorMessage(error) ?? t('super.users.license.toast.assignError')
+      );
     }
   });
 
@@ -94,7 +100,7 @@ function ChangeLicenseModal({
     <Portal>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
         <div className="mx-4 w-full max-w-lg rounded-xl border bg-card p-6 shadow-xl">
-          <h3 className="mb-2 font-bold">Alterar licença</h3>
+          <h3 className="mb-2 font-bold">{t('super.users.license.modal.title')}</h3>
           <p className="mb-4 text-sm text-muted-foreground">
             {user.name} ({user.email})
             <br />
@@ -103,7 +109,7 @@ function ChangeLicenseModal({
 
           <div className="space-y-3">
             <label className="block text-xs font-medium text-muted-foreground">
-              Plano/licença
+              {t('super.users.license.modal.planLabel')}
             </label>
             <select
               className="w-full rounded-md border px-3 py-2 text-sm"
@@ -111,7 +117,7 @@ function ChangeLicenseModal({
               onChange={(e) => setPlanId(e.target.value)}
               disabled={plansQuery.isLoading}
             >
-              <option value="">Selecione um plano</option>
+              <option value="">{t('super.users.license.modal.selectPlanPlaceholder')}</option>
               {plansQuery.data?.map((plan) => (
                 <option key={plan.id} value={plan.id}>
                   {plan.label} ({plan.name})
@@ -120,23 +126,23 @@ function ChangeLicenseModal({
             </select>
             {plansQuery.isError && (
               <p className="text-xs text-red-600">
-                Não foi possível carregar o catálogo de planos.
+                {t('super.users.license.modal.loadPlansError')}
               </p>
             )}
             {plansQuery.data && plansQuery.data.length === 0 && (
               <p className="text-xs text-muted-foreground">
-                Nenhum plano ativo encontrado no catálogo.
+                {t('super.users.license.modal.noActivePlans')}
               </p>
             )}
 
             <label className="block text-xs font-medium text-muted-foreground">
-              Motivo da alteração
+              {t('super.users.license.modal.reasonLabel')}
             </label>
             <textarea
               className="min-h-[80px] w-full rounded-md border px-3 py-2 text-sm"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="Descreva o motivo da concessão da licença"
+              placeholder={t('super.users.license.modal.reasonPlaceholder')}
             />
           </div>
 
@@ -152,7 +158,9 @@ function ChangeLicenseModal({
               disabled={!planId || reason.trim().length < 5 || assignMutation.isPending}
               className="rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
             >
-              {assignMutation.isPending ? t('common.actions.saving') : 'Salvar plano'}
+              {assignMutation.isPending
+                ? t('common.actions.saving')
+                : t('super.users.license.modal.saveButton')}
             </button>
           </div>
         </div>
@@ -204,9 +212,9 @@ function ChangeRoleModal({
             value={role}
             onChange={(e) => setRole(e.target.value as Role)}
           >
-            <option value="SUPER_ADMIN">Super Admin</option>
-            <option value="OWNER">Owner</option>
-            <option value="ADMIN">Admin</option>
+            <option value="SUPER_ADMIN">{t('common.roles.superAdmin')}</option>
+            <option value="OWNER">{t('common.roles.owner')}</option>
+            <option value="ADMIN">{t('common.roles.admin')}</option>
             <option value="STUDENT">{t('common.roles.student')}</option>
           </select>
 
@@ -286,9 +294,9 @@ export default function SuperUsersPage() {
           }}
         >
           <option value="">{t('super.users.filter.allRoles')}</option>
-          <option value="SUPER_ADMIN">Super Admin</option>
-          <option value="OWNER">Owner</option>
-          <option value="ADMIN">Admin</option>
+          <option value="SUPER_ADMIN">{t('common.roles.superAdmin')}</option>
+          <option value="OWNER">{t('common.roles.owner')}</option>
+          <option value="ADMIN">{t('common.roles.admin')}</option>
           <option value="STUDENT">{t('common.roles.student')}</option>
         </select>
       </div>
@@ -320,7 +328,9 @@ export default function SuperUsersPage() {
                 <th className="px-4 py-3 font-medium">
                   {t('super.users.table.role')}
                 </th>
-                <th className="px-4 py-3 font-medium">Licença atual</th>
+                <th className="px-4 py-3 font-medium">
+                  {t('super.users.table.currentPlan')}
+                </th>
                 <th className="px-4 py-3 font-medium text-right">
                   {t('super.users.table.actions')}
                 </th>
@@ -351,7 +361,9 @@ export default function SuperUsersPage() {
                         </div>
                       </div>
                     ) : (
-                      <span className="text-xs text-muted-foreground">Sem licença ativa</span>
+                      <span className="text-xs text-muted-foreground">
+                        {t('super.users.license.noneActive')}
+                      </span>
                     )}
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -360,7 +372,7 @@ export default function SuperUsersPage() {
                         onClick={() => setLicensingUser(u)}
                         className="rounded-md border px-3 py-1 text-xs transition-colors hover:bg-accent"
                       >
-                        Alterar licença
+                        {t('super.users.license.changeButton')}
                       </button>
                       <button
                         onClick={() => setEditingUser(u)}

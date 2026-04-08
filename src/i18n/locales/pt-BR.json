@@ -1539,9 +1539,29 @@
         "email": "Email",
         "school": "Escola",
         "role": "Role",
+        "currentPlan": "Plano atual",
         "actions": "Ações"
       },
       "changeRoleButton": "Alterar Role",
+      "license": {
+        "changeButton": "Alterar plano",
+        "noneActive": "Sem plano ativo",
+        "defaultReason": "Concessão manual pelo super admin",
+        "modal": {
+          "title": "Alterar plano",
+          "planLabel": "Plano/licença",
+          "selectPlanPlaceholder": "Selecione um plano",
+          "loadPlansError": "Não foi possível carregar o catálogo de planos.",
+          "noActivePlans": "Nenhum plano ativo encontrado no catálogo.",
+          "reasonLabel": "Motivo da alteração",
+          "reasonPlaceholder": "Descreva o motivo da concessão da licença",
+          "saveButton": "Salvar plano"
+        },
+        "toast": {
+          "planAssigned": "Plano atribuído com sucesso",
+          "assignError": "Não foi possível atribuir o plano"
+        }
+      },
       "empty": "Nenhum usuário encontrado.",
       "pagination": "{{total}} usuário(s) • Página {{page}} de {{totalPages}}",
       "modal": {

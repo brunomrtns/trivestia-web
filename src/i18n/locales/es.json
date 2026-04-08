@@ -1504,7 +1504,8 @@
         "email": "Correo electrónico",
         "school": "Escuela",
         "role": "Rollo",
-        "actions": "Comportamiento"
+        "actions": "Comportamiento",
+        "currentPlan": "Plan actual"
       },
       "changeRoleButton": "Cambiar rol",
       "empty": "No se encontraron usuarios.",
@@ -1517,6 +1518,25 @@
       "toast": {
         "roleUpdated": "¡Desplazamiento actualizado con éxito!",
         "updateError": "Error al actualizar el rol"
+      },
+      "license": {
+        "changeButton": "Cambiar de plan",
+        "noneActive": "Ningún plan activo",
+        "defaultReason": "Concesión manual por superadministrador",
+        "modal": {
+          "title": "Cambiar de plan",
+          "planLabel": "Plan/licencia",
+          "selectPlanPlaceholder": "Selecciona un plan",
+          "loadPlansError": "No se puede cargar el catálogo de planes.",
+          "noActivePlans": "No se encontraron planes activos en el catálogo.",
+          "reasonLabel": "Razón del cambio",
+          "reasonPlaceholder": "Describa el motivo de la concesión de la licencia.",
+          "saveButton": "Guardar plan"
+        },
+        "toast": {
+          "planAssigned": "Plan asignado exitosamente",
+          "assignError": "No se puede asignar el plan"
+        }
       }
     },
     "billing": {

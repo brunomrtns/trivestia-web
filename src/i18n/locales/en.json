@@ -1504,7 +1504,8 @@
         "email": "E-mail",
         "school": "School",
         "role": "Roll",
-        "actions": "Actions"
+        "actions": "Actions",
+        "currentPlan": "Current plan"
       },
       "changeRoleButton": "Change Role",
       "empty": "No users found.",
@@ -1517,6 +1518,25 @@
       "toast": {
         "roleUpdated": "Scroll updated successfully!",
         "updateError": "Error updating role"
+      },
+      "license": {
+        "changeButton": "Change plan",
+        "noneActive": "No active plan",
+        "defaultReason": "Manual grant by super admin",
+        "modal": {
+          "title": "Change plan",
+          "planLabel": "Plan/license",
+          "selectPlanPlaceholder": "Select a plan",
+          "loadPlansError": "Unable to load plan catalog.",
+          "noActivePlans": "No active plans found in the catalog.",
+          "reasonLabel": "Reason for change",
+          "reasonPlaceholder": "Describe the reason for granting the license",
+          "saveButton": "Save plan"
+        },
+        "toast": {
+          "planAssigned": "Successfully assigned plan",
+          "assignError": "Unable to assign plan"
+        }
       }
     },
     "billing": {
