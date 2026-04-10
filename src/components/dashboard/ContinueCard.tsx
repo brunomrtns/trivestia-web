@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { tenantPath } from '@/lib/tenant';
 import type { DashboardContinueDTO } from '@/types/api';
 import { useTranslation } from 'react-i18next';
+import { useLearningV2Flag } from '@/features/learning/learning.hooks';
+import { buildContinueUrl } from '@/features/learning/learning.utils';
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
@@ -30,11 +32,23 @@ export function ContinueCard({
 }: ContinueCardProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const useLearningV2 = useLearningV2Flag();
   const { hasContinuation, course, module, lesson, next } = data;
 
   // ── Estado: com dados ──────────────────────────────────────────────────────
   if (hasContinuation && course && module && lesson && next) {
     const handleContinue = () => {
+      if (useLearningV2) {
+        const learningUrl = buildContinueUrl(data, slug);
+        if (learningUrl) {
+          navigate(learningUrl);
+          return;
+        }
+
+        navigate(tenantPath(slug, '/app/dashboard'));
+        return;
+      }
+
       if (next.kind === 'STEP' && next.stepId) {
         navigate(
           tenantPath(
@@ -49,6 +63,8 @@ export function ContinueCard({
             `/app/lessons/${lesson.id}/activities/${next.activityId}`
           )
         );
+      } else {
+        navigate(tenantPath(slug, '/app/dashboard'));
       }
     };
 

@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { useAuthStore } from '@/features/auth/auth.store';
+import { toLearningOverview, toLearningLesson } from '@/features/learning/learning.routes';
 
 function resolveCourseImageUrl(pathOrUrl?: string | null) {
   if (!pathOrUrl) return null;
@@ -33,6 +34,7 @@ export default function CourseDetailPage() {
   }>();
   const location = useLocation();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const useLearningV2 = useAuthStore((s) => s.useLearningV2);
   const slug = tenantSlug ?? '';
   const base = location.pathname.includes('/app')
     ? `/t/${slug}/app`
@@ -106,7 +108,11 @@ export default function CourseDetailPage() {
         )}
         {isAuthenticated && (
           <Link
-            to={`/t/${slug}/app/courses/${courseId}/interactive`}
+            to={
+              useLearningV2
+                ? toLearningOverview(slug, courseId!)
+                : `/t/${slug}/app/courses/${courseId}/interactive`
+            }
             className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:opacity-90"
           >
             <PlayCircle className="h-5 w-5" />
@@ -125,6 +131,7 @@ export default function CourseDetailPage() {
             title={mod.title}
             index={i + 1}
             isAuthenticated={isAuthenticated}
+            useLearningV2={useLearningV2}
             courseId={courseId!}
             slug={slug}
           />
@@ -139,6 +146,7 @@ function ModuleAccordion({
   title,
   index,
   isAuthenticated,
+  useLearningV2,
   courseId,
   slug
 }: {
@@ -146,6 +154,7 @@ function ModuleAccordion({
   title: string;
   index: number;
   isAuthenticated: boolean;
+  useLearningV2: boolean;
   courseId: string;
   slug: string;
 }) {
@@ -182,7 +191,11 @@ function ModuleAccordion({
             >
               {isAuthenticated ? (
                 <Link
-                  to={`/t/${slug}/app/lessons/${lesson.id}`}
+                  to={
+                    useLearningV2
+                      ? toLearningLesson(slug, courseId!, lesson.id)
+                      : `/t/${slug}/app/lessons/${lesson.id}`
+                  }
                   state={{ lessonTitle: lesson.title, courseId }}
                   className="flex w-full items-center gap-3 text-muted-foreground transition-colors hover:text-foreground"
                 >

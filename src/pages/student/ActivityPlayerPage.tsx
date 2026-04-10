@@ -25,7 +25,7 @@ import { ChallengeBriefingScreen } from '@/components/sim-trading/ChallengeBrief
 import { HelpDrawer } from '@/components/sim-trading/HelpDrawer';
 import { useTutorialProgress } from '@/components/sim-trading/useTutorialProgress';
 import { formatPercentage } from '@/lib/utils';
-import type { Answer, SubmissionResult, SubmissionResponse } from '@/types/api';
+import type { Answer, SubmissionResult } from '@/types/api';
 
 export default function ActivityPlayerPage() {
   const { lessonId, activityId, tenantSlug } = useParams<{
@@ -41,6 +41,7 @@ export default function ActivityPlayerPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
   const [result, setResult] = useState<SubmissionResult | null>(null);
+  const [isRetrying, setIsRetrying] = useState(false);
 
   // GET /lessons/:lessonId/activities/:activityId — Bearer ANY
   // staleTime:0 garante que novas questões criadas pelo admin aparecem sem F5
@@ -63,6 +64,7 @@ export default function ActivityPlayerPage() {
     }) => progressEndpoints.submit(slug, data),
     onSuccess: (data) => {
       setResult(data);
+      setIsRetrying(false);
       // Força reload da revisão após submissão
       qc.invalidateQueries({
         queryKey: ['submission-review', slug, activityId]
@@ -102,6 +104,24 @@ export default function ActivityPlayerPage() {
   });
   const isCourseExpired = unlock?.reason === 'COURSE_EXPIRED';
 
+  if (!lessonId) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
+        <p className="text-lg font-semibold">Nao foi possivel abrir a atividade</p>
+        <p className="text-sm text-muted-foreground">
+          Esta rota legada nao possui contexto de aula para carregar a atividade.
+        </p>
+        <button
+          type="button"
+          onClick={() => navigate(`/t/${slug}/app/dashboard`)}
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+        >
+          Ir para dashboard
+        </button>
+      </div>
+    );
+  }
+
   // Aguarda: carregamento da atividade E verificação de submissão existente
   // Inclui caso: refetch em background com 0 questões no cache (evita currentQuestion=undefined)
   if (
@@ -119,11 +139,17 @@ export default function ActivityPlayerPage() {
 
   // ─── Desafio de Trading: briefing → terminal ──────────────────────────────────
   if (activity.type === 'SIM_TRADING_CHALLENGE') {
-    return (
+      return (
       <SimTradingChallengeFlow
         slug={slug}
         activityId={activityId!}
-        onGoBack={() => navigate(-1)}
+        onGoBack={() => {
+          if (lessonId) {
+            navigate(`/t/${slug}/app/lessons/${lessonId}`);
+          } else {
+            navigate(`/t/${slug}/app/dashboard`);
+          }
+        }}
       />
     );
   }
@@ -157,7 +183,7 @@ export default function ActivityPlayerPage() {
 
   // Tela de resultado: exibe se acabou de submeter OU se já tinha submissão anterior
   // submissionReview=null significa sem submissão; submissionReview=object significa já submeteu
-  if (result !== null || submissionReview != null) {
+  if (!isRetrying && (result !== null || submissionReview != null)) {
     const score = result?.score ?? submissionReview?.score ?? 0;
     const maxScore = result?.maxScore ?? submissionReview?.maxScore ?? 1;
     const pct =
@@ -345,6 +371,7 @@ export default function ActivityPlayerPage() {
         <div className="flex justify-center gap-3 pb-8">
           <button
             onClick={() => {
+              setIsRetrying(true);
               setResult(null);
               setAnswers({});
               setCurrentIndex(0);

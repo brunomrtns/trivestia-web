@@ -8,7 +8,7 @@ import {
   BookOpen,
   CheckCircle2,
   Circle,
-  Loader2,
+  Play,
   Lock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -37,7 +37,7 @@ const STATUS_CONFIG: Record<
   { icon: typeof Circle; color: string }
 > = {
   NOT_STARTED: { icon: Circle, color: 'text-muted-foreground' },
-  IN_PROGRESS: { icon: Loader2, color: 'text-yellow-500' },
+  IN_PROGRESS: { icon: Play, color: 'text-primary' },
   COMPLETED: { icon: CheckCircle2, color: 'text-green-500' }
 };
 
@@ -181,11 +181,8 @@ function LessonRow({
         ) : (
           <StatusIcon
             className={cn(
-              'h-4 w-4 shrink-0',
-              isActive ? 'text-primary' : config.color,
-              lesson.progress.status === 'IN_PROGRESS' &&
-                !isActive &&
-                'animate-spin'
+              'h-3.5 w-3.5 shrink-0',
+              isActive ? 'text-primary' : config.color
             )}
           />
         )}

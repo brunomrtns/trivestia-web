@@ -55,6 +55,15 @@ export const adminEndpoints = {
   deleteModule: (slug: string, courseId: string, id: string) =>
     apiTenant(slug).delete(`/courses/${courseId}/modules/${id}`),
 
+  reorderModules: (
+    slug: string,
+    courseId: string,
+    orders: { moduleId: string; order: number }[]
+  ) =>
+    apiTenant(slug)
+      .patch(`/courses/${courseId}/modules/reorder`, { orders })
+      .then((r) => r.data),
+
   // ─── Lessons ──────────────────────────────────────────────────────────────
   createLesson: (slug: string, moduleId: string, data: CreateLessonDTO) =>
     apiTenant(slug)
@@ -73,6 +82,15 @@ export const adminEndpoints = {
 
   deleteLesson: (slug: string, moduleId: string, id: string) =>
     apiTenant(slug).delete(`/modules/${moduleId}/lessons/${id}`),
+
+  reorderLessons: (
+    slug: string,
+    moduleId: string,
+    orders: { lessonId: string; order: number }[]
+  ) =>
+    apiTenant(slug)
+      .patch(`/modules/${moduleId}/lessons/reorder`, { orders })
+      .then((r) => r.data),
 
   // ─── Activities ───────────────────────────────────────────────────────────
   createActivity: (slug: string, lessonId: string, data: CreateActivityDTO) =>

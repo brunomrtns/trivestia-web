@@ -52,6 +52,12 @@ const ProgressPage = lazy(() => import('@/pages/student/ProgressPage'));
 const CourseInteractivePage = lazy(
   () => import('@/pages/student/CourseInteractivePage')
 );
+const LearningShell = lazy(() => import('@/components/learning/LearningShell'));
+const CourseOverview = lazy(() => import('@/components/learning/CourseOverview'));
+const LessonRedirect = lazy(() => import('@/components/learning/LessonRedirect'));
+const StepView = lazy(() => import('@/components/learning/StepView'));
+const ActivityFlow = lazy(() => import('@/components/learning/ActivityFlow'));
+const CompletionCards = lazy(() => import('@/components/learning/CompletionCards'));
 
 const PracticeLabPage = lazy(() => import('@/pages/student/PracticeLabPage'));
 const PracticeHistoryPage = lazy(
@@ -66,7 +72,6 @@ const AdminUsersPage = lazy(() => import('@/pages/admin/AdminUsersPage'));
 const AdminLessonStepsPage = lazy(() => import('@/pages/admin/AdminLessonStepsPage'));
 const AnnouncementsPage = lazy(() => import('@/pages/student/AnnouncementsPage'));
 const SettingsPage = lazy(() => import('@/pages/student/SettingsPage'));
-const TrainingPage = lazy(() => import('@/pages/student/TrainingPage'));
 const AdminAnnouncementsPage = lazy(() => import('@/pages/admin/AdminAnnouncementsPage'));
 const AdminPeriodsPage = lazy(() => import('@/pages/admin/AdminPeriodsPage'));
 const AdminOffersPage = lazy(() => import('@/pages/admin/AdminOffersPage'));
@@ -139,6 +144,23 @@ const tenantAppRoutes = [
   { path: 'courses', element: <CoursesPage /> },
   { path: 'courses/:courseId', element: <CourseDetailPage /> },
   { path: 'courses/:courseId/interactive', element: <CourseInteractivePage /> },
+  {
+    path: 'learn/:courseId',
+    element: <LearningShell />,
+    children: [
+      { index: true, element: <CourseOverview /> },
+      { path: 'lessons/:lessonId', element: <LessonRedirect /> },
+      { path: 'lessons/:lessonId/steps/:stepId', element: <StepView /> },
+      {
+        path: 'lessons/:lessonId/steps/:stepId/activities/:activityId',
+        element: <ActivityFlow />
+      },
+      {
+        path: 'complete',
+        element: <CompletionCards />
+      }
+    ]
+  },
   { path: 'lessons/:lessonId', element: <LessonPage /> },
   {
     path: 'lessons/:lessonId/activities/:activityId',
@@ -149,8 +171,7 @@ const tenantAppRoutes = [
   { path: 'lab/history', element: <PracticeHistoryPage /> },
   { path: 'progress', element: <ProgressPage /> },
   { path: 'announcements', element: <AnnouncementsPage /> },
-  { path: 'settings', element: <SettingsPage /> },
-  { path: 'training', element: <TrainingPage /> }
+  { path: 'settings', element: <SettingsPage /> }
 ];
 
 const tenantAdminRoutes = [

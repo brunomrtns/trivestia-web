@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -22,9 +22,7 @@ import {
   Video,
   Image,
   Lock,
-  ShieldCheck,
-  FileUp,
-  ExternalLink
+  ShieldCheck
 } from 'lucide-react';
 import {
   DndContext,
@@ -45,7 +43,6 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { adminEndpoints } from '@/services/endpoints/admin.endpoints';
-import { FileUploadService } from '@/services/FileUploadService';
 import { StepFormModal } from '@/components/admin/StepFormModal';
 import { cn } from '@/lib/utils';
 import type {
@@ -243,13 +240,50 @@ function SortableStepRow({
 
 // ─── LessonSection ────────────────────────────────────────────────────────────
 
+interface SortableLessonSectionProps {
+  slug: string;
+  courseId: string;
+  moduleId: string;
+  lesson: Lesson;
+  onDeleteLesson: (id: string) => void;
+  isDeletingLesson: boolean;
+}
+
+function SortableLessonSection(props: SortableLessonSectionProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id: props.lesson.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 50 : 1
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <LessonSection
+        {...props}
+        dragHandleProps={{ ...attributes, ...listeners }}
+      />
+    </div>
+  );
+}
+
 function LessonSection({
   slug,
   courseId,
   moduleId,
   lesson,
   onDeleteLesson,
-  isDeletingLesson
+  isDeletingLesson,
+  dragHandleProps
 }: {
   slug: string;
   courseId: string;
@@ -257,11 +291,10 @@ function LessonSection({
   lesson: Lesson;
   onDeleteLesson: (id: string) => void;
   isDeletingLesson: boolean;
+  dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
 }) {
   const qc = useQueryClient();
   const { t } = useTranslation();
-  const [videoProgress, setVideoProgress] = useState<number | null>(null);
-  const [materialProgress, setMaterialProgress] = useState<number | null>(null);
 
   const lessonSchema = z.object({
     title: z.string().min(2, t('admin.lessons.validation.title')),
@@ -457,22 +490,6 @@ function LessonSection({
     onError: () => toast.error(t('admin.lessons.toast.activityAddError'))
   });
 
-  const createContentStepMut = useMutation({
-    mutationFn: (data: { type: StepType; title: string }) =>
-      adminEndpoints.createStep(slug, lesson.id, {
-        type: data.type,
-        title: data.title,
-        content: {},
-        order: (localSteps.length ?? 0) + 1
-      }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin-timeline', slug, lesson.id] });
-      setAddingStep(false);
-      toast.success(t('admin.stepForm.toast.created'));
-    },
-    onError: () => toast.error(t('admin.stepForm.toast.createError'))
-  });
-
   // ─── Lesson edit form ───────────────────────────────────────────────────────
   const lessonEditForm = useForm<LessonForm>({
     resolver: zodResolver(lessonSchema),
@@ -640,7 +657,13 @@ function LessonSection({
           </div>
         </form>
       ) : (
-        <div className="flex items-center gap-3 px-4 py-3">
+        <div className="flex items-center gap-2 px-4 py-3">
+          <div
+            {...dragHandleProps}
+            className="cursor-grab p-1 text-muted-foreground transition hover:text-foreground active:cursor-grabbing"
+          >
+            <GripVertical className="h-4 w-4" />
+          </div>
           <button
             onClick={() => setExpanded(!expanded)}
             className="flex flex-1 items-center gap-2 text-left"
@@ -960,18 +983,55 @@ function LessonSection({
 
 // ─── ModuleSection ────────────────────────────────────────────────────────────
 
+interface SortableModuleSectionProps {
+  slug: string;
+  courseId: string;
+  module: Module;
+  onDeleteModule: (id: string) => void;
+  isDeletingModule: boolean;
+}
+
+function SortableModuleSection(props: SortableModuleSectionProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id: props.module.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 50 : 1
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <ModuleSection
+        {...props}
+        dragHandleProps={{ ...attributes, ...listeners }}
+      />
+    </div>
+  );
+}
+
 function ModuleSection({
   slug,
   courseId,
   module,
   onDeleteModule,
-  isDeletingModule
+  isDeletingModule,
+  dragHandleProps
 }: {
   slug: string;
   courseId: string;
   module: Module;
   onDeleteModule: (id: string) => void;
   isDeletingModule: boolean;
+  dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
 }) {
   const qc = useQueryClient();
   const { t } = useTranslation();
@@ -1039,6 +1099,42 @@ function ModuleSection({
     onError: () => toast.error(t('admin.lessons.toast.moduleUpdateError'))
   });
 
+  const reorderLessonsMut = useMutation({
+    mutationFn: (orders: { lessonId: string; order: number }[]) =>
+      adminEndpoints.reorderLessons(slug, module.id, orders),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-lessons', slug, module.id] });
+    },
+    onError: () => {
+      toast.error(t('admin.lessons.toast.reorderError'));
+      qc.invalidateQueries({ queryKey: ['admin-lessons', slug, module.id] });
+    }
+  });
+
+  const [localLessons, setLocalLessons] = useState<Lesson[]>([]);
+  useEffect(() => {
+    if (lessons) setLocalLessons(lessons);
+  }, [lessons]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  function handleLessonDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIdx = localLessons.findIndex((l) => l.id === String(active.id));
+    const newIdx = localLessons.findIndex((l) => l.id === String(over.id));
+    const reordered = arrayMove(localLessons, oldIdx, newIdx);
+    setLocalLessons(reordered);
+
+    reorderLessonsMut.mutate(
+      reordered.map((l, i) => ({ lessonId: l.id, order: i + 1 }))
+    );
+  }
+
   return (
     <div className="rounded-2xl border bg-card shadow-sm">
       {/* Module header */}
@@ -1079,6 +1175,12 @@ function ModuleSection({
         </form>
       ) : (
         <div className="flex items-center gap-3 px-5 py-4">
+          <div
+            {...dragHandleProps}
+            className="cursor-grab p-1 text-muted-foreground transition hover:text-foreground active:cursor-grabbing"
+          >
+            <GripVertical className="h-5 w-5" />
+          </div>
           <button
             onClick={() => setExpanded(!expanded)}
             className="flex flex-1 items-center gap-3 text-left"
@@ -1140,27 +1242,38 @@ function ModuleSection({
               <Loader2 className="h-5 w-5 animate-spin text-primary" />
             </div>
           ) : (
-            <>
-              {lessons?.map((lesson) => (
-                <LessonSection
-                  key={lesson.id}
-                  slug={slug}
-                  courseId={courseId}
-                  moduleId={module.id}
-                  lesson={lesson}
-                  onDeleteLesson={(id) => deleteLessonMut.mutate(id)}
-                  isDeletingLesson={
-                    deleteLessonMut.isPending &&
-                    deleteLessonMut.variables === lesson.id
-                  }
-                />
-              ))}
-              {lessons?.length === 0 && (
-                <p className="py-2 text-center text-sm text-muted-foreground">
-                  {t('admin.lessons.emptyModule')}
-                </p>
-              )}
-            </>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleLessonDragEnd}
+            >
+              <SortableContext
+                items={localLessons.map((l) => l.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-3">
+                  {localLessons.map((lesson) => (
+                    <SortableLessonSection
+                      key={lesson.id}
+                      slug={slug}
+                      courseId={courseId}
+                      moduleId={module.id}
+                      lesson={lesson}
+                      onDeleteLesson={(id) => deleteLessonMut.mutate(id)}
+                      isDeletingLesson={
+                        deleteLessonMut.isPending &&
+                        deleteLessonMut.variables === lesson.id
+                      }
+                    />
+                  ))}
+                  {localLessons.length === 0 && (
+                    <p className="py-2 text-center text-sm text-muted-foreground">
+                      {t('admin.lessons.emptyModule')}
+                    </p>
+                  )}
+                </div>
+              </SortableContext>
+            </DndContext>
           )}
 
           {/* Add lesson form */}
@@ -1290,6 +1403,42 @@ export default function AdminLessonsPage() {
     onError: () => toast.error(t('admin.lessons.toast.moduleDeleteError'))
   });
 
+  const reorderModulesMut = useMutation({
+    mutationFn: (orders: { moduleId: string; order: number }[]) =>
+      adminEndpoints.reorderModules(slug, courseId!, orders),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-modules', slug, courseId] });
+    },
+    onError: () => {
+      toast.error(t('admin.lessons.toast.reorderError'));
+      qc.invalidateQueries({ queryKey: ['admin-modules', slug, courseId] });
+    }
+  });
+
+  const [localModules, setLocalModules] = useState<Module[]>([]);
+  useEffect(() => {
+    if (modules) setLocalModules(modules);
+  }, [modules]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  function handleModuleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIdx = localModules.findIndex((m) => m.id === String(active.id));
+    const newIdx = localModules.findIndex((m) => m.id === String(over.id));
+    const reordered = arrayMove(localModules, oldIdx, newIdx);
+    setLocalModules(reordered);
+
+    reorderModulesMut.mutate(
+      reordered.map((m, i) => ({ moduleId: m.id, order: i + 1 }))
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header + Breadcrumb */}
@@ -1391,33 +1540,44 @@ export default function AdminLessonsPage() {
           ))}
         </div>
       ) : (
-        <div className="space-y-3">
-          {modules?.map((mod) => (
-            <ModuleSection
-              key={mod.id}
-              slug={slug}
-              courseId={courseId!}
-              module={mod}
-              onDeleteModule={(id) => deleteModuleMut.mutate(id)}
-              isDeletingModule={
-                deleteModuleMut.isPending &&
-                deleteModuleMut.variables === mod.id
-              }
-            />
-          ))}
-          {modules?.length === 0 && !addingModule && (
-            <div className="py-16 text-center text-muted-foreground">
-              <BookOpen className="mx-auto mb-4 h-12 w-12 opacity-30" />
-              <p>{t('admin.lessons.noModules')}</p>
-              <button
-                onClick={() => setAddingModule(true)}
-                className="mt-3 text-sm font-medium text-primary hover:underline"
-              >
-                {t('admin.lessons.createFirstModule')}
-              </button>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleModuleDragEnd}
+        >
+          <SortableContext
+            items={localModules.map((m) => m.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-3">
+              {localModules.map((mod) => (
+                <SortableModuleSection
+                  key={mod.id}
+                  slug={slug}
+                  courseId={courseId!}
+                  module={mod}
+                  onDeleteModule={(id) => deleteModuleMut.mutate(id)}
+                  isDeletingModule={
+                    deleteModuleMut.isPending &&
+                    deleteModuleMut.variables === mod.id
+                  }
+                />
+              ))}
+              {localModules.length === 0 && !addingModule && (
+                <div className="py-16 text-center text-muted-foreground">
+                  <BookOpen className="mx-auto mb-4 h-12 w-12 opacity-30" />
+                  <p>{t('admin.lessons.noModules')}</p>
+                  <button
+                    onClick={() => setAddingModule(true)}
+                    className="mt-3 text-sm font-medium text-primary hover:underline"
+                  >
+                    {t('admin.lessons.createFirstModule')}
+                  </button>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </SortableContext>
+        </DndContext>
       )}
     </div>
   );

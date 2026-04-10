@@ -29,5 +29,5 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src", "src/components/learning/LearningOutline.tsx"]
 }

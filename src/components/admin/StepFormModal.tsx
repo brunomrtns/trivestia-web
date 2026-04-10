@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Portal } from '@/components/ui/Portal';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -12,14 +12,12 @@ import {
   FileText,
   Video,
   Image,
-  ImagePlus,
-  FileUp,
-  Link2,
-  FileArchive
+  ImagePlus
 } from 'lucide-react';
 import { stepsEndpoints } from '@/services/endpoints/steps.endpoints';
 import { FileUploadService } from '@/services/FileUploadService';
 import { cn } from '@/lib/utils';
+import { RichTextEditor } from './RichTextEditor';
 import type {
   LessonStepDTO,
   StepType,
@@ -38,17 +36,12 @@ interface StepFormData {
   estimatedMinutes?: number;
   body?: string;
   url?: string;
-  articleVideoUrl?: string;
-  articleImageUrl?: string;
-  articleAttachmentUrl?: string;
   alt?: string;
   caption?: string;
   activityId?: string;
 }
 
 const MAX_VIDEO_SIZE_BYTES = 200 * 1024 * 1024;
-const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
-const MAX_ATTACHMENT_SIZE_BYTES = 25 * 1024 * 1024;
 
 function toPublicStorageUrl(pathOrUrl: string): string {
   if (!pathOrUrl) return '';
@@ -90,10 +83,7 @@ function formToCreateDTO(data: StepFormData, order: number): CreateStepDTO {
     case 'CONTENT_TEXT':
       content = {
         format: 'ARTICLE',
-        body: data.body ?? '',
-        videoUrl: data.articleVideoUrl ?? '',
-        imageUrl: data.articleImageUrl ?? '',
-        attachmentUrl: data.articleAttachmentUrl ?? ''
+        body: data.body ?? ''
       };
       break;
     case 'CONTENT_VIDEO':
@@ -126,10 +116,7 @@ function formToUpdateDTO(data: StepFormData): UpdateStepDTO {
     case 'CONTENT_TEXT':
       content = {
         format: 'ARTICLE',
-        body: data.body ?? '',
-        videoUrl: data.articleVideoUrl ?? '',
-        imageUrl: data.articleImageUrl ?? '',
-        attachmentUrl: data.articleAttachmentUrl ?? ''
+        body: data.body ?? ''
       };
       break;
     case 'CONTENT_VIDEO':
@@ -155,6 +142,7 @@ function formToUpdateDTO(data: StepFormData): UpdateStepDTO {
   };
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function dtoToForm(step: LessonStepDTO): StepFormData {
   const c = step.content as Record<string, unknown>;
   return {
@@ -164,9 +152,6 @@ export function dtoToForm(step: LessonStepDTO): StepFormData {
     estimatedMinutes: step.estimatedMinutes ?? undefined,
     body: (c.body as string) ?? '',
     url: (c.url as string) ?? '',
-    articleVideoUrl: (c.videoUrl as string) ?? '',
-    articleImageUrl: (c.imageUrl as string) ?? '',
-    articleAttachmentUrl: (c.attachmentUrl as string) ?? '',
     alt: (c.alt as string) ?? '',
     caption: (c.caption as string) ?? '',
     activityId: (c.activityId as string) ?? ''
@@ -213,9 +198,6 @@ export function StepFormModal({
     estimatedMinutes: z.coerce.number().min(0).optional(),
     body: z.string().optional(),
     url: z.string().optional(),
-    articleVideoUrl: z.string().optional(),
-    articleImageUrl: z.string().optional(),
-    articleAttachmentUrl: z.string().optional(),
     alt: z.string().optional(),
     caption: z.string().optional(),
     activityId: z.string().optional()
@@ -253,9 +235,6 @@ export function StepFormModal({
           isOptional: false,
           body: '',
           url: '',
-            articleVideoUrl: '',
-            articleImageUrl: '',
-            articleAttachmentUrl: '',
           alt: '',
           caption: ''
         }
@@ -263,16 +242,10 @@ export function StepFormModal({
 
   const watchType = form.watch('type');
   const watchUrl = form.watch('url');
-          const watchArticleVideoUrl = form.watch('articleVideoUrl');
-          const watchArticleImageUrl = form.watch('articleImageUrl');
-          const watchArticleAttachmentUrl = form.watch('articleAttachmentUrl');
 
   // ── Image upload ──────────────────────────────────────────────────────────────
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoFileInputRef = useRef<HTMLInputElement>(null);
-  const articleImageFileInputRef = useRef<HTMLInputElement>(null);
-  const articleVideoFileInputRef = useRef<HTMLInputElement>(null);
-  const articleAttachmentFileInputRef = useRef<HTMLInputElement>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(
     step?.type === 'CONTENT_IMAGE'
       ? (((step.content as Record<string, unknown>).url as string) ?? null)
@@ -280,27 +253,11 @@ export function StepFormModal({
   );
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [articleImageFile, setArticleImageFile] = useState<File | null>(null);
-  const [articleVideoFile, setArticleVideoFile] = useState<File | null>(null);
-  const [articleAttachmentFile, setArticleAttachmentFile] =
-    useState<File | null>(null);
-  const [articleImagePreview, setArticleImagePreview] = useState<string | null>(
-    step?.type === 'CONTENT_TEXT'
-      ? toPublicStorageUrl(
-          (((step.content as Record<string, unknown>).imageUrl as string) ?? '')
-        ) || null
-      : null
-  );
   const [uploading, setUploading] = useState(false);
 
   const resolvedVideoUrl = toPublicStorageUrl(watchUrl ?? '');
   const videoEmbedUrl = getVideoEmbedUrl(resolvedVideoUrl);
   const videoLocalPreview = videoFile ? URL.createObjectURL(videoFile) : null;
-  const resolvedArticleVideoUrl = toPublicStorageUrl(watchArticleVideoUrl ?? '');
-  const articleVideoEmbedUrl = getVideoEmbedUrl(resolvedArticleVideoUrl);
-  const articleVideoLocalPreview = articleVideoFile
-    ? URL.createObjectURL(articleVideoFile)
-    : null;
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -326,60 +283,15 @@ export function StepFormModal({
     setVideoFile(file);
   }
 
-  function handleArticleImageFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      toast.error('Selecione uma imagem válida.');
-      return;
+  const handleEditorImageUpload = async (file: File) => {
+    try {
+      const result = await FileUploadService.upload(slug, file, 'questions');
+      return toPublicStorageUrl(result.path);
+    } catch {
+      toast.error('Falha no upload da imagem do artigo.');
+      return null;
     }
-
-    if (file.size > MAX_IMAGE_SIZE_BYTES) {
-      toast.error('Imagem maior que 10MB.');
-      return;
-    }
-
-    setArticleImageFile(file);
-    setArticleImagePreview(URL.createObjectURL(file));
-  }
-
-  function handleArticleVideoFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('video/')) {
-      toast.error('Selecione um vídeo válido.');
-      return;
-    }
-
-    if (file.size > MAX_VIDEO_SIZE_BYTES) {
-      toast.error('Vídeo maior que 200MB.');
-      return;
-    }
-
-    setArticleVideoFile(file);
-  }
-
-  function handleArticleAttachmentFileChange(
-    e: React.ChangeEvent<HTMLInputElement>
-  ) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const isPdf = file.type === 'application/pdf';
-    if (!isPdf) {
-      toast.error('Anexo deve ser PDF.');
-      return;
-    }
-
-    if (file.size > MAX_ATTACHMENT_SIZE_BYTES) {
-      toast.error('PDF maior que 25MB.');
-      return;
-    }
-
-    setArticleAttachmentFile(file);
-  }
+  };
 
   // ── Mutations ─────────────────────────────────────────────────────────────────
   const createMut = useMutation({
@@ -407,47 +319,6 @@ export function StepFormModal({
   const isPending = createMut.isPending || updateMut.isPending || uploading;
 
   const onSubmit = async (data: StepFormData) => {
-    // Upload article assets if needed
-    if (data.type === 'CONTENT_TEXT') {
-      setUploading(true);
-      try {
-        if (articleImageFile) {
-          const imageResult = await FileUploadService.upload(
-            slug,
-            articleImageFile,
-            'questions'
-          );
-          data.articleImageUrl = toPublicStorageUrl(imageResult.path);
-          form.setValue('articleImageUrl', data.articleImageUrl);
-        }
-
-        if (articleVideoFile) {
-          const videoResult = await FileUploadService.upload(
-            slug,
-            articleVideoFile,
-            'courses/videos'
-          );
-          data.articleVideoUrl = toPublicStorageUrl(videoResult.path);
-          form.setValue('articleVideoUrl', data.articleVideoUrl);
-        }
-
-        if (articleAttachmentFile) {
-          const attachmentResult = await FileUploadService.upload(
-            slug,
-            articleAttachmentFile,
-            'courses/materials'
-          );
-          data.articleAttachmentUrl = toPublicStorageUrl(attachmentResult.path);
-          form.setValue('articleAttachmentUrl', data.articleAttachmentUrl);
-        }
-      } catch {
-        toast.error('Falha no upload dos arquivos do artigo.');
-        setUploading(false);
-        return;
-      }
-      setUploading(false);
-    }
-
     // Upload video if file selected
     if (data.type === 'CONTENT_VIDEO' && videoFile) {
       setUploading(true);
@@ -573,173 +444,18 @@ export function StepFormModal({
                   Conteúdo do artigo
                 </label>
 
-                <textarea
-                  className="h-40 w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring font-mono"
-                  placeholder={t('admin.stepForm.contentPlaceholder')}
-                  {...form.register('body')}
+                <Controller
+                  name="body"
+                  control={form.control}
+                  render={({ field }) => (
+                    <RichTextEditor
+                      content={field.value || ''}
+                      onChange={field.onChange}
+                      onUploadImage={handleEditorImageUpload}
+                    />
+                  )}
                 />
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {t('admin.stepForm.htmlHint')}
-                </p>
 
-                  <div className="mt-4 space-y-3 rounded-lg border bg-background/40 p-3">
-                    <p className="text-xs font-medium text-muted-foreground">
-                      Mídias do artigo
-                    </p>
-
-                    <div>
-                      <label className="mb-1 flex items-center gap-1 text-xs text-muted-foreground">
-                        <Link2 className="h-3.5 w-3.5" />
-                        Vídeo por URL
-                      </label>
-                      <input
-                        className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
-                        placeholder="https://youtube.com/watch?v=..."
-                        {...form.register('articleVideoUrl')}
-                        onChange={(e) => {
-                          form.setValue('articleVideoUrl', e.target.value);
-                          if (e.target.value) setArticleVideoFile(null);
-                        }}
-                      />
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => articleVideoFileInputRef.current?.click()}
-                      className="flex w-full items-center justify-center rounded-lg border border-dashed px-3 py-2 text-sm text-muted-foreground transition hover:border-primary hover:text-primary"
-                    >
-                      <FileUp className="mr-1 h-4 w-4" />
-                      {articleVideoFile
-                        ? `${articleVideoFile.name} (${(articleVideoFile.size / (1024 * 1024)).toFixed(1)} MB)`
-                        : 'Enviar vídeo do artigo (máx. 200MB)'}
-                    </button>
-                    <input
-                      ref={articleVideoFileInputRef}
-                      type="file"
-                      accept="video/*"
-                      className="hidden"
-                      onChange={handleArticleVideoFileChange}
-                    />
-
-                    {(articleVideoLocalPreview || resolvedArticleVideoUrl) && (
-                      <div className="aspect-video w-full overflow-hidden rounded-lg border bg-muted">
-                        {articleVideoLocalPreview ? (
-                          <video
-                            src={articleVideoLocalPreview}
-                            controls
-                            className="h-full w-full"
-                            preload="metadata"
-                          />
-                        ) : articleVideoEmbedUrl ? (
-                          <iframe
-                            src={articleVideoEmbedUrl}
-                            className="h-full w-full"
-                            allowFullScreen
-                          />
-                        ) : (
-                          <video
-                            src={resolvedArticleVideoUrl}
-                            controls
-                            className="h-full w-full"
-                            preload="metadata"
-                          />
-                        )}
-                      </div>
-                    )}
-
-                    <div>
-                      <label className="mb-1 flex items-center gap-1 text-xs text-muted-foreground">
-                        <Link2 className="h-3.5 w-3.5" />
-                        Imagem por URL
-                      </label>
-                      <input
-                        className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
-                        placeholder="https://..."
-                        {...form.register('articleImageUrl')}
-                        onChange={(e) => {
-                          form.setValue('articleImageUrl', e.target.value);
-                          if (e.target.value) {
-                            setArticleImageFile(null);
-                            setArticleImagePreview(e.target.value);
-                          }
-                        }}
-                      />
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => articleImageFileInputRef.current?.click()}
-                      className="flex w-full items-center justify-center rounded-lg border border-dashed px-3 py-2 text-sm text-muted-foreground transition hover:border-primary hover:text-primary"
-                    >
-                      <ImagePlus className="mr-1 h-4 w-4" />
-                      {articleImageFile
-                        ? `${articleImageFile.name} (${(articleImageFile.size / (1024 * 1024)).toFixed(1)} MB)`
-                        : 'Enviar imagem do artigo (máx. 10MB)'}
-                    </button>
-                    <input
-                      ref={articleImageFileInputRef}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleArticleImageFileChange}
-                    />
-
-                    {articleImagePreview && (
-                      <div className="overflow-hidden rounded-lg border bg-muted">
-                        <img
-                          src={articleImagePreview}
-                          alt="Prévia do artigo"
-                          className="max-h-48 w-full object-contain"
-                        />
-                      </div>
-                    )}
-
-                    <div>
-                      <label className="mb-1 flex items-center gap-1 text-xs text-muted-foreground">
-                        <Link2 className="h-3.5 w-3.5" />
-                        PDF por URL
-                      </label>
-                      <input
-                        className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
-                        placeholder="https://.../arquivo.pdf"
-                        {...form.register('articleAttachmentUrl')}
-                        onChange={(e) => {
-                          form.setValue('articleAttachmentUrl', e.target.value);
-                          if (e.target.value) setArticleAttachmentFile(null);
-                        }}
-                      />
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => articleAttachmentFileInputRef.current?.click()}
-                      className="flex w-full items-center justify-center rounded-lg border border-dashed px-3 py-2 text-sm text-muted-foreground transition hover:border-primary hover:text-primary"
-                    >
-                      <FileArchive className="mr-1 h-4 w-4" />
-                      {articleAttachmentFile
-                        ? `${articleAttachmentFile.name} (${(articleAttachmentFile.size / (1024 * 1024)).toFixed(1)} MB)`
-                        : 'Enviar PDF do artigo (máx. 25MB)'}
-                    </button>
-                    <input
-                      ref={articleAttachmentFileInputRef}
-                      type="file"
-                      accept="application/pdf"
-                      className="hidden"
-                      onChange={handleArticleAttachmentFileChange}
-                    />
-
-                    {watchArticleAttachmentUrl && (
-                      <a
-                        href={toPublicStorageUrl(watchArticleAttachmentUrl)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-                      >
-                        <FileArchive className="h-3.5 w-3.5" />
-                        Visualizar PDF atual
-                      </a>
-                    )}
-                  </div>
               </div>
             )}
 
