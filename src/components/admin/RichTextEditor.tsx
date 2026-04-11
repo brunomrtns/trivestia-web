@@ -60,7 +60,11 @@ const MenuButton = ({
   </button>
 );
 
-export function RichTextEditor({ content, onChange, onUploadImage }: RichTextEditorProps) {
+export function RichTextEditor({
+  content,
+  onChange,
+  onUploadImage
+}: RichTextEditorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -96,17 +100,28 @@ export function RichTextEditor({ content, onChange, onUploadImage }: RichTextEdi
       attributes: {
         class: 'prose max-w-none focus:outline-none min-h-[200px] p-4 text-sm'
       },
-      handleDrop: function(view, event, slice, moved) {
-        if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
+      handleDrop: function (view, event, slice, moved) {
+        if (
+          !moved &&
+          event.dataTransfer &&
+          event.dataTransfer.files &&
+          event.dataTransfer.files[0]
+        ) {
           const file = event.dataTransfer.files[0];
           if (file.type.startsWith('image/') && onUploadImage) {
             setIsUploading(true);
-            onUploadImage(file).then(url => {
+            onUploadImage(file).then((url) => {
               if (url) {
                 const { schema } = view.state;
-                const coordinates = view.posAtCoords({ left: event.clientX, top: event.clientY });
+                const coordinates = view.posAtCoords({
+                  left: event.clientX,
+                  top: event.clientY
+                });
                 const node = schema.nodes.image.create({ src: url });
-                const transaction = view.state.tr.insert(coordinates?.pos || 0, node);
+                const transaction = view.state.tr.insert(
+                  coordinates?.pos || 0,
+                  node
+                );
                 view.dispatch(transaction);
               }
               setIsUploading(false);
@@ -116,12 +131,16 @@ export function RichTextEditor({ content, onChange, onUploadImage }: RichTextEdi
         }
         return false;
       },
-      handlePaste: function(view, event, slice) {
-        if (event.clipboardData && event.clipboardData.files && event.clipboardData.files[0]) {
+      handlePaste: function (view, event) {
+        if (
+          event.clipboardData &&
+          event.clipboardData.files &&
+          event.clipboardData.files[0]
+        ) {
           const file = event.clipboardData.files[0];
           if (file.type.startsWith('image/') && onUploadImage) {
             setIsUploading(true);
-            onUploadImage(file).then(url => {
+            onUploadImage(file).then((url) => {
               if (url) {
                 const { schema } = view.state;
                 const node = schema.nodes.image.create({ src: url });
@@ -140,7 +159,9 @@ export function RichTextEditor({ content, onChange, onUploadImage }: RichTextEdi
 
   if (!editor) return null;
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (file && onUploadImage) {
       setIsUploading(true);
@@ -194,7 +215,9 @@ export function RichTextEditor({ content, onChange, onUploadImage }: RichTextEdi
       {isUploading && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-background/50 backdrop-blur-sm">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          <span className="mt-2 text-xs font-medium text-foreground">Enviando imagem...</span>
+          <span className="mt-2 text-xs font-medium text-foreground">
+            Enviando imagem...
+          </span>
         </div>
       )}
       <div className="flex flex-wrap items-center gap-1 border-b bg-muted/30 p-1">
@@ -226,26 +249,30 @@ export function RichTextEditor({ content, onChange, onUploadImage }: RichTextEdi
         >
           <Code className="h-4 w-4" />
         </MenuButton>
-        
+
         <div className="w-px h-4 bg-border mx-1" />
-        
+
         <MenuButton
-          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 1 }).run()
+          }
           isActive={editor.isActive('heading', { level: 1 })}
           title="Título 1"
         >
           <Heading1 className="h-4 w-4" />
         </MenuButton>
         <MenuButton
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 2 }).run()
+          }
           isActive={editor.isActive('heading', { level: 2 })}
           title="Título 2"
         >
           <Heading2 className="h-4 w-4" />
         </MenuButton>
-        
+
         <div className="w-px h-4 bg-border mx-1" />
-        
+
         <MenuButton
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           isActive={editor.isActive('bulletList')}
@@ -260,7 +287,7 @@ export function RichTextEditor({ content, onChange, onUploadImage }: RichTextEdi
         >
           <ListOrdered className="h-4 w-4" />
         </MenuButton>
-        
+
         <div className="w-px h-4 bg-border mx-1" />
 
         <MenuButton
@@ -284,10 +311,14 @@ export function RichTextEditor({ content, onChange, onUploadImage }: RichTextEdi
         >
           <AlignRight className="h-4 w-4" />
         </MenuButton>
-        
+
         <div className="w-px h-4 bg-border mx-1" />
 
-        <MenuButton onClick={setLink} isActive={editor.isActive('link')} title="Link">
+        <MenuButton
+          onClick={setLink}
+          isActive={editor.isActive('link')}
+          title="Link"
+        >
           <LinkIcon className="h-4 w-4" />
         </MenuButton>
         <MenuButton onClick={addImage} title="Inserir Imagem">

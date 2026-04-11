@@ -21,17 +21,13 @@ import {
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/features/auth/auth.store';
 import { tenantPath } from '@/lib/tenant';
+import { useUIStore } from '@/stores/ui.store';
 
 interface NavLink {
   to: string;
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   alsoMatch?: string[];
-}
-
-interface SidebarProps {
-  collapsed: boolean;
-  onCollapse: () => void;
 }
 
 function buildLinks(slug: string, t: (key: string) => string) {
@@ -86,10 +82,12 @@ function buildLinks(slug: string, t: (key: string) => string) {
   return { studentLinks, adminLinks };
 }
 
-export function Sidebar({ collapsed, onCollapse }: SidebarProps) {
+export function Sidebar() {
   const { t } = useTranslation();
   const location = useLocation();
   const user = useAuthStore((s) => s.user);
+  const { sidebarCollapsed: collapsed, toggleSidebar: onCollapse } =
+    useUIStore();
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const slug = tenantSlug ?? '';
 

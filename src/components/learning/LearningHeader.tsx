@@ -1,7 +1,15 @@
-import { ChevronLeft, ChevronRight, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  PanelLeftClose,
+  PanelLeftOpen
+} from 'lucide-react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { useMemo } from 'react';
-import { useLearningData, useLearningNav } from '@/features/learning/learning.context';
+import {
+  useLearningData,
+  useLearningNav
+} from '@/features/learning/learning.context';
 import { getBackTarget } from '@/features/learning/learning.utils';
 
 export default function LearningHeader() {
@@ -14,7 +22,8 @@ export default function LearningHeader() {
     activityId?: string;
   }>();
   const { course, modules, progress } = useLearningData();
-  const { toggleOutline, activeLessonId, isDesktopOutlineVisible } = useLearningNav();
+  const { toggleOutline, activeLessonId, isDesktopOutlineVisible } =
+    useLearningNav();
 
   const slug = params.tenantSlug ?? '';
   const backTarget = getBackTarget(
@@ -42,7 +51,9 @@ export default function LearningHeader() {
 
   const activeLesson = useMemo(() => {
     if (!activeLessonId || !activeModule) return null;
-    return activeModule.lessons.find((item) => item.id === activeLessonId) ?? null;
+    return (
+      activeModule.lessons.find((item) => item.id === activeLessonId) ?? null
+    );
   }, [activeLessonId, activeModule]);
 
   return (
@@ -101,7 +112,9 @@ export default function LearningHeader() {
           onClick={toggleOutline}
           className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground lg:inline-flex"
           title="Estrutura do curso"
-          aria-label={isDesktopOutlineVisible ? 'Fechar estrutura' : 'Abrir estrutura'}
+          aria-label={
+            isDesktopOutlineVisible ? 'Fechar estrutura' : 'Abrir estrutura'
+          }
           type="button"
         >
           {isDesktopOutlineVisible ? (

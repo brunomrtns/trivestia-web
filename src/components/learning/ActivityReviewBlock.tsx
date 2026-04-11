@@ -32,8 +32,8 @@ export function ActivityReviewBlock({
   if (review.reviewPolicy === 'NEVER') {
     return (
       <div className="flex items-center gap-3 rounded-xl border bg-card p-4 text-sm text-muted-foreground">
-        <Lock className="h-5 w-5 shrink-0" />
-        A revisão desta atividade não está disponível.
+        <Lock className="h-5 w-5 shrink-0" />A revisão desta atividade não está
+        disponível.
       </div>
     );
   }
@@ -44,16 +44,18 @@ export function ActivityReviewBlock({
     return (
       <div className="space-y-2 rounded-xl border bg-card p-4 text-sm text-muted-foreground">
         <div className="flex items-center gap-3">
-        <Clock className="h-5 w-5 shrink-0 text-yellow-500" />
-        Revisão disponível em{' '}
-        {hasReviewDate
-          ? new Date(review.reviewAvailableAt!).toLocaleString('pt-BR')
-          : 'data indisponível no momento'}.
+          <Clock className="h-5 w-5 shrink-0 text-yellow-500" />
+          Revisão disponível em{' '}
+          {hasReviewDate
+            ? new Date(review.reviewAvailableAt!).toLocaleString('pt-BR')
+            : 'data indisponível no momento'}
+          .
         </div>
 
         {!hasReviewDate && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-2 text-xs text-amber-800">
-            Política AFTER_DATE recebida sem reviewAvailableAt. Revisão mantida bloqueada por segurança.
+            Política AFTER_DATE recebida sem reviewAvailableAt. Revisão mantida
+            bloqueada por segurança.
           </div>
         )}
       </div>
@@ -64,7 +66,8 @@ export function ActivityReviewBlock({
     if (review.responses.length > 0) {
       return (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-          Revisão bloqueada pela política da atividade. Respostas retornadas pelo backend não serão exibidas.
+          Revisão bloqueada pela política da atividade. Respostas retornadas
+          pelo backend não serão exibidas.
         </div>
       );
     }
@@ -112,7 +115,8 @@ export function ActivityReviewBlock({
                 <XCircle className="h-5 w-5 text-red-500" />
               )}
               <span className="text-xs font-semibold text-muted-foreground">
-                Questão {index + 1} · {response.isCorrect ? 'Correta' : 'Incorreta'}
+                Questão {index + 1} ·{' '}
+                {response.isCorrect ? 'Correta' : 'Incorreta'}
               </span>
             </div>
 

@@ -1,5 +1,8 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useLearningData, useLearningNav } from '@/features/learning/learning.context';
+import {
+  useLearningData,
+  useLearningNav
+} from '@/features/learning/learning.context';
 
 export default function LearningActionBar() {
   const { actionBar } = useLearningNav();

@@ -4,7 +4,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import type { LessonStepDTO } from '@/types/api';
-import { useLearningData, useLearningNav } from '@/features/learning/learning.context';
+import {
+  useLearningData,
+  useLearningNav
+} from '@/features/learning/learning.context';
 import {
   useActivity,
   useActivitySubmission,
@@ -76,7 +79,10 @@ export default function ActivityFlow() {
   );
 
   const currentStepIndex = useMemo(
-    () => steps.findIndex((candidate) => candidate.id === (canonicalStep?.id ?? stepId)),
+    () =>
+      steps.findIndex(
+        (candidate) => candidate.id === (canonicalStep?.id ?? stepId)
+      ),
     [canonicalStep?.id, stepId, steps]
   );
 
@@ -89,7 +95,10 @@ export default function ActivityFlow() {
     currentStepIndex > 0 ? steps[currentStepIndex - 1] : null;
 
   const activity = activityQuery.data ?? null;
-  const questions = useMemo(() => activity?.questions ?? [], [activity?.questions]);
+  const questions = useMemo(
+    () => activity?.questions ?? [],
+    [activity?.questions]
+  );
   const review = submission.reviewData;
   const isCourseExpired = unlockQuery.data?.reason === 'COURSE_EXPIRED';
   const isCourseCompleted = isLearningCourseCompleted(progress, next);
@@ -157,12 +166,15 @@ export default function ActivityFlow() {
         next.activityId === activityId;
 
       if (isLoopingToSameActivity) {
-        console.warn('[learning] next points to current activity, avoiding loop', {
-          lessonId,
-          stepId,
-          activityId,
-          next
-        });
+        console.warn(
+          '[learning] next points to current activity, avoiding loop',
+          {
+            lessonId,
+            stepId,
+            activityId,
+            next
+          }
+        );
       } else if (next.kind === 'ACTIVITY' && next.stepId && next.activityId) {
         startActivity(next.lessonId, next.stepId, next.activityId);
         return;
@@ -222,7 +234,10 @@ export default function ActivityFlow() {
           toast.success('Atividade enviada com sucesso.');
         },
         onError: () => {
-          toast.error('Falha ao enviar atividade. Suas respostas foram mantidas.');        }
+          toast.error(
+            'Falha ao enviar atividade. Suas respostas foram mantidas.'
+          );
+        }
       });
     }
   });
@@ -268,7 +283,11 @@ export default function ActivityFlow() {
     return null;
   }
 
-  if (timelineQuery.isLoading || activityQuery.isLoading || shouldShowReviewLoader) {
+  if (
+    timelineQuery.isLoading ||
+    activityQuery.isLoading ||
+    shouldShowReviewLoader
+  ) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -303,15 +322,24 @@ export default function ActivityFlow() {
   }
 
   if (canonicalStep.id !== stepId) {
-    console.warn('[learning] activity URL mismatch, redirecting to canonical step', {
-      requestedStepId: stepId,
-      canonicalStepId: canonicalStep.id,
-      activityId
-    });
+    console.warn(
+      '[learning] activity URL mismatch, redirecting to canonical step',
+      {
+        requestedStepId: stepId,
+        canonicalStepId: canonicalStep.id,
+        activityId
+      }
+    );
     return (
       <Navigate
         replace
-        to={toLearningActivity(tenantSlug, courseId, lessonId, canonicalStep.id, activityId)}
+        to={toLearningActivity(
+          tenantSlug,
+          courseId,
+          lessonId,
+          canonicalStep.id,
+          activityId
+        )}
       />
     );
   }
@@ -367,8 +395,8 @@ export default function ActivityFlow() {
 
       {isCourseExpired && !hasResult && (
         <div className="flex items-center gap-3 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
-          <AlertTriangle className="h-5 w-5 shrink-0" />
-          O prazo do curso encerrou. Não é possível enviar novas respostas.
+          <AlertTriangle className="h-5 w-5 shrink-0" />O prazo do curso
+          encerrou. Não é possível enviar novas respostas.
         </div>
       )}
 
@@ -390,7 +418,8 @@ export default function ActivityFlow() {
               }}
               className="rounded-lg border px-4 py-2 text-sm font-medium transition hover:bg-accent"
             >
-              Refazer atividade            </button>
+              Refazer atividade{' '}
+            </button>
 
             <button
               type="button"

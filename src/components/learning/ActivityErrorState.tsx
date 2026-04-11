@@ -23,7 +23,9 @@ export function ActivityErrorState({
         <AlertCircle className="h-7 w-7 text-destructive" />
       </div>
       <h2 className="text-lg font-semibold">{title}</h2>
-      <p className="mt-2 max-w-sm text-sm text-muted-foreground">{description}</p>
+      <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+        {description}
+      </p>
 
       {(onPrimary || onSecondary) && (
         <div className="mt-6 flex flex-wrap justify-center gap-3">

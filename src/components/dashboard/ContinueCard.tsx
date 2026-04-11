@@ -6,6 +6,7 @@ import type { DashboardContinueDTO } from '@/types/api';
 import { useTranslation } from 'react-i18next';
 import { useLearningV2Flag } from '@/features/learning/learning.hooks';
 import { buildContinueUrl } from '@/features/learning/learning.utils';
+import { useUIStore } from '@/stores/ui.store';
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
@@ -33,11 +34,12 @@ export function ContinueCard({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const useLearningV2 = useLearningV2Flag();
+  const { setSidebarCollapsed } = useUIStore();
   const { hasContinuation, course, module, lesson, next } = data;
 
-  // ── Estado: com dados ──────────────────────────────────────────────────────
   if (hasContinuation && course && module && lesson && next) {
     const handleContinue = () => {
+      setSidebarCollapsed(true);
       if (useLearningV2) {
         const learningUrl = buildContinueUrl(data, slug);
         if (learningUrl) {

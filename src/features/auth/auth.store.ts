@@ -63,7 +63,10 @@ export const useAuthStore = create<AuthState>((set) => ({
       user,
       token,
       isAuthenticated: true,
-      tenantSlug: tenantSlug ?? authStorage.getAuthSlug() ?? authStorage.getLastTenantSlug()
+      tenantSlug:
+        tenantSlug ??
+        authStorage.getAuthSlug() ??
+        authStorage.getLastTenantSlug()
     });
   },
 

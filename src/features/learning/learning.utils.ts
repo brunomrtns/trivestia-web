@@ -116,7 +116,12 @@ export function resolveStepIdResult(
   }
 
   if (nextStepId) {
-    return logAndResolveFallback('NEXT_STEP_NOT_FOUND', steps, next, nextStepId);
+    return logAndResolveFallback(
+      'NEXT_STEP_NOT_FOUND',
+      steps,
+      next,
+      nextStepId
+    );
   }
 
   const firstPending = steps.find((step) => !step.isViewed && !step.isVirtual);
@@ -214,7 +219,13 @@ export function buildContinueUrl(
 
   if (next.kind === 'ACTIVITY') {
     if (next.activityId && next.stepId) {
-      return toLearningActivity(slug, courseId, lessonId, next.stepId, next.activityId);
+      return toLearningActivity(
+        slug,
+        courseId,
+        lessonId,
+        next.stepId,
+        next.activityId
+      );
     }
 
     return toLearningLesson(slug, courseId, lessonId);
@@ -240,7 +251,13 @@ export function buildLearningNextUrl(
 
   if (next.kind === 'ACTIVITY') {
     if (next.stepId && next.activityId) {
-      return toLearningActivity(slug, courseId, next.lessonId, next.stepId, next.activityId);
+      return toLearningActivity(
+        slug,
+        courseId,
+        next.lessonId,
+        next.stepId,
+        next.activityId
+      );
     }
 
     if (next.stepId) {

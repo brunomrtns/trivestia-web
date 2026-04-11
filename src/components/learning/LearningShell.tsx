@@ -1,4 +1,4 @@
-import { Navigate, Outlet, useLocation, useParams } from 'react-router-dom';
+import { Navigate, Outlet, useParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   LearningDataProvider,
@@ -33,12 +33,7 @@ export default function LearningShell() {
   }
 
   if (!isLearningV2Enabled) {
-    return (
-      <Navigate
-        replace
-        to={toLegacyInteractive(tenantSlug, courseId)}
-      />
-    );
+    return <Navigate replace to={toLegacyInteractive(tenantSlug, courseId)} />;
   }
 
   return (
@@ -57,10 +52,6 @@ function LearningShellLayout() {
   const isFullscreen = shellMode === 'fullscreen';
   const hasActionBar = Boolean(actionBar) && !isFullscreen;
 
-  if (isLoading) {
-    return <LearningShellSkeleton hasActionBar={hasActionBar} />;
-  }
-
   if (error) {
     return (
       <div className="flex h-full items-center justify-center p-6">
@@ -68,7 +59,9 @@ function LearningShellLayout() {
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
             <AlertCircle className="h-6 w-6 text-destructive" />
           </div>
-          <h2 className="text-lg font-semibold">Não foi possível carregar o curso</h2>
+          <h2 className="text-lg font-semibold">
+            Não foi possível carregar o curso
+          </h2>
           <p className="mt-2 text-sm text-muted-foreground">
             O shell de aprendizagem não conseguiu carregar os dados iniciais.
           </p>
@@ -101,10 +94,31 @@ function LearningShellLayout() {
         }`}
       >
         <div className="flex h-full min-h-0">
-          {!isFullscreen && <LearningOutline />}
+          {!isFullscreen &&
+            (isLoading ? (
+              <div className="hidden w-[240px] shrink-0 border-r bg-card lg:block">
+                <div className="h-10 border-b" />
+                <div className="space-y-3 p-3">
+                  <div className="h-4 w-4/5 animate-pulse rounded bg-muted" />
+                  <div className="ml-3 space-y-2">
+                    <div className="h-8 w-full animate-pulse rounded bg-muted" />
+                    <div className="h-8 w-full animate-pulse rounded bg-muted" />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <LearningOutline />
+            ))}
 
           <main className="flex-1 min-h-0 min-w-0 overflow-y-auto">
-            {isFullscreen ? (
+            {isLoading ? (
+              <div className="mx-auto max-w-4xl space-y-4 p-5 md:p-10">
+                <div className="h-7 w-1/2 animate-pulse rounded bg-muted" />
+                <div className="h-4 w-1/3 animate-pulse rounded bg-muted" />
+                <div className="mt-6 h-4 w-full animate-pulse rounded bg-muted" />
+                <div className="h-4 w-5/6 animate-pulse rounded bg-muted" />
+              </div>
+            ) : isFullscreen ? (
               <div className="h-full w-full">
                 <ShellContentTransition />
               </div>
@@ -123,21 +137,21 @@ function LearningShellLayout() {
 }
 
 function ShellContentTransition() {
-  const location = useLocation();
   return (
     <AnimatePresence mode="wait">
-      <motion.div
-        key={location.pathname}
-        {...CONTENT_TRANSITION}
-        className="min-h-full"
-      >
+      <motion.div {...CONTENT_TRANSITION} className="min-h-full">
         <Outlet />
       </motion.div>
     </AnimatePresence>
   );
 }
 
-function LearningShellSkeleton({ hasActionBar }: { hasActionBar: boolean }) {
+// TODO: Verificar se função é usada em algum lugar, se não for, remover
+export function LearningShellSkeleton({
+  hasActionBar
+}: {
+  hasActionBar: boolean;
+}) {
   return (
     <div className="relative h-full overflow-hidden bg-background">
       <div className="absolute inset-x-0 top-0 z-20 h-12 border-b bg-card md:h-14" />
@@ -145,7 +159,7 @@ function LearningShellSkeleton({ hasActionBar }: { hasActionBar: boolean }) {
       <div
         className={`absolute inset-x-0 overflow-hidden ${
           hasActionBar
-             ? 'top-12 bottom-[72px] md:top-14 md:bottom-20'
+            ? 'top-12 bottom-[72px] md:top-14 md:bottom-20'
             : 'top-12 bottom-0 md:top-14'
         }`}
       >

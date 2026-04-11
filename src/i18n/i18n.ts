@@ -12,7 +12,9 @@ function getInitialLanguage(): string {
       const parsed = JSON.parse(saved) as { language?: string };
       if (parsed.language) return parsed.language;
     }
-  } catch { /* ignora */ }
+  } catch {
+    /* ignora */
+  }
   const lang = navigator.language ?? 'pt-BR';
   if (lang.startsWith('pt')) return 'pt-BR';
   if (lang.startsWith('en')) return 'en';
@@ -20,20 +22,18 @@ function getInitialLanguage(): string {
   return 'pt-BR';
 }
 
-i18n
-  .use(initReactI18next)
-  .init({
-    lng: getInitialLanguage(),
-    fallbackLng: 'pt-BR',
-    defaultNS: 'translation',
-    resources: {
-      'pt-BR': { translation: ptBR },
-      en: { translation: en },
-      es: { translation: es }
-    },
-    interpolation: {
-      escapeValue: false // React já escapa por padrão
-    }
-  });
+i18n.use(initReactI18next).init({
+  lng: getInitialLanguage(),
+  fallbackLng: 'pt-BR',
+  defaultNS: 'translation',
+  resources: {
+    'pt-BR': { translation: ptBR },
+    en: { translation: en },
+    es: { translation: es }
+  },
+  interpolation: {
+    escapeValue: false // React já escapa por padrão
+  }
+});
 
 export default i18n;

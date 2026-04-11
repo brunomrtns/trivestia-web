@@ -9,7 +9,10 @@ import {
   X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useLearningData, useLearningNav } from '@/features/learning/learning.context';
+import {
+  useLearningData,
+  useLearningNav
+} from '@/features/learning/learning.context';
 import { useBatchLessonUnlock } from '@/features/learning/learning.hooks';
 
 const COLLAPSED_KEY = '@tm:learningOutlineCollapsed';
@@ -37,8 +40,8 @@ export default function LearningOutline() {
   } = useLearningNav();
   const collapsedStorageKey = `${COLLAPSED_KEY}:${slug}:${courseId}`;
 
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>(
-    () => getInitialCollapsedState(collapsedStorageKey)
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>(() =>
+    getInitialCollapsedState(collapsedStorageKey)
   );
 
   const allLessonIds = useMemo(
@@ -74,7 +77,10 @@ export default function LearningOutline() {
   }, [activeModuleId, collapsed]);
 
   const toggleModule = (moduleId: string) => {
-    setCollapsed((previous) => ({ ...previous, [moduleId]: !previous[moduleId] }));
+    setCollapsed((previous) => ({
+      ...previous,
+      [moduleId]: !previous[moduleId]
+    }));
   };
 
   return (

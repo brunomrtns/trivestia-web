@@ -26,7 +26,8 @@ import { invalidateLearningCache } from './learning.utils';
 export function useCourseInteractive(slug: string, courseId: string) {
   return useQuery({
     queryKey: ['course-interactive', slug, courseId],
-    queryFn: () => courseInteractiveEndpoints.getCourseInteractive(slug, courseId),
+    queryFn: () =>
+      courseInteractiveEndpoints.getCourseInteractive(slug, courseId),
     enabled: Boolean(slug && courseId),
     staleTime: 5 * 60 * 1000
   });
@@ -40,12 +41,16 @@ export function useLessonTimeline(slug: string, lessonId: string) {
   });
 }
 
-export function useActivity(slug: string, lessonId: string, activityId: string) {
+export function useActivity(
+  slug: string,
+  lessonId: string,
+  activityId: string
+) {
   return useQuery({
     queryKey: ['activity', slug, lessonId, activityId],
     queryFn: () => learningEndpoints.getActivity(slug, lessonId, activityId),
     enabled: Boolean(slug && lessonId && activityId),
-    staleTime: 0
+    staleTime: 10 * 1000
   });
 }
 
@@ -53,7 +58,8 @@ export function useActivitySubmission(slug: string, activityId?: string) {
   const queryClient = useQueryClient();
 
   const submit = useMutation({
-    mutationFn: (data: SubmitActivityRequest) => progressEndpoints.submit(slug, data),
+    mutationFn: (data: SubmitActivityRequest) =>
+      progressEndpoints.submit(slug, data),
     onSuccess: () => {
       if (!activityId) return;
       void queryClient.invalidateQueries({
@@ -70,13 +76,14 @@ export function useActivitySubmission(slug: string, activityId?: string) {
       try {
         return await progressEndpoints.getSubmission(slug, activityId);
       } catch (err: unknown) {
-        const status = (err as { response?: { status?: number } })?.response?.status;
+        const status = (err as { response?: { status?: number } })?.response
+          ?.status;
         if (status === 404) return null;
         throw err;
       }
     },
     enabled: Boolean(slug && activityId),
-    staleTime: 0,
+    staleTime: 10 * 1000,
     retry: false
   });
 
@@ -164,7 +171,8 @@ export function useStepViewTracker(options: StepViewTrackerOptions) {
 
         try {
           const current = optionsRef.current;
-          const attempts = (attemptCountRef.current.get(currentStepId) ?? 0) + 1;
+          const attempts =
+            (attemptCountRef.current.get(currentStepId) ?? 0) + 1;
           attemptCountRef.current.set(currentStepId, attempts);
 
           await stepsEndpoints.markViewed(

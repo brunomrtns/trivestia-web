@@ -8,10 +8,10 @@ export interface TextStepContentProps {
 
 export function TextStepContent({ content }: TextStepContentProps) {
   const body = (content.body as string) ?? '';
-  
+
   // ── Legacy Article Media (Backward Compatibility) ──
   // These fields are no longer available in the authoring UI.
-  // We keep rendering them here to avoid breaking existing articles 
+  // We keep rendering them here to avoid breaking existing articles
   // that were created before the rich text editor (Tiptap) integration.
   // Authors should migrate to embed them directly into the text.
   const articleVideoUrl = resolveStorageUrl((content.videoUrl as string) ?? '');
@@ -27,11 +27,11 @@ export function TextStepContent({ content }: TextStepContentProps) {
     <div className="space-y-8">
       <div
         className="prose prose-lg max-w-none prose-headings:font-bold prose-headings:text-foreground prose-headings:leading-tight prose-h2:mt-10 prose-h2:text-2xl prose-h3:mt-8 prose-p:text-foreground/85 prose-p:leading-relaxed prose-strong:text-foreground prose-a:text-primary prose-a:underline-offset-2 prose-li:text-foreground/85 prose-img:rounded-xl prose-video:rounded-xl prose-blockquote:border-primary/30 prose-blockquote:text-foreground/70"
-        dangerouslySetInnerHTML={{ 
+        dangerouslySetInnerHTML={{
           __html: DOMPurify.sanitize(body, {
             ADD_TAGS: ['iframe'],
             ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling']
-          }) 
+          })
         }}
       />
 
@@ -113,7 +113,12 @@ export function VideoStepContent({ content }: VideoStepContentProps) {
 
   return (
     <div className="aspect-video overflow-hidden rounded-xl bg-black">
-      <video src={sourceUrl} controls className="h-full w-full" preload="metadata" />
+      <video
+        src={sourceUrl}
+        controls
+        className="h-full w-full"
+        preload="metadata"
+      />
     </div>
   );
 }
@@ -128,7 +133,9 @@ export function ImageStepContent({ content }: ImageStepContentProps) {
   const caption = (content.caption as string | undefined) ?? undefined;
 
   if (!sourceUrl) {
-    return <p className="text-sm text-muted-foreground">Imagem indisponível.</p>;
+    return (
+      <p className="text-sm text-muted-foreground">Imagem indisponível.</p>
+    );
   }
 
   return (
@@ -192,7 +199,8 @@ export function ActivityStepCard({
         className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
       >
         Iniciar atividade
-        <Play className="h-4 w-4" />      </button>
+        <Play className="h-4 w-4" />{' '}
+      </button>
     </div>
   );
 }

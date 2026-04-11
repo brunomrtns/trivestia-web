@@ -1,4 +1,11 @@
-import { Menu, LogOut, User as UserIcon, Settings, ChevronDown, BookOpenText } from 'lucide-react';
+import {
+  Menu,
+  LogOut,
+  User as UserIcon,
+  Settings,
+  ChevronDown,
+  BookOpenText
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { AnnouncementBell } from '@/components/announcements/AnnouncementBell';
@@ -6,14 +13,12 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/auth.store';
 import { useTenant } from '@/hooks/useTenant';
 import { tenantPath } from '@/lib/tenant';
+import { useUIStore } from '@/stores/ui.store';
 
-interface TopbarProps {
-  onMenuClick: () => void;
-}
-
-export function Topbar({ onMenuClick }: TopbarProps) {
+export function Topbar() {
   const { t } = useTranslation();
   const { user, logout } = useAuthStore();
+  const { toggleSidebar } = useUIStore();
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const { tenant } = useTenant();
   const navigate = useNavigate();
@@ -34,7 +39,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-6">
       <button
-        onClick={onMenuClick}
+        onClick={toggleSidebar}
         className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
         aria-label={t('common.aria.menu')}
       >
@@ -42,8 +47,8 @@ export function Topbar({ onMenuClick }: TopbarProps) {
       </button>
 
       <div className="flex items-center gap-3">
+        ...
         <AnnouncementBell />
-
         <DropdownMenu.Root>
           <DropdownMenu.Trigger asChild>
             <button className="flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors hover:bg-accent focus:outline-none">
@@ -61,7 +66,9 @@ export function Topbar({ onMenuClick }: TopbarProps) {
             >
               {/* Cabeçalho do menu com dados do usuário */}
               <div className="px-3 py-2.5">
-                <p className="text-sm font-semibold leading-none">{user?.name}</p>
+                <p className="text-sm font-semibold leading-none">
+                  {user?.name}
+                </p>
                 {user?.email && (
                   <p className="mt-1 text-xs leading-none text-muted-foreground">
                     {user.email}

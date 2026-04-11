@@ -1,8 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import type { LessonStepDTO } from '@/types/api';
-import { useLearningData, useLearningNav } from '@/features/learning/learning.context';
-import { useLessonTimeline, useStepViewTracker } from '@/features/learning/learning.hooks';
+import {
+  useLearningData,
+  useLearningNav
+} from '@/features/learning/learning.context';
+import {
+  useLessonTimeline,
+  useStepViewTracker
+} from '@/features/learning/learning.hooks';
 import { toLearningStep } from '@/features/learning/learning.routes';
 import {
   isLearningCourseCompleted,
@@ -18,7 +24,12 @@ import {
 const EMPTY_STEPS: LessonStepDTO[] = [];
 
 export default function StepView() {
-  const params = useParams<{ tenantSlug: string; courseId: string; lessonId: string; stepId: string }>();
+  const params = useParams<{
+    tenantSlug: string;
+    courseId: string;
+    lessonId: string;
+    stepId: string;
+  }>();
   const lessonId = params.lessonId ?? '';
   const stepIdFromUrl = params.stepId ?? '';
   const tenantSlug = params.tenantSlug ?? '';
@@ -53,13 +64,16 @@ export default function StepView() {
   );
 
   const currentStep = currentStepIndex >= 0 ? steps[currentStepIndex] : null;
-  const previousStep = currentStepIndex > 0 ? steps[currentStepIndex - 1] : null;
+  const previousStep =
+    currentStepIndex > 0 ? steps[currentStepIndex - 1] : null;
   const nextStep =
     currentStepIndex >= 0 && currentStepIndex < steps.length - 1
       ? steps[currentStepIndex + 1]
       : null;
 
-  const isCanonicalUrl = Boolean(resolvedStepId && resolvedStepId === stepIdFromUrl);
+  const isCanonicalUrl = Boolean(
+    resolvedStepId && resolvedStepId === stepIdFromUrl
+  );
   const isCourseCompleted = isLearningCourseCompleted(progress, next);
 
   const navigateByCourseNext = useCallback((): boolean => {
@@ -224,25 +238,17 @@ export default function StepView() {
 
   if (timelineQuery.error || !timelineQuery.data) {
     return (
-      <StateMessage>
-        Não foi possível carregar os steps da aula.
-      </StateMessage>
+      <StateMessage>Não foi possível carregar os steps da aula.</StateMessage>
     );
   }
 
   if (!steps.length) {
-    return (
-      <StateMessage>
-        Esta aula ainda não possui steps.
-      </StateMessage>
-    );
+    return <StateMessage>Esta aula ainda não possui steps.</StateMessage>;
   }
 
   if (!resolvedStepId) {
     return (
-      <StateMessage>
-        Não foi possível resolver um step válido.
-      </StateMessage>
+      <StateMessage>Não foi possível resolver um step válido.</StateMessage>
     );
   }
 
@@ -256,30 +262,31 @@ export default function StepView() {
   }
 
   if (!currentStep) {
-    return (
-      <StateMessage>
-        Step não encontrado na timeline.
-      </StateMessage>
-    );
+    return <StateMessage>Step não encontrado na timeline.</StateMessage>;
   }
 
   return (
     <article className="mx-auto max-w-[52rem]">
       {resolution.fallbackReason && (
         <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
-          Step solicitado não foi encontrado na timeline. Fallback seguro aplicado.
+          Step solicitado não foi encontrado na timeline. Fallback seguro
+          aplicado.
         </div>
       )}
       <header className="mb-10 border-b border-border/40 pb-8">
         <p className="mb-2 text-sm font-medium tracking-wide text-muted-foreground">
           {timelineQuery.data.lesson.title}
         </p>
-        <h1 className="text-3xl font-bold leading-tight tracking-tight md:text-4xl lg:text-[2.75rem]">{currentStep.title}</h1>
+        <h1 className="text-3xl font-bold leading-tight tracking-tight md:text-4xl lg:text-[2.75rem]">
+          {currentStep.title}
+        </h1>
       </header>
 
       <StepRenderer
         step={currentStep}
-        onStartActivity={(activityId) => startActivity(lessonId, currentStep.id, activityId)}
+        onStartActivity={(activityId) =>
+          startActivity(lessonId, currentStep.id, activityId)
+        }
       />
     </article>
   );

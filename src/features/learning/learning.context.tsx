@@ -35,7 +35,9 @@ interface LearningDataContextValue {
   refetch: () => Promise<unknown>;
 }
 
-const LearningDataContext = createContext<LearningDataContextValue | null>(null);
+const LearningDataContext = createContext<LearningDataContextValue | null>(
+  null
+);
 
 interface LearningDataProviderProps {
   slug: string;
@@ -190,7 +192,11 @@ export function LearningNavProvider({ children }: LearningNavProviderProps) {
       if (isMobileViewport()) {
         setMobileOutlineOpen(false);
       }
-      navigate(stepId ? toLearningStep(slug, courseId, lessonId, stepId) : toLearningLesson(slug, courseId, lessonId));
+      navigate(
+        stepId
+          ? toLearningStep(slug, courseId, lessonId, stepId)
+          : toLearningLesson(slug, courseId, lessonId)
+      );
     },
     [courseId, navigate, slug]
   );
@@ -210,7 +216,9 @@ export function LearningNavProvider({ children }: LearningNavProviderProps) {
       if (isMobileViewport()) {
         setMobileOutlineOpen(false);
       }
-      navigate(toLearningActivity(slug, courseId, lessonId, stepId, activityId));
+      navigate(
+        toLearningActivity(slug, courseId, lessonId, stepId, activityId)
+      );
     },
     [courseId, navigate, slug]
   );

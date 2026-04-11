@@ -9,6 +9,7 @@ import { SimTradingTerminal } from '@/components/sim-trading/SimTradingTerminal'
 import { simulationEndpoints } from '@/services/endpoints/simulation.endpoints';
 import type { Candle, ScenarioPayload } from '@/types/api';
 import { useTranslation } from 'react-i18next';
+import { useUIStore } from '@/stores/ui.store';
 
 // ─── Config Form ──────────────────────────────────────────────────────────────
 
@@ -37,6 +38,7 @@ export default function PracticeLabPage() {
   const { t } = useTranslation();
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const slug = tenantSlug ?? '';
+  const { setSidebarCollapsed } = useUIStore();
   const [phase, setPhase] = useState<Phase>('hub');
   const [practiceToken, setPracticeToken] = useState<string>('');
   const [practiceCandles, setPracticeCandles] = useState<Candle[]>([]);
@@ -64,6 +66,7 @@ export default function PracticeLabPage() {
     setLoading(true);
     try {
       const res = await simulationEndpoints.createPracticeScenario(slug, data);
+      setSidebarCollapsed(true);
       // Backend retorna { sessionId, candles, executionConfig, scenarioToken, maxEvents }
       // Montar ScenarioPayload para o hook
       const scenario: ScenarioPayload = {
@@ -77,8 +80,9 @@ export default function PracticeLabPage() {
       setPracticeCandles(res.candles);
       setPracticeScenario(scenario);
       setPhase('terminal');
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message ?? t('app.lab.toast.error'));
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error?.response?.data?.message ?? t('app.lab.toast.error'));
     } finally {
       setLoading(false);
     }

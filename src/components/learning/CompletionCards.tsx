@@ -2,7 +2,10 @@ import { useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Award, BookOpen, CheckCircle2, Home, RotateCcw } from 'lucide-react';
-import { useLearningData, useLearningNav } from '@/features/learning/learning.context';
+import {
+  useLearningData,
+  useLearningNav
+} from '@/features/learning/learning.context';
 import {
   buildLearningNextUrl,
   isLearningCourseCompleted
@@ -32,9 +35,12 @@ export function CourseCompletionCard() {
   if (!isCompleted) {
     return (
       <section className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
-        <h1 className="text-xl font-bold text-amber-900">Conclusão ainda indisponível</h1>
+        <h1 className="text-xl font-bold text-amber-900">
+          Conclusão ainda indisponível
+        </h1>
         <p className="mt-2 text-sm text-amber-800">
-          O curso ainda possui etapas pendentes. Continue do ponto atual para concluir.
+          O curso ainda possui etapas pendentes. Continue do ponto atual para
+          concluir.
         </p>
 
         <div className="mt-4 flex flex-wrap gap-3">
@@ -42,7 +48,11 @@ export function CourseCompletionCard() {
             <button
               type="button"
               onClick={() => {
-                if (next.kind === 'ACTIVITY' && next.stepId && next.activityId) {
+                if (
+                  next.kind === 'ACTIVITY' &&
+                  next.stepId &&
+                  next.activityId
+                ) {
                   startActivity(next.lessonId, next.stepId, next.activityId);
                   return;
                 }
@@ -82,7 +92,8 @@ export function CourseCompletionCard() {
           <div>
             <h1 className="text-2xl font-bold">Curso concluído com sucesso</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              {course?.title ?? 'Curso'} foi finalizado. Você pode revisar o conteúdo quando quiser.
+              {course?.title ?? 'Curso'} foi finalizado. Você pode revisar o
+              conteúdo quando quiser.
             </p>
           </div>
         </div>

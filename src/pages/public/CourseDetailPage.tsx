@@ -1,4 +1,4 @@
-import { useParams, Link, useLocation } from 'react-router-dom';
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
@@ -12,6 +12,7 @@ import {
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { useAuthStore } from '@/features/auth/auth.store';
 import { toLearningOverview, toLearningLesson } from '@/features/learning/learning.routes';
+import { useUIStore } from '@/stores/ui.store';
 
 function resolveCourseImageUrl(pathOrUrl?: string | null) {
   if (!pathOrUrl) return null;
@@ -33,6 +34,8 @@ export default function CourseDetailPage() {
     tenantSlug: string;
   }>();
   const location = useLocation();
+  const navigate = useNavigate();
+  const { setSidebarCollapsed } = useUIStore();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const useLearningV2 = useAuthStore((s) => s.useLearningV2);
   const slug = tenantSlug ?? '';
@@ -107,23 +110,28 @@ export default function CourseDetailPage() {
           </Link>
         )}
         {isAuthenticated && (
-          <Link
-            to={
-              useLearningV2
+          <button
+            type="button"
+            onClick={() => {
+              setSidebarCollapsed(true);
+              const target = useLearningV2
                 ? toLearningOverview(slug, courseId!)
-                : `/t/${slug}/app/courses/${courseId}/interactive`
-            }
+                : `/t/${slug}/app/courses/${courseId}/interactive`;
+              navigate(target);
+            }}
             className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:opacity-90"
           >
             <PlayCircle className="h-5 w-5" />
             {t('public.courseDetail.continueCourse')}
-          </Link>
+          </button>
         )}
       </div>
 
       {/* Módulos */}
       <div className="space-y-4">
-        <h2 className="text-xl font-bold">{t('public.courseDetail.contentTitle')}</h2>
+        <h2 className="text-xl font-bold">
+          {t('public.courseDetail.contentTitle')}
+        </h2>
         {modules?.map((mod, i) => (
           <ModuleAccordion
             key={mod.id}
@@ -158,12 +166,21 @@ function ModuleAccordion({
   courseId: string;
   slug: string;
 }) {
-  // GET /modules/:moduleId/lessons — público
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { setSidebarCollapsed } = useUIStore();
   const { data: lessons, isLoading } = useQuery({
     queryKey: ['lessons', slug, moduleId],
     queryFn: () => learningEndpoints.getLessons(slug, moduleId)
   });
+
+  const handleLessonClick = (lessonId: string) => {
+    setSidebarCollapsed(true);
+    const target = useLearningV2
+      ? toLearningLesson(slug, courseId!, lessonId)
+      : `/t/${slug}/app/lessons/${lessonId}`;
+    navigate(target);
+  };
 
   return (
     <motion.div
@@ -178,7 +195,9 @@ function ModuleAccordion({
         </span>
         <h3 className="font-semibold">{title}</h3>
         <span className="ml-auto text-sm text-muted-foreground">
-          {isLoading ? '...' : t('public.courseDetail.lessonCount', { n: lessons?.length ?? 0 })}
+          {isLoading
+            ? '...'
+            : t('public.courseDetail.lessonCount', { n: lessons?.length ?? 0 })}
         </span>
       </div>
 
@@ -190,19 +209,15 @@ function ModuleAccordion({
               className="flex items-center gap-3 px-5 py-3 text-sm"
             >
               {isAuthenticated ? (
-                <Link
-                  to={
-                    useLearningV2
-                      ? toLearningLesson(slug, courseId!, lesson.id)
-                      : `/t/${slug}/app/lessons/${lesson.id}`
-                  }
-                  state={{ lessonTitle: lesson.title, courseId }}
+                <button
+                  type="button"
+                  onClick={() => handleLessonClick(lesson.id)}
                   className="flex w-full items-center gap-3 text-muted-foreground transition-colors hover:text-foreground"
                 >
                   <FileText className="h-4 w-4 shrink-0" />
                   {lesson.title}
                   <ChevronRight className="ml-auto h-4 w-4 opacity-50" />
-                </Link>
+                </button>
               ) : (
                 <span className="flex w-full items-center gap-3 text-muted-foreground">
                   <Lock className="h-4 w-4 shrink-0" />

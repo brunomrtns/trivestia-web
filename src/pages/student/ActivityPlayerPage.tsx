@@ -24,6 +24,7 @@ import { SimTradingTerminal } from '@/components/sim-trading/SimTradingTerminal'
 import { ChallengeBriefingScreen } from '@/components/sim-trading/ChallengeBriefingScreen';
 import { HelpDrawer } from '@/components/sim-trading/HelpDrawer';
 import { useTutorialProgress } from '@/components/sim-trading/useTutorialProgress';
+import { useUIStore } from '@/stores/ui.store';
 import { formatPercentage } from '@/lib/utils';
 import type { Answer, SubmissionResult } from '@/types/api';
 
@@ -44,7 +45,7 @@ export default function ActivityPlayerPage() {
   const [isRetrying, setIsRetrying] = useState(false);
 
   // GET /lessons/:lessonId/activities/:activityId — Bearer ANY
-  // staleTime:0 garante que novas questões criadas pelo admin aparecem sem F5
+  // staleTime: 10s para evitar flickering em navegação rápida
   const {
     data: activity,
     isLoading,
@@ -53,7 +54,8 @@ export default function ActivityPlayerPage() {
     queryKey: ['activity', slug, lessonId, activityId],
     queryFn: () => learningEndpoints.getActivity(slug, lessonId!, activityId!),
     enabled: !!lessonId && !!activityId,
-    staleTime: 0
+    staleTime: 10 * 1000,
+    placeholderData: (previousData) => previousData
   });
 
   // POST /submissions — Bearer ANY
@@ -91,8 +93,9 @@ export default function ActivityPlayerPage() {
       }
     },
     enabled: !!activityId,
-    staleTime: 0,
-    retry: false
+    staleTime: 10 * 1000,
+    retry: false,
+    placeholderData: (previousData) => previousData
   });
 
   // Verifica se o prazo do curso expirou (bloqueia submissão, mas não exibe)
@@ -107,9 +110,12 @@ export default function ActivityPlayerPage() {
   if (!lessonId) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
-        <p className="text-lg font-semibold">Nao foi possivel abrir a atividade</p>
+        <p className="text-lg font-semibold">
+          Nao foi possivel abrir a atividade
+        </p>
         <p className="text-sm text-muted-foreground">
-          Esta rota legada nao possui contexto de aula para carregar a atividade.
+          Esta rota legada nao possui contexto de aula para carregar a
+          atividade.
         </p>
         <button
           type="button"
@@ -122,13 +128,11 @@ export default function ActivityPlayerPage() {
     );
   }
 
-  // Aguarda: carregamento da atividade E verificação de submissão existente
-  // Inclui caso: refetch em background com 0 questões no cache (evita currentQuestion=undefined)
+  // Aguarda carregamento inicial apenas se não houver dados
+  // Se já temos 'activity', mantemos a UI estável mesmo durante refetch
   if (
-    isLoading ||
-    !activity ||
-    (!result && loadingReview) ||
-    (isFetching && activity.questions.length === 0)
+    (isLoading && !activity) ||
+    (!result && loadingReview && !submissionReview)
   ) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
@@ -137,9 +141,12 @@ export default function ActivityPlayerPage() {
     );
   }
 
+  // Se por algum motivo ainda não temos activity (ex: erro não capturado ou query desabilitada)
+  if (!activity) return null;
+
   // ─── Desafio de Trading: briefing → terminal ──────────────────────────────────
   if (activity.type === 'SIM_TRADING_CHALLENGE') {
-      return (
+    return (
       <SimTradingChallengeFlow
         slug={slug}
         activityId={activityId!}
@@ -194,202 +201,202 @@ export default function ActivityPlayerPage() {
     return (
       <div className="flex-1 overflow-y-auto p-6">
         <div className="mx-auto max-w-2xl space-y-6">
-        {/* Score header */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="flex flex-col items-center justify-center text-center"
-        >
-          <div
-            className={`mb-6 flex h-24 w-24 items-center justify-center rounded-full ${passed ? 'bg-green-100' : 'bg-yellow-100'}`}
+          {/* Score header */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center justify-center text-center"
           >
-            <Trophy
-              className={`h-12 w-12 ${passed ? 'text-green-500' : 'text-yellow-500'}`}
-            />
-          </div>
-          <h1 className="mb-2 text-4xl font-extrabold">
-            {formatPercentage(pct)}
-          </h1>
-          <p className="mb-1 text-lg font-semibold">
-            {passed
-              ? t('app.activity.result.passed')
-              : t('app.activity.result.failed')}
-          </p>
-          <p className="mb-8 text-muted-foreground">
-            {t('app.activity.result.scoreLabel', { score, maxScore })}
-          </p>
-        </motion.div>
+            <div
+              className={`mb-6 flex h-24 w-24 items-center justify-center rounded-full ${passed ? 'bg-green-100' : 'bg-yellow-100'}`}
+            >
+              <Trophy
+                className={`h-12 w-12 ${passed ? 'text-green-500' : 'text-yellow-500'}`}
+              />
+            </div>
+            <h1 className="mb-2 text-4xl font-extrabold">
+              {formatPercentage(pct)}
+            </h1>
+            <p className="mb-1 text-lg font-semibold">
+              {passed
+                ? t('app.activity.result.passed')
+                : t('app.activity.result.failed')}
+            </p>
+            <p className="mb-8 text-muted-foreground">
+              {t('app.activity.result.scoreLabel', { score, maxScore })}
+            </p>
+          </motion.div>
 
-        {/* ─── Revisão condicional das questões ─────────────────────────────── */}
-        {loadingReview && (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          </div>
-        )}
+          {/* ─── Revisão condicional das questões ─────────────────────────────── */}
+          {loadingReview && (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          )}
 
-        {submissionReview && !loadingReview && (
-          <div className="space-y-4">
-            <h2 className="text-lg font-bold">
-              {t('app.activity.result.reviewTitle')}
-            </h2>
+          {submissionReview && !loadingReview && (
+            <div className="space-y-4">
+              <h2 className="text-lg font-bold">
+                {t('app.activity.result.reviewTitle')}
+              </h2>
 
-            {/* Política: NEVER */}
-            {submissionReview.reviewPolicy === 'NEVER' && (
-              <div className="flex items-center gap-3 rounded-xl border bg-card p-4 text-sm text-muted-foreground">
-                <Lock className="h-5 w-5 shrink-0" />
-                {t('app.activity.result.policyNever')}
-              </div>
-            )}
-
-            {/* Política: AFTER_DATE ainda bloqueada */}
-            {submissionReview.reviewPolicy === 'AFTER_DATE' &&
-              !submissionReview.reviewAllowed && (
+              {/* Política: NEVER */}
+              {submissionReview.reviewPolicy === 'NEVER' && (
                 <div className="flex items-center gap-3 rounded-xl border bg-card p-4 text-sm text-muted-foreground">
-                  <Clock className="h-5 w-5 shrink-0 text-yellow-500" />
-                  <span>
-                    {t('app.activity.result.policyAfterDate', {
-                      date: submissionReview.reviewAvailableAt
-                        ? new Date(
-                            submissionReview.reviewAvailableAt
-                          ).toLocaleString('pt-BR')
-                        : t('app.activity.result.policyDateFallback')
-                    })}
-                  </span>
+                  <Lock className="h-5 w-5 shrink-0" />
+                  {t('app.activity.result.policyNever')}
                 </div>
               )}
 
-            {/* Revisão permitida: questão por questão */}
-            {submissionReview.reviewAllowed &&
-              submissionReview.responses.map((r, idx) => {
-                const feedbackEntry = result?.results?.find(
-                  (x) => x.questionId === r.questionId
-                );
-                return (
-                  <div
-                    key={r.questionId}
-                    className={`rounded-2xl border p-5 shadow-sm ${
-                      r.isCorrect
-                        ? 'border-green-500/30 bg-green-500/5'
-                        : 'border-red-500/30 bg-red-500/5'
-                    }`}
-                  >
-                    {/* Cabeçalho com resultado */}
-                    <div className="mb-3 flex items-center gap-2">
-                      {r.isCorrect ? (
-                        <CheckCircle2 className="h-5 w-5 text-green-500" />
-                      ) : (
-                        <XCircle className="h-5 w-5 text-red-500" />
-                      )}
-                      <span className="text-xs font-semibold text-muted-foreground">
-                        {t('app.activity.result.questionN', { n: idx + 1 })} ·{' '}
-                        {r.isCorrect
-                          ? t('app.activity.result.correct')
-                          : t('app.activity.result.incorrect')}{' '}
-                        ·{' '}
-                        {t('app.activity.result.questionScore', {
-                          earned: r.earnedScore,
-                          weight: r.question.weight
-                        })}
-                      </span>
-                    </div>
-
-                    {/* Enunciado */}
-                    <p className="mb-3 text-sm font-semibold leading-relaxed">
-                      {r.question.statement}
-                    </p>
-
-                    {/* Imagem do enunciado */}
-                    {r.question.imageUrl && (
-                      <img
-                        src={r.question.imageUrl}
-                        alt={t('app.activity.result.questionImageAlt')}
-                        className="mb-3 max-h-48 w-full rounded-xl object-contain bg-muted/30"
-                      />
-                    )}
-
-                    {/* Opções com gabarito (isCorrect presente quando review liberado) */}
-                    {r.question.options.length > 0 && (
-                      <div className="mb-3 space-y-1.5">
-                        {r.question.options.map((opt) => {
-                          const withCorrect = opt as typeof opt & {
-                            isCorrect?: boolean;
-                          };
-                          return (
-                            <div
-                              key={opt.id}
-                              className={`flex items-start gap-2 rounded-lg px-3 py-2 text-sm ${
-                                withCorrect.isCorrect
-                                  ? 'bg-green-500/10 text-green-700 dark:text-green-400'
-                                  : 'bg-muted/30 text-muted-foreground'
-                              }`}
-                            >
-                              <span className="mt-0.5 h-3 w-3 shrink-0">
-                                {withCorrect.isCorrect ? '✓' : '–'}
-                              </span>
-                              {opt.text}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                    {/* Explicação */}
-                    {r.question.explanation && (
-                      <div className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-sm text-primary/90">
-                        <span className="mr-1 font-semibold">
-                          {t('app.activity.result.explanationLabel')}
-                        </span>
-                        {r.question.explanation}
-                      </div>
-                    )}
-
-                    {/* Feedback de atividades especiais (ChartMarkup, RiskCalc) */}
-                    {feedbackEntry?.feedback && (
-                      <QuestionRenderer
-                        activityType={activity.type}
-                        question={{
-                          id: r.questionId,
-                          statement: r.question.statement,
-                          difficulty: 1,
-                          explanation: '',
-                          weight: r.question.weight,
-                          order: idx,
-                          options: []
-                        }}
-                        value={answers[r.questionId] ?? null}
-                        onChange={() => {}}
-                        feedback={feedbackEntry.feedback}
-                      />
-                    )}
+              {/* Política: AFTER_DATE ainda bloqueada */}
+              {submissionReview.reviewPolicy === 'AFTER_DATE' &&
+                !submissionReview.reviewAllowed && (
+                  <div className="flex items-center gap-3 rounded-xl border bg-card p-4 text-sm text-muted-foreground">
+                    <Clock className="h-5 w-5 shrink-0 text-yellow-500" />
+                    <span>
+                      {t('app.activity.result.policyAfterDate', {
+                        date: submissionReview.reviewAvailableAt
+                          ? new Date(
+                              submissionReview.reviewAvailableAt
+                            ).toLocaleString('pt-BR')
+                          : t('app.activity.result.policyDateFallback')
+                      })}
+                    </span>
                   </div>
-                );
-              })}
-          </div>
-        )}
+                )}
 
-        {/* Actions */}
-        <div className="flex justify-center gap-3 pb-8">
-          <button
-            onClick={() => {
-              setIsRetrying(true);
-              setResult(null);
-              setAnswers({});
-              setCurrentIndex(0);
-            }}
-            className="flex items-center gap-2 rounded-xl border px-5 py-2.5 text-sm font-semibold transition hover:bg-accent"
-          >
-            <RotateCcw className="h-4 w-4" />
-            {t('app.activity.result.retry')}
-          </button>
-          <button
-            onClick={() => navigate(`/t/${slug}/app/dashboard`)}
-            className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
-          >
-            {t('app.activity.result.goToDashboard')}
-          </button>
+              {/* Revisão permitida: questão por questão */}
+              {submissionReview.reviewAllowed &&
+                submissionReview.responses.map((r, idx) => {
+                  const feedbackEntry = result?.results?.find(
+                    (x) => x.questionId === r.questionId
+                  );
+                  return (
+                    <div
+                      key={r.questionId}
+                      className={`rounded-2xl border p-5 shadow-sm ${
+                        r.isCorrect
+                          ? 'border-green-500/30 bg-green-500/5'
+                          : 'border-red-500/30 bg-red-500/5'
+                      }`}
+                    >
+                      {/* Cabeçalho com resultado */}
+                      <div className="mb-3 flex items-center gap-2">
+                        {r.isCorrect ? (
+                          <CheckCircle2 className="h-5 w-5 text-green-500" />
+                        ) : (
+                          <XCircle className="h-5 w-5 text-red-500" />
+                        )}
+                        <span className="text-xs font-semibold text-muted-foreground">
+                          {t('app.activity.result.questionN', { n: idx + 1 })} ·{' '}
+                          {r.isCorrect
+                            ? t('app.activity.result.correct')
+                            : t('app.activity.result.incorrect')}{' '}
+                          ·{' '}
+                          {t('app.activity.result.questionScore', {
+                            earned: r.earnedScore,
+                            weight: r.question.weight
+                          })}
+                        </span>
+                      </div>
+
+                      {/* Enunciado */}
+                      <p className="mb-3 text-sm font-semibold leading-relaxed">
+                        {r.question.statement}
+                      </p>
+
+                      {/* Imagem do enunciado */}
+                      {r.question.imageUrl && (
+                        <img
+                          src={r.question.imageUrl}
+                          alt={t('app.activity.result.questionImageAlt')}
+                          className="mb-3 max-h-48 w-full rounded-xl object-contain bg-muted/30"
+                        />
+                      )}
+
+                      {/* Opções com gabarito (isCorrect presente quando review liberado) */}
+                      {r.question.options.length > 0 && (
+                        <div className="mb-3 space-y-1.5">
+                          {r.question.options.map((opt) => {
+                            const withCorrect = opt as typeof opt & {
+                              isCorrect?: boolean;
+                            };
+                            return (
+                              <div
+                                key={opt.id}
+                                className={`flex items-start gap-2 rounded-lg px-3 py-2 text-sm ${
+                                  withCorrect.isCorrect
+                                    ? 'bg-green-500/10 text-green-700 dark:text-green-400'
+                                    : 'bg-muted/30 text-muted-foreground'
+                                }`}
+                              >
+                                <span className="mt-0.5 h-3 w-3 shrink-0">
+                                  {withCorrect.isCorrect ? '✓' : '–'}
+                                </span>
+                                {opt.text}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {/* Explicação */}
+                      {r.question.explanation && (
+                        <div className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-sm text-primary/90">
+                          <span className="mr-1 font-semibold">
+                            {t('app.activity.result.explanationLabel')}
+                          </span>
+                          {r.question.explanation}
+                        </div>
+                      )}
+
+                      {/* Feedback de atividades especiais (ChartMarkup, RiskCalc) */}
+                      {feedbackEntry?.feedback && (
+                        <QuestionRenderer
+                          activityType={activity.type}
+                          question={{
+                            id: r.questionId,
+                            statement: r.question.statement,
+                            difficulty: 1,
+                            explanation: '',
+                            weight: r.question.weight,
+                            order: idx,
+                            options: []
+                          }}
+                          value={answers[r.questionId] ?? null}
+                          onChange={() => {}}
+                          feedback={feedbackEntry.feedback}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex justify-center gap-3 pb-8">
+            <button
+              onClick={() => {
+                setIsRetrying(true);
+                setResult(null);
+                setAnswers({});
+                setCurrentIndex(0);
+              }}
+              className="flex items-center gap-2 rounded-xl border px-5 py-2.5 text-sm font-semibold transition hover:bg-accent"
+            >
+              <RotateCcw className="h-4 w-4" />
+              {t('app.activity.result.retry')}
+            </button>
+            <button
+              onClick={() => navigate(`/t/${slug}/app/dashboard`)}
+              className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+            >
+              {t('app.activity.result.goToDashboard')}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
     );
   }
 
@@ -416,88 +423,92 @@ export default function ActivityPlayerPage() {
     <div className="flex-1 overflow-y-auto p-6">
       <div className="mx-auto max-w-2xl space-y-6">
         {/* Header */}
-      <div>
-        <div className="mb-2 flex items-center justify-between text-sm text-muted-foreground">
-          <span>{t(`common.activityTypes.${activity.type}`, { defaultValue: activity.type })}</span>
-          <span>
-            {currentIndex + 1}/{totalQuestions}
-          </span>
+        <div>
+          <div className="mb-2 flex items-center justify-between text-sm text-muted-foreground">
+            <span>
+              {t(`common.activityTypes.${activity.type}`, {
+                defaultValue: activity.type
+              })}
+            </span>
+            <span>
+              {currentIndex + 1}/{totalQuestions}
+            </span>
+          </div>
+          <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+            <motion.div
+              className="h-full rounded-full bg-primary"
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.3 }}
+            />
+          </div>
+          <h1 className="mt-3 text-xl font-bold">{activity.title}</h1>
         </div>
-        <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+
+        {/* Questão */}
+        <AnimatePresence mode="wait">
           <motion.div
-            className="h-full rounded-full bg-primary"
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.3 }}
-          />
-        </div>
-        <h1 className="mt-3 text-xl font-bold">{activity.title}</h1>
-      </div>
-
-      {/* Questão */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentQuestion.id}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.2 }}
-          className="rounded-2xl border bg-card p-6 shadow-sm"
-        >
-          <p className="mb-6 text-base font-semibold leading-relaxed">
-            {currentQuestion.statement}
-          </p>
-          <QuestionRenderer
-            activityType={activity.type}
-            question={currentQuestion}
-            value={answers[currentQuestion.id] ?? null}
-            onChange={handleAnswer}
-          />
-        </motion.div>
-      </AnimatePresence>
-
-      {/* Banner prazo encerrado */}
-      {isCourseExpired && (
-        <div className="flex items-center gap-3 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
-          <AlertTriangle className="h-5 w-5 shrink-0" />
-          {t('app.activity.expiredBanner')}
-        </div>
-      )}
-
-      {/* Navegação */}
-      <div className="flex items-center justify-between">
-        <button
-          onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
-          disabled={currentIndex === 0}
-          className="flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition hover:bg-accent disabled:opacity-40"
-        >
-          <ChevronLeft className="h-4 w-4" />
-          {t('common.pagination.previous')}
-        </button>
-
-        {currentIndex < totalQuestions - 1 ? (
-          <button
-            onClick={() => setCurrentIndex((i) => i + 1)}
-            disabled={!answers[currentQuestion.id]}
-            className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-40"
+            key={currentQuestion.id}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.2 }}
+            className="rounded-2xl border bg-card p-6 shadow-sm"
           >
-            {t('app.lesson.nav.next')}
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        ) : (
-          <button
-            onClick={handleSubmit}
-            disabled={submitMutation.isPending || isCourseExpired}
-            className="flex items-center gap-2 rounded-xl bg-green-600 px-6 py-2.5 text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-40"
-          >
-            {submitMutation.isPending && (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            )}
-            {t('app.activity.nav.submit')}
-          </button>
+            <p className="mb-6 text-base font-semibold leading-relaxed">
+              {currentQuestion.statement}
+            </p>
+            <QuestionRenderer
+              activityType={activity.type}
+              question={currentQuestion}
+              value={answers[currentQuestion.id] ?? null}
+              onChange={handleAnswer}
+            />
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Banner prazo encerrado */}
+        {isCourseExpired && (
+          <div className="flex items-center gap-3 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
+            <AlertTriangle className="h-5 w-5 shrink-0" />
+            {t('app.activity.expiredBanner')}
+          </div>
         )}
+
+        {/* Navegação */}
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
+            disabled={currentIndex === 0}
+            className="flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition hover:bg-accent disabled:opacity-40"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            {t('common.pagination.previous')}
+          </button>
+
+          {currentIndex < totalQuestions - 1 ? (
+            <button
+              onClick={() => setCurrentIndex((i) => i + 1)}
+              disabled={!answers[currentQuestion.id]}
+              className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-40"
+            >
+              {t('app.lesson.nav.next')}
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          ) : (
+            <button
+              onClick={handleSubmit}
+              disabled={submitMutation.isPending || isCourseExpired}
+              className="flex items-center gap-2 rounded-xl bg-green-600 px-6 py-2.5 text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-40"
+            >
+              {submitMutation.isPending && (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              )}
+              {t('app.activity.nav.submit')}
+            </button>
+          )}
+        </div>
       </div>
-    </div>
     </div>
   );
 }
@@ -519,6 +530,7 @@ function SimTradingChallengeFlow({
   const [phase, setPhase] = useState<ChallengePhase>('BRIEFING');
   const [helpOpen, setHelpOpen] = useState(false);
   const tutorial = useTutorialProgress();
+  const { setSidebarCollapsed } = useUIStore();
 
   // Buscar briefing
   const {
@@ -568,7 +580,10 @@ function SimTradingChallengeFlow({
       <div className="flex-1 overflow-y-auto p-6">
         <ChallengeBriefingScreen
           briefing={briefing}
-          onStart={() => setPhase('TERMINAL')}
+          onStart={() => {
+            setSidebarCollapsed(true);
+            setPhase('TERMINAL');
+          }}
           onGoBack={onGoBack}
           onOpenHelp={() => setHelpOpen(true)}
         />

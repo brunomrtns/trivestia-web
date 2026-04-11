@@ -36,7 +36,10 @@ export function useActivitySession({
   const [localResult, setLocalResult] = useState<SubmissionResult | null>(null);
   const [isRetrying, setIsRetrying] = useState(false);
 
-  const questionIds = useMemo(() => new Set(questions.map((q) => q.id)), [questions]);
+  const questionIds = useMemo(
+    () => new Set(questions.map((q) => q.id)),
+    [questions]
+  );
 
   const sanitizeAnswers = useCallback(
     (input: Record<string, Answer>): Record<string, Answer> => {
@@ -81,17 +84,22 @@ export function useActivitySession({
     }));
   }, []);
 
-  const setLocalResultSafely = useCallback((result: SubmissionResult | null) => {
-    setLocalResult(result);
-    setIsRetrying(false);
-  }, []);
+  const setLocalResultSafely = useCallback(
+    (result: SubmissionResult | null) => {
+      setLocalResult(result);
+      setIsRetrying(false);
+    },
+    []
+  );
 
   const goPrevious = useCallback(() => {
     setCurrentIndex((index) => Math.max(0, index - 1));
   }, []);
 
   const goNext = useCallback(() => {
-    setCurrentIndex((index) => Math.min(index + 1, Math.max(questions.length - 1, 0)));
+    setCurrentIndex((index) =>
+      Math.min(index + 1, Math.max(questions.length - 1, 0))
+    );
   }, [questions.length]);
 
   return {
@@ -149,11 +157,14 @@ export function useActivityFlowIntegration({
   onExitForward,
   onSubmit
 }: UseActivityFlowIntegrationOptions): UseActivityFlowIntegrationResult {
-  const isLastQuestion = questions.length > 0 && currentIndex === questions.length - 1;
+  const isLastQuestion =
+    questions.length > 0 && currentIndex === questions.length - 1;
   const currentAnswered = currentQuestion
     ? answers[currentQuestion.id] !== undefined
     : false;
-  const allAnswered = questions.every((question) => answers[question.id] !== undefined);
+  const allAnswered = questions.every(
+    (question) => answers[question.id] !== undefined
+  );
 
   const submitIfAllowed = useCallback(() => {
     if (questions.length === 0) return;

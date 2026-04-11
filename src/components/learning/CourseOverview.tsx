@@ -1,6 +1,15 @@
 import { useEffect, useMemo } from 'react';
-import { BookOpen, CheckCircle2, CircleDashed, Lock, PlayCircle } from 'lucide-react';
-import { useLearningData, useLearningNav } from '@/features/learning/learning.context';
+import {
+  BookOpen,
+  CheckCircle2,
+  CircleDashed,
+  Lock,
+  PlayCircle
+} from 'lucide-react';
+import {
+  useLearningData,
+  useLearningNav
+} from '@/features/learning/learning.context';
 import { useBatchLessonUnlock } from '@/features/learning/learning.hooks';
 import { isLearningCourseCompleted } from '@/features/learning/learning.utils';
 import { ContinueLearningCard } from './ContinueLearningCard';
@@ -50,17 +59,23 @@ export default function CourseOverview() {
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Visão geral do curso
             </p>
-            <h1 className="mt-1 text-2xl font-bold">{course?.title ?? 'Curso'}</h1>
+            <h1 className="mt-1 text-2xl font-bold">
+              {course?.title ?? 'Curso'}
+            </h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              {course?.description ?? 'Acompanhe seu progresso e continue do ponto certo.'}
+              {course?.description ??
+                'Acompanhe seu progresso e continue do ponto certo.'}
             </p>
           </div>
 
           <div className="min-w-44 rounded-xl border bg-background px-4 py-3 text-right">
             <p className="text-xs text-muted-foreground">Progresso do curso</p>
-            <p className="mt-1 text-2xl font-extrabold">{progress?.percent ?? 0}%</p>
+            <p className="mt-1 text-2xl font-extrabold">
+              {progress?.percent ?? 0}%
+            </p>
             <p className="text-xs text-muted-foreground">
-              {progress?.completedLessons ?? 0}/{progress?.totalLessons ?? 0} aulas concluídas
+              {progress?.completedLessons ?? 0}/{progress?.totalLessons ?? 0}{' '}
+              aulas concluídas
             </p>
           </div>
         </div>
@@ -75,7 +90,8 @@ export default function CourseOverview() {
         {isCompleted && (
           <div className="mt-4 flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm">
             <span className="font-medium text-emerald-900">
-              Curso finalizado. Você pode revisar o conteúdo ou abrir a conclusão.
+              Curso finalizado. Você pode revisar o conteúdo ou abrir a
+              conclusão.
             </span>
             <button
               type="button"
@@ -92,15 +108,21 @@ export default function CourseOverview() {
 
       <div className="space-y-4">
         {modules.map((module) => (
-          <article key={module.id} className="rounded-2xl border bg-card p-4 shadow-sm">
+          <article
+            key={module.id}
+            className="rounded-2xl border bg-card p-4 shadow-sm"
+          >
             <div className="mb-3 flex items-center justify-between">
               <div>
                 <h2 className="text-base font-semibold">{module.title}</h2>
                 <p className="text-xs text-muted-foreground">
-                  {module.progress.completedLessons}/{module.progress.totalLessons} aulas concluídas
+                  {module.progress.completedLessons}/
+                  {module.progress.totalLessons} aulas concluídas
                 </p>
               </div>
-              <span className="text-sm font-semibold text-primary">{module.progress.percent}%</span>
+              <span className="text-sm font-semibold text-primary">
+                {module.progress.percent}%
+              </span>
             </div>
 
             <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-muted">
@@ -115,7 +137,9 @@ export default function CourseOverview() {
                 const isCurrent = lesson.id === currentLessonId;
                 const isNext = lesson.id === nextLessonId;
                 const isDone = lesson.progress.status === 'COMPLETED';
-                const isLocked = unlockMap.has(lesson.id) ? !unlockMap.get(lesson.id) : false;
+                const isLocked = unlockMap.has(lesson.id)
+                  ? !unlockMap.get(lesson.id)
+                  : false;
 
                 return (
                   <button
@@ -131,7 +155,11 @@ export default function CourseOverview() {
                           next.stepId &&
                           next.activityId
                         ) {
-                          startActivity(lesson.id, next.stepId, next.activityId);
+                          startActivity(
+                            lesson.id,
+                            next.stepId,
+                            next.activityId
+                          );
                           return;
                         }
 

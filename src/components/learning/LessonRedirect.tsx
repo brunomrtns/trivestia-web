@@ -1,12 +1,19 @@
 import { useEffect } from 'react';
 import { Navigate, useLocation, useParams } from 'react-router-dom';
-import { useLearningData, useLearningNav } from '@/features/learning/learning.context';
+import {
+  useLearningData,
+  useLearningNav
+} from '@/features/learning/learning.context';
 import { useLessonTimeline } from '@/features/learning/learning.hooks';
 import { toLearningStep } from '@/features/learning/learning.routes';
 import { resolveStepIdResult } from '@/features/learning/learning.utils';
 
 export default function LessonRedirect() {
-  const params = useParams<{ tenantSlug: string; courseId: string; lessonId: string }>();
+  const params = useParams<{
+    tenantSlug: string;
+    courseId: string;
+    lessonId: string;
+  }>();
   const location = useLocation();
   const { slug, courseId, next } = useLearningData();
   const { setActionBar, setShellMode } = useLearningNav();
@@ -58,7 +65,12 @@ export default function LessonRedirect() {
     );
   }
 
-  const targetPath = toLearningStep(params.tenantSlug, courseId, lessonId, targetStepId);
+  const targetPath = toLearningStep(
+    params.tenantSlug,
+    courseId,
+    lessonId,
+    targetStepId
+  );
   if (location.pathname === targetPath) {
     return null;
   }
@@ -67,7 +79,8 @@ export default function LessonRedirect() {
     <>
       {resolution.fallbackReason && (
         <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
-          Step alvo indisponível. Aplicado fallback seguro para manter navegação.
+          Step alvo indisponível. Aplicado fallback seguro para manter
+          navegação.
         </div>
       )}
       <Navigate replace to={targetPath} />

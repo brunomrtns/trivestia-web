@@ -1,5 +1,8 @@
 import { ArrowRight, BookOpen, CheckCircle2, PlayCircle } from 'lucide-react';
-import { useLearningData, useLearningNav } from '@/features/learning/learning.context';
+import {
+  useLearningData,
+  useLearningNav
+} from '@/features/learning/learning.context';
 import {
   buildLearningNextUrl,
   isLearningCourseCompleted
@@ -71,7 +74,9 @@ export function ContinueLearningCard() {
   }
 
   const label =
-    next.kind === 'ACTIVITY' ? 'Continuar na atividade' : 'Continuar do ponto atual';
+    next.kind === 'ACTIVITY'
+      ? 'Continuar na atividade'
+      : 'Continuar do ponto atual';
 
   return (
     <div className="rounded-2xl border bg-gradient-to-br from-primary/5 to-card p-5 shadow-sm">
@@ -82,7 +87,8 @@ export function ContinueLearningCard() {
         <div className="flex-1">
           <p className="text-sm font-semibold">Continue de onde parou</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Próximo destino: {next.kind === 'ACTIVITY' ? 'atividade' : 'step'} da aula atual.
+            Próximo destino: {next.kind === 'ACTIVITY' ? 'atividade' : 'step'}{' '}
+            da aula atual.
           </p>
         </div>
         <button
