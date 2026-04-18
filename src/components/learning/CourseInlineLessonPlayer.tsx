@@ -70,54 +70,53 @@ export function CourseInlineLessonPlayer({
   const isLastStep = currentStep >= steps.length - 1;
 
   return (
-    <div className="flex gap-6">
-      {/* Mini timeline — hidden on small screens, shown on xl */}
-      <aside className="hidden w-56 shrink-0 xl:block">
-        <div className="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto rounded-xl border bg-card/50 p-2">
-          <LessonTimeline
-            steps={steps}
-            currentIndex={currentStep}
-            onSelect={setCurrentStep}
-          />
-        </div>
-      </aside>
-
+    <div className="grid gap-6 xl:grid-cols-[minmax(0,_1fr)_260px]">
       {/* Player area */}
-      <div className="flex-1 min-w-0">
-        {/* Lesson title */}
+      <div className="min-w-0">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="mb-4"
+          className="mb-6 flex flex-wrap items-end justify-between gap-3"
         >
-          <h2 className="text-lg font-bold">{timeline?.lesson.title}</h2>
-          <p className="text-xs text-muted-foreground">
-            {t('app.lessonPlayer.stepOf', {
-              n: currentStep + 1,
-              total: steps.length
-            })}
-            {timeline?.progress
-              ? t('app.lessonPlayer.completedSuffix', {
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              {t('app.lessonPlayer.stepOf', {
+                n: currentStep + 1,
+                total: steps.length
+              })}
+            </p>
+            <h2 className="mt-2 text-2xl font-bold md:text-3xl">
+              {timeline?.lesson.title}
+            </h2>
+            {timeline?.progress && (
+              <p className="mt-1 text-sm text-muted-foreground">
+                {t('app.lessonPlayer.completedSuffix', {
                   viewed: timeline.progress.viewed,
                   total: timeline.progress.total
-                })
-              : ''}
-          </p>
+                })}
+              </p>
+            )}
+          </div>
+          <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+            {currentStep + 1}/{steps.length}
+          </span>
         </motion.div>
 
-        <AnimatePresence mode="wait">
-          {activeStep && (
-            <StepPlayer
-              key={activeStep.id}
-              slug={slug}
-              step={activeStep}
-              lessonId={lessonId}
-            />
-          )}
-        </AnimatePresence>
+        <div className="rounded-2xl border bg-card/60 p-4 shadow-sm md:p-6">
+          <AnimatePresence mode="wait">
+            {activeStep && (
+              <StepPlayer
+                key={activeStep.id}
+                slug={slug}
+                step={activeStep}
+                lessonId={lessonId}
+              />
+            )}
+          </AnimatePresence>
+        </div>
 
         {/* Navigation */}
-        <div className="mt-6 flex items-center justify-between">
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
           <button
             disabled={currentStep === 0}
             onClick={() => setCurrentStep((s) => s - 1)}
@@ -126,10 +125,6 @@ export function CourseInlineLessonPlayer({
             <ChevronLeft className="h-4 w-4" />
             {t('common.pagination.previous')}
           </button>
-
-          <span className="text-xs text-muted-foreground xl:hidden">
-            {currentStep + 1}/{steps.length}
-          </span>
 
           {isLastStep ? (
             <button
@@ -150,6 +145,17 @@ export function CourseInlineLessonPlayer({
           )}
         </div>
       </div>
+
+      {/* Timeline */}
+      <aside className="hidden xl:block">
+        <div className="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto rounded-2xl border bg-card/50 p-3">
+          <LessonTimeline
+            steps={steps}
+            currentIndex={currentStep}
+            onSelect={setCurrentStep}
+          />
+        </div>
+      </aside>
     </div>
   );
 }

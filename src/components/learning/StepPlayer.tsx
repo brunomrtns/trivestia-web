@@ -21,7 +21,7 @@ export function StepPlayer({ slug, step, lessonId }: StepPlayerProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -12 }}
       transition={{ duration: 0.2 }}
-      className="rounded-2xl border bg-card p-6 shadow-sm"
+      className="rounded-2xl border bg-card p-5 shadow-sm md:p-6"
     >
       {step.type === 'CONTENT_TEXT' && (
         <TextContent content={content} />
@@ -69,14 +69,14 @@ function TextContent({ content }: { content: Record<string, unknown> }) {
     : null;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div
-        className="prose prose-invert max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-a:text-primary"
+        className="prose prose-invert max-w-none text-base leading-relaxed prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-a:text-primary md:text-[1.05rem]"
         dangerouslySetInnerHTML={{ __html: body }}
       />
 
       {articleVideoUrl && (
-        <div className="aspect-video overflow-hidden rounded-xl bg-black">
+        <div className="aspect-video overflow-hidden rounded-2xl bg-black">
           {embedVideoUrl ? (
             <iframe
               src={embedVideoUrl}
@@ -98,7 +98,7 @@ function TextContent({ content }: { content: Record<string, unknown> }) {
 
       {articleImageUrl && (
         <figure className="space-y-2">
-          <div className="overflow-hidden rounded-xl bg-muted">
+          <div className="overflow-hidden rounded-2xl bg-muted">
             <img
               src={articleImageUrl}
               alt="Imagem do artigo"
@@ -124,13 +124,23 @@ function TextContent({ content }: { content: Record<string, unknown> }) {
   );
 }
 
-function VideoContent({ url, provider }: { url: string; provider: string }) {
+function VideoContent({ url, provider }: { url: string | undefined; provider: string }) {
   const { t } = useTranslation();
-  const embedUrl = getEmbedUrl(url, provider);
+
+  if (!url) {
+    return (
+      <div className="flex aspect-video items-center justify-center rounded-2xl bg-black text-muted-foreground">
+        Vídeo indisponível
+      </div>
+    );
+  }
+
+  const resolvedUrl = resolveStorageUrl(url);
+  const embedUrl = getEmbedUrl(resolvedUrl, provider);
 
   if (embedUrl) {
     return (
-      <div className="aspect-video overflow-hidden rounded-xl bg-black">
+      <div className="aspect-video overflow-hidden rounded-2xl bg-black">
         <iframe
           src={embedUrl}
           className="h-full w-full"
@@ -144,8 +154,8 @@ function VideoContent({ url, provider }: { url: string; provider: string }) {
 
   // Direct video URL
   return (
-    <div className="aspect-video overflow-hidden rounded-xl bg-black">
-      <video src={url} controls className="h-full w-full" preload="metadata" />
+    <div className="aspect-video overflow-hidden rounded-2xl bg-black">
+      <video src={resolvedUrl} controls className="h-full w-full" preload="metadata" />
     </div>
   );
 }
@@ -161,7 +171,7 @@ function ImageContent({
 }) {
   return (
     <figure className="space-y-3">
-      <div className="overflow-hidden rounded-xl bg-muted">
+      <div className="overflow-hidden rounded-2xl bg-muted">
         <img
           src={url}
           alt={alt}
@@ -214,7 +224,8 @@ function ActivityContent({
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function getEmbedUrl(url: string, provider: string): string | null {
+function getEmbedUrl(url: string | undefined | null, provider: string): string | null {
+  if (!url) return null;
   if (
     provider === 'youtube' ||
     url.includes('youtube.com') ||

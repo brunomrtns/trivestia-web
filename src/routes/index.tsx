@@ -76,6 +76,7 @@ const AdminAnnouncementsPage = lazy(() => import('@/pages/admin/AdminAnnouncemen
 const AdminPeriodsPage = lazy(() => import('@/pages/admin/AdminPeriodsPage'));
 const AdminOffersPage = lazy(() => import('@/pages/admin/AdminOffersPage'));
 const AdminBillingPage = lazy(() => import('@/pages/admin/AdminBillingPage'));
+const AdminAICoursePage = lazy(() => import('@/pages/admin/AdminAICoursePage'));
 
 // Payment
 const PaymentSuccessPage = lazy(() => import('@/pages/payment/PaymentSuccessPage'));
@@ -189,7 +190,8 @@ const tenantAdminRoutes = [
   { path: 'users', element: <AdminUsersPage /> },
   { path: 'announcements', element: <AdminAnnouncementsPage /> },
   { path: 'offers', element: <AdminOffersPage /> },
-  { path: 'billing', element: <AdminBillingPage /> }
+  { path: 'billing', element: <AdminBillingPage /> },
+  { path: 'ai-course', element: <AdminAICoursePage /> }
 ];
 
 // ─── Router ──────────────────────────────────────────────────────────────────

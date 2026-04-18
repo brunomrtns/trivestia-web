@@ -125,7 +125,7 @@ export default function CourseInteractivePage() {
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden">
       {/* Top bar */}
-      <div className="shrink-0 border-b bg-background px-4 py-3 lg:px-6">
+      <div className="shrink-0 border-b bg-background px-4 py-3 lg:px-8">
         <div className="flex items-center gap-3">
           <Link
             to={`/t/${slug}/app/courses/${courseId}`}
@@ -162,10 +162,10 @@ export default function CourseInteractivePage() {
         {/* Sidebar */}
         <aside
           className={`
-            ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-            fixed inset-y-0 left-0 z-40 w-72 border-r bg-card pt-16 transition-transform
-            lg:relative lg:inset-y-auto lg:left-auto lg:z-auto lg:w-72 lg:translate-x-0 lg:pt-0
-          `}
+              ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+              fixed inset-y-0 left-0 z-40 w-[18.5rem] border-r bg-card pt-16 transition-transform
+              lg:relative lg:inset-y-auto lg:left-auto lg:z-auto lg:w-[18.5rem] lg:translate-x-0 lg:pt-0
+            `}
         >
           <div className="flex h-full flex-col overflow-hidden">
             <div className="flex-1 overflow-y-auto p-3">
@@ -188,8 +188,8 @@ export default function CourseInteractivePage() {
         )}
 
         {/* Content area */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-4xl px-4 py-6 lg:px-8">
+        <main className="flex-1 min-w-0 overflow-y-auto">
+          <div className="mx-auto w-full max-w-6xl px-4 py-6 lg:px-10 xl:max-w-[78rem]">
             {/* Header with progress + continue */}
             {!activeLessonId && (
               <motion.div

@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,7 +15,8 @@ import {
   BookOpen,
   Settings2,
   Calendar,
-  ImagePlus
+  ImagePlus,
+  Sparkles
 } from 'lucide-react';
 import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { adminEndpoints } from '@/services/endpoints/admin.endpoints';
@@ -262,6 +263,7 @@ export default function AdminCoursesPage() {
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const slug = tenantSlug ?? '';
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<Course | null>(null);
 
@@ -316,13 +318,22 @@ export default function AdminCoursesPage() {
           </p>
         </div>
         {!creating && (
-          <button
-            onClick={() => setCreating(true)}
-            className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
-          >
-            <Plus className="h-4 w-4" />
-            {t('admin.courses.page.newButton')}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate(`/t/${slug}/admin/ai-course`)}
+              className="flex items-center gap-2 rounded-xl border border-purple-200 bg-purple-50 px-4 py-2.5 text-sm font-semibold text-purple-700 transition hover:bg-purple-100 dark:border-purple-800 dark:bg-purple-950 dark:text-purple-300 dark:hover:bg-purple-900"
+            >
+              <Sparkles className="h-4 w-4" />
+              Criar com IA
+            </button>
+            <button
+              onClick={() => setCreating(true)}
+              className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+            >
+              <Plus className="h-4 w-4" />
+              {t('admin.courses.page.newButton')}
+            </button>
+          </div>
         )}
       </div>
 

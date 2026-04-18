@@ -16,7 +16,8 @@ import {
   Zap,
   Globe,
   Megaphone,
-  Wallet
+  Wallet,
+  Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/features/auth/auth.store';
@@ -76,6 +77,11 @@ function buildLinks(slug: string, t: (key: string) => string) {
       to: tenantPath(slug, '/admin/billing'),
       icon: Wallet,
       label: t('common.nav.billing')
+    },
+    {
+      to: tenantPath(slug, '/admin/ai-course'),
+      icon: Sparkles,
+      label: 'Gerar Curso IA'
     }
   ];
 

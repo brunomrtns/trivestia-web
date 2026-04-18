@@ -1095,3 +1095,37 @@ export interface BillingCoupon {
   createdAt: string;
   updatedAt: string;
 }
+
+// ─── AI Course Generation ────────────────────────────────────────────────────
+
+export type CourseGenStatus =
+  | 'PENDING'
+  | 'PROCESSING'
+  | 'IMPORTING'
+  | 'COMPLETED'
+  | 'FAILED';
+
+export interface CourseGenStatusHistoryEntry {
+  id: string;
+  status: CourseGenStatus;
+  detail: string | null;
+  createdAt: string;
+}
+
+export interface CourseGenerationRequest {
+  id: string;
+  tenantId: string;
+  requestedByUserId: string;
+  briefing: string;
+  includeVideo: boolean;
+  status: CourseGenStatus;
+  generatedCourseId: string | null;
+  errorMessage: string | null;
+  createdAt: string;
+  updatedAt: string;
+  statusHistory: CourseGenStatusHistoryEntry[];
+}
+
+export interface AiCourseAvailability {
+  enabled: boolean;
+}
