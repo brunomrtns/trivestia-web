@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { Navigate, Outlet, useParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
@@ -48,9 +49,33 @@ export default function LearningShell() {
 function LearningShellLayout() {
   const { isLoading, error, refetch } = useLearningData();
   const { actionBar, shellMode } = useLearningNav();
+  const contentScrollRef = useRef<HTMLElement | null>(null);
+  const [actionBarInsetPx, setActionBarInsetPx] = useState(0);
+  const [isMobileViewport, setIsMobileViewport] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(max-width: 1023px)').matches;
+  });
 
   const isFullscreen = shellMode === 'fullscreen';
   const hasActionBar = Boolean(actionBar) && !isFullscreen;
+  const shouldReserveActionBarSpace = hasActionBar && isMobileViewport;
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const mediaQuery = window.matchMedia('(max-width: 1023px)');
+
+    const onChange = (event: MediaQueryListEvent) => {
+      setIsMobileViewport(event.matches);
+    };
+
+    setIsMobileViewport(mediaQuery.matches);
+    mediaQuery.addEventListener('change', onChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', onChange);
+    };
+  }, []);
 
   if (error) {
     return (
@@ -88,7 +113,7 @@ function LearningShellLayout() {
         className={`absolute inset-x-0 overflow-hidden ${
           isFullscreen
             ? 'inset-y-0'
-            : hasActionBar
+            : shouldReserveActionBarSpace
               ? 'top-12 bottom-[72px] md:top-14 md:bottom-20'
               : 'top-12 bottom-0 md:top-14'
         }`}
@@ -110,7 +135,7 @@ function LearningShellLayout() {
               <LearningOutline />
             ))}
 
-          <main className="flex-1 min-h-0 min-w-0 overflow-y-auto">
+          <main ref={contentScrollRef} className="flex-1 min-h-0 min-w-0 overflow-y-auto">
             {isLoading ? (
               <div className="mx-auto max-w-4xl space-y-4 p-5 md:p-10">
                 <div className="h-7 w-1/2 animate-pulse rounded bg-muted" />
@@ -123,7 +148,12 @@ function LearningShellLayout() {
                 <ShellContentTransition />
               </div>
             ) : (
-              <div className="min-h-full w-full px-4 py-6 md:px-10 md:py-10 xl:px-16">
+              <div
+                className="min-h-full w-full px-4 py-6 transition-[padding-bottom] duration-150 ease-out md:px-10 md:py-10 xl:px-16"
+                style={{
+                  paddingBottom: `calc(1.5rem + ${Math.max(actionBarInsetPx - 8, 0)}px)`
+                }}
+              >
                 <ShellContentTransition />
               </div>
             )}
@@ -131,7 +161,12 @@ function LearningShellLayout() {
         </div>
       </div>
 
-      {!isFullscreen && <LearningActionBar />}
+      {!isFullscreen && (
+        <LearningActionBar
+          scrollContainerRef={contentScrollRef}
+          onInsetChange={setActionBarInsetPx}
+        />
+      )}
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { stepsEndpoints } from '@/services/endpoints/steps.endpoints';
 import { LessonTimeline } from '@/components/learning/LessonTimeline';
 import { StepPlayer } from '@/components/learning/StepPlayer';
+import { ContextualLessonNavigation } from '@/components/learning/ContextualLessonNavigation';
 
 interface CourseInlineLessonPlayerProps {
   slug: string;
@@ -25,6 +26,7 @@ export function CourseInlineLessonPlayer({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [currentStep, setCurrentStep] = useState(0);
+  const [contextualInsetPx, setContextualInsetPx] = useState(0);
 
   const { data: timeline, isLoading } = useQuery({
     queryKey: ['timeline', slug, lessonId],
@@ -68,11 +70,20 @@ export function CourseInlineLessonPlayer({
   }
 
   const isLastStep = currentStep >= steps.length - 1;
+  const progressPercent =
+    timeline?.progress && timeline.progress.total > 0
+      ? (timeline.progress.viewed / timeline.progress.total) * 100
+      : steps.length > 0
+        ? ((currentStep + 1) / steps.length) * 100
+        : 0;
 
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,_1fr)_260px]">
       {/* Player area */}
-      <div className="min-w-0">
+      <div
+        className="min-w-0 transition-[padding-bottom] duration-150 ease-out"
+        style={{ paddingBottom: `${Math.max(contextualInsetPx - 8, 0)}px` }}
+      >
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -144,6 +155,24 @@ export function CourseInlineLessonPlayer({
             </button>
           )}
         </div>
+
+        <ContextualLessonNavigation
+          currentIndex={currentStep}
+          total={steps.length}
+          canGoBack={currentStep > 0}
+          canGoForward={isLastStep ? Boolean(onLessonComplete) : true}
+          onPrevious={() => setCurrentStep((s) => s - 1)}
+          onNext={() => {
+            if (isLastStep) {
+              onLessonComplete?.();
+              return;
+            }
+            setCurrentStep((s) => s + 1);
+          }}
+          nextLabel={isLastStep ? t('app.lessonPlayer.completeLesson') : t('app.lesson.nav.next')}
+          progressPercent={progressPercent}
+          onInsetChange={setContextualInsetPx}
+        />
       </div>
 
       {/* Timeline */}

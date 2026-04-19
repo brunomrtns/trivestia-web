@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { stepsEndpoints } from '@/services/endpoints/steps.endpoints';
 import { LessonTimeline } from '@/components/learning/LessonTimeline';
 import { StepPlayer } from '@/components/learning/StepPlayer';
+import { ContextualLessonNavigation } from '@/components/learning/ContextualLessonNavigation';
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
@@ -34,6 +35,7 @@ export default function LessonPage() {
   )?.courseId;
 
   const [currentStep, setCurrentStep] = useState(0);
+  const [contextualInsetPx, setContextualInsetPx] = useState(0);
 
   // ── Queries ──────────────────────────────────────────────────────────────
 
@@ -58,6 +60,12 @@ export default function LessonPage() {
 
   const steps = timeline?.steps ?? [];
   const activeStep = steps[currentStep];
+  const progressPercent =
+    timeline?.progress && timeline.progress.total > 0
+      ? (timeline.progress.viewed / timeline.progress.total) * 100
+      : steps.length > 0
+        ? ((currentStep + 1) / steps.length) * 100
+        : 0;
 
   return (
     <div className="container max-w-5xl py-12">
@@ -127,7 +135,10 @@ export default function LessonPage() {
               </aside>
 
               {/* Content area */}
-              <div className="flex-1 min-w-0">
+              <div
+                className="flex-1 min-w-0 transition-[padding-bottom] duration-150 ease-out"
+                style={{ paddingBottom: `${Math.max(contextualInsetPx - 8, 0)}px` }}
+              >
                 <AnimatePresence mode="wait">
                   {activeStep && (
                     <StepPlayer
@@ -164,6 +175,18 @@ export default function LessonPage() {
                     <ChevronRight className="h-4 w-4" />
                   </button>
                 </div>
+
+                <ContextualLessonNavigation
+                  currentIndex={currentStep}
+                  total={steps.length}
+                  canGoBack={currentStep > 0}
+                  canGoForward={currentStep < steps.length - 1}
+                  onPrevious={() => setCurrentStep((s) => s - 1)}
+                  onNext={() => setCurrentStep((s) => s + 1)}
+                  nextLabel={t('app.lesson.nav.next')}
+                  progressPercent={progressPercent}
+                  onInsetChange={setContextualInsetPx}
+                />
               </div>
             </div>
           ) : (
