@@ -11,8 +11,10 @@ O Trivestia é uma plataforma de **educação financeira voltada para investidor
 O app tem **três camadas de acesso**:
 
 - **Pública** (`/`, `/courses`, `/courses/:id`) — qualquer visitante
-- **Aluno autenticado** (`/app/*`) — estudar, responder, ver progresso
+- **Aluno autenticado** (`/app/*`) — estudar, responder, ver progresso (autenticação via BI Identity SSO)
 - **Administrador** (`/admin/*`) — gerenciar cursos, aulas, questões e usuários
+
+> A autenticação não é local: o Trivestia usa **BI Identity SSO** (cookie-based). Veja a seção [Autenticação: BI Identity SSO](#autenticação-bi-identity-sso) para detalhes.
 
 ---
 
@@ -28,7 +30,7 @@ O app tem **três camadas de acesso**:
 | Roteamento       | React Router v6 (`createBrowserRouter`, lazy loading)       |
 | Estado global    | Zustand 4.5                                                 |
 | Cache e fetching | TanStack React Query 5 (`staleTime: 5 min`)                 |
-| HTTP Client      | Axios 1.7 (interceptor hardened com refresh queue)          |
+| HTTP Client      | Axios 1.7 (cookies SSO + redirect para BI Identity)         |
 | Formulários      | React Hook Form 7.54 + Zod 3.24                             |
 | Animações        | Framer Motion 11.15                                         |
 | Drag-and-drop    | @dnd-kit/core + @dnd-kit/sortable (atividades de ordenação) |
@@ -50,13 +52,13 @@ src/
 │   └── utils.ts                # cn(), formatDate(), helpers
 ├── features/
 │   └── auth/
-│       ├── storage.ts          # Única fonte de verdade para localStorage
-│       └── auth.store.ts       # Zustand: user, token, setAuth, logout
+│       ├── storage.ts          # Cache de sessão no localStorage (user + tenant slug)
+│       └── auth.store.ts       # Zustand: user, isAuthenticated, logout (SSO)
 ├── services/
 │   ├── api/
-│   │   └── client.ts           # Axios hardened com interceptor de refresh
+│   │   └── client.ts           # Axios com withCredentials (cookies SSO) + redirect 401
 │   └── endpoints/              # Módulos de chamadas por domínio
-│       ├── auth.endpoints.ts
+│       ├── auth.endpoints.ts   # Apenas /auth/me (login é no BI Identity)
 │       ├── learning.endpoints.ts
 │       ├── progress.endpoints.ts
 │       ├── admin.endpoints.ts
@@ -64,18 +66,18 @@ src/
 ├── routes/
 │   ├── index.tsx               # Router completo com lazy loading
 │   └── guards/
-│       ├── AuthGuard.tsx       # Redireciona para /login se não autenticado
+│       ├── AuthGuard.tsx       # Redireciona para /id/login se não autenticado
 │       └── AdminGuard.tsx      # Redireciona para /app/dashboard se não ADMIN
 ├── layouts/
 │   ├── PublicLayout.tsx        # Header + Footer para rotas públicas
-│   ├── AuthLayout.tsx          # Layout centralizado para Login/Register
+│   ├── AuthLayout.tsx          # Layout centralizado para telas de redirecionamento SSO
 │   └── AppLayout/
 │       ├── AppLayout.tsx       # Container com Sidebar + Topbar
 │       ├── Sidebar.tsx         # Navegação lateral responsiva
 │       └── Topbar.tsx          # Header com perfil e notificações
 ├── pages/
 │   ├── public/                 # Landing, Courses, CourseDetail
-│   ├── auth/                   # Login, Register
+│   ├── auth/                   # Páginas de redirecionamento SSO (não há login local)
 │   ├── student/                # Dashboard, ActivityPlayer, Lesson, Progress
 │   └── admin/                  # AdminCourses, AdminLessons, AdminQuestions, AdminUsers
 ├── components/
@@ -97,7 +99,7 @@ src/
 ├── /courses          — Catálogo de cursos
 └── /courses/:id      — Detalhe de curso
 
-/login, /register (AuthLayout)
+/id/login, /id/logout (BI Identity SSO — fora do Trivestia)
 
 /app/* (AuthGuard → AppLayout)
 ├── /app/dashboard    — Resumo do progresso, cursos em andamento
@@ -116,23 +118,30 @@ src/
 
 > **Detalhe de implementação:** as páginas `CoursesPage` e `CourseDetailPage` são reutilizadas tanto nas rotas públicas (`/courses`) quanto nas autenticadas (`/app/courses`). O componente detecta o contexto via `useLocation` e ajusta os links internos com um prefixo `base = location.pathname.startsWith('/app') ? '/app' : ''`.
 
-### Gerenciamento de Estado e Sessão
+### Autenticação: BI Identity SSO
 
-- **`authStorage`** (`features/auth/storage.ts`): única interface para `localStorage` — armazena `@tm:token`, `@tm:refreshToken` e `@tm:user`. Usa `removeItem` individual (compatibilidade com a API do localStorage).
-- **`useAuthStore`** (Zustand): estado em memória sincronizado com o storage. `loadSession()` é chamado em `main.tsx` **antes** do `ReactDOM.render` para hidratar o estado sem flash de redirecionamento.
+O Trivestia não possui sistema de autenticação próprio. A autenticação é delegada ao **BI Identity**, o serviço de SSO (Single Sign-On) da Brunointegrations, hospedado em `brunointegrations.com/id`. O fluxo é **cookie-based**:
+
+- O BI Identity define o cookie `bi_auth` (e `bi_refresh`) no domínio `.brunointegrations.com`, compartilhado entre todos os subdomínios.
+- Não há rotas locais de login/registro no Trivestia. O login acontece em `/id/login` (BI Identity).
+- O frontend, ao detectar um usuário não autenticado, redireciona para `/id/login?redirect=/trivestia/app`.
+- O backend valida o cookie `bi_auth` no middleware de auth (`trademaster-api/src/shared/middlewares/auth.middleware.ts`), chamando `http://bi-api:3300/api/auth/check`. O usuário local é find-or-created por e-mail.
+
+#### Componentes no Frontend
+
+- **`authStorage`** (`features/auth/storage.ts`): cache de sessão no `localStorage` — armazena apenas o `@tm:user` (perfil em cache) e `@tm:authSlug`/`@tm:lastTenantSlug` (slug do tenant). **Não armazena tokens** — a autenticação vive nos cookies de domínio.
+- **`useAuthStore`** (Zustand): estado em memória sincronizado com o storage. `loadSession()` é chamado em `main.tsx` **antes** do `ReactDOM.render` para hidratar o estado sem flash de redirecionamento. `logout()` limpa o cache local e redireciona para `/id/logout` para invalidar os cookies SSO.
+- **`AuthGuard`**: se `isAuthenticated` for falso, redireciona para `/id/login?redirect=...` (via BI Identity).
 - **React Query**: cache de dados remotos por 5 minutos, `retry: 1`. Desabilitado (`enabled: false`) em queries que dependem de dados não disponíveis.
 
-### Axios Hardened
+#### Axios com Cookies SSO
 
-O cliente em `services/api/client.ts` implementa o padrão de refresh com fila:
+O cliente em `services/api/client.ts` é configurado com `withCredentials: true`, garantindo que os cookies `bi_auth`/`bi_refresh` sejam enviados em toda requisição. O interceptor de resposta trata o caso de sessão expirada:
 
-1. **Request interceptor**: injeta `Authorization: Bearer <token>` em toda requisição.
-2. **Response interceptor (401)**:
-   - Ignora erros em rotas `/auth/` para evitar loop.
-   - Define flag `_retry` para evitar tentativa dupla.
-   - Usa lock `isRefreshing` e `failedQueue` para serializar múltiplas requisições simultâneas que expiraram.
-   - Se o refresh falhar: chama `authStorage.clearSession()` e redireciona para `/login`.
-   - Se o refresh tiver sucesso: processa a fila com o novo token.
+1. **Request**: cookies SSO são enviados automaticamente (sem header `Authorization` manual).
+2. **Response interceptor (401)**: a sessão SSO está inválida/expirada → chama `authStorage.clearSession()` e redireciona para `/id/login?redirect=/trivestia/`.
+
+> Não há mais fila de refresh, lock `isRefreshing` nem `Authorization: Bearer <token>`. O renovo da sessão é responsabilidade do BI Identity, que gerencia o cookie `bi_refresh` de forma transparente.
 
 ---
 
@@ -235,6 +244,8 @@ Crie um arquivo `.env` na raiz:
 
 ```env
 VITE_API_BASE_URL=http://localhost:3333
+# BI Identity SSO (backend). O frontend usa caminhos relativos /id/login e /id/logout.
+BI_IDENTITY_URL=https://brunointegrations.com/id
 ```
 
 ### Rodando
