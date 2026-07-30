@@ -11,6 +11,7 @@ import {
   useLearningNav
 } from '@/features/learning/learning.context';
 import { getBackTarget } from '@/features/learning/learning.utils';
+import { TeacherProfileBadge } from '@/components/teacher/TeacherProfileBadge';
 
 export default function LearningHeader() {
   const location = useLocation();
@@ -103,6 +104,11 @@ export default function LearningHeader() {
         </div>
 
         <div className="hidden shrink-0 items-center md:flex">
+          <TeacherProfileBadge
+            teacherProfile={course?.teacherProfile}
+            label="Professor"
+            className="mr-2"
+          />
           <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold tabular-nums text-primary">
             {percent}%
           </span>

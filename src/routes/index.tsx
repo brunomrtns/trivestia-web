@@ -66,6 +66,9 @@ const PracticeHistoryPage = lazy(
 
 // Admin
 const AdminCoursesPage = lazy(() => import('@/pages/admin/AdminCoursesPage'));
+const AdminCourseTeacherProfilePage = lazy(
+  () => import('@/pages/admin/AdminCourseTeacherProfilePage')
+);
 const AdminLessonsPage = lazy(() => import('@/pages/admin/AdminLessonsPage'));
 const AdminQuestionsPage = lazy(() => import('@/pages/admin/AdminQuestionsPage'));
 const AdminUsersPage = lazy(() => import('@/pages/admin/AdminUsersPage'));
@@ -177,6 +180,10 @@ const tenantAppRoutes = [
 
 const tenantAdminRoutes = [
   { path: 'courses', element: <AdminCoursesPage /> },
+  {
+    path: 'courses/:courseId/teacher-profile',
+    element: <AdminCourseTeacherProfilePage />
+  },
   { path: 'courses/:courseId/lessons', element: <AdminLessonsPage /> },
   { path: 'courses/:courseId/periods', element: <AdminPeriodsPage /> },
   {

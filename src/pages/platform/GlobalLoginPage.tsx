@@ -7,9 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { ArrowLeft, BookOpen, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { platformEndpoints } from '@/services/endpoints/platform.endpoints';
-import { authEndpoints } from '@/services/endpoints/auth.endpoints';
 import { usePlatformAuthStore } from '@/features/platform/platform.store';
-import { useAuthStore } from '@/features/auth/auth.store';
 import type { ResolveEmailResponse } from '@/types/api';
 
 // ─── Schemas (definidos dentro do componente para usar t()) ─────────────────
@@ -40,7 +38,6 @@ export default function GlobalLoginPage() {
   });
 
   const platformSetAuth = usePlatformAuthStore((s) => s.setAuth);
-  const tenantSetAuth = useAuthStore((s) => s.setAuth);
 
   const [phase, setPhase] = useState<Phase>('EMAIL');
   const [resolveResult, setResolveResult] =
@@ -129,15 +126,8 @@ export default function GlobalLoginPage() {
         );
         navigate('/workspace', { replace: true });
       } else {
-        const res = await authEndpoints.login(loginCtx.slug, {
-          email,
-          password: data.password
-        });
-        tenantSetAuth(res.user, res.token, res.refreshToken, loginCtx.slug);
-        toast.success(
-          t('platform.login.toast.success', { name: res.user.name })
-        );
-        navigate(`/t/${loginCtx.slug}/app/dashboard`, { replace: true });
+        // Tenant login is handled by BI Identity SSO — redirect there.
+        window.location.href = '/id/login?redirect=/trivestia/';
       }
     } catch {
       toast.error(

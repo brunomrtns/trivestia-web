@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Play, RotateCcw } from 'lucide-react';
 import type { CourseInteractiveDTO, CourseInteractiveNext } from '@/types/api';
+import { TeacherProfileBadge } from '@/components/teacher/TeacherProfileBadge';
 
 interface CourseInteractiveHeaderProps {
   course: CourseInteractiveDTO['course'];
@@ -31,6 +32,11 @@ export function CourseInteractiveHeader({
           <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
             {course.description}
           </p>
+          <TeacherProfileBadge
+            teacherProfile={course.teacherProfile}
+            label="Seu professor"
+            className="mt-3"
+          />
         </div>
 
         <button

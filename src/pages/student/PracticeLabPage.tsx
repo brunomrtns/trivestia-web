@@ -225,7 +225,9 @@ export default function PracticeLabPage() {
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
           >
             <TrendingUp className="h-4 w-4" />
-            {loading ? t('app.lab.form.submitLoading') : t('app.lab.form.submit')}
+            {loading
+              ? t('app.lab.form.submitLoading')
+              : t('app.lab.form.submit')}
           </button>
         </form>
       </div>

@@ -17,7 +17,9 @@ import type {
   LessonStepDTO,
   PeriodDTO,
   CreatePeriodRequest,
-  UpdatePeriodRequest
+  UpdatePeriodRequest,
+  TeacherProfileAdminDTO,
+  UpsertTeacherProfileDTO
 } from '@/types/api';
 
 // Todos os endpoints admin exigem Bearer ADMIN
@@ -35,6 +37,20 @@ export const adminEndpoints = {
 
   deleteCourse: (slug: string, id: string) =>
     apiTenant(slug).delete(`/courses/${id}`),
+
+  getTeacherProfile: (slug: string, courseId: string) =>
+    apiTenant(slug)
+      .get<TeacherProfileAdminDTO | null>(`/courses/${courseId}/teacher-profile`)
+      .then((r) => r.data),
+
+  upsertTeacherProfile: (
+    slug: string,
+    courseId: string,
+    data: UpsertTeacherProfileDTO
+  ) =>
+    apiTenant(slug)
+      .put<TeacherProfileAdminDTO>(`/courses/${courseId}/teacher-profile`, data)
+      .then((r) => r.data),
 
   // ─── Modules ──────────────────────────────────────────────────────────────
   createModule: (slug: string, courseId: string, data: CreateModuleDTO) =>

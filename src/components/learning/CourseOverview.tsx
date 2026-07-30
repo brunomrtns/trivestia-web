@@ -13,6 +13,7 @@ import {
 import { useBatchLessonUnlock } from '@/features/learning/learning.hooks';
 import { isLearningCourseCompleted } from '@/features/learning/learning.utils';
 import { ContinueLearningCard } from './ContinueLearningCard';
+import { TeacherProfileBadge } from '@/components/teacher/TeacherProfileBadge';
 
 export default function CourseOverview() {
   const { slug, course, modules, progress, next } = useLearningData();
@@ -66,6 +67,12 @@ export default function CourseOverview() {
               {course?.description ??
                 'Acompanhe seu progresso e continue do ponto certo.'}
             </p>
+            <TeacherProfileBadge
+              teacherProfile={course?.teacherProfile}
+              label="Seu professor"
+              variant="card"
+              className="mt-4 max-w-sm"
+            />
           </div>
 
           <div className="min-w-44 rounded-xl border bg-background px-4 py-3 text-right">

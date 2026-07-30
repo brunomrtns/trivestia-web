@@ -897,7 +897,15 @@
         "streakDay_other": "dias seguidos",
         "record": "recorde",
         "activityTooltip": "{{date}}: {{count}} atividade(s)",
-        "days": ["S", "T", "Q", "Q", "S", "S", "D"],
+        "days": [
+          "S",
+          "T",
+          "Q",
+          "Q",
+          "S",
+          "S",
+          "D"
+        ],
         "aria": {
           "configure": "Configurar meta"
         }

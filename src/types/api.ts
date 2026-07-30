@@ -165,7 +165,32 @@ export interface Course {
   thumbnailUrl?: string | null;
   deadline: string | null;
   createdAt: string;
+  teacherProfile?: {
+    id: string;
+    name: string;
+    primaryImageUrl: string | null;
+    referenceImages: string[];
+  } | null;
   modules?: Module[];
+}
+
+export interface TeacherProfileAdminDTO {
+  id: string;
+  courseId: string;
+  name: string;
+  primaryImageUrl: string | null;
+  referenceImages: string[];
+  visualConfig: Record<string, unknown>;
+  voiceConfig: Record<string, unknown> | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UpsertTeacherProfileDTO {
+  name: string;
+  primaryImageUrl?: string | null;
+  referenceImages?: string[];
+  visualConfig?: Record<string, unknown>;
 }
 
 export interface Module {
@@ -528,7 +553,17 @@ export interface CourseInteractiveNext {
 }
 
 export interface CourseInteractiveDTO {
-  course: { id: string; title: string; description: string };
+  course: {
+    id: string;
+    title: string;
+    description: string | null;
+    teacherProfile: {
+      id: string;
+      name: string;
+      primaryImageUrl: string | null;
+      referenceImages: string[];
+    } | null;
+  };
   progress: { percent: number; completedLessons: number; totalLessons: number };
   modules: CourseInteractiveModule[];
   next: CourseInteractiveNext | null;
@@ -1128,4 +1163,35 @@ export interface CourseGenerationRequest {
 
 export interface AiCourseAvailability {
   enabled: boolean;
+}
+
+export type CourseGenDocType = 'PROVA' | 'GABARITO' | 'LEI' | 'APOIO';
+export type CourseGenDocScanStatus = 'PENDING' | 'CLEAN' | 'INFECTED' | 'FAILED';
+export type CourseGenDocIngestStatus = 'PENDING' | 'INGESTED' | 'FAILED';
+
+export interface CourseGenDocument {
+  id: string;
+  requestId: string;
+  filename: string;
+  fileType: string;
+  fileSize: number;
+  docType: CourseGenDocType;
+  scanStatus: CourseGenDocScanStatus;
+  ingestStatus: CourseGenDocIngestStatus;
+  extractedPath: string | null;
+  ocrUsed: boolean;
+  errorMessage: string | null;
+  sha256: string | null;
+  groupId: string | null;
+  createdAt: string;
+}
+
+export interface UploadDocResult {
+  accepted: CourseGenDocument[];
+  errors: Array<{ filename: string; error: string }>;
+}
+
+export interface LinkedDocPair {
+  prova: { id: string; filename: string; docType: string; groupId: string };
+  gabarito: { id: string; filename: string; docType: string; groupId: string };
 }

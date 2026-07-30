@@ -402,6 +402,14 @@ export default function AdminCoursesPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Link
+                      to={`/t/${slug}/admin/courses/${course.id}/teacher-profile`}
+                      className="flex items-center gap-1.5 rounded-lg bg-blue-500/10 px-3 py-2 text-xs font-semibold text-blue-600 transition hover:bg-blue-500/20"
+                      aria-label="Configurar professor virtual"
+                    >
+                      <BookOpen className="h-3.5 w-3.5" />
+                      Professor
+                    </Link>
+                    <Link
                       to={`/t/${slug}/admin/courses/${course.id}/lessons`}
                       className="flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-2 text-xs font-semibold text-primary transition hover:bg-primary/20"
                       aria-label={t('admin.courses.aria.manage')}

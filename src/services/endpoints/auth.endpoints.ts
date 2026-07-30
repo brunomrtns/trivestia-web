@@ -1,36 +1,14 @@
 import { apiTenant } from '../api/apiTenant';
-import type { AuthResponse, RefreshResponse, User } from '@/types/api';
+import type { User } from '@/types/api';
 
-// POST /t/:slug/auth/register
-// POST /t/:slug/auth/login
-// POST /t/:slug/auth/refresh
-// GET  /t/:slug/auth/me
+// BI Identity SSO — login/register/refresh are handled by the Identity Service
+// at /id/. Trivestia only exposes /me (current user) and /sso-redirect.
+//
+// GET  /t/:slug/auth/me          — current user profile (cookie auth)
+// GET  /t/:slug/auth/sso-redirect — redirect to /id/login
 export const authEndpoints = {
-  register: (
-    slug: string,
-    data: { name: string; email: string; password: string }
-  ) =>
-    apiTenant(slug)
-      .post<AuthResponse>('/auth/register', data)
-      .then((r) => r.data),
-
-  login: (slug: string, data: { email: string; password: string }) =>
-    apiTenant(slug)
-      .post<AuthResponse>('/auth/login', data)
-      .then((r) => r.data),
-
-  googleLogin: (slug: string, idToken: string) =>
-    apiTenant(slug)
-      .post<AuthResponse>('/auth/google', { idToken })
-      .then((r) => r.data),
-
-  refresh: (slug: string, refreshToken: string) =>
-    apiTenant(slug)
-      .post<RefreshResponse>('/auth/refresh', { refreshToken })
-      .then((r) => r.data),
-
   getMe: (slug: string) =>
     apiTenant(slug)
       .get<User>('/auth/me')
-      .then((r) => r.data)
+      .then((r) => r.data),
 };

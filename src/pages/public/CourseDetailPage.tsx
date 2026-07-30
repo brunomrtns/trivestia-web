@@ -13,6 +13,7 @@ import { learningEndpoints } from '@/services/endpoints/learning.endpoints';
 import { useAuthStore } from '@/features/auth/auth.store';
 import { toLearningOverview, toLearningLesson } from '@/features/learning/learning.routes';
 import { useUIStore } from '@/stores/ui.store';
+import { TeacherProfileBadge } from '@/components/teacher/TeacherProfileBadge';
 
 function resolveCourseImageUrl(pathOrUrl?: string | null) {
   if (!pathOrUrl) return null;
@@ -100,6 +101,12 @@ export default function CourseDetailPage() {
         <p className="mt-3 max-w-2xl text-lg text-muted-foreground">
           {course?.description}
         </p>
+        <TeacherProfileBadge
+          teacherProfile={course?.teacherProfile}
+          label="Seu professor"
+          variant="card"
+          className="mt-4 max-w-sm"
+        />
         {!isAuthenticated && (
           <Link
             to={`/t/${slug}/register`}

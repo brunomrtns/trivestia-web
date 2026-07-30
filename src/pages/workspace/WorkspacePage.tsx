@@ -11,7 +11,7 @@ import type { PlatformMeResponse } from '@/types/api';
 export default function WorkspacePage() {
   const { user } = usePlatformAuthStore();
   const { t } = useTranslation();
-  const tenantSetAuth = useAuthStore((s) => s.setAuth);
+  const tenantSetUser = useAuthStore((s) => s.setUser);
   const tenantIsAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const [meData, setMeData] = useState<PlatformMeResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,12 +26,7 @@ export default function WorkspacePage() {
         if (me.hasSchool && me.tenantSlug && !tenantIsAuthenticated) {
           try {
             const session = await platformEndpoints.autoTenantSession();
-            tenantSetAuth(
-              session.user,
-              session.token,
-              session.refreshToken,
-              session.tenantSlug
-            );
+            tenantSetUser(session.user, session.tenantSlug);
           } catch {
             // Nao bloquear a pagina se falhar — usuario ainda pode navegar para /admin
           }
